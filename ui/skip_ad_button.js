@@ -125,6 +125,9 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
    * @private
    */
   onAdStarted_() {
+    // The previous ad of a pod may have left the button enabled and the
+    // counter hidden, so always start from a clean state.
+    this.reset_();
     if (this.ad.isSkippable() && this.ad.needsSkipUI()) {
       shaka.ui.Utils.setDisplay(this.button_, true);
       shaka.ui.Utils.setDisplay(this.counter_, true);
@@ -144,6 +147,11 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
       const secondsLeft = Math.round(this.ad.getTimeUntilSkippable());
       if (secondsLeft > 0) {
         this.counter_.textContent = secondsLeft;
+        // A previous tick, or a skip state that has since been recomputed,
+        // may have hidden the counter and enabled the button. There is a
+        // countdown to show again, so restore both.
+        shaka.ui.Utils.setDisplay(this.counter_, true);
+        this.button_.disabled = true;
       } else {
         // The ad should now be skippable. OnSkipStateChanged() is
         // listening for a SKIP_STATE_CHANGED event and will take care
@@ -168,6 +176,16 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
       this.button_.disabled = false;
       this.timer_.stop();
       shaka.ui.Utils.setDisplay(this.counter_, false);
+    } else {
+      // The ad is skippable but not yet, which is what the next ad of a pod
+      // reports. Keep the button disabled and (re)start the countdown.
+      this.button_.disabled = true;
+      if (this.ad.needsSkipUI()) {
+        shaka.ui.Utils.setDisplay(this.button_, true);
+        shaka.ui.Utils.setDisplay(this.counter_, true);
+        this.timer_.tickNow();
+        this.timer_.tickEvery(0.5);
+      }
     }
   }
 
