@@ -69,6 +69,7 @@
     "postcss-cli": "^11.0.1",
     "postcss-custom-properties": "^15.0.1",
     "postcss-less": "^6.0.0",
+    "postcss-preset-env": "^11.4.0",
     "pwacompat": "^2.0.17",
     "rimraf": "^3.0.2",
     "sprintf-js": "^1.1.2",
