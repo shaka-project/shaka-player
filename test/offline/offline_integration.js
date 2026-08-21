@@ -129,12 +129,14 @@ filterDescribe('Offline', supportsStorage, () => {
         }
 
         if (deviceDetected.getDeviceName() === 'Xbox') {
-          // Axinom won't issue a license for an Xbox One.  The error message
-          // from the license server says "Your DRM client's security level is
-          // 150, but the entitlement message requires 2000 or higher."
-          // TODO: Stop using Axinom's license server.  Use
-          // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
-          pending('Xbox One not supported by Axinom license server');
+          // This skip dates from when the content used Axinom's license
+          // server, which refused an Xbox One because its security level is
+          // 150 while the entitlement message demanded 2000 or higher.  We no
+          // longer use that server: Widevine's test proxy issues the keys and
+          // PlayReady's test server is asked for security level 150, so the
+          // original reason no longer applies.  Left in place because there is
+          // no Xbox here to prove it, and it is worth retrying on one.
+          pending('Skipping until this can be retried on an Xbox');
           return;
         }
 

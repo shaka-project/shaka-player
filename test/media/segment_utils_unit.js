@@ -213,37 +213,17 @@ describe('SegmentUtils', () => {
       type: 'video',
       mimeType: 'video/mp4',
       codecs: 'avc1.42E01E',
-      language: 'und',
-      height: '288',
-      width: '512',
+      language: 'eng',
+      height: '144',
+      width: '338',
       channelCount: null,
       sampleRate: null,
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
       frameRate: null,
-      timescale: 24,
+      timescale: 12288,
       drmInfos: [
-        {
-          keySystem: 'com.microsoft.playready',
-          encryptionScheme: 'cenc',
-          licenseServerUri: '',
-          distinctiveIdentifierRequired: false,
-          persistentStateRequired: false,
-          audioRobustness: '',
-          videoRobustness: '',
-          serverCertificate: null,
-          serverCertificateUri: '',
-          sessionType: '',
-          initData: [
-            {
-              initDataType: 'cenc',
-              initData: jasmine.any(Uint8Array),
-            },
-          ],
-          mediaTypes: undefined,
-          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
-        },
         {
           keySystem: 'com.widevine.alpha',
           encryptionScheme: 'cenc',
@@ -262,7 +242,27 @@ describe('SegmentUtils', () => {
             },
           ],
           mediaTypes: undefined,
-          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
+          keyIds: (new Set()).add('26093af868d35e2cae9f1cd3d59932f1'),
+        },
+        {
+          keySystem: 'com.microsoft.playready',
+          encryptionScheme: 'cenc',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'cenc',
+              initData: jasmine.any(Uint8Array),
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('26093af868d35e2cae9f1cd3d59932f1'),
         },
       ],
     };
@@ -278,33 +278,13 @@ describe('SegmentUtils', () => {
       height: null,
       width: null,
       channelCount: 2,
-      sampleRate: 44100,
+      sampleRate: 48000,
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
       frameRate: null,
-      timescale: 44100,
+      timescale: 48000,
       drmInfos: [
-        {
-          keySystem: 'com.microsoft.playready',
-          encryptionScheme: 'cenc',
-          licenseServerUri: '',
-          distinctiveIdentifierRequired: false,
-          persistentStateRequired: false,
-          audioRobustness: '',
-          videoRobustness: '',
-          serverCertificate: null,
-          serverCertificateUri: '',
-          sessionType: '',
-          initData: [
-            {
-              initDataType: 'cenc',
-              initData: jasmine.any(Uint8Array),
-            },
-          ],
-          mediaTypes: undefined,
-          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
-        },
         {
           keySystem: 'com.widevine.alpha',
           encryptionScheme: 'cenc',
@@ -323,7 +303,27 @@ describe('SegmentUtils', () => {
             },
           ],
           mediaTypes: undefined,
-          keyIds: (new Set()).add('4060a865887842679cbf91ae5bae1e72'),
+          keyIds: (new Set()).add('763c2f1ed21a521ba1f1bc49e9d429ac'),
+        },
+        {
+          keySystem: 'com.microsoft.playready',
+          encryptionScheme: 'cenc',
+          licenseServerUri: '',
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [
+            {
+              initDataType: 'cenc',
+              initData: jasmine.any(Uint8Array),
+            },
+          ],
+          mediaTypes: undefined,
+          keyIds: (new Set()).add('763c2f1ed21a521ba1f1bc49e9d429ac'),
         },
       ],
     };
@@ -606,7 +606,7 @@ describe('SegmentUtils', () => {
     expect(defaultKID).toBeNull();
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(multidrmVideoInitSegment);
-    expect(defaultKID).toBe('4060a865887842679cbf91ae5bae1e72');
+    expect(defaultKID).toBe('26093af868d35e2cae9f1cd3d59932f1');
     defaultKID =
         shaka.media.SegmentUtils.getDefaultKID(initFairPlay);
     expect(defaultKID).toBe('b99ed9e5c64149d1bfa843692b686ddb');

@@ -10,9 +10,26 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     return (bytes[pos] << 8) | bytes[pos + 1];
   }
 
+  /**
+   * Asserts the full serialization of the message currently in the writer:
+   * the type byte, the 16-bit length field, and the exact payload bytes.
+   *
+   * Checking the payload byte-for-byte is what makes these tests able to
+   * catch a wire-format regression; asserting only that something was
+   * written cannot.
+   *
+   * @param {number} expectedType
+   * @param {!Array<number>} expectedPayload
+   */
+  function expectMessage(expectedType, expectedPayload) {
+    const bytes = writer.getBytes();
+    expect(readUint8(bytes, 0)).toBe(expectedType);
+    expect(readUint16BE(bytes, 1)).toBe(expectedPayload.length);
+    expect(Array.from(bytes.subarray(3))).toEqual(expectedPayload);
+  }
+
   beforeEach(() => {
-    writer =
-        new shaka.msf.BufferControlWriter(shaka.msf.Utils.Version.DRAFT_14);
+    writer = new shaka.msf.BufferControlWriter(new shaka.msf.QuicVarIntCodec());
   });
 
   // eslint-disable-next-line @stylistic/max-len
@@ -36,7 +53,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
   });
 
   describe('marshalSubscribe', () => {
-    it('should marshal a valid Subscribe message', () => {
+    it('should encode priority, forward, filter and order as params', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
         requestId: BigInt(1),
@@ -49,8 +66,19 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalSubscribe(msg);
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBeGreaterThan(0);
+
+      // Draft-16 moves subscriberPriority, forward, the subscription filter
+      // and groupOrder out of fixed fields and into delta-encoded params.
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE, [
+        0x01, // requestId
+        0x02, 0x03, 0x6e, 0x73, 0x31, 0x03, 0x6e, 0x73, 0x32, // ['ns1','ns2']
+        0x06, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x31, // 'track1'
+        0x04, // param count
+        0x10, 0x01, // type 0x10 FORWARD = 1
+        0x10, 0x01, // delta 0x10 -> type 0x20 SUBSCRIBER_PRIORITY = 1
+        0x01, 0x01, 0x00, // delta 1 -> type 0x21 FILTER, len 1, NONE
+        0x01, 0x01, // delta 1 -> type 0x22 GROUP_ORDER = ASCENDING
+      ]);
     });
 
     it('should throw if startLocation is missing for absolute filter', () => {
@@ -105,12 +133,34 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_ERROR,
         requestId: BigInt(1),
-        code: BigInt(404),
-        reason: 'Not found',
-        trackAlias: BigInt(5),
+        code: BigInt(4),
+        retryInterval: BigInt(7),
+        reason: 'no',
       };
       writer.marshalSubscribeError(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_ERROR, [
+        0x01, // requestId
+        0x04, // code
+        0x07, // retryInterval
+        0x02, 0x6e, 0x6f, // 'no'
+      ]);
+    });
+
+    it('should default a missing retryInterval to zero', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_ERROR,
+        requestId: BigInt(1),
+        code: BigInt(4),
+        reason: 'no',
+      };
+      writer.marshalSubscribeError(msg);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_ERROR, [
+        0x01, 0x04,
+        0x00, // retryInterval defaulted
+        0x02, 0x6e, 0x6f,
+      ]);
     });
   });
 
@@ -203,14 +253,19 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
   });
 
   describe('marshalPublishNamespaceOk', () => {
-    it('should marshal an PublishNamespaceOk message', () => {
+    it('should marshal an PublishNamespaceOk with a parameter list', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_OK,
         requestId: BigInt(1),
         namespace: ['ns'],
       };
       writer.marshalPublishNamespaceOk(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      // Draft-16 REQUEST_OK carries a (here empty) parameter list.
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH_NAMESPACE_OK, [
+        0x01, // requestId
+        0x00, // param count = 0
+      ]);
     });
   });
 
@@ -250,24 +305,35 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
   });
 
   describe('marshalClientSetup', () => {
-    it('should marshal a ClientSetup message', () => {
-      const msg = {
-        versions: [1, 2, 3],
-        params: []}
-         ;
-      writer.marshalClientSetup(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+    it('should marshal a ClientSetup with no in-band version', () => {
+      writer.marshalClientSetup({params: []});
+
+      // The version is negotiated via the WebTransport subprotocol, so the
+      // payload is nothing but the parameter list.
+      expectMessage(shaka.msf.Utils.MessageTypeId.CLIENT_SETUP, [
+        0x00, // param count = 0
+      ]);
+    });
+
+    it('should marshal ClientSetup parameters', () => {
+      writer.marshalClientSetup({
+        params: [{type: BigInt(2), value: BigInt(42)}],
+      });
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.CLIENT_SETUP, [
+        0x01, // param count
+        0x02, 0x2a, // delta type 2 -> type 2 (even), value 42
+      ]);
     });
   });
 
   describe('marshalServerSetup', () => {
-    it('should marshal a ServerSetup message', () => {
-      const msg = {
-        version: 1,
-        params: [],
-      };
-      writer.marshalServerSetup(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+    it('should marshal a ServerSetup with no in-band version', () => {
+      writer.marshalServerSetup({params: []});
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SERVER_SETUP, [
+        0x00, // param count = 0
+      ]);
     });
   });
 
@@ -339,38 +405,6 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     expect(length).toBe(bytes.length - 3);
 
     expect(bytes.length).toBeGreaterThan(3);
-  });
-
-  it('marshalClientSetup writes versions array correctly', () => {
-    const msg = {
-      versions: [1, 255],
-      params: [],
-    };
-    writer.marshalClientSetup(msg);
-    const bytes = writer.getBytes();
-
-    expect(readUint8(bytes, 0))
-        .toBe(shaka.msf.Utils.MessageTypeId.CLIENT_SETUP);
-    const length = readUint16BE(bytes, 1);
-    expect(length).toBe(bytes.length - 3);
-
-    expect(bytes[3]).toBeGreaterThan(0);
-  });
-
-  it('marshalServerSetup writes version correctly', () => {
-    const msg = {
-      version: 0xff00000b,
-      params: [],
-    };
-    writer.marshalServerSetup(msg);
-    const bytes = writer.getBytes();
-
-    expect(readUint8(bytes, 0))
-        .toBe(shaka.msf.Utils.MessageTypeId.SERVER_SETUP);
-    const length = readUint16BE(bytes, 1);
-    expect(length).toBe(bytes.length - 3);
-
-    expect(bytes[3]).toBeGreaterThan(0);
   });
 
   describe('marshalSubscribeUpdate', () => {
@@ -506,47 +540,65 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     });
   });
 
-  describe('KeyValuePairs', () => {
-    it('should marshal even key with bigint value', () => {
-      const msg = {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+  describe('delta-encoded KeyValuePairs', () => {
+    /**
+     * Marshals a PublishNamespace, whose payload is requestId, namespace and
+     * then nothing but the parameter list, and returns the serialized
+     * parameter list: the pair count followed by the delta-encoded pairs.
+     *
+     * @param {!Array<shaka.msf.Utils.KeyValuePair>} params
+     * @return {!Array<number>}
+     */
+    function paramBytes(params) {
+      writer.marshalPublishNamespace({
+        kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,
         requestId: BigInt(1),
-        startLocation: {group: BigInt(1), object: BigInt(2)},
-        endGroup: BigInt(5),
-        subscriberPriority: 1,
-        forward: false,
-        params: [{type: BigInt(2), value: BigInt(123)}],
-      };
-      writer.marshalSubscribeUpdate(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+        namespace: [],
+        params,
+      });
+      // 3 header bytes + requestId + the empty namespace tuple's count.
+      return Array.from(writer.getBytes().subarray(5));
+    }
+
+    it('should encode an even key as a var int value', () => {
+      // 123 exceeds the 1-byte var int range (0-63), so it takes 2 bytes.
+      expect(paramBytes([{type: BigInt(2), value: BigInt(123)}]))
+          .toEqual([0x01, 0x02, 0x40, 0x7b]);
     });
 
-    it('should marshal odd key with Uint8Array value', () => {
-      const msg = {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
-        requestId: BigInt(1),
-        startLocation: {group: BigInt(1), object: BigInt(2)},
-        endGroup: BigInt(5),
-        subscriberPriority: 1,
-        forward: false,
-        params: [{type: BigInt(3), value: new Uint8Array([1, 2, 3])}],
-      };
-      writer.marshalSubscribeUpdate(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+    it('should encode an odd key as a length-prefixed byte string', () => {
+      expect(paramBytes([{type: BigInt(3), value: new Uint8Array([1, 2, 3])}]))
+          .toEqual([0x01, 0x03, 0x03, 0x01, 0x02, 0x03]);
     });
 
-    it('should handle empty params array', () => {
-      const msg = {
-        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
-        requestId: BigInt(1),
-        startLocation: {group: BigInt(1), object: BigInt(2)},
-        endGroup: BigInt(5),
-        subscriberPriority: 1,
-        forward: false,
-        params: [],
-      };
-      writer.marshalSubscribeUpdate(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+    it('should encode types as deltas from the previous type', () => {
+      // Types 2 and 8 serialize as deltas 2 and 6.
+      expect(paramBytes([
+        {type: BigInt(2), value: BigInt(1)},
+        {type: BigInt(8), value: BigInt(2)},
+      ])).toEqual([0x02, 0x02, 0x01, 0x06, 0x02]);
+    });
+
+    it('should sort by ascending type before delta encoding', () => {
+      // Same pairs supplied out of order must produce the same bytes.
+      expect(paramBytes([
+        {type: BigInt(8), value: BigInt(2)},
+        {type: BigInt(2), value: BigInt(1)},
+      ])).toEqual([0x02, 0x02, 0x01, 0x06, 0x02]);
+    });
+
+    it('should write a zero count for an empty params array', () => {
+      expect(paramBytes([])).toEqual([0x00]);
+    });
+
+    it('should reject an even key whose value is not a bigint', () => {
+      expect(() => paramBytes([{type: BigInt(2), value: new Uint8Array([1])}]))
+          .toThrow();
+    });
+
+    it('should reject an odd key whose value is not bytes', () => {
+      expect(() => paramBytes([{type: BigInt(3), value: BigInt(1)}]))
+          .toThrow();
     });
   });
 
@@ -634,7 +686,110 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     });
   });
 
-  describe('marshalSubscribe with ABSOLUTE_RANGE filter', () => {
+  describe('caller-supplied params', () => {
+    it('should not mutate the message when marshaling Subscribe', () => {
+      const params = [];
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
+        requestId: BigInt(1),
+        namespace: [],
+        name: '',
+        subscriberPriority: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
+        forward: true,
+        filterType: shaka.config.MsfFilterType.NONE,
+        params,
+      };
+
+      writer.marshalSubscribe(msg);
+      const first = Array.from(writer.getBytes());
+
+      // The synthesized forward/priority/filter/order params must not be
+      // appended to the caller's array, or marshaling again would emit them
+      // twice.
+      expect(params.length).toBe(0);
+
+      writer.reset();
+      writer.marshalSubscribe(msg);
+      expect(Array.from(writer.getBytes())).toEqual(first);
+    });
+
+    it('should not mutate the message when marshaling SubscribeUpdate', () => {
+      const params = [];
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+        requestId: BigInt(1),
+        startLocation: {group: BigInt(1), object: BigInt(2)},
+        endGroup: BigInt(5),
+        subscriberPriority: 1,
+        forward: false,
+        params,
+      };
+
+      writer.marshalSubscribeUpdate(msg);
+      const first = Array.from(writer.getBytes());
+
+      expect(params.length).toBe(0);
+
+      writer.reset();
+      writer.marshalSubscribeUpdate(msg);
+      expect(Array.from(writer.getBytes())).toEqual(first);
+    });
+  });
+
+  describe('subscription filter encoding', () => {
+    /**
+     * @param {shaka.config.MsfFilterType} filterType
+     * @param {(shaka.msf.Utils.Location|undefined)} startLocation
+     * @param {(bigint|undefined)} endGroup
+     * @return {!Array<number>}
+     */
+    function filterBytes(filterType, startLocation, endGroup) {
+      writer.marshalSubscribe({
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
+        requestId: BigInt(1),
+        namespace: [],
+        name: '',
+        subscriberPriority: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
+        forward: true,
+        filterType,
+        startLocation,
+        endGroup,
+        params: [],
+      });
+      // The filter is the odd-typed param 0x21, written third of four pairs.
+      // Payload: requestId, empty tuple, empty name, count, then the pairs
+      // 0x10/0x01, 0x10/0x01, then delta 0x01, length, filter bytes.
+      const bytes = writer.getBytes();
+      const filterLength = bytes[3 + 4 + 4 + 1];
+      const start = 3 + 4 + 4 + 2;
+      return Array.from(bytes.subarray(start, start + filterLength));
+    }
+
+    it('should encode an End Group for ABSOLUTE_RANGE', () => {
+      expect(filterBytes(
+          shaka.config.MsfFilterType.ABSOLUTE_RANGE,
+          {group: BigInt(1), object: BigInt(2)},
+          BigInt(9)))
+          .toEqual([0x04, 0x01, 0x02, 0x09]);
+    });
+
+    it('should not encode an End Group for ABSOLUTE_START', () => {
+      // AbsoluteStart is open ended: the filter is type plus start only.
+      expect(filterBytes(
+          shaka.config.MsfFilterType.ABSOLUTE_START,
+          {group: BigInt(1), object: BigInt(2)},
+          undefined))
+          .toEqual([0x03, 0x01, 0x02]);
+    });
+
+    it('should encode neither start nor end for LARGEST_OBJECT', () => {
+      expect(filterBytes(
+          shaka.config.MsfFilterType.LARGEST_OBJECT, undefined, undefined))
+          .toEqual([0x02]);
+    });
+
     it('should throw if endGroup is missing', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE,

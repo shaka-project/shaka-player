@@ -132,10 +132,19 @@ requirement: {
     "function template(a) { new Int32Array(a) }"
   value:
     "/** @param {BufferSource} a */"
+    "function template(a) { new Float16Array(a) }"
+  value:
+    "/** @param {BufferSource} a */"
     "function template(a) { new Float32Array(a) }"
   value:
     "/** @param {BufferSource} a */"
     "function template(a) { new Float64Array(a) }"
+  value:
+    "/** @param {BufferSource} a */"
+    "function template(a) { new BigInt64Array(a) }"
+  value:
+    "/** @param {BufferSource} a */"
+    "function template(a) { new BigUint64Array(a) }"
   error_message: "Use shaka.util.BufferUtils.view* instead."
   whitelist_regexp: "lib/util/buffer_utils.js"
   whitelist_regexp: "lib/util/data_view_reader.js"
@@ -175,6 +184,18 @@ requirement: {
   type: BANNED_PROPERTY
   value: "DataView.prototype.buffer"
   value: "TypedArray.prototype.buffer"
+  value: "Int8Array.prototype.buffer"
+  value: "Uint8Array.prototype.buffer"
+  value: "Uint8ClampedArray.prototype.buffer"
+  value: "Int16Array.prototype.buffer"
+  value: "Uint16Array.prototype.buffer"
+  value: "Int32Array.prototype.buffer"
+  value: "Uint32Array.prototype.buffer"
+  value: "Float16Array.prototype.buffer"
+  value: "Float32Array.prototype.buffer"
+  value: "Float64Array.prototype.buffer"
+  value: "BigInt64Array.prototype.buffer"
+  value: "BigUint64Array.prototype.buffer"
   error_message:
     "Using \"TypedArray.buffer\" is not safe since it doesn\'t "
     "handle sub-arrays"

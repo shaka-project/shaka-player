@@ -60,7 +60,7 @@ describe('Player Cross Boundary', () => {
         },
         drm: {
           servers: {
-            'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+            'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
             'com.microsoft.playready': 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:51745386-2d42-56fd-8bad-4f58422004d7,contentkey:UXRThi1CVv2LrU9YQiAE1w==),(kid:26470f42-96d4-5d04-a9ba-bb442e169800,contentkey:JkcPQpbUXQSpurtELhaYAA==)',
           },
         },

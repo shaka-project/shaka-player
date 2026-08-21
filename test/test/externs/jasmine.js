@@ -354,6 +354,13 @@ jasmine.Spy.prototype.and;
 
 
 /**
+ * @param {...*} varArgs
+ * @return {!jasmine.Spy}
+ */
+jasmine.Spy.prototype.withArgs = function(varArgs) {};
+
+
+/**
  * @param {string} name
  * @return {!jasmine.Spy}
  * @see https://github.com/shaka-project/closure-compiler/issues/1422

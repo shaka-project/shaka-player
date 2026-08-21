@@ -213,7 +213,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -297,7 +299,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -2244,6 +2248,102 @@ describe('DashParser Manifest', () => {
     expect(textStream.roles).toEqual(['captions', 'forced-subtitle']);
     expect(textStream.forced).toBe(true);
   });
+
+  it('adds an implied subtitle role when kind defaults to subtitle',
+      async () => {
+        // A text AdaptationSet with no Role/Accessibility elements at all
+        // defaults its "kind" to subtitle, but historically left `roles`
+        // empty, so nothing signaled that this was a subtitle track.
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('subtitle');
+        expect(textStream.roles).toEqual(['subtitle']);
+      });
+
+  it('adds an implied subtitle role for an explicit Role value="subtitle"',
+      async () => {
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Role schemeIdUri="urn:mpeg:dash:role:2011" ',
+          '          value="subtitle" />',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('subtitle');
+        expect(textStream.roles).toEqual(['subtitle']);
+      });
+
+  it('does not add an implied subtitle role when a Role already exists',
+      async () => {
+        // Explicit Role value="caption" overrides the default "subtitle"
+        // kind, so the implied-subtitle-role branch must not fire. The
+        // Role value that set "kind" isn't duplicated into `roles`, and
+        // since there are no other Role/Accessibility values here, `roles`
+        // stays empty.
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Role schemeIdUri="urn:mpeg:dash:role:2011" ',
+          '          value="caption" />',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('caption');
+        expect(textStream.roles).toEqual([]);
+      });
 
   it('supports HDR signaling via profiles', async () => {
     // (DASH-IF IOP v4.3 10.3.3.)

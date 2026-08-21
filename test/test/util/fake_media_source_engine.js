@@ -163,6 +163,10 @@ shaka.test.FakeMediaSourceEngine = class {
     this.reset =
         jasmine.createSpy('reset').and.returnValue(Promise.resolve());
 
+    /** @type {!jasmine.Spy} */
+    this.hasSourceBufferFor =
+        jasmine.createSpy('hasSourceBufferFor').and.stub();
+
     this.textDisplayer = new shaka.test.FakeTextDisplayer();
   }
 
