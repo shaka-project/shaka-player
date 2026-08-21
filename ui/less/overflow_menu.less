@@ -22,9 +22,7 @@
 .shaka-settings-menu {
   /* It's okay to add a vertical scroll if there are too many items, but
    * horizontal scrolling is not allowed. */
-  overflow-x: hidden;
-  overflow-y: auto;
-
+  overflow: hidden auto;
   scrollbar-color:
     var(--shaka-font-color)
     var(--shaka-bg);
@@ -144,24 +142,19 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-
   width: calc(100% - var(--shaka-icon-size-sm));
   padding-right: calc(var(--shaka-icon-size-sm) + 8px);
-
   position: relative;
 
-  &:after {
+  &::after {
     content: "";
     position: absolute;
     right: 5px;
     top: 50%;
     transform: translateY(-50%);
-
     width: var(--shaka-icon-size-sm);
     height: var(--shaka-icon-size-sm);
-
     background-color: var(--shaka-font-color);
-
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
     mask-size: contain;
   }
@@ -313,7 +306,6 @@
 .shaka-back-to-overflow-button {
   border-bottom: 1px solid rgba(255, 255, 255, 20%) !important;
   border-radius: 0 !important;
-
   margin-bottom: 5px;
 
   /* The label inside the button, which says something like "back". */
