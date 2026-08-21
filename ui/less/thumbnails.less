@@ -19,6 +19,15 @@
     width: 7.5%;
   }
 
+  // When there is no thumbnail to show, the box must hug the time, instead of
+  // reserving the width of an image that is not being displayed. Otherwise the
+  // time would stop following the pointer well before the edges of the bar.
+  &.time-only {
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+  }
+
   .shaka-player-ui-thumbnail-image-container {
     background-color: var(--shaka-bg-solid);
     border: 1px solid var(--shaka-bg-solid);
