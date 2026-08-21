@@ -38,8 +38,8 @@
   user-select: none;
 
   *,
-  :after,
-  :before {
+  ::after,
+  ::before {
     box-sizing: revert;
   }
 
@@ -152,7 +152,6 @@
 .shaka-top-controls {
   width: var(--shaka-controls-w);
   padding: 0;
-
   position: absolute;
   top: 0;
 
@@ -201,9 +200,7 @@
   .center-children();
 
   gap: 2.5%;
-
   z-index: 2;
-
   pointer-events: none;
 
   @big-button-size-percentage: 12.5%;
@@ -220,7 +217,6 @@
     border: none;
     margin: 0;
     padding: 0;
-
     pointer-events: initial;
 
     .center-children();
@@ -229,7 +225,6 @@
     background-color: var(--shaka-bg);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 35%);
     cursor: pointer;
-
     transition: transform 0.18s ease-out, background-color 0.18s ease-out;
 
     &:not([disabled]):hover {
@@ -260,6 +255,7 @@
 
 .shaka-video-container.pip-placeholder {
   .center-children();
+
   flex-direction: column;
   gap: 14px;
   margin: auto;
@@ -289,6 +285,7 @@
   .pip-icon-group {
     position: relative;
     .center-children();
+
     z-index: 2;
 
     // Size the group to the same footprint as the button so the ring
@@ -334,7 +331,6 @@
     border: 1.5px solid rgba(255, 255, 255, 25%);
     backdrop-filter: blur(6px);
     cursor: pointer;
-
     transition:
       transform 0.18s ease-out,
       background-color 0.18s ease-out,
@@ -378,13 +374,11 @@
 .panel-button() {
   /* White text or button icons. */
   color: var(--shaka-font-color);
-
   height: var(--shaka-icon-size);
   width: var(--shaka-icon-size);
 
   /* Consistent alignment of buttons. */
   line-height: 0.5;
-
   padding: 0 2px;
 
   /* Transparent backgrounds, no borders, and a pointer when you mouse over
@@ -487,27 +481,20 @@
 
 .shaka-statistics-container,
 .shaka-ad-statistics-container {
-  overflow-x: hidden;
-  overflow-y: auto;
-
+  overflow: hidden auto;
   scrollbar-color: rgba(255, 255, 255, 15%) transparent;
   scrollbar-width: thin;
-
   color: var(--shaka-font-color);
   background-color: rgba(12, 14, 18, 88%);
   border: 1px solid rgba(255, 255, 255, 8%);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 50%);
-
   font-size: var(--shaka-font-size);
   font-family: monospace;
-
   padding: 0;
   border-radius: 10px;
-
   position: absolute;
   z-index: 2;
   top: 15px;
-
   max-height: calc(100% - 115px);
 
   .show-when-controls-shown();
@@ -674,6 +661,7 @@
 .shaka-hidden-fast-forward-container {
   /* Keep the fast forward button to the right of this container. */
   .absolute-position();
+
   left: 60%;
 }
 
