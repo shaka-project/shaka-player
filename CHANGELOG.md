@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.15.57](https://github.com/shaka-project/shaka-player/compare/v4.15.56...v4.15.57) (2026-08-21)
+
+
+### Bug Fixes
+
+* Avoid quadratic copying of prefetched segment data ([#10448](https://github.com/shaka-project/shaka-player/issues/10448)) ([40e50ce](https://github.com/shaka-project/shaka-player/commit/40e50ce59a1839a371519bb0a0bf700a50d39c60)), closes [#10446](https://github.com/shaka-project/shaka-player/issues/10446)
+* **offline:** Close the database when another connection needs it ([#10435](https://github.com/shaka-project/shaka-player/issues/10435)) ([3587ec3](https://github.com/shaka-project/shaka-player/commit/3587ec38ce1b99f7b481732549a9a149f2020d84))
+* **offline:** Don't leak an IndexedDB connection ([#10434](https://github.com/shaka-project/shaka-player/issues/10434)) ([e1a18ce](https://github.com/shaka-project/shaka-player/commit/e1a18ce2282a94ffe4d1ea5470267bde8a6bd7ab))
+* **test:** Skip Widevine tests on Edge with a revoked device certificate ([#10449](https://github.com/shaka-project/shaka-player/issues/10449)) ([58fb31c](https://github.com/shaka-project/shaka-player/commit/58fb31cced0c7808e15cdcae02074d06620f84cb)), closes [#10442](https://github.com/shaka-project/shaka-player/issues/10442)
+
 ## [4.15.56](https://github.com/shaka-project/shaka-player/compare/v4.15.55...v4.15.56) (2026-08-15)
 
 
