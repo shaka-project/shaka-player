@@ -153,7 +153,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.lastThumbnailPendingRequest_ = null;
 
     /**
-     * True if the bar is moving due to touchscreen or keyboard events.
+     * True if the bar is moving due to touchscreen events.
      *
      * @private {boolean}
      */
@@ -176,6 +176,38 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.hideThumbnailTimer_ = new shaka.util.Timer(() => {
       this.hideThumbnailTimeContainer_();
+    });
+
+    /**
+     * The value of the bar right before the last key press, used to tell
+     * whether the key moved the playhead at all.
+     *
+     * @private {?number}
+     */
+    this.valueBeforeKeyPress_ = null;
+
+    /**
+     * The timer is activated to preview the position a key press has moved
+     * the bar to.
+     *
+     * Which keys seek, and by how much, is up to Controls, which listens for
+     * them on an ancestor of the bar and therefore runs after us. Waiting for
+     * the event to be over lets us read the value it has just set instead of
+     * repeating that decision here.
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.showThumbnailTimer_ = new shaka.util.Timer(() => {
+      const value = this.getValue();
+      if (value == this.valueBeforeKeyPress_ ||
+          this.controls.anySettingsMenusAreOpen()) {
+        // The key did not seek.
+        return;
+      }
+      this.showThumbnailAtValue_(value);
+      this.hideThumbnailTimer_.stop();
+      this.hideThumbnailTimer_.tickAfter(
+          shaka.ui.SeekBar.KEYBOARD_THUMBNAIL_TIMEOUT_);
     });
 
     /** @private {!Array<!shaka.extern.AdCuePoint>} */
@@ -231,6 +263,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.hideThumbnailTimer_.tickNow();
     });
 
+    this.eventManager.listen(this.bar, 'keydown', () => {
+      this.valueBeforeKeyPress_ = this.getValue();
+      // We use tickAfter so that a timeout of 0 is programmed internally
+      // and it is not executed immediately.
+      this.showThumbnailTimer_.tickAfter(/* seconds= */ 0);
+    });
+
     this.eventManager.listen(this.controls, 'chaptersupdated', () => {
       this.markChapters_();
       if (this.controls.getChapters().length > 0 && this.player.isDynamic()) {
@@ -279,6 +318,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.adBreaksTimer_ = null;
     this.chaptersTimer_?.stop();
     this.chaptersTimer_ = null;
+    this.hideThumbnailTimer_?.stop();
+    this.hideThumbnailTimer_ = null;
+    this.showThumbnailTimer_?.stop();
+    this.showThumbnailTimer_ = null;
     this.resizeObserver_?.disconnect();
     this.resizeObserver_ = null;
 
@@ -289,14 +332,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * Called by the base class when user interaction with the input element
    * begins.
    *
+   * @param {boolean=} fromTouchEvent
    * @override
    */
-  onChangeStart() {
+  onChangeStart(fromTouchEvent = false) {
     this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
-    this.hideThumbnailTimer_.stop();
-    this.isMoving_ = true;
+    this.isMoving_ = fromTouchEvent;
   }
 
   /**
@@ -1016,6 +1059,13 @@ shaka.ui.SeekBar.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ = 5; // seconds
  * @private
  */
 shaka.ui.SeekBar.THUMB_SIZE_PX_ = 12;
+
+
+/**
+ * @const {number}
+ * @private
+ */
+shaka.ui.SeekBar.KEYBOARD_THUMBNAIL_TIMEOUT_ = 1;
 
 
 /**
