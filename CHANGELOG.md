@@ -1,5 +1,54 @@
 # Changelog
 
+## [5.3.0](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.3.0) (2026-08-21)
+
+
+### Features
+
+* **DASH:** Add subtitle support for role attribute and kind='subtitle' ([#10441](https://github.com/shaka-project/shaka-player/issues/10441)) ([8f19ce4](https://github.com/shaka-project/shaka-player/commit/8f19ce488f7d8df6326c3f490e4a1bca48e55e2c))
+* **DASH:** Add support for Preselections (Next Generation Audio) ([#10344](https://github.com/shaka-project/shaka-player/issues/10344)) ([89f1255](https://github.com/shaka-project/shaka-player/commit/89f1255788d7fd91840ad656865bfb8f53a2abad))
+* **MSF:** Add MoQT draft-18 support and deprecate draft-14 ([#10383](https://github.com/shaka-project/shaka-player/issues/10383)) ([adc8c1b](https://github.com/shaka-project/shaka-player/commit/adc8c1bec77060060613f59c6c16dce0ee3eeef6))
+
+
+### Bug Fixes
+
+* **Ads:** Don't enable the skip button before the ad's own media loads ([#10447](https://github.com/shaka-project/shaka-player/issues/10447)) ([306ab8f](https://github.com/shaka-project/shaka-player/commit/306ab8fdb091f4b905f726963102889645d4e397)), closes [#10418](https://github.com/shaka-project/shaka-player/issues/10418)
+* **Ads:** Restrict click-through URIs to http(s) schemes ([#10412](https://github.com/shaka-project/shaka-player/issues/10412)) ([8681f03](https://github.com/shaka-project/shaka-player/commit/8681f0358ad6c2d0c9eb2cb60eb8303545aaac84))
+* Avoid quadratic copying of prefetched segment data ([#10448](https://github.com/shaka-project/shaka-player/issues/10448)) ([ef14147](https://github.com/shaka-project/shaka-player/commit/ef1414797c69dda4e716fe616b57526697bd9043)), closes [#10446](https://github.com/shaka-project/shaka-player/issues/10446)
+* Avoid re-downloading init segments on unbuffered seek ([#10428](https://github.com/shaka-project/shaka-player/issues/10428)) ([10eb756](https://github.com/shaka-project/shaka-player/commit/10eb7565e20e8524dfc84eba5afe27d66a302d38)), closes [#10373](https://github.com/shaka-project/shaka-player/issues/10373)
+* **CMCD:** Re-arm the reporter on every load() ([#10416](https://github.com/shaka-project/shaka-player/issues/10416)) ([d71d28f](https://github.com/shaka-project/shaka-player/commit/d71d28f89113a8baea21d69efc443acb37834b19))
+* **Dolby Vision:** Enable Dolby Vision p8 workaround on encrypted content ([#10423](https://github.com/shaka-project/shaka-player/issues/10423)) ([8c163a8](https://github.com/shaka-project/shaka-player/commit/8c163a8e8c58fe94a72926a614b3773f92416db5))
+* Don't re-encode existing query parameters when appending new ones ([#10415](https://github.com/shaka-project/shaka-player/issues/10415)) ([dc110e5](https://github.com/shaka-project/shaka-player/commit/dc110e56f341e6faf17cf3638c553a9a87d41435))
+* Fix duplicate error code 4058 ([#10372](https://github.com/shaka-project/shaka-player/issues/10372)) ([eb94e6f](https://github.com/shaka-project/shaka-player/commit/eb94e6f14bdb80e42c821c88acb4305bbde18342))
+* Fix stuck playback on multiplexed TS content ([#10431](https://github.com/shaka-project/shaka-player/issues/10431)) ([3011e6e](https://github.com/shaka-project/shaka-player/commit/3011e6e84997f94c5289f79f17293c664a1aa383))
+* **HLS:** Detect audio-only raw content when CODECS is missing ([#10399](https://github.com/shaka-project/shaka-player/issues/10399)) ([49fa88b](https://github.com/shaka-project/shaka-player/commit/49fa88bfff6d7fb9c6ff224ac102231fb5877004))
+* **HLS:** Fix audio/video desync in muxed TS segments mode ([#10406](https://github.com/shaka-project/shaka-player/issues/10406)) ([4650e30](https://github.com/shaka-project/shaka-player/commit/4650e307d741252d5843449b85a8be5d7c8370e7)), closes [#10341](https://github.com/shaka-project/shaka-player/issues/10341)
+* **MSF:** Fix draft-16 negotiation and skip empty catalog objects ([#10367](https://github.com/shaka-project/shaka-player/issues/10367)) ([25b244e](https://github.com/shaka-project/shaka-player/commit/25b244e6ad3d9eae60e93652ec43300df7358fd0))
+* **MSF:** Report bandwidth per group so ABR can pick higher qualities ([#10371](https://github.com/shaka-project/shaka-player/issues/10371)) ([8336642](https://github.com/shaka-project/shaka-player/commit/83366425dc791fbc3f296dbf1245506b50b8b4f7))
+* **net:** Abort pending retry delays immediately ([#10443](https://github.com/shaka-project/shaka-player/issues/10443)) ([f5171df](https://github.com/shaka-project/shaka-player/commit/f5171df302f6714f4256afde9bed8eeef1f53bfc)), closes [#10413](https://github.com/shaka-project/shaka-player/issues/10413)
+* **net:** isolate headers across retry attempts ([#10361](https://github.com/shaka-project/shaka-player/issues/10361)) ([f8297f5](https://github.com/shaka-project/shaka-player/commit/f8297f5e40a8dcf91dcf8c08147aa08c89ec9f95))
+* Normalize Opus codec when multiplexed ([#10464](https://github.com/shaka-project/shaka-player/issues/10464)) ([0b92535](https://github.com/shaka-project/shaka-player/commit/0b92535e22fec38daa3605ee57559b2b36f15a2e))
+* **offline:** Close the database when another connection needs it ([#10435](https://github.com/shaka-project/shaka-player/issues/10435)) ([872a168](https://github.com/shaka-project/shaka-player/commit/872a1682dccc6223fb67305385d05fe4cc3c6aa0))
+* **offline:** Don't leak an IndexedDB connection ([#10434](https://github.com/shaka-project/shaka-player/issues/10434)) ([96dff25](https://github.com/shaka-project/shaka-player/commit/96dff25ece11c413221ac9fbddb8e270833248e6))
+* Only mark MSE append errors recoverable when the stream is disabled ([#10409](https://github.com/shaka-project/shaka-player/issues/10409)) ([f9c6fcd](https://github.com/shaka-project/shaka-player/commit/f9c6fcdf473cc5c1867afa0a1e575d00198ea02f))
+* Prevent screen.orientation methods from being garbage collected on Safari ([#10364](https://github.com/shaka-project/shaka-player/issues/10364)) ([a56b17a](https://github.com/shaka-project/shaka-player/commit/a56b17af3f2dc4e07632f7ce7384eb0ca40508c9))
+* Reset media source before switching variant on MSE append failure ([#10380](https://github.com/shaka-project/shaka-player/issues/10380)) ([e013447](https://github.com/shaka-project/shaka-player/commit/e013447dc550c9ccc722f3018c4f6ef2933931cc))
+* Restore correct playhead position after MediaSource reload ([#10335](https://github.com/shaka-project/shaka-player/issues/10335)) ([33a5f25](https://github.com/shaka-project/shaka-player/commit/33a5f25d0b30b51d07ee8c97f48b0d142c728f17))
+* **security:** prevent glob expansion in shaka-bot comment command parser ([#10281](https://github.com/shaka-project/shaka-player/issues/10281)) ([a80b3f1](https://github.com/shaka-project/shaka-player/commit/a80b3f1300b289d5a4c6a8110a2ce1b443cfdefd))
+* **test:** Skip Widevine tests on Edge with a revoked device certificate ([#10449](https://github.com/shaka-project/shaka-player/issues/10449)) ([9f6a484](https://github.com/shaka-project/shaka-player/commit/9f6a48419385af3941896dd26310673d0b5ba4ea)), closes [#10442](https://github.com/shaka-project/shaka-player/issues/10442)
+* **Transmux:** Add device registration to the web worker ([#10348](https://github.com/shaka-project/shaka-player/issues/10348)) ([6821c15](https://github.com/shaka-project/shaka-player/commit/6821c15eac13c3ea8c9e18160371c27b7419140d))
+* **Transmux:** Fall back to main thread on worker transmux timeout ([#10349](https://github.com/shaka-project/shaka-player/issues/10349)) ([2586e14](https://github.com/shaka-project/shaka-player/commit/2586e1405a8f55848cd35e978523f0e03e71f625))
+* **Transmux:** Fall back to main thread when the transmux worker fails ([#10370](https://github.com/shaka-project/shaka-player/issues/10370)) ([1d28ee2](https://github.com/shaka-project/shaka-player/commit/1d28ee226198d1dd748d156f31f182504a0eabb9))
+* **UI:** Align seek bar chapter markers with the playhead thumb ([#10229](https://github.com/shaka-project/shaka-player/issues/10229)) ([059deee](https://github.com/shaka-project/shaka-player/commit/059deee09a10d876c4a172c7af0e9adbc7cbcc41))
+* **UI:** Center the seek bar time on the pointer when there are no thumbnails ([#10457](https://github.com/shaka-project/shaka-player/issues/10457)) ([a6c2574](https://github.com/shaka-project/shaka-player/commit/a6c257411105827ee57130056a1de5e6fa2eef6b)), closes [#10452](https://github.com/shaka-project/shaka-player/issues/10452)
+* **UI:** Fix context menu and rate slider touch behavior on mobile ([#10365](https://github.com/shaka-project/shaka-player/issues/10365)) ([41fea2e](https://github.com/shaka-project/shaka-player/commit/41fea2e307e7e91ea629327af309862218de61ab)), closes [#10363](https://github.com/shaka-project/shaka-player/issues/10363)
+* **UI:** Fix thumbnail preview not scaling with player size ([#10333](https://github.com/shaka-project/shaka-player/issues/10333)) ([aafb1e2](https://github.com/shaka-project/shaka-player/commit/aafb1e205c55a515894ee83914a5611af05c7391))
+* **UI:** isolate keyboard shortcuts and fullscreen detection per player instance ([#10436](https://github.com/shaka-project/shaka-player/issues/10436)) ([9a4e146](https://github.com/shaka-project/shaka-player/commit/9a4e146b846c6cbe8fc9c52a894e13910d9ddb35)), closes [#10429](https://github.com/shaka-project/shaka-player/issues/10429)
+* **UI:** Prevent playback rate menu from being cut off on narrow screens ([#10343](https://github.com/shaka-project/shaka-player/issues/10343)) ([d566247](https://github.com/shaka-project/shaka-player/commit/d56624742e1a283f9abdc3253555aec3e0df1629))
+* **UI:** Prevent playback rate menu jitter when dragging the slider ([#10458](https://github.com/shaka-project/shaka-player/issues/10458)) ([cfb31c4](https://github.com/shaka-project/shaka-player/commit/cfb31c4139a2690eb4475473be8b748f923fa993))
+* **UI:** Preview time/thumbnails when seeking with keys ([#10465](https://github.com/shaka-project/shaka-player/issues/10465)) ([86ef054](https://github.com/shaka-project/shaka-player/commit/86ef0547c27a0766247c6539dec0697a58a94d20))
+* **UI:** Scope form element font inheritance to the player container ([#10353](https://github.com/shaka-project/shaka-player/issues/10353)) ([6c358dc](https://github.com/shaka-project/shaka-player/commit/6c358dc67b061c23f4edc428aafaab1940b0a53b))
+
 ## [5.2.0](https://github.com/shaka-project/shaka-player/compare/v5.1.0...v5.2.0) (2026-07-10)
 
 
