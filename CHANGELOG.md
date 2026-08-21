@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.1.20](https://github.com/shaka-project/shaka-player/compare/v5.1.19...v5.1.20) (2026-08-21)
+
+
+### Bug Fixes
+
+* **Ads:** Don't enable the skip button before the ad's own media loads ([#10447](https://github.com/shaka-project/shaka-player/issues/10447)) ([3ef7ed3](https://github.com/shaka-project/shaka-player/commit/3ef7ed35d8d696a7fe6e71b4ebf36a2bdc26385c)), closes [#10418](https://github.com/shaka-project/shaka-player/issues/10418)
+* Avoid quadratic copying of prefetched segment data ([#10448](https://github.com/shaka-project/shaka-player/issues/10448)) ([da98f07](https://github.com/shaka-project/shaka-player/commit/da98f07a9478d2726eee3b5193dc6331c31e152d)), closes [#10446](https://github.com/shaka-project/shaka-player/issues/10446)
+* **net:** Abort pending retry delays immediately ([#10443](https://github.com/shaka-project/shaka-player/issues/10443)) ([be23bab](https://github.com/shaka-project/shaka-player/commit/be23babcbc9b0ccabd32c8e75dc6063b6c0848b2)), closes [#10413](https://github.com/shaka-project/shaka-player/issues/10413)
+* **offline:** Close the database when another connection needs it ([#10435](https://github.com/shaka-project/shaka-player/issues/10435)) ([4f2386d](https://github.com/shaka-project/shaka-player/commit/4f2386d06b750f515511cb0f825aef0baa6bc342))
+* **offline:** Don't leak an IndexedDB connection ([#10434](https://github.com/shaka-project/shaka-player/issues/10434)) ([5141f6b](https://github.com/shaka-project/shaka-player/commit/5141f6b5769c3475bcc43a6d6d1681458bd92f95))
+* **test:** Skip Widevine tests on Edge with a revoked device certificate ([#10449](https://github.com/shaka-project/shaka-player/issues/10449)) ([359cf4d](https://github.com/shaka-project/shaka-player/commit/359cf4dacdf9e48e0ddef3281d55b863de006dfb)), closes [#10442](https://github.com/shaka-project/shaka-player/issues/10442)
+* **UI:** isolate keyboard shortcuts and fullscreen detection per player instance ([#10436](https://github.com/shaka-project/shaka-player/issues/10436)) ([d64e40f](https://github.com/shaka-project/shaka-player/commit/d64e40f3d349f9e2091c897c2669f8709b144c00)), closes [#10429](https://github.com/shaka-project/shaka-player/issues/10429)
+* **UI:** Preview time/thumbnails when seeking with keys ([#10465](https://github.com/shaka-project/shaka-player/issues/10465)) ([af95fd1](https://github.com/shaka-project/shaka-player/commit/af95fd100a1ad8fc0e41f6f73fc300cf7a4bac15))
+
 ## [5.1.19](https://github.com/shaka-project/shaka-player/compare/v5.1.18...v5.1.19) (2026-08-15)
 
 
