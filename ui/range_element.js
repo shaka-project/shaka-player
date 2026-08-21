@@ -128,7 +128,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         if (!this.bar.disabled) {
           this.isChanging_ = true;
           this.setBarValueForTouch_(e);
-          this.onChangeStart();
+          this.onChangeStart(/* fromTouchEvent= */ true);
           // Apply the new value right away, mirroring the mousedown handler.
           // This makes a single tap seek to the touched position for controls
           // that act on onChange (e.g. volume and playback-rate sliders),
@@ -203,10 +203,11 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * Called when user interaction begins.
    * To be overridden by subclasses.
+   * @param {boolean=} fromTouchEvent
    * @override
    * @export
    */
-  onChangeStart() {}
+  onChangeStart(fromTouchEvent = false) {}
 
   /**
    * Called when a new value is set by user interaction.

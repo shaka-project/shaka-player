@@ -1315,6 +1315,92 @@ describe('UI', () => {
         document.body.removeChild(input);
       });
     });
+
+    describe('seek bar thumbnail preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLElement} */
+      let seekBar;
+      /** @type {!HTMLElement} */
+      let thumbnailContainer;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-seek-bar');
+        thumbnailContainer = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-player-ui-thumbnail-container');
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        // The bar is built disabled and is only enabled when the controls go
+        // from hidden to visible, which never happens here because they are
+        // already visible.  A disabled input cannot take focus.
+        /** @type {!HTMLInputElement} */ (seekBar).disabled = false;
+        seekBar.focus();
+      });
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      it('stays up while a seek key is held down', async () => {
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
+
+        pressKey('ArrowRight');
+        await Util.delay(0.1);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Holding the key down makes it repeat, which keeps the preview up
+        // past the timeout a single press would have hidden it at.
+        await Util.delay(0.6);
+        pressKey('ArrowRight');
+        await Util.delay(0.6);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Once the key is released it stops repeating and the preview goes
+        // away on its own.
+        await Util.delay(1.2);
+        expect(thumbnailContainer.style.visibility).toBe('hidden');
+      });
+
+      it('is not shown for keys that do not seek', async () => {
+        // 'x' is not bound to anything, so the playhead does not move.
+        pressKey('x');
+        await Util.delay(0.1);
+        expect(video.currentTime).toBe(50);
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
+      });
+    });
   });
 
 
