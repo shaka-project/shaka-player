@@ -401,6 +401,20 @@ describe('MediaSourceEngine', () => {
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
+    it('corrects audio codecs in multiplexed MP4 video', async () => {
+      const stream = makeFakeStream('video/mp4');
+      stream.codecs = 'opus,av01.0.08M.08';
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, stream);
+      await mediaSourceEngine.init(initObject, false);
+
+      const audioCodec = shaka.util.MimeUtils.getCorrectAudioCodecs(
+          'opus', stream.mimeType);
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
+          `video/mp4; codecs="${audioCodec},av01.0.08M.08"`);
+    });
+
     it('creates SourceBuffers with extra features', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
       config.addExtraFeaturesToSourceBuffer = (mimeType) => {
