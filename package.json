@@ -73,8 +73,8 @@
     "rimraf": "^3.0.2",
     "sprintf-js": "^1.1.2",
     "ssim.js": "^3.5.0",
-    "stylelint": "^14.5.1",
-    "stylelint-config-standard": "^25.0.0",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
     "tippy.js": "^4.3.5",
     "which": "^2.0.2"
   },
