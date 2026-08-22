@@ -273,8 +273,6 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
-        .addBoolInput_('Enable DASH sequence mode',
-            'manifest.dash.sequenceMode')
         .addBoolInput_('Use stream once in period flattening',
             'manifest.dash.useStreamOnceInPeriodFlattening')
         .addBoolInput_('Enable fast switching',
@@ -297,7 +295,6 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestProgramDateTime')
         .addNumberInput_('Live segments delay',
             'manifest.hls.liveSegmentsDelay')
-        .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
         .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
             'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addBoolInput_('Disable codec guessing',
