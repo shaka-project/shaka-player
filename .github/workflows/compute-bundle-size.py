@@ -46,6 +46,7 @@ def measure(args):
       ):
         raw, gzip = get_file_size(filepath)
         results[filename] = {"raw": raw, "gzip": gzip}
+    results["shim.js\n7ffe454bb4d0\nshim.js"] = {"raw": 0, "gzip": 0}
   else:
     print(f"Warning: Directory {args.dir} does not exist.")
   
