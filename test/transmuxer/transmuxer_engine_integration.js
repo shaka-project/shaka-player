@@ -28,6 +28,13 @@ describe('TransmuxerEngine', () => {
       expect(TransmuxerEngine.isSupported(
           mimeType, ContentType.VIDEO)).toBe(true);
     });
+
+    it('supports audio/mp2t as an alias of video/mp2t', () => {
+      const transportStreamAudioMp2tMimeType =
+          'audio/mp2t; codecs="mp4a.40.2"';
+      expect(TransmuxerEngine.isSupported(
+          transportStreamAudioMp2tMimeType, ContentType.AUDIO)).toBe(true);
+    });
   });
 
   describe('convertCodecs', () => {
