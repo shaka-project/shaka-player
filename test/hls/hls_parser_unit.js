@@ -1686,6 +1686,53 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('supports audio/mp2t mimetype for demuxed audio-only TS renditions',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+          'URI="audio"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+          'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+          'video\n',
+        ].join('');
+
+        const videoMedia = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-MAP:URI="init.mp4"\n',
+          '#EXTINF:5,\n',
+          'main.mp4',
+        ].join('\n');
+
+        // No extension, so the mimetype comes from the Content-Type header.
+        const audioMedia = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXTINF:5,\n',
+          'main.test',
+        ].join('\n');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', videoMedia)
+            .setResponseText('test:/audio', audioMedia)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData)
+            .setResponseValue('test:/main.test', tsSegmentData);
+
+        fakeNetEngine.setHeaders('test:/main.test', {
+          'content-type': 'audio/mp2t',
+        });
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await loadAllStreamsFor(manifest);
+
+        const audioStream = manifest.variants[0].audio;
+        goog.asserts.assert(audioStream, 'Audio stream should exist!');
+        expect(audioStream.mimeType).toBe('audio/mp2t');
+      });
+
   it('parses manifest with HDR metadata', async () => {
     const master = [
       '#EXTM3U\n',
