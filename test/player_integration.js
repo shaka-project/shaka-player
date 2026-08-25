@@ -282,6 +282,38 @@ describe('Player', () => {
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 30);
       expect(results).toEqual(expected);
     });
+
+    it('No segments before startTime using canUpdateStartTime', async () => {
+      player.addEventListener('canupdatestarttime', () => {
+        player.updateStartTime(24);
+      });
+      const results = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: false,
+      };
+      const expected = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: true,
+      };
+      player.getNetworkingEngine().registerRequestFilter(
+          (type, request) => {
+            if (request.uris[0] == 'test:sintel/video/0') {
+              results.requestedVideoSegment0 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/1') {
+              results.requestedVideoSegment1 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/2') {
+              results.requestedVideoSegment2 = true;
+            }
+          });
+      await player.load('test:sintel_compiled');
+      await video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 30);
+      expect(results).toEqual(expected);
+    });
   });
 
 
