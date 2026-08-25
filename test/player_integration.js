@@ -122,7 +122,7 @@ describe('Player', () => {
       player.configure('streaming.evictionGoal', 1);
       // Play the stream .
       await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
-      player.addEventListener('manifestparsed', () => {
+      player.addEventListener('canupdatestarttime', () => {
         player.updateStartTime(1020);
       });
       await video.play();
@@ -173,7 +173,7 @@ describe('Player', () => {
       player.configure('streaming.rebufferingGoal', 2);
       // Play the stream .
       await player.load('/base/test/test/assets/10480/dash_0.mpd', 5020);
-      player.addEventListener('manifestparsed', () => {
+      player.addEventListener('canupdatestarttime', () => {
         player.updateStartTime(5020);
       });
       await video.play();
