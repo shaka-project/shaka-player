@@ -2,23 +2,22 @@
     "extends": "stylelint-config-standard",
     "customSyntax": "postcss-less",
     "rules": {
-      "font-family-no-missing-generic-family-keyword": null,
+      "at-rule-prelude-no-invalid": null,
+      "color-function-alias-notation": null,
       "declaration-block-single-line-max-declarations": null,
-      "declaration-empty-line-before": null,
-      "max-line-length": [80, {
-        ignorePattern: "/^@import\\s+/",
-      }],
+      "declaration-property-value-keyword-no-deprecated": null,
+      "declaration-property-value-no-unknown": null,
+      "font-family-no-missing-generic-family-keyword": null,
       "function-no-unknown": [true, {
-        ignoreFunctions: [
+        "ignoreFunctions": [
           "data-uri",
           "lighten",
-          "percentage",
-        ],
+          "percentage"
+        ]
       }],
+      "no-descending-specificity": null,
       "property-no-vendor-prefix": null,
-      "selector-list-comma-newline-after": "always-multi-line",
       "selector-no-vendor-prefix": null,
-      "selector-pseudo-element-colon-notation": "single",
       "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh", "vw", "dvh", "dvw"],
       "color-function-notation": "legacy"
     }

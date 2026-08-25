@@ -186,6 +186,63 @@ describe('Ad UI', () => {
       expect(skipButton.disabled).toBe(false);
     });
 
+    it('is disabled again if the skip state goes back to not-yet',
+        async () => {
+          // Regression test for
+          // https://github.com/shaka-project/shaka-player/issues/10418
+          const eventManager = new shaka.util.EventManager();
+          const waiter = new shaka.test.Waiter(eventManager);
+          const pStart =
+              waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+          ad = new shaka.test.FakeAd(/* skipIn= */ 0,
+              /* position= */ 1, /* totalAdsInPod= */ 2);
+          adManager.startAd(ad);
+          await pStart;
+
+          adManager.changeSkipState();
+          expect(skipButton.disabled).toBe(false);
+
+          // The skip state is recomputed and the ad is not skippable yet, as
+          // happens once the next ad of a pod has loaded its own media.
+          ad.setTimeUntilSkippable(5);
+          adManager.changeSkipState();
+
+          expect(skipButton.disabled).toBe(true);
+          const skipCounter =
+              UiUtils.getElementByClassName(container, 'shaka-skip-ad-counter');
+          UiUtils.confirmElementDisplayed(skipCounter);
+          expect(skipCounter.textContent).toBe('5');
+        });
+
+    it('is disabled again when the next ad of a pod starts', async () => {
+      const eventManager = new shaka.util.EventManager();
+      const waiter = new shaka.test.Waiter(eventManager);
+      const pStart =
+          waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      ad = new shaka.test.FakeAd(/* skipIn= */ 0,
+          /* position= */ 1, /* totalAdsInPod= */ 2);
+      adManager.startAd(ad);
+      await pStart;
+
+      adManager.changeSkipState();
+      expect(skipButton.disabled).toBe(false);
+
+      const pNext =
+          waiter.waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+      ad = new shaka.test.FakeAd(/* skipIn= */ 5,
+          /* position= */ 2, /* totalAdsInPod= */ 2);
+      adManager.startAd(ad);
+      await pNext;
+
+      expect(skipButton.disabled).toBe(true);
+      const skipCounter =
+          UiUtils.getElementByClassName(container, 'shaka-skip-ad-counter');
+      UiUtils.confirmElementDisplayed(skipCounter);
+      expect(skipCounter.textContent).toBe('5');
+    });
+
     it('hides skip counter if an ad can be skipped now', async () => {
       const eventManager = new shaka.util.EventManager();
       const waiter = new shaka.test.Waiter(eventManager);

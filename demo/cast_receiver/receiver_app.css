@@ -46,17 +46,13 @@ body {
 
 #welcome {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  inset: 0;
 
   /* Make sure the idle cards sit above everything in the Player UI.  That way,
    * they will be visible on top until we decide to hide them and show the
    * player. */
   z-index: 99;
   background-color: white;
-
   background-image: url("shaka-player-logo-light.png");
   background-repeat: no-repeat;
   background-position: center;
@@ -66,13 +62,12 @@ body {
   position: absolute;
   bottom: 2.5%;
   right: 2.5%;
-
   font-size: 2vh;
   color: black;
 }
 
 /* Preload the background images for idle mode */
-body:after {
+body::after {
   position: absolute;
   width: 0;
   height: 0;

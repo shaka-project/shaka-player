@@ -1190,6 +1190,11 @@ shakaDemo.Main = class {
           params.get('manifest.msf.namespaces').split(','));
     }
 
+    if (params.has('drm.preferredKeySystems')) {
+      this.configure('drm.preferredKeySystems',
+          params.get('drm.preferredKeySystems').split(','));
+    }
+
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
 
@@ -1772,6 +1777,7 @@ shakaDemo.Main = class {
     const otherArrays = [
       'accessibility.speechToText.languagesToTranslate',
       'manifest.msf.namespaces',
+      'drm.preferredKeySystems',
     ];
 
     for (const key of otherArrays) {

@@ -34,11 +34,10 @@
     position: relative;
 
     /* The :after pseudo-element contains the tooltip */
-    &:hover:after,
-    &:focus-visible:after,
-    &:active:after {
+    &:hover::after,
+    &:focus-visible::after,
+    &:active::after {
       content: attr(aria-label);
-
       line-height: 1.2;
       white-space: nowrap;
       font-size: var(--shaka-font-size);
@@ -68,9 +67,9 @@
   // If the seekbar is missing, this is positioned lower.
   &.shaka-tooltips-bottom {
     & > .shaka-tooltip {
-      &:hover:after,
-      &:focus-visible:after,
-      &:active:after {
+      &:hover::after,
+      &:focus-visible::after,
+      &:active::after {
         bottom: calc(var(--shaka-icon-size) / 2 * -1);
       }
     }
@@ -79,9 +78,9 @@
   // If the seekbar is missing, this is positioned lower.
   &.shaka-tooltips-low-position {
     & > .shaka-tooltip {
-      &:hover:after,
-      &:focus-visible:after,
-      &:active:after {
+      &:hover::after,
+      &:focus-visible::after,
+      &:active::after {
         bottom: var(--shaka-icon-size);
       }
     }
@@ -89,9 +88,9 @@
 
   /* Adds an additional attribute for the status in .shaka-tooltip-status */
   & > .shaka-tooltip-status {
-    &:hover:after,
-    &:focus-visible:after,
-    &:active:after {
+    &:hover::after,
+    &:focus-visible::after,
+    &:active::after {
       content: attr(aria-label) " (" attr(shaka-status) ")";
     }
   }
@@ -99,9 +98,9 @@
   /* The first tooltip of the panel is not centered on top of the button
    * but rather aligned with the left border of the control panel */
   button:first-child {
-    &:hover:after,
-    &:focus-visible:after,
-    &:active:after {
+    &:hover::after,
+    &:focus-visible::after,
+    &:active::after {
       left: 0;
       transform: translateX(0);
     }
@@ -110,9 +109,9 @@
   /* The last tooltip of the panel is not centered on top of the button
    * but rather aligned with the right border of the control panel */
   button:last-child {
-    &:hover:after,
-    &:focus-visible:after,
-    &:active:after {
+    &:hover::after,
+    &:focus-visible::after,
+    &:active::after {
       left: var(--shaka-icon-size);
       transform: translateX(-100%);
     }
