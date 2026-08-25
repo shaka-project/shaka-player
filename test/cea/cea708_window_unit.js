@@ -59,6 +59,52 @@ describe('Cea708Window', () => {
     expect(caption).toEqual(expectedCaption);
   });
 
+  it('applies the window fill color to the emitted cue background', () => {
+    const text = 'test word';
+    window.setWindowFillColor('magenta');
+    for (const c of text) {
+      window.setCharacter(c);
+    }
+
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, 0, rowCount, colCount);
+    // The fill color is applied to the top-level cue's background.
+    topLevelCue.backgroundColor = 'magenta';
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, text),
+    ];
+
+    const caption = window.forceEmit(endTime, serviceNumber);
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    expect(caption).toEqual(expectedCaption);
+  });
+
+  it('does not set a cue background when no fill color is applied', () => {
+    const text = 'test word';
+    for (const c of text) {
+      window.setCharacter(c);
+    }
+
+    const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+        serviceNumber, 0, rowCount, colCount);
+    // No backgroundColor is set on the top-level cue (default empty).
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, text),
+    ];
+
+    const caption = window.forceEmit(endTime, serviceNumber);
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    expect(caption).toEqual(expectedCaption);
+  });
+
   describe('handles carriage returns', () => {
     it('handles a regular carriage return', () => {
       const text1 = 'test';
@@ -370,6 +416,192 @@ describe('Cea708Window', () => {
     expect(caption).toEqual(expectedCaption);
   });
 
+
+  describe('pen-bounds safety', () => {
+    // setCharacter writes a character only when the pen is within the
+    // window's row and column counts; otherwise the window memory remains
+    // unchanged (and nothing is emitted). The window is defined with rowCount
+    // rows and colCount columns in beforeEach, so valid pen indices are
+    // [0, rowCount) x [0, colCount).
+
+    it('does not write a character when the pen row is out of bounds', () => {
+      // Row == rowCount is one past the last valid row.
+      window.setPenLocation(/* row= */ rowCount, /* col= */ 0);
+      window.setCharacter('x');
+
+      // Memory is unchanged, so nothing is emitted.
+      expect(window.forceEmit(endTime, serviceNumber)).toBeNull();
+    });
+
+    it('does not write a character when the pen column is out of bounds',
+        () => {
+          // Col == colCount is one past the last valid column.
+          window.setPenLocation(/* row= */ 0, /* col= */ colCount);
+          window.setCharacter('x');
+
+          expect(window.forceEmit(endTime, serviceNumber)).toBeNull();
+        });
+
+    it('does not write a character when the pen location is negative', () => {
+      window.setPenLocation(/* row= */ -1, /* col= */ 0);
+      window.setCharacter('x');
+      expect(window.forceEmit(endTime, serviceNumber)).toBeNull();
+
+      window.setPenLocation(/* row= */ 0, /* col= */ -1);
+      window.setCharacter('y');
+      expect(window.forceEmit(endTime, serviceNumber)).toBeNull();
+    });
+
+    it('leaves existing window memory unchanged for an out-of-bounds write',
+        () => {
+          const text = 'test';
+          for (const c of text) {
+            window.setCharacter(c);
+          }
+
+          // Move the pen out of bounds and attempt to write. This must not add
+          // to or corrupt the existing memory.
+          window.setPenLocation(/* row= */ rowCount, /* col= */ 0);
+          window.setCharacter('X');
+
+          const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+              serviceNumber, 0, rowCount, colCount);
+          topLevelCue.nestedCues = [
+            CeaUtils.createDefaultCue(startTime, endTime, text),
+          ];
+
+          const caption = window.forceEmit(endTime, serviceNumber);
+          expect(caption).toEqual({stream, cue: topLevelCue});
+        });
+
+    it('writes a character at the last in-bounds pen location', () => {
+      // The last valid row is rowCount - 1; leading empty rows are trimmed by
+      // the emitter, so the single character appears with no line breaks.
+      const text = 'hi';
+      window.setPenLocation(/* row= */ rowCount - 1, /* col= */ 0);
+      for (const c of text) {
+        window.setCharacter(c);
+      }
+
+      const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+          serviceNumber, 0, rowCount, colCount);
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, text),
+      ];
+
+      const caption = window.forceEmit(endTime, serviceNumber);
+      expect(caption).toEqual({stream, cue: topLevelCue});
+    });
+
+    // setCharacter writes only when the pen is within rowCount/colCount;
+    // an out-of-bounds write leaves the window memory unchanged.
+
+    /**
+     * A small, deterministic PRNG (mulberry32). Given the same seed it always
+     * produces the same sequence, which keeps this property test reproducible.
+     * @param {number} seed
+     * @return {function(): number} Returns floats in [0, 1).
+     */
+    const mulberry32 = (seed) => {
+      let a = seed >>> 0;
+      return () => {
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    /**
+     * Draws a random integer in [0, maxInclusive] from the given PRNG.
+     * @param {function(): number} rng
+     * @param {number} maxInclusive
+     * @return {number}
+     */
+    const randInt = (rng, maxInclusive) =>
+      Math.floor(rng() * (maxInclusive + 1));
+
+    /**
+     * Draws a random integer in [min, max] (both inclusive) from the PRNG.
+     * @param {function(): number} rng
+     * @param {number} min
+     * @param {number} max
+     * @return {number}
+     */
+    const randIntRange = (rng, min, max) =>
+      min + Math.floor(rng() * (max - min + 1));
+
+    // A small alphabet of printable characters used for the random writes.
+    const alphabet = 'abcXYZ0189';
+
+    /**
+     * Builds a fresh window matching the beforeEach geometry (rowCount rows,
+     * colCount columns) so the "new window" pen-bounds semantics apply.
+     * @return {!shaka.cea.Cea708Window}
+     */
+    const makeWindow = () => {
+      const w = new shaka.cea.Cea708Window(/* windowNum= */ 0, serviceNumber);
+      w.defineWindow(
+          /* visible= */ true, /* verticalAnchor= */ 0, /* horAnchor= */ 0,
+          /* anchorId= */ 0, /* relativeToggle= */ false, rowCount, colCount);
+      w.setStartTime(startTime);
+      return w;
+    };
+
+    it('out-of-bounds writes never change the emitted memory', () => {
+      // A spread of fixed seeds keeps the test deterministic while exercising
+      // many randomly chosen (row, col, char) operation sequences.
+      const seeds = [
+        0x00000001, 0x00c0ffee, 0x0badf00d, 0x00012345,
+        0x00abcdef, 0x9e3779b9, 0x2545f491, 0xdeadbeef,
+      ];
+      const iterationsPerSeed = 30;
+
+      for (const seed of seeds) {
+        const rng = mulberry32(seed);
+        for (let i = 0; i < iterationsPerSeed; i++) {
+          // Generate a sequence of writes. Each location ranges from one past
+          // the negative edge to one past the positive edge, so roughly the
+          // outer values are out of bounds and the rest are valid.
+          const opCount = randIntRange(rng, 1, 20);
+          const ops = [];
+          for (let k = 0; k < opCount; k++) {
+            ops.push({
+              row: randIntRange(rng, -2, rowCount + 1),
+              col: randIntRange(rng, -2, colCount + 1),
+              char: alphabet[randInt(rng, alphabet.length - 1)],
+            });
+          }
+
+          // The "full" window applies every op. Out-of-bounds ops must be
+          // no-ops, so its emitted memory must match the baseline below.
+          const full = makeWindow();
+          for (const op of ops) {
+            full.setPenLocation(op.row, op.col);
+            full.setCharacter(op.char);
+          }
+
+          // The baseline window applies only the in-bounds ops. Because every
+          // op explicitly sets the pen location before writing, dropping the
+          // out-of-bounds ops is equivalent to writing nothing for them.
+          const baseline = makeWindow();
+          for (const op of ops) {
+            const inBounds = op.row >= 0 && op.row < rowCount &&
+                op.col >= 0 && op.col < colCount;
+            if (inBounds) {
+              baseline.setPenLocation(op.row, op.col);
+              baseline.setCharacter(op.char);
+            }
+          }
+
+          // The out-of-bounds writes left the memory unchanged: the full
+          // sequence emits exactly what the in-bounds-only sequence emits.
+          expect(full.forceEmit(endTime, serviceNumber))
+              .toEqual(baseline.forceEmit(endTime, serviceNumber));
+        }
+      }
+    });
+  });
 
   it('correctly handles display(), hide(), and toggle() commands', () => {
     window.display(); // The window should be visible.
