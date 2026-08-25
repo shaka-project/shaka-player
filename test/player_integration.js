@@ -122,7 +122,7 @@ describe('Player', () => {
       player.configure('streaming.evictionGoal', 1);
       // Play the stream .
       await player.load('/base/test/test/assets/7401/dash_0.mpd', 1020);
-      player.addEventListener('manifestparsed', () => {
+      player.addEventListener('canupdatestarttime', () => {
         player.updateStartTime(1020);
       });
       await video.play();
@@ -173,7 +173,7 @@ describe('Player', () => {
       player.configure('streaming.rebufferingGoal', 2);
       // Play the stream .
       await player.load('/base/test/test/assets/10480/dash_0.mpd', 5020);
-      player.addEventListener('manifestparsed', () => {
+      player.addEventListener('canupdatestarttime', () => {
         player.updateStartTime(5020);
       });
       await video.play();
@@ -253,6 +253,38 @@ describe('Player', () => {
   describe('updateStartTime() in manifestparsed event handler', () => {
     it('does not get segments prior to startTime', async () => {
       player.addEventListener('manifestparsed', () => {
+        player.updateStartTime(24);
+      });
+      const results = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: false,
+      };
+      const expected = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: true,
+      };
+      player.getNetworkingEngine().registerRequestFilter(
+          (type, request) => {
+            if (request.uris[0] == 'test:sintel/video/0') {
+              results.requestedVideoSegment0 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/1') {
+              results.requestedVideoSegment1 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/2') {
+              results.requestedVideoSegment2 = true;
+            }
+          });
+      await player.load('test:sintel_compiled');
+      await video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 30);
+      expect(results).toEqual(expected);
+    });
+
+    it('No segments before startTime using canUpdateStartTime', async () => {
+      player.addEventListener('canupdatestarttime', () => {
         player.updateStartTime(24);
       });
       const results = {
