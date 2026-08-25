@@ -144,6 +144,7 @@ describe('Player', () => {
       // The stream should have transitioned to VOD by now.
       expect(player.isLive()).toBe(false);
     });
+
     it('multi period and shifted period start', async () => {
       const netEngine = player.getNetworkingEngine();
       shaka.log.setLevel(shaka.log.Level.V1);
