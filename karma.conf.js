@@ -456,11 +456,22 @@ module.exports = (config) => {
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
         'third_party/**/*.js': ['babel', 'sourcemap'],
+        // Since v4.6.0, the less browser bundle ships untranspiled ES6+
+        // (classes, arrow functions), which older platforms such as Tizen 3
+        // cannot parse.  The AMD module would then never register and
+        // test/test/util/ui_utils.js would fail with "less is not defined".
+        'node_modules/less/dist/less.js': ['babel'],
       },
 
       babelPreprocessor: {
         // Cache results in .babel-cache
         cachePath: '.babel-cache',
+        // Per-file override (the preprocessor calls this with the karma file
+        // object).  We only want backtraces into our own code, and the inline
+        // map for the less bundle would be ~1.4MB of extra payload to ship to
+        // slow devices on every run.
+        sourceMap: (file) =>
+          file.originalPath.includes('/node_modules/') ? false : 'inline',
         options: {
           presets: ['@babel/preset-env'],
           // Add source maps so that backtraces refer to the original code.
@@ -477,6 +488,7 @@ module.exports = (config) => {
                 'lib/(debug|deprecate|polyfill)/*.js',
                 'test/**/*.js',
                 'third_party/**/*.js',
+                'node_modules/**/*.js',
               ],
             }],
           ],
