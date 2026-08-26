@@ -230,6 +230,48 @@ describe('UI', () => {
     /** @type {!HTMLVideoElement} */
     let video;
 
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
     beforeEach(() => {
       videoContainer =
         /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -1795,7 +1837,7 @@ describe('UI', () => {
         const seekBar = container1.querySelector('.shaka-seek-bar');
         expect(seekBar).toBeTruthy();
 
-        /** @type {!HTMLElement} */ (seekBar).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar));
 
         const spaceEvent = new KeyboardEvent('keydown', {
           key: ' ',
@@ -1904,7 +1946,7 @@ describe('UI', () => {
 
         const seekBar1 = container1.querySelector('.shaka-seek-bar');
         expect(seekBar1).toBeTruthy();
-        /** @type {!HTMLElement} */ (seekBar1).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar1));
 
         const arrowRightEvent = new KeyboardEvent('keydown', {
           key: 'ArrowRight',
@@ -1932,7 +1974,7 @@ describe('UI', () => {
         /** @type {!HTMLInputElement} */ (document.createElement('input'));
         input.type = 'text';
         document.body.appendChild(input);
-        input.focus();
+        focusForKeyboardTest(input);
 
         const spaceEvent = new KeyboardEvent('keydown', {
           key: ' ',
@@ -1997,11 +2039,7 @@ describe('UI', () => {
         // get it out of the range it is built with.
         controls.seekTo(50, false);
 
-        // The bar is built disabled and is only enabled when the controls go
-        // from hidden to visible, which never happens here because they are
-        // already visible.  A disabled input cannot take focus.
-        /** @type {!HTMLInputElement} */ (seekBar).disabled = false;
-        seekBar.focus();
+        focusForKeyboardTest(seekBar);
       });
 
       /** @param {string} key */
