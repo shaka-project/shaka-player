@@ -272,6 +272,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/dash-svta-2053-2/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'test/test/assets/7401/*', included: false},
+      {pattern: 'test/test/assets/10480/*', included: false},
       {pattern: 'test/test/assets/6339/*', included: false},
       {pattern: 'test/test/assets/dash-aes-128/*', included: false},
       {pattern: 'test/test/assets/dash-audio-ac3/*', included: false},
