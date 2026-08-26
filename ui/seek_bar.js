@@ -995,9 +995,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   getChapter_(totalSeconds) {
-    for (const chapter of this.controls.getChapters()) {
+    const chapters = this.controls.getChapters();
+    for (let i = 0; i < chapters.length; i++) {
+      const chapter = chapters[i];
+      const isLast = i === chapters.length - 1;
       if (chapter.startTime <= totalSeconds &&
-          chapter.endTime > totalSeconds) {
+          (chapter.endTime > totalSeconds ||
+          (isLast && totalSeconds >= chapter.endTime))) {
         return chapter;
       }
     }
