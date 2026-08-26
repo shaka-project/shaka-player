@@ -456,7 +456,7 @@ module.exports = (config) => {
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
         'third_party/**/*.js': ['babel', 'sourcemap'],
-        // Since v4.6.0, the less browser bundle ships untranspiled ES6+
+        // Since v4.6.0, the less browser bundle ships ES6+
         // (classes, arrow functions), which older platforms such as Tizen 3
         // cannot parse.  The AMD module would then never register and
         // test/test/util/ui_utils.js would fail with "less is not defined".
