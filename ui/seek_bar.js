@@ -397,10 +397,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       // The caller may pause the video right after this, e.g. when a play/pause
       // shortcut ends the interaction, which rejects this promise.  That is not
       // an error we need to report.
-      const playResult = this.video.play();
-      if (playResult) {
-        playResult.catch(() => {});
-      }
+      this.video.play();
     }
 
     if (this.isMoving_) {
