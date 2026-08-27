@@ -120,6 +120,15 @@ msfCatalog.Accessibility;
  *   parentName: (string|undefined),
  *   contentProtectionRefIDs: (Array<string>|undefined),
  *   accessibility: (Array<!msfCatalog.Accessibility>|undefined),
+ *   m2tsPacketSize: (number|undefined),
+ *   m2tsPacketsPerObject: (number|undefined),
+ *   m2tsProgramNumber: (number|undefined),
+ *   m2tsPmtPid: (number|undefined),
+ *   m2tsPcrPid: (number|undefined),
+ *   m2tsPsiInterval: (number|undefined),
+ *   m2tsRandomAccess: (boolean|undefined),
+ *   m2tsTimestampMode: (string|undefined),
+ *   m2tsScte35Pid: (number|undefined),
  * }}
  */
 msfCatalog.Track;

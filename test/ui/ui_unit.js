@@ -230,6 +230,76 @@ describe('UI', () => {
     /** @type {!HTMLVideoElement} */
     let video;
 
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    /**
+     * Creates a keydown event for |key|.
+     *
+     * Not every platform honors the "key" member of the init dictionary: on
+     * Tizen 3 the constructor accepts it but leaves event.key undefined, so
+     * the code under test throws instead of running the shortcut.  Force the
+     * property in that case, which is all the code under test reads.
+     *
+     * @param {string} key
+     * @return {!KeyboardEvent}
+     */
+    function createKeydownEvent(key) {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      if (event.key != key) {
+        Object.defineProperty(event, 'key', {
+          get: () => key,
+          configurable: true,
+        });
+      }
+
+      return event;
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
     beforeEach(() => {
       videoContainer =
         /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -1795,13 +1865,9 @@ describe('UI', () => {
         const seekBar = container1.querySelector('.shaka-seek-bar');
         expect(seekBar).toBeTruthy();
 
-        /** @type {!HTMLElement} */ (seekBar).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar));
 
-        const spaceEvent = new KeyboardEvent('keydown', {
-          key: ' ',
-          bubbles: true,
-          cancelable: true,
-        });
+        const spaceEvent = createKeydownEvent(' ');
         const spacePreventDefaultSpy =
             spyOn(spaceEvent, 'preventDefault').and.callThrough();
         seekBar.dispatchEvent(spaceEvent);
@@ -1810,11 +1876,7 @@ describe('UI', () => {
         expect(spacePreventDefaultSpy).toHaveBeenCalled();
 
         controls1.seekTo(50, false);
-        const arrowLeftEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowLeft',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
         const arrowLeftPreventDefaultSpy =
             spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
         seekBar.dispatchEvent(arrowLeftEvent);
@@ -1823,17 +1885,22 @@ describe('UI', () => {
         expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
 
         controls1.seekTo(50, false);
-        const arrowRightEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowRight',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
         seekBar.dispatchEvent(arrowRightEvent);
 
         expect(video1.currentTime).toBe(55);
       });
 
       it('isolates fullscreen status and keys between players', () => {
+        // isFullScreenEnabled() only reads document.fullscreenElement when
+        // document fullscreen is available; without it the controls fall back
+        // to the video element and this test would measure the platform
+        // instead.  Tizen 3 also refuses to redefine the property at all.
+        if (!document.fullscreenEnabled) {
+          pending('This test requires fullscreen support, which is ' +
+              'unavailable.');
+        }
+
         const originalFullscreenElement =
             Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
 
@@ -1859,22 +1926,14 @@ describe('UI', () => {
           const initialTime1 = video1.currentTime;
           const initialTime2 = video2.currentTime;
 
-          const arrowLeftEvent = new KeyboardEvent('keydown', {
-            key: 'ArrowLeft',
-            bubbles: true,
-            cancelable: true,
-          });
+          const arrowLeftEvent = createKeydownEvent('ArrowLeft');
           window.dispatchEvent(arrowLeftEvent);
 
           expect(video1.currentTime).toBe(45);
           expect(video1.currentTime).not.toBe(initialTime1);
           expect(video2.currentTime).toBe(initialTime2);
 
-          const spaceEvent = new KeyboardEvent('keydown', {
-            key: ' ',
-            bubbles: true,
-            cancelable: true,
-          });
+          const spaceEvent = createKeydownEvent(' ');
           window.dispatchEvent(spaceEvent);
 
           expect(play1Spy).toHaveBeenCalledTimes(1);
@@ -1904,13 +1963,9 @@ describe('UI', () => {
 
         const seekBar1 = container1.querySelector('.shaka-seek-bar');
         expect(seekBar1).toBeTruthy();
-        /** @type {!HTMLElement} */ (seekBar1).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar1));
 
-        const arrowRightEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowRight',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
         seekBar1.dispatchEvent(arrowRightEvent);
 
         expect(video1.currentTime).toBe(55);
@@ -1932,20 +1987,12 @@ describe('UI', () => {
         /** @type {!HTMLInputElement} */ (document.createElement('input'));
         input.type = 'text';
         document.body.appendChild(input);
-        input.focus();
+        focusForKeyboardTest(input);
 
-        const spaceEvent = new KeyboardEvent('keydown', {
-          key: ' ',
-          bubbles: true,
-          cancelable: true,
-        });
+        const spaceEvent = createKeydownEvent(' ');
         window.dispatchEvent(spaceEvent);
 
-        const arrowLeftEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowLeft',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
         window.dispatchEvent(arrowLeftEvent);
 
         expect(playSpy).not.toHaveBeenCalled();
@@ -1997,20 +2044,12 @@ describe('UI', () => {
         // get it out of the range it is built with.
         controls.seekTo(50, false);
 
-        // The bar is built disabled and is only enabled when the controls go
-        // from hidden to visible, which never happens here because they are
-        // already visible.  A disabled input cannot take focus.
-        /** @type {!HTMLInputElement} */ (seekBar).disabled = false;
-        seekBar.focus();
+        focusForKeyboardTest(seekBar);
       });
 
       /** @param {string} key */
       function pressKey(key) {
-        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
-          key,
-          bubbles: true,
-          cancelable: true,
-        }));
+        seekBar.dispatchEvent(createKeydownEvent(key));
       }
 
       it('stays up while a seek key is held down', async () => {

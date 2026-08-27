@@ -948,7 +948,7 @@ describe('HlsParser', () => {
      * @param {!Array<!Map<string, string>>} captionResults
      * @param {boolean=} isLive
      * @param {?shaka.media.InitSegmentReference=} candidateInit
-     * @return {!Promise<shaka.media.SegmentUtils.BasicInfo>}
+     * @return {!Promise<shaka.extern.BasicInfo>}
      */
     async function probeSegments(
         captionResults, isLive = false, candidateInit = null) {
