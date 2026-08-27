@@ -149,7 +149,7 @@
   }
 }
 
-@media (max-width: 474px) {
+@media (width <= 474px) {
   .shaka-volume-bar-container {
     width: 50px;
 
@@ -173,7 +173,7 @@
 }
 /* stylelint-enable max-line-length */
 
-@media (min-width: 475px) {
+@media (width >= 475px) {
   .shaka-mute-button:hover + .shaka-volume-bar-container-allow-hiding,
   .shaka-mute-volume-container:hover .shaka-volume-bar-container-allow-hiding {
     width: 100px;
@@ -193,12 +193,12 @@
 
 .shaka-seek-bar-container {
   .show-when-controls-shown();
+
   top: 5px;
   height: 5px;
 
   /* add spacing between seek-bar-container and controls-button-panel */
   margin-bottom: var(--shaka-track-h);
-
   background-clip: padding-box !important;
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;

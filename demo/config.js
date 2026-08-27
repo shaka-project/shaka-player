@@ -168,7 +168,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Renewal Interval (sec)',
             'drm.renewalIntervalSec',
             /* canBeDecimal= */ false,
-            /* canBeZero= */ true);
+            /* canBeZero= */ true)
+        .addArrayStringInput_('preferredKeySystems',
+            'drm.preferredKeySystems');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {

@@ -136,7 +136,7 @@ html, body {
   top: 4px;
 }
 
-.hamburger-menu .mdl-textfield__label:after {
+.hamburger-menu .mdl-textfield__label::after {
   bottom: 0;
 }
 
@@ -275,7 +275,7 @@ html, body {
   }
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (width <= 400px) {
   /* On screens less than 400px, the 330px-wide cards need to shrink.
    * This makes them shrink linearly below that threshold. */
   .asset-card {
@@ -371,7 +371,7 @@ html, body {
   color: black;
 }
 
-@media screen and (max-width: 780px) {
+@media screen and (width <= 780px) {
   /* On smaller screens, the header should expand and the elements in it should
    * wrap to remain accessible. */
   #nav-button-container {
@@ -603,7 +603,6 @@ footer .mdl-mega-footer__link-list {
 
 .input-container-style-accordion.show {
   opacity: 1;
-
   max-height: fit-content;
 }
 

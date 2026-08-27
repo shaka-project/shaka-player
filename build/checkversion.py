@@ -29,7 +29,10 @@ def player_version():
   """Gets the version of the library from player.js."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'lib', 'player.js')
   with shakaBuildHelpers.open_file(path, 'r') as f:
-    match = re.search(r'shaka\.Player\.version = \'(.*?)\'', f.read())
+    # The version is the default value of the goog.define() call, which spans
+    # multiple lines, so allow anything in between.
+    match = re.search(r'shaka\.Player\.version = .*?\'(v.*?)\'', f.read(),
+                      re.DOTALL)
     return match.group(1) if match else ''
 
 
