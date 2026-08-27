@@ -230,6 +230,76 @@ describe('UI', () => {
     /** @type {!HTMLVideoElement} */
     let video;
 
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    /**
+     * Creates a keydown event for |key|.
+     *
+     * Not every platform honors the "key" member of the init dictionary: on
+     * Tizen 3 the constructor accepts it but leaves event.key undefined, so
+     * the code under test throws instead of running the shortcut.  Force the
+     * property in that case, which is all the code under test reads.
+     *
+     * @param {string} key
+     * @return {!KeyboardEvent}
+     */
+    function createKeydownEvent(key) {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      if (event.key != key) {
+        Object.defineProperty(event, 'key', {
+          get: () => key,
+          configurable: true,
+        });
+      }
+
+      return event;
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
     beforeEach(() => {
       videoContainer =
         /** @type {!HTMLElement} */ (document.createElement('div'));
