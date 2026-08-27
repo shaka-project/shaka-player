@@ -538,8 +538,10 @@ SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
+gregoire
 moqt
 msf
+msfts
 QUIC
 WEBTRANSPORT
 
