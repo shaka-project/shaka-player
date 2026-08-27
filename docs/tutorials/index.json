@@ -31,6 +31,7 @@
   { "upgrade": { "title": "Upgrade Guide" } },
   { "upgrade-manifest": { "title": "ManifestParser Upgrade Guide" } },
   { "lcevc": { "title": "LCEVC Quick Start" } },
+  { "preselection": { "title": "DASH Preselections (Next Generation Audio)" } },
   { "accessibility": { "title": "Accessibility" } },
   { "queue-manager": { "title": "QueueManager" } }
 ]

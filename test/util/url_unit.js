@@ -122,6 +122,17 @@ describe('URL', () => {
       expect(base).toEqual(['http://a.com/']);
       expect(relative).toEqual(['x']);
     });
+
+    it('does not re-encode existing query params', () => {
+      const base = ['http://example.com/'];
+      const relative = ['a?token=st=1~acl=/live/*~hmac=abc'];
+
+      const result = shaka.util.URL.resolveUris(base, relative, 'x=1');
+
+      expect(result)
+          .toEqual(['http://example.com/a?token=st=1~acl=/live/*~hmac=abc' +
+              '&x=1']);
+    });
   });
 
   describe('getDomain', () => {
@@ -226,6 +237,50 @@ describe('URL', () => {
 
       expect(result).toBe('http://example.com/?a=new');
     });
+
+    it('does not re-encode existing signed token params', () => {
+      // Signed URLs (e.g. Akamai or CloudFront tokens) are compared
+      // byte-for-byte by the CDN, so characters like "~", "=" and "/" in
+      // existing params must not be percent-encoded when we append our own
+      // params.  See https://github.com/video-dev/hls.js/pull/7969 for the
+      // same issue in hls.js.
+      const uri = 'https://example.com/media.m3u8' +
+          '?token=st=1600000000~exp=1600003600~acl=/live/*~hmac=abc123';
+
+      const params = new Map();
+      params.set('_HLS_msn', '5');
+      params.set('_HLS_skip', 'YES');
+
+      const result = shaka.util.URL.appendParams(uri, params);
+
+      expect(result).toBe('https://example.com/media.m3u8' +
+          '?token=st=1600000000~exp=1600003600~acl=/live/*~hmac=abc123' +
+          '&_HLS_msn=5&_HLS_skip=YES');
+    });
+
+    it('does not alter percent-encoding of existing params', () => {
+      const uri = 'https://example.com/media.m3u8?sig=a%2Fb%3Dc';
+
+      const params = new Map();
+      params.set('_HLS_skip', 'v2');
+
+      const result = shaka.util.URL.appendParams(uri, params);
+
+      expect(result)
+          .toBe('https://example.com/media.m3u8?sig=a%2Fb%3Dc&_HLS_skip=v2');
+    });
+
+    it('overwrites existing param without altering other params', () => {
+      const uri = 'https://example.com/media.m3u8?token=a=1~b=2&_HLS_msn=3';
+
+      const params = new Map();
+      params.set('_HLS_msn', '7');
+
+      const result = shaka.util.URL.appendParams(uri, params);
+
+      expect(result)
+          .toBe('https://example.com/media.m3u8?token=a=1~b=2&_HLS_msn=7');
+    });
   });
 
   describe('getScheme', () => {
@@ -303,6 +358,21 @@ describe('URL', () => {
       const uri = 'https://example.com/path?x=1';
       expect(shaka.util.URL.applyUrlParams(uri, () => 'tok=abc'))
           .toBe('https://example.com/path?x=1&tok=abc');
+    });
+
+    it('does not re-encode existing signed token params', () => {
+      const uri = 'https://example.com/manifest.mpd' +
+          '?token=st=1600000000~exp=1600003600~acl=/live/*~hmac=abc123';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'a=1'))
+          .toBe('https://example.com/manifest.mpd' +
+              '?token=st=1600000000~exp=1600003600~acl=/live/*~hmac=abc123' +
+              '&a=1');
+    });
+
+    it('preserves the encoding of the applied params', () => {
+      const uri = 'https://example.com/path';
+      expect(shaka.util.URL.applyUrlParams(uri, () => 'sig=a%2Fb%3Dc'))
+          .toBe('https://example.com/path?sig=a%2Fb%3Dc');
     });
   });
 

@@ -85,7 +85,7 @@ describe('ContentWorkarounds', () => {
   const keySystemsConfigs = new Map()
       .set('com.widevine.alpha', {
         servers: {
-          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+          'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
         },
       })
       .set('com.microsoft.playready', {
@@ -105,7 +105,7 @@ describe('ContentWorkarounds', () => {
       });
   for (const [keySystem, drmConfig] of keySystemsConfigs) {
     drmIt(`plays mixed clear encrypted content with ${keySystem}`, async () => {
-      if (!shakaSupport.drm[keySystem]) {
+      if (!checkDrmSupport(keySystem)) {
         pending('Needed DRM is not supported on this platform');
       }
       if (deviceDetected.getDeviceName() === 'Tizen' &&

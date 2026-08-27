@@ -248,7 +248,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       fakeInitState.manifest = 'test:sintel-enc';
       fakeInitState.player.configure['drm'] = {
         'servers': {
-          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+          'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
         },
       };
 
@@ -278,7 +278,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       fakeInitState.manifest = 'test:sintel-enc';
       fakeInitState.player.configure['drm'] = {
         'servers': {
-          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+          'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy',
         },
       };
 

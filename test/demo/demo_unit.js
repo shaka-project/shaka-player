@@ -90,6 +90,7 @@ describe('Demo', () => {
           .add('preferredVideo')
           .add('preferredText')
           .add('accessibility.speechToText.languagesToTranslate')
+          .add('drm.preferredKeySystems')
           .add('manifest.msf.namespaces')
           .add('cmcd.eventTargets');
       // We determine whether a config option has been made or not by looking at

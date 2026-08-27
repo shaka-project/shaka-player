@@ -230,6 +230,76 @@ describe('UI', () => {
     /** @type {!HTMLVideoElement} */
     let video;
 
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    /**
+     * Creates a keydown event for |key|.
+     *
+     * Not every platform honors the "key" member of the init dictionary: on
+     * Tizen 3 the constructor accepts it but leaves event.key undefined, so
+     * the code under test throws instead of running the shortcut.  Force the
+     * property in that case, which is all the code under test reads.
+     *
+     * @param {string} key
+     * @return {!KeyboardEvent}
+     */
+    function createKeydownEvent(key) {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      if (event.key != key) {
+        Object.defineProperty(event, 'key', {
+          get: () => key,
+          configurable: true,
+        });
+      }
+
+      return event;
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
     beforeEach(() => {
       videoContainer =
         /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -1481,6 +1551,71 @@ describe('UI', () => {
       });
     });
 
+    describe('custom context menu on touch devices', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let contextMenu;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'statistics',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+
+        const controls = ui.getControls();
+        controlsContainer = controls.getControlsContainer();
+        // onContainerTouch ignores touches until the media has a duration and
+        // only acts while the controls are showing (opaque).
+        Object.defineProperty(video, 'duration',
+            {value: 100, configurable: true});
+        controlsContainer.setAttribute('shown', 'true');
+
+        const contextMenus =
+            videoContainer.getElementsByClassName('shaka-context-menu');
+        expect(contextMenus.length).toBe(1);
+        contextMenu = /** @type {!HTMLElement} */ (contextMenus[0]);
+      });
+
+      afterEach(() => {
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('stays open when the long-press is released', () => {
+        // A long-press fires 'contextmenu' while the finger is down, then
+        // 'touchend' when it is released.  The menu must survive the release.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('closes on a subsequent tap', () => {
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        // A separate tap (its own touchstart + touchend) closes the menu.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;
@@ -1641,6 +1776,308 @@ describe('UI', () => {
 
         getStatsFromContainer();
         expect(bufferingTime).toBe(lastBufferingTime);
+      });
+    });
+
+    describe('keyboard shortcuts and multi-player isolation', () => {
+      /** @type {!HTMLElement} */
+      let container1;
+      /** @type {!HTMLVideoElement} */
+      let video1;
+      /** @type {shaka.ui.Overlay} */
+      let ui1;
+      /** @type {shaka.ui.Controls} */
+      let controls1;
+      /** @type {shaka.Player} */
+      let player1;
+
+      /** @type {!HTMLElement} */
+      let container2;
+      /** @type {!HTMLVideoElement} */
+      let video2;
+      /** @type {shaka.ui.Overlay} */
+      let ui2;
+      /** @type {shaka.ui.Controls} */
+      let controls2;
+      /** @type {shaka.Player} */
+      let player2;
+
+      beforeEach(async () => {
+        container1 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container1);
+        video1 = shaka.test.UiUtils.createVideoElement();
+        container1.appendChild(video1);
+
+        container2 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container2);
+        video2 = shaka.test.UiUtils.createVideoElement();
+        container2.appendChild(video2);
+
+        Object.defineProperty(video1, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+        Object.defineProperty(video2, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime1 = 0;
+        Object.defineProperty(video1, 'currentTime', {
+          get: () => currentTime1,
+          set: (val) => {
+            currentTime1 = val;
+          },
+          configurable: true,
+        });
+
+        let currentTime2 = 0;
+        Object.defineProperty(video2, 'currentTime', {
+          get: () => currentTime2,
+          set: (val) => {
+            currentTime2 = val;
+          },
+          configurable: true,
+        });
+
+        ui1 = await UiUtils.createUIThroughAPI(container1, video1);
+        controls1 = ui1.getControls();
+        player1 = controls1.getLocalPlayer();
+        spyOn(player1, 'getAssetUri').and.returnValue('fake-uri-1');
+        spyOn(player1, 'seekRange').and.returnValue({start: 0, end: 100});
+        controls1.seekTo(50, false);
+
+        ui2 = await UiUtils.createUIThroughAPI(container2, video2);
+        controls2 = ui2.getControls();
+        player2 = controls2.getLocalPlayer();
+        spyOn(player2, 'getAssetUri').and.returnValue('fake-uri-2');
+        spyOn(player2, 'seekRange').and.returnValue({start: 0, end: 100});
+        controls2.seekTo(50, false);
+      });
+
+      it('handles seekbar Space and Arrow keys with preventDefault', () => {
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const seekBar = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar).toBeTruthy();
+
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar));
+
+        const spaceEvent = createKeydownEvent(' ');
+        const spacePreventDefaultSpy =
+            spyOn(spaceEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(spaceEvent);
+
+        expect(playSpy).toHaveBeenCalledTimes(1);
+        expect(spacePreventDefaultSpy).toHaveBeenCalled();
+
+        controls1.seekTo(50, false);
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+        const arrowLeftPreventDefaultSpy =
+            spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(arrowLeftEvent);
+
+        expect(video1.currentTime).toBe(45);
+        expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
+
+        controls1.seekTo(50, false);
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
+        seekBar.dispatchEvent(arrowRightEvent);
+
+        expect(video1.currentTime).toBe(55);
+      });
+
+      it('isolates fullscreen status and keys between players', () => {
+        // isFullScreenEnabled() only reads document.fullscreenElement when
+        // document fullscreen is available; without it the controls fall back
+        // to the video element and this test would measure the platform
+        // instead.  Tizen 3 also refuses to redefine the property at all.
+        if (!document.fullscreenEnabled) {
+          pending('This test requires fullscreen support, which is ' +
+              'unavailable.');
+        }
+
+        const originalFullscreenElement =
+            Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+
+        try {
+          Object.defineProperty(document, 'fullscreenElement', {
+            get: () => container1,
+            configurable: true,
+          });
+
+          expect(controls1.isFullScreenEnabled()).toBe(true);
+          expect(controls2.isFullScreenEnabled()).toBe(false);
+
+          const play1Spy =
+              spyOn(video1, 'play').and.returnValue(Promise.resolve());
+          const play2Spy =
+              spyOn(video2, 'play').and.returnValue(Promise.resolve());
+          const pause1Spy = spyOn(video1, 'pause');
+          const pause2Spy = spyOn(video2, 'pause');
+
+          controls1.seekTo(50, false);
+          controls2.seekTo(50, false);
+
+          const initialTime1 = video1.currentTime;
+          const initialTime2 = video2.currentTime;
+
+          const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+          window.dispatchEvent(arrowLeftEvent);
+
+          expect(video1.currentTime).toBe(45);
+          expect(video1.currentTime).not.toBe(initialTime1);
+          expect(video2.currentTime).toBe(initialTime2);
+
+          const spaceEvent = createKeydownEvent(' ');
+          window.dispatchEvent(spaceEvent);
+
+          expect(play1Spy).toHaveBeenCalledTimes(1);
+          expect(play2Spy).not.toHaveBeenCalled();
+          expect(pause1Spy).not.toHaveBeenCalled();
+          expect(pause2Spy).not.toHaveBeenCalled();
+          expect(video2.currentTime).toBe(initialTime2);
+        } finally {
+          if (originalFullscreenElement) {
+            Object.defineProperty(
+                document, 'fullscreenElement', originalFullscreenElement);
+          } else {
+            // @ts-ignore
+            delete document['fullscreenElement'];
+          }
+        }
+      });
+
+      it('does not leak seekbar focus events to other players', () => {
+        ui2.configure({enableKeyboardPlaybackControlsInWindow: true});
+
+        controls1.seekTo(50, false);
+        controls2.seekTo(50, false);
+
+        const initialTime1 = video1.currentTime;
+        const initialTime2 = video2.currentTime;
+
+        const seekBar1 = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar1).toBeTruthy();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar1));
+
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
+        seekBar1.dispatchEvent(arrowRightEvent);
+
+        expect(video1.currentTime).toBe(55);
+        expect(video1.currentTime).not.toBe(initialTime1);
+        expect(video2.currentTime).toBe(initialTime2);
+      });
+
+      it('does not trigger shortcuts when typing in a form input', () => {
+        ui1.configure({enableKeyboardPlaybackControlsInWindow: true});
+
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const pauseSpy = spyOn(video1, 'pause');
+
+        controls1.seekTo(50, false);
+        const initialTime1 = video1.currentTime;
+
+        const input =
+        /** @type {!HTMLInputElement} */ (document.createElement('input'));
+        input.type = 'text';
+        document.body.appendChild(input);
+        focusForKeyboardTest(input);
+
+        const spaceEvent = createKeydownEvent(' ');
+        window.dispatchEvent(spaceEvent);
+
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+        window.dispatchEvent(arrowLeftEvent);
+
+        expect(playSpy).not.toHaveBeenCalled();
+        expect(pauseSpy).not.toHaveBeenCalled();
+        expect(video1.currentTime).toBe(initialTime1);
+
+        document.body.removeChild(input);
+      });
+    });
+
+    describe('seek bar thumbnail preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLElement} */
+      let seekBar;
+      /** @type {!HTMLElement} */
+      let thumbnailContainer;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-seek-bar');
+        thumbnailContainer = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-player-ui-thumbnail-container');
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        focusForKeyboardTest(seekBar);
+      });
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(createKeydownEvent(key));
+      }
+
+      it('stays up while a seek key is held down', async () => {
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
+
+        pressKey('ArrowRight');
+        await Util.delay(0.1);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Holding the key down makes it repeat, which keeps the preview up
+        // past the timeout a single press would have hidden it at.
+        await Util.delay(0.6);
+        pressKey('ArrowRight');
+        await Util.delay(0.6);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Once the key is released it stops repeating and the preview goes
+        // away on its own.
+        await Util.delay(1.2);
+        expect(thumbnailContainer.style.visibility).toBe('hidden');
+      });
+
+      it('is not shown for keys that do not seek', async () => {
+        // 'x' is not bound to anything, so the playhead does not move.
+        pressKey('x');
+        await Util.delay(0.1);
+        expect(video.currentTime).toBe(50);
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
       });
     });
   });

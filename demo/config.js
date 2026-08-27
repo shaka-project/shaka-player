@@ -168,7 +168,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Renewal Interval (sec)',
             'drm.renewalIntervalSec',
             /* canBeDecimal= */ false,
-            /* canBeZero= */ true);
+            /* canBeZero= */ true)
+        .addArrayStringInput_('preferredKeySystems',
+            'drm.preferredKeySystems');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {
@@ -326,8 +328,9 @@ shakaDemo.Config = class {
     const msfVersionOptions = shaka.config.MsfVersion;
     const msfVersionOptionNames = {
       'AUTO': 'Auto',
-      'DRAFT_14': 'draft-14',
+      'DRAFT_14': 'draft-14 (deprecated)',
       'DRAFT_16': 'draft-16',
+      'DRAFT_18': 'draft-18',
     };
 
     const docLink = this.resolveExternLink_('.ManifestConfiguration');

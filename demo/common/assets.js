@@ -349,7 +349,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (multicodec, multilingual, ClearKey server)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
@@ -394,7 +394,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine, single linear ad)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
@@ -408,7 +408,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine, single non-linear ad)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
@@ -422,7 +422,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, SAMPLE-AES-CTR, multi-key)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
@@ -511,7 +511,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy')
       .setExtraConfig({
         drm: {
           advanced: {
@@ -538,7 +538,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy')
       .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4, VTT in MP4)',
@@ -574,7 +574,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy')
       .setExtraConfig({
         drm: {
           advanced: {
@@ -597,7 +597,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy')
       .setExtraConfig({
         drm: {
           advanced: {
@@ -667,7 +667,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.AUDIO_ONLY)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://proxy.uat.widevine.com/proxy'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (multicodec, TTML)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
@@ -2750,22 +2750,6 @@ shakaAssets.testAssets = [
         manifest: {
           msf: {
             namespaces: ['moqtail', 'testsrc'],
-          },
-        },
-      })
-      .setMimeType('application/msf'),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'moqtail HDR',
-      /* iconUri= */ '',
-      /* manifestUri= */ 'https://ord.abr.moqtail.dev',
-      /* source= */ shakaAssets.Source.MOQTAIL)
-      .addFeature(shakaAssets.Feature.MSF)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .setExtraConfig({
-        manifest: {
-          msf: {
-            namespaces: ['moqtail'],
           },
         },
       })

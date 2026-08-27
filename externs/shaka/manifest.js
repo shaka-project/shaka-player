@@ -389,6 +389,7 @@ shaka.extern.SegmentIndex = class {
  *   isAudioMuxedInVideo: boolean,
  *   baseOriginalId: ?string,
  *   isIframe: boolean,
+ *   preselection: ?shaka.extern.Preselection,
  * }}
  *
  * @description
@@ -550,10 +551,38 @@ shaka.extern.SegmentIndex = class {
  *   True if the stream only contains I-frames (key frames), such as an HLS
  *   I-frame-only playlist (EXT-X-I-FRAMES-ONLY / EXT-X-I-FRAME-STREAM-INF) or a
  *   DASH trick mode stream.
+ * @property {?shaka.extern.Preselection} preselection
+ *   <i>Defaults to null.</i> <br>
+ *   The Preselection this stream belongs to, if any.  Set when the stream
+ *   represents one of several pre-defined experiences carried in the same
+ *   media segments.
  *
  * @exportDoc
  */
 shaka.extern.Stream;
+
+
+/**
+ * @typedef {{
+ *   id: string,
+ *   tag: ?string
+ * }}
+ *
+ * @description
+ * Describes the Preselection (ISO/IEC 23009-1 clause 5.3.11) a stream belongs
+ * to, when the stream represents one of several pre-defined experiences
+ * multiplexed at the elementary-stream level in the same media segments (for
+ * example, Dolby AC-4 or MPEG-H 3D Audio presentations).
+ *
+ * @property {string} id
+ *   The id of the Preselection.  Unique within one Period.
+ * @property {?string} tag
+ *   The Preselection Tag that identifies the experience to be selected in
+ *   the media stream, or null if not signaled.  For example, for Dolby AC-4
+ *   it corresponds to the presentation to be decoded.
+ * @exportDoc
+ */
+shaka.extern.Preselection;
 
 
 /**
@@ -576,3 +605,62 @@ shaka.extern.Stream;
  * @exportDoc
  */
 shaka.extern.ThumbnailSprite;
+
+
+/**
+ * @typedef {{
+ *   type: string,
+ *   mimeType: string,
+ *   codecs: string,
+ *   language: ?string,
+ *   height: ?string,
+ *   width: ?string,
+ *   channelCount: ?number,
+ *   sampleRate: ?number,
+ *   closedCaptions: Map<string, string>,
+ *   videoRange: ?string,
+ *   colorGamut: ?string,
+ *   frameRate: ?number,
+ *   timescale: ?number,
+ *   drmInfos: !Array<shaka.extern.DrmInfo>
+ * }}
+ *
+ * @description
+ * The media properties of a stream, as derived from a mime type or parsed out
+ * of a media segment.  Fields that could not be determined are left null.
+ *
+ * Produced by the shaka.media.SegmentUtils parsers, and returned by a
+ * packaging plugin from shaka.extern.MsfPackaging.describeTrack().
+ *
+ * @property {string} type
+ *   The basic type of the media, such as "audio" or "video".
+ * @property {string} mimeType
+ *   The mime type, without its codecs parameter.
+ * @property {string} codecs
+ *   The codecs, as a comma-separated list.
+ * @property {?string} language
+ *   The language of the media.
+ * @property {?string} height
+ *   The height in pixels.
+ * @property {?string} width
+ *   The width in pixels.
+ * @property {?number} channelCount
+ *   The number of audio channels.
+ * @property {?number} sampleRate
+ *   The audio sample rate in Hz.
+ * @property {Map<string, string>} closedCaptions
+ *   The closed caption channels carried in the media, mapping a channel id
+ *   such as "CC1" to its language.  Empty when there are none.
+ * @property {?string} videoRange
+ *   The video range, such as "PQ" or "HLG".
+ * @property {?string} colorGamut
+ *   The color gamut, such as "p3".
+ * @property {?number} frameRate
+ *   The video frame rate.
+ * @property {?number} timescale
+ *   The timescale of the media timestamps.
+ * @property {!Array<shaka.extern.DrmInfo>} drmInfos
+ *   The DRM systems signaled in the media, empty when it is unencrypted.
+ * @exportDoc
+ */
+shaka.extern.BasicInfo;

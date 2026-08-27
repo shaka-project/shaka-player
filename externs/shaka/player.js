@@ -2383,12 +2383,64 @@ shaka.extern.NetworkingConfiguration;
 
 /**
  * @typedef {{
+ *   data: !BufferSource,
+ *   preselection: !shaka.extern.Preselection,
+ *   stream: shaka.extern.Stream,
+ *   contentType: string,
+ *   isInitSegment: boolean
+ * }}
+ *
+ * @description
+ *   The information about a segment of a stream that belongs to a
+ *   Preselection, passed to
+ *   <code>mediaSource.modifyPreselectionSegmentCallback</code> right before
+ *   the segment is appended to the SourceBuffer.
+ *
+ * @property {!BufferSource} data
+ *   The segment data.
+ * @property {!shaka.extern.Preselection} preselection
+ *   The Preselection the stream being appended belongs to.  Its
+ *   <code>tag</code> identifies the experience that should be selected in
+ *   the media stream.
+ * @property {shaka.extern.Stream} stream
+ *   The stream being appended.
+ * @property {string} contentType
+ *   The content type being appended, e.g. 'audio' or 'video'.
+ * @property {boolean} isInitSegment
+ *   True if the data is an initialization segment.
+ * @exportDoc
+ */
+shaka.extern.PreselectionSegmentInfo;
+
+
+/**
+ * @summary
+ * A callback invoked right before appending a segment of a stream that
+ * belongs to a Preselection (for example, a Dolby AC-4 or MPEG-H stream where
+ * several experiences are multiplexed in the same segments).  It may return
+ * the info with the segment data rewritten so the media engine decodes the
+ * selected experience (for example, using an external processor such as
+ * Dolby ALPS).  Since the buffer is cleared when the audio track changes,
+ * the segments of the newly selected Preselection flow through this callback
+ * again after a selection change.
+ *
+ * @typedef {function(!shaka.extern.PreselectionSegmentInfo):
+ *     !shaka.extern.PreselectionSegmentInfo}
+ * @exportDoc
+ */
+shaka.extern.ModifyPreselectionSegmentCallback;
+
+
+/**
+ * @typedef {{
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   addExtraFeaturesToSourceBuffer: function(string): string,
  *   forceTransmux: boolean,
  *   insertFakeEncryptionInInit: boolean,
  *   correctEc3Enca: boolean,
  *   modifyCueCallback: shaka.extern.TextParser.ModifyCueCallback,
+ *   modifyPreselectionSegmentCallback:
+ *       shaka.extern.ModifyPreselectionSegmentCallback,
  *   dispatchAllEmsgBoxes: boolean,
  *   useSourceElements: boolean,
  *   durationReductionEmitsUpdateEnd: boolean,
@@ -2440,6 +2492,14 @@ shaka.extern.NetworkingConfiguration;
  *    is appended to the presentation.
  *    Gives a chance for client-side editing of cue text, cue timing, etc.
  *    This works for MSE always and for src= only when you use UITextDisplayer.
+ * @property {shaka.extern.ModifyPreselectionSegmentCallback
+ *          } modifyPreselectionSegmentCallback
+ *   A callback called for each segment of a stream that belongs to a
+ *   Preselection, right before it is appended to the SourceBuffer.
+ *   Gives a chance to rewrite the segment so the media engine decodes the
+ *   selected experience (for example, an AC-4 presentation).
+ *   <br>
+ *   By default it returns the info passed, unmodified.
  * @property {boolean} dispatchAllEmsgBoxes
  *   If true, all emsg boxes are parsed and dispatched.
  *   <br>

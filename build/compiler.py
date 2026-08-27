@@ -367,40 +367,33 @@ class Less(object):
     base, ext = os.path.splitext(output)
     self.output_modern = base + '.modern' + ext
 
-  def _run_postcss(self, input_path, output_path, plugins, browserslist):
+  def _run_postcss(self, input_path, output_path, env):
     """Runs PostCSS on |input_path|, writing to |output_path|.
 
-    Sets BROWSERSLIST in os.environ for the duration of the call and restores
-    the previous value (or removes the key) afterwards.  This avoids passing
-    an 'env' kwarg that execute_get_code does not support.
+    Plugins and browser targets are defined in build/postcss.config.cjs and
+    selected via the --env flag passed to postcss-cli.
 
     Args:
       input_path: Path to the CSS file to process.
       output_path: Path to write the processed CSS to.
-      plugins: List of --use plugin names to pass to PostCSS.
-      browserslist: Browserslist query string.
+      env: Environment name passed to postcss-cli (e.g. 'legacy' or
+          'modern').  The config function in postcss.config.cjs uses this
+          to decide which plugins and browser targets to enable.
 
     Returns:
       True on success; False on failure.
     """
     postcss = shakaBuildHelpers.get_node_binary('postcss-cli', 'postcss')
 
-    plugin_flags = []
-    for plugin in plugins:
-      plugin_flags += ['--use', plugin]
+    config_dir = _get_source_path('build')
+    cmd_line = postcss + [
+        input_path, '-o', output_path,
+        '--config', config_dir,
+        '--env', env,
+        '--map',
+    ]
 
-    cmd_line = postcss + [input_path, '-o', output_path] + plugin_flags + ['--map']
-
-    # Temporarily override BROWSERSLIST, preserving any existing value.
-    previous = os.environ.get('BROWSERSLIST')
-    os.environ['BROWSERSLIST'] = browserslist
-    try:
-      return shakaBuildHelpers.execute_get_code(cmd_line) == 0
-    finally:
-      if previous is None:
-        os.environ.pop('BROWSERSLIST', None)
-      else:
-        os.environ['BROWSERSLIST'] = previous
+    return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
   def compile(self, force=False):
     """Compiles the main less file in |self.main_source_file| into two CSS
@@ -441,25 +434,21 @@ class Less(object):
     # Duplicate the raw compiled CSS so each PostCSS pass has its own file.
     shutil.copy2(self.output, self.output_modern)
 
-    # Step 2a: legacy build
+    # Step 2a: legacy build  (see build/postcss.config.cjs, env=legacy)
+    #   • postcss-preset-env         — convert inset and media query ranges
     #   • postcss-custom-properties  — resolve/flatten all CSS variables
     #   • autoprefixer               — add vendor prefixes for old browsers
     #   • cssnano                    — minify
-    if not self._run_postcss(
-        self.output, self.output,
-        ['postcss-custom-properties', 'autoprefixer', 'cssnano'],
-        'chrome 38, safari 8, firefox 42'):
+    if not self._run_postcss(self.output, self.output, 'legacy'):
       logging.error('PostCSS legacy processing failed')
       return False
 
-    # Step 2b: modern build
+    # Step 2b: modern build  (see build/postcss.config.cjs, env=modern)
     #   • autoprefixer  — add vendor prefixes for recent browsers only
     #   • cssnano       — minify
     #   (CSS custom properties are intentionally kept as-is)
     if not self._run_postcss(
-        self.output_modern, self.output_modern,
-        ['autoprefixer', 'cssnano'],
-        'last 2 years'):
+        self.output_modern, self.output_modern, 'modern'):
       logging.error('PostCSS modern processing failed')
       return False
 

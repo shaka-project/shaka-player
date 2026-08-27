@@ -401,6 +401,20 @@ describe('MediaSourceEngine', () => {
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
+    it('corrects audio codecs in multiplexed MP4 video', async () => {
+      const stream = makeFakeStream('video/mp4');
+      stream.codecs = 'opus,av01.0.08M.08';
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, stream);
+      await mediaSourceEngine.init(initObject, false);
+
+      const audioCodec = shaka.util.MimeUtils.getCorrectAudioCodecs(
+          'opus', stream.mimeType);
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
+          `video/mp4; codecs="${audioCodec},av01.0.08M.08"`);
+    });
+
     it('creates SourceBuffers with extra features', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
       config.addExtraFeaturesToSourceBuffer = (mimeType) => {
@@ -637,6 +651,55 @@ describe('MediaSourceEngine', () => {
     it('appends the given data', async () => {
       const p = mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await p;
+    });
+
+    it('invokes modifyPreselectionSegmentCallback for Preselection streams',
+        async () => {
+          const stream =
+              shaka.test.StreamingEngineUtil.createMockAudioStream(9);
+          stream.preselection = {id: '10', tag: '1'};
+
+          /** @type {!jasmine.Spy} */
+          const modifySpy =
+              jasmine.createSpy('modifyPreselectionSegmentCallback');
+          modifySpy.and.callFake((preselectionSegmentInfo) => {
+            // Return a copy so the assertion below sees the original data
+            // that was passed in.
+            return Object.assign({}, preselectionSegmentInfo, {data: buffer2});
+          });
+
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.modifyPreselectionSegmentCallback =
+              shaka.test.Util.spyFunc(modifySpy);
+          mediaSourceEngine.configure(config);
+
+          const p = mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, buffer, null, stream,
+              /* hasClosedCaptions= */ false);
+
+          expect(modifySpy).toHaveBeenCalledWith(jasmine.objectContaining({
+            data: buffer,
+            preselection: {id: '10', tag: '1'},
+            contentType: ContentType.AUDIO,
+            isInitSegment: true,
+          }));
+          expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
+          audioSourceBuffer.updateend();
+          await p;
+        });
+
+    it('appends Preselection stream data unmodified by default', async () => {
+      const stream =
+          shaka.test.StreamingEngineUtil.createMockAudioStream(9);
+      stream.preselection = {id: '10', tag: '1'};
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, stream,
           /* hasClosedCaptions= */ false);
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();

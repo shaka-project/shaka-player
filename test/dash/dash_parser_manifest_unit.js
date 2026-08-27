@@ -213,7 +213,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -297,7 +299,9 @@ describe('DashParser Manifest', () => {
             stream.mimeType = 'text/vtt';
             stream.bandwidth = 100;
             stream.kind = 'caption';
-            stream.roles = ['caption', 'main'];
+            // The Role value that set "kind" (caption) is not duplicated
+            // into roles; other Role values (main) still are.
+            stream.roles = ['main'];
           });
         }));
   });
@@ -2244,6 +2248,102 @@ describe('DashParser Manifest', () => {
     expect(textStream.roles).toEqual(['captions', 'forced-subtitle']);
     expect(textStream.forced).toBe(true);
   });
+
+  it('adds an implied subtitle role when kind defaults to subtitle',
+      async () => {
+        // A text AdaptationSet with no Role/Accessibility elements at all
+        // defaults its "kind" to subtitle, but historically left `roles`
+        // empty, so nothing signaled that this was a subtitle track.
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('subtitle');
+        expect(textStream.roles).toEqual(['subtitle']);
+      });
+
+  it('adds an implied subtitle role for an explicit Role value="subtitle"',
+      async () => {
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Role schemeIdUri="urn:mpeg:dash:role:2011" ',
+          '          value="subtitle" />',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('subtitle');
+        expect(textStream.roles).toEqual(['subtitle']);
+      });
+
+  it('does not add an implied subtitle role when a Role already exists',
+      async () => {
+        // Explicit Role value="caption" overrides the default "subtitle"
+        // kind, so the implied-subtitle-role branch must not fire. The
+        // Role value that set "kind" isn't duplicated into `roles`, and
+        // since there are no other Role/Accessibility values here, `roles`
+        // stays empty.
+        const manifestText = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet id="1" contentType="text">',
+          '      <Role schemeIdUri="urn:mpeg:dash:role:2011" ',
+          '          value="caption" />',
+          '      <Representation id="text-en" mimeType="text/webvtt">',
+          '        <BaseURL>t-en.vtt</BaseURL>',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet id="1" mimeType="video/mp4">',
+          '      <Representation id="video-sd" width="640" height="480">',
+          '        <BaseURL>v-sd.mp4</BaseURL>',
+          '        <SegmentBase indexRange="100-200" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', manifestText);
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const textStream = manifest.textStreams[0];
+        expect(textStream.kind).toBe('caption');
+        expect(textStream.roles).toEqual([]);
+      });
 
   it('supports HDR signaling via profiles', async () => {
     // (DASH-IF IOP v4.3 10.3.3.)
@@ -5008,4 +5108,190 @@ describe('DashParser Manifest', () => {
           expect(onTimelineRegionAdded).toHaveBeenCalled();
         });
       });
+
+  describe('Preselection', () => {
+    const preselectionScheme = 'urn:mpeg:dash:preselection:2016';
+    const channelScheme =
+        'urn:mpeg:dash:23003:3:audio_channel_configuration:2011';
+
+    /**
+     * A Period with one video AdaptationSet and one AC-4 audio AdaptationSet
+     * whose presentations are multiplexed at the elementary-stream level.
+     * The audio AdaptationSet is marked with a preselection descriptor of the
+     * given property type, and two Preselection elements describe the two
+     * audio experiences.
+     *
+     * @param {string} descriptorProperty
+     * @return {string}
+     */
+    const makeFatStreamManifest = (descriptorProperty) => {
+      return [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet id="1" mimeType="video/mp4">',
+        '      <Representation id="v" bandwidth="1">',
+        '        <SegmentTemplate media="v-$Number$.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '    <AdaptationSet id="2" mimeType="audio/mp4"',
+        '        codecs="ac-4.02.01.00">',
+        `      <${descriptorProperty} schemeIdUri="${preselectionScheme}" />`,
+        '      <Representation id="a" bandwidth="1">',
+        '        <SegmentTemplate media="a-$Number$.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '    <Preselection id="10" tag="1" lang="en"',
+        '        preselectionComponents="2" codecs="ac-4.02.01.01">',
+        `      <AudioChannelConfiguration schemeIdUri="${channelScheme}"`,
+        '          value="2"/>',
+        '      <Label>English dialogue</Label>',
+        '      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>',
+        '    </Preselection>',
+        '    <Preselection id="20" tag="2" lang="es"',
+        '        preselectionComponents="2" codecs="ac-4.02.01.02">',
+        `      <AudioChannelConfiguration schemeIdUri="${channelScheme}"`,
+        '          value="6"/>',
+        '      <Label>Spanish dub</Label>',
+        '      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="dub"/>',
+        '    </Preselection>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+    };
+
+    it('creates a track per Preselection element', async () => {
+      fakeNetEngine.setResponseText(
+          'https://foo', makeFatStreamManifest('EssentialProperty'));
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      // The essential preselection descriptor means the AdaptationSet is only
+      // consumable through its Preselections, so exactly one variant per
+      // Preselection is exposed.
+      expect(manifest.variants.length).toBe(2);
+
+      const english = manifest.variants
+          .map((variant) => variant.audio)
+          .find((audio) => audio.language == 'en');
+      expect(english).toEqual(jasmine.objectContaining({
+        originalId: 'a_preselection_10',
+        language: 'en',
+        label: 'English dialogue',
+        codecs: 'ac-4.02.01.01',
+        channelsCount: 2,
+        roles: ['main'],
+        primary: true,
+        preselection: {id: '10', tag: '1'},
+      }));
+
+      const spanish = manifest.variants
+          .map((variant) => variant.audio)
+          .find((audio) => audio.language == 'es');
+      expect(spanish).toEqual(jasmine.objectContaining({
+        originalId: 'a_preselection_20',
+        language: 'es',
+        label: 'Spanish dub',
+        codecs: 'ac-4.02.01.02',
+        channelsCount: 6,
+        roles: ['dub'],
+        primary: false,
+        preselection: {id: '20', tag: '2'},
+      }));
+    });
+
+    it('keeps the plain track with a supplemental descriptor', async () => {
+      fakeNetEngine.setResponseText(
+          'https://foo', makeFatStreamManifest('SupplementalProperty'));
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      // The supplemental preselection descriptor means the AdaptationSet is
+      // also consumable on its own, so its plain track is exposed along with
+      // one track per Preselection.
+      expect(manifest.variants.length).toBe(3);
+      const codecs = manifest.variants
+          .map((variant) => variant.audio.codecs)
+          .sort();
+      expect(codecs).toEqual(
+          ['ac-4.02.01.00', 'ac-4.02.01.01', 'ac-4.02.01.02']);
+    });
+
+    it('keeps sets with an essential single-set descriptor', async () => {
+      const manifestText = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet id="1" mimeType="video/mp4">',
+        '      <Representation id="v" bandwidth="1">',
+        '        <SegmentTemplate media="v-$Number$.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '    <AdaptationSet id="2" mimeType="audio/mp4" codecs="ac-4.02.01.00"',
+        '        lang="en">',
+        `      <EssentialProperty schemeIdUri="${preselectionScheme}"`,
+        '          value="1,2" />',
+        '      <Representation id="a" bandwidth="1">',
+        '        <SegmentTemplate media="a-$Number$.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', manifestText);
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      // The AdaptationSet is itself the complete experience of the
+      // Preselection defined by its own descriptor, so it is exposed as-is
+      // rather than dropped as carrying an unrecognized EssentialProperty.
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].audio.codecs).toBe('ac-4.02.01.00');
+      expect(manifest.variants[0].audio.preselection)
+          .toEqual({id: '1', tag: '1'});
+    });
+
+    it('ignores sets only consumable through unsupported Preselections',
+        async () => {
+          // Two audio components in separate AdaptationSets combined by
+          // multi-set Preselections (ISO/IEC 23009-1 Annex G.16), which are
+          // not supported yet.
+          const manifestText = [
+            '<MPD minBufferTime="PT75S">',
+            '  <Period id="1" duration="PT30S">',
+            '    <AdaptationSet id="1" mimeType="video/mp4">',
+            '      <Representation id="v" bandwidth="1">',
+            '        <SegmentTemplate media="v-$Number$.mp4" duration="1" />',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '    <AdaptationSet id="2" mimeType="audio/mp4"',
+            '        codecs="mhm2.0x0C">',
+            `      <EssentialProperty schemeIdUri="${preselectionScheme}" />`,
+            '      <Representation id="a1" bandwidth="1">',
+            '        <SegmentTemplate media="a1-$Number$.mp4" duration="1" />',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '    <AdaptationSet id="3" mimeType="audio/mp4" lang="en"',
+            '        codecs="mhm2.0x0C">',
+            `      <EssentialProperty schemeIdUri="${preselectionScheme}" />`,
+            '      <Representation id="a2" bandwidth="1">',
+            '        <SegmentTemplate media="a2-$Number$.mp4" duration="1" />',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '    <Preselection id="1" tag="1" lang="en"',
+            '        preselectionComponents="2 3" />',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo', manifestText);
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('https://foo', playerInterface);
+
+          // The audio AdaptationSets cannot be consumed on their own and the
+          // multi-set Preselection is not supported, so only video remains.
+          expect(manifest.variants.length).toBe(1);
+          expect(manifest.variants[0].audio).toBe(null);
+          expect(manifest.variants[0].video).toBeTruthy();
+        });
+  });
 });

@@ -205,7 +205,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 ## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
- - Media over QUIC Transport [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/)
+ - Media over QUIC Transport [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/) and [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/) (plus [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/), deprecated and removed in v6)
  - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
@@ -235,6 +235,24 @@ Note: This module is experimental and is only included in the experimental build
 
 [lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dec.js
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
+
+
+## HEVC software fallback
+
+**Only supported on browsers with Media Source Extensions SourceBuffer support
+and WebCodecs**
+
+ - HEVC (H.265) playback on browsers without native HEVC decoding support,
+   such as Firefox or Chrome on Linux (transcoding to H.264 provided by
+   [@hevcjs/shaka-plugin][], must be separately included)
+
+ - Live demo : [hevcjs.dev/demo/shaka.html][]
+
+ - More on [hevc.js][]
+
+[@hevcjs/shaka-plugin]: https://www.npmjs.com/package/@hevcjs/shaka-plugin
+[hevcjs.dev/demo/shaka.html]: https://www.hevcjs.dev/demo/shaka.html
+[hevc.js]: https://www.hevcjs.dev
 
 
 ## DRM support matrix

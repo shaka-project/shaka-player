@@ -920,6 +920,25 @@ describe('VttTextParser', () => {
         /* hls= */ true);
   });
 
+  it('handles timestamp rollover with fragmented MP4 HLS', () => {
+    verifyHelper(
+        [
+          {startTime: 0, endTime: 2, payload: 'Test'},
+        ],
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:4689740251,LOCAL:00:00:00.000\n\n' +
+        '00:00:00.000 --> 00:00:02.000 line:0\n' +
+        'Test',
+        {
+          periodStart: -448733025.0804778,
+          segmentStart: 0,
+          segmentEnd: 4,
+          vttOffset: -448733025.0804778,
+          isMpegTs: false,
+        },
+        /* hls= */ true);
+  });
+
   it('supports global style blocks', () => {
     const textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black';
     verifyHelper(

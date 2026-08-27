@@ -123,6 +123,7 @@ datas
 Decryptor
 Decryptors
 degrad
+demuxed
 discardable
 displayer
 displayers
@@ -209,6 +210,7 @@ cssnano
 hbbtv
 Conax
 cvox
+dolbylaboratories
 expressjs
 Expressplay
 Eyevinn
@@ -223,6 +225,7 @@ Jwplayer
 Kaltura
 Livesim
 moqlivemock
+moqtail
 muxjs
 Nagra
 Playready
@@ -512,6 +515,7 @@ xyzw
 # DASH
 dashif
 fontdownload
+isobmff
 isoff
 querypart
 startnumber
@@ -536,8 +540,10 @@ SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
+gregoire
 moqt
 msf
+msfts
 QUIC
 WEBTRANSPORT
 

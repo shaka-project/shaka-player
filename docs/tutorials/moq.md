@@ -90,6 +90,66 @@ When `player.load()` is called with `'application/msf'`, Shaka:
 > is false in the catalog) is not supported and will throw an error.
 
 
+## Supported Packagings
+
+Each catalog track declares how its media is packaged into MoQT objects, in its
+`packaging` field. A track whose packaging Shaka does not support is skipped,
+and the rest of the catalog still plays.
+
+| `packaging` | Object contains | Spec |
+| --- | --- | --- |
+| `cmaf` | One CMAF chunk | [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/) |
+| `chunk-per-object` | One CMAF chunk | [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/) |
+| `loc` | One frame of a raw bitstream | [draft-ietf-moq-loc](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/) |
+| `m2ts` | A run of whole transport packets | [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/) |
+
+### MPEG-2 Transport Stream (`m2ts`)
+
+Both source packet sizes are supported: 188-octet transport packets and
+192-octet M2TS source packets, whose 4-octet arrival timestamp is discarded
+because it says nothing about presentation.
+
+Two things are worth knowing about this packaging:
+
+- **The track must declare `codec`.** The codec decides which source buffers
+  MediaSource opens, and that happens before the first group has arrived to be
+  inspected, so it cannot be discovered from the media. A track carrying a
+  muxed program lists both codecs, comma separated, exactly like the HLS
+  `CODECS` attribute:
+
+  ```json
+  {
+    "name": "program-1-ts",
+    "packaging": "m2ts",
+    "codec": "avc1.64001f,mp4a.40.2",
+    "m2tsPacketSize": 188,
+    "m2tsPcrPid": 257
+  }
+  ```
+
+  Shaka opens an audio and a video source buffer from that one track and feeds
+  both from its segments.
+
+- **Latency is one Group.** A transport packet carries no timing of its own, a
+  PES packet spans many of them, and an object boundary falls wherever the
+  publisher chose to cut, so a single object cannot be appended on its own. The
+  Group is the smallest unit that can be, and it is only complete once the next
+  one starts. Expect higher latency than `chunk-per-object`, where each object
+  can be appended the moment it arrives.
+
+Declaring `initData` (base64 PAT/PMT packets) is recommended: Shaka prepends it
+to every group, which is what keeps a stream playable when its program
+information does not repeat at the start of each group.
+
+If the publisher signals a PCR discontinuity between two groups, Shaka
+re-anchors the media so that presentation time keeps running forward, and
+tells the transmuxer to start a fresh initialization segment.
+
+> **Note:** `m2ts` needs the transmuxer, which is a separate build target.
+> A custom build must include `+@transmuxer` alongside `+@msf`. The same is
+> true of HLS with transport stream segments.
+
+
 ## MSF Configuration
 
 All MoQ-specific options live under `manifest.msf` in the player configuration.
@@ -209,22 +269,38 @@ Controls which MoQT draft version(s) to negotiate with the server.
 
 | Value | WebTransport protocol strings offered | Description |
 |---|---|---|
-| `shaka.config.MsfVersion.AUTO` | `moqt-16`, `moq-00` | Try draft-16 first, fall back to draft-14 (default). |
-| `shaka.config.MsfVersion.DRAFT_14` |  | Force draft-14 only. |
+| `shaka.config.MsfVersion.AUTO` | `moqt-18`, `moqt-16`, `moq-00` | Offer every supported draft, newest first (default). |
+| `shaka.config.MsfVersion.DRAFT_18` | `moqt-18` | Force draft-18 only. |
 | `shaka.config.MsfVersion.DRAFT_16` | `moqt-16` | Force draft-16 only. |
+| `shaka.config.MsfVersion.DRAFT_14` | `moq-00` | **Deprecated.** Force draft-14 only; removed in v6. |
+
+Draft-14 is deprecated and will be removed in **v6**. Selecting it, whether
+explicitly or because the server chose `moq-00` under `AUTO`, logs a deprecation
+warning. It predates the subprotocol-based version negotiation introduced in
+draft-15 and negotiates in band instead, offering a version list in
+`CLIENT_SETUP`. Move to draft-16 or draft-18 before v6.
+
+Draft-16 and draft-18 are different wire protocols rather than revisions of
+one: draft-17 replaced the variable-length integer encoding, moved the control
+plane from a single bidirectional stream to a pair of unidirectional ones, gave
+each request its own bidirectional stream, and reassigned several message type
+IDs. Shaka keeps a separate implementation of each behind a dialect, selected
+once during negotiation.
 
 ```js
 player.configure({
   manifest: {
     msf: {
-      version: shaka.config.MsfVersion.DRAFT_16,
+      version: shaka.config.MsfVersion.DRAFT_18,
     }
   }
 });
 ```
 
-The negotiated version is determined from the `protocol` property of the
-established WebTransport connection.
+The version is negotiated via the WebTransport subprotocol. Note that Shaka does
+not require the server to echo the subprotocol back: some relays accept the
+offered subprotocol while leaving `WebTransport.protocol` empty, and treating
+that as a failure would break otherwise working connections.
 
 ### `catalogPreprocessor` (function, default: identity)
 
