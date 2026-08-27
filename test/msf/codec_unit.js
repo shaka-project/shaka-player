@@ -47,28 +47,32 @@ filterDescribe('shaka.msf.QuicVarIntCodec', isMSFSupported, () => {
   });
 
   describe('round trip', () => {
+    // These are strings rather than bigints because this list is built when
+    // the file loads, before filterDescribe can skip us on platforms without
+    // BigInt.
     // 0x20000000 through 0x3fffffff sit in the top half of the 4-byte range,
     // where an over-narrow mask on the first byte silently drops bit 29.
     const values = [
-      BigInt(0),
-      BigInt(1),
-      BigInt(0x3f),
-      BigInt(0x40),
-      BigInt(0x3fff),
-      BigInt(0x4000),
-      BigInt(0x1fffffff),
-      BigInt(0x20000000),
-      BigInt(0x2abcdef0),
-      BigInt(0x3fffffff),
-      BigInt(0x40000000),
-      BigInt(Number.MAX_SAFE_INTEGER),
-      BigInt('0x0fffffffffffffff'),
-      BigInt('0x1000000000000000'),
-      BigInt('0x3fffffffffffffff'),
+      '0x0',
+      '0x1',
+      '0x3f',
+      '0x40',
+      '0x3fff',
+      '0x4000',
+      '0x1fffffff',
+      '0x20000000',
+      '0x2abcdef0',
+      '0x3fffffff',
+      '0x40000000',
+      '0x1fffffffffffff',  // Number.MAX_SAFE_INTEGER
+      '0x0fffffffffffffff',
+      '0x1000000000000000',
+      '0x3fffffffffffffff',
     ];
 
-    for (const value of values) {
-      it(`should round trip 0x${value.toString(16)}`, () => {
+    for (const stringValue of values) {
+      it(`should round trip ${stringValue}`, () => {
+        const value = BigInt(stringValue);
         const bytes = encode(value);
         expect(codec.varIntLength(bytes[0])).toBe(bytes.byteLength);
         expect(codec.decodeVarInt(bytes)).toBe(value);

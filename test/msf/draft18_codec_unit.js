@@ -33,23 +33,26 @@ filterDescribe('shaka.msf.draft18.Codec', isMSFSupported, () => {
   }
 
   describe('decodeVarInt', () => {
-    // The example encodings from draft-18 section 1.4.1, table 2.
+    // The example encodings from draft-18 section 1.4.1, table 2.  The
+    // expected values are strings rather than bigints because this list is
+    // built when the file loads, before filterDescribe can skip us on
+    // platforms without BigInt.
     const vectors = [
-      ['25', BigInt(37)],
-      ['80 25', BigInt(37)],
-      ['bb bd', BigInt(15293)],
-      ['ed 7f 3e 7d', BigInt(226442877)],
-      ['fa a1 a0 e4 03 d8', BigInt('2893212287960')],
-      ['fc 89 98 ab c6 6b c0', BigInt('151288809941952')],
-      ['fe fa 31 8f a8 e3 ca 11', BigInt('70423237261249041')],
-      ['ff ff ff ff ff ff ff ff ff', BigInt('18446744073709551615')],
+      ['25', '37'],
+      ['80 25', '37'],
+      ['bb bd', '15293'],
+      ['ed 7f 3e 7d', '226442877'],
+      ['fa a1 a0 e4 03 d8', '2893212287960'],
+      ['fc 89 98 ab c6 6b c0', '151288809941952'],
+      ['fe fa 31 8f a8 e3 ca 11', '70423237261249041'],
+      ['ff ff ff ff ff ff ff ff ff', '18446744073709551615'],
     ];
 
     for (const [hex, expected] of vectors) {
       it(`should decode the specification example 0x${hex}`, () => {
         const encoded = bytes(hex);
         expect(codec.varIntLength(encoded[0])).toBe(encoded.byteLength);
-        expect(codec.decodeVarInt(encoded)).toBe(expected);
+        expect(codec.decodeVarInt(encoded)).toBe(BigInt(expected));
       });
     }
 
@@ -94,30 +97,34 @@ filterDescribe('shaka.msf.draft18.Codec', isMSFSupported, () => {
   });
 
   describe('round trip', () => {
+    // These are strings rather than bigints because this list is built when
+    // the file loads, before filterDescribe can skip us on platforms without
+    // BigInt.
     const values = [
-      BigInt(0),
-      BigInt(1),
-      BigInt(127),
-      BigInt(128),
-      BigInt(16383),
-      BigInt(16384),
-      BigInt(2097151),
-      BigInt(2097152),
-      BigInt(268435455),
-      BigInt(268435456),
-      BigInt('34359738367'),
-      BigInt('34359738368'),
-      BigInt('4398046511103'),
-      BigInt('4398046511104'),
-      BigInt('562949953421311'),
-      BigInt('562949953421312'),
-      BigInt('72057594037927935'),
-      BigInt('72057594037927936'),
-      BigInt('18446744073709551615'),
+      '0',
+      '1',
+      '127',
+      '128',
+      '16383',
+      '16384',
+      '2097151',
+      '2097152',
+      '268435455',
+      '268435456',
+      '34359738367',
+      '34359738368',
+      '4398046511103',
+      '4398046511104',
+      '562949953421311',
+      '562949953421312',
+      '72057594037927935',
+      '72057594037927936',
+      '18446744073709551615',
     ];
 
-    for (const value of values) {
-      it(`should round trip ${value}`, () => {
+    for (const stringValue of values) {
+      it(`should round trip ${stringValue}`, () => {
+        const value = BigInt(stringValue);
         const encoded = encode(value);
         expect(codec.varIntLength(encoded[0])).toBe(encoded.byteLength);
         expect(codec.decodeVarInt(encoded)).toBe(value);
