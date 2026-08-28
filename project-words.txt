@@ -399,6 +399,7 @@ schi
 schm
 scte
 sdtp
+segs
 senc
 sepiff
 sgpd
@@ -462,6 +463,7 @@ txxx
 tyer
 udta
 ufid
+unalignable
 unskippable
 mpdpatch
 urlparam

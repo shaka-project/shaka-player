@@ -281,6 +281,41 @@ describe('Player', () => {
     });
   });
 
+  describe('skip ranges', () => {
+    // Player owns the manifest stream-type guard; add/remove/buffered behavior
+    // lives in SkipRangeController and is covered by its own tests.
+    const unsupportedWarning =
+        'addSkipRange() supports segments mode, VOD only; ignoring';
+
+    it('accepts a range on segments-mode VOD content', async () => {
+      manifest.sequenceMode = false;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(true);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range in sequence mode', async () => {
+      manifest.sequenceMode = true;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range on live content', async () => {
+      manifest.sequenceMode = false;
+      spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+  });
+
   describe('load/unload', () => {
     /** @type {!jasmine.Spy} */
     let checkError;
