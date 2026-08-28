@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.1.21](https://github.com/shaka-project/shaka-player/compare/v5.1.20...v5.1.21) (2026-08-28)
+
+
+### Bug Fixes
+
+* Add support for embedded closed captions and improve timestamp rollover handling in HLS and VTT parsers ([#10425](https://github.com/shaka-project/shaka-player/issues/10425)) ([0445b71](https://github.com/shaka-project/shaka-player/commit/0445b711cb02724aa3d31a1c21a184dd54e55bc5))
+* **Ads:** Send ad tracking events via GET ([#10469](https://github.com/shaka-project/shaka-player/issues/10469)) ([570e454](https://github.com/shaka-project/shaka-player/commit/570e45466c4a431ea95410e75cb6648ae16e2a9c))
+* **DASH:** Live to VOD transition with multi period start not at 0 ([#10480](https://github.com/shaka-project/shaka-player/issues/10480)) ([ef8072d](https://github.com/shaka-project/shaka-player/commit/ef8072d7f62a1446905c3943374848334de21be2))
+* Prevent long buffering on seeks after period transitions ([#10484](https://github.com/shaka-project/shaka-player/issues/10484)) ([efe9fbf](https://github.com/shaka-project/shaka-player/commit/efe9fbfbb0c631578fc2f603a15fda551f725895))
+* **Transmux:** Support audio-only MPEG-TS renditions labeled 'labeled 'audio/mp2t' ([#10473](https://github.com/shaka-project/shaka-player/issues/10473)) ([544b862](https://github.com/shaka-project/shaka-player/commit/544b86235d8b83e869bedaf39af48637feadf56d))
+* **TS:** Fix slice_type parsing in multi-slice H.264 frames ([#10477](https://github.com/shaka-project/shaka-player/issues/10477)) ([3749b68](https://github.com/shaka-project/shaka-player/commit/3749b687a505cc242a88ebc889a5a8699dffb2d5)), closes [#10468](https://github.com/shaka-project/shaka-player/issues/10468)
+* **UI:** Include end boundary when matching last chapter ([#10475](https://github.com/shaka-project/shaka-player/issues/10475)) ([77d78af](https://github.com/shaka-project/shaka-player/commit/77d78af514a0be7f83cc9800b94f349a211d1e10))
+
 ## [5.1.20](https://github.com/shaka-project/shaka-player/compare/v5.1.19...v5.1.20) (2026-08-21)
 
 
