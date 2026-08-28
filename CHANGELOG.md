@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.16.47](https://github.com/shaka-project/shaka-player/compare/v4.16.46...v4.16.47) (2026-08-28)
+
+
+### Bug Fixes
+
+* **DASH:** Live to VOD transition with multi period start not at 0 ([#10480](https://github.com/shaka-project/shaka-player/issues/10480)) ([1a4a6d9](https://github.com/shaka-project/shaka-player/commit/1a4a6d90695c9a6c208d2e64b0f38208e98360b3))
+* Prevent long buffering on seeks after period transitions ([#10484](https://github.com/shaka-project/shaka-player/issues/10484)) ([a3fd472](https://github.com/shaka-project/shaka-player/commit/a3fd47220f1e74e35731f9951de300d567bc7b85))
+* **Transmux:** Support audio-only MPEG-TS renditions labeled 'labeled 'audio/mp2t' ([#10473](https://github.com/shaka-project/shaka-player/issues/10473)) ([09f6f49](https://github.com/shaka-project/shaka-player/commit/09f6f49b36c1867bef7644f705b19a40d6473de4))
+* **TS:** Fix slice_type parsing in multi-slice H.264 frames ([#10477](https://github.com/shaka-project/shaka-player/issues/10477)) ([dc0d183](https://github.com/shaka-project/shaka-player/commit/dc0d1834e6da8e1bf638e0b3000fdd3e06a03467)), closes [#10468](https://github.com/shaka-project/shaka-player/issues/10468)
+
 ## [4.16.46](https://github.com/shaka-project/shaka-player/compare/v4.16.45...v4.16.46) (2026-08-21)
 
 
