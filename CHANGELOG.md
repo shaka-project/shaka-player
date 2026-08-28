@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.2.8](https://github.com/shaka-project/shaka-player/compare/v5.2.7...v5.2.8) (2026-08-28)
+
+
+### Bug Fixes
+
+* Add support for embedded closed captions and improve timestamp rollover handling in HLS and VTT parsers ([#10425](https://github.com/shaka-project/shaka-player/issues/10425)) ([1867254](https://github.com/shaka-project/shaka-player/commit/186725406b6a23d808a9f19d79142207f0073136))
+* **Ads:** Send ad tracking events via GET ([#10469](https://github.com/shaka-project/shaka-player/issues/10469)) ([690d759](https://github.com/shaka-project/shaka-player/commit/690d75937859c1dda686b987feabfcfad6905443))
+* **DASH:** Live to VOD transition with multi period start not at 0 ([#10480](https://github.com/shaka-project/shaka-player/issues/10480)) ([e55f892](https://github.com/shaka-project/shaka-player/commit/e55f89288ccd159a224a45e1828b80cc4f29ca22))
+* Prevent long buffering on seeks after period transitions ([#10484](https://github.com/shaka-project/shaka-player/issues/10484)) ([ca837ec](https://github.com/shaka-project/shaka-player/commit/ca837eccfe44d222137ac0410d2651199f8d7763))
+* **Transmux:** Support audio-only MPEG-TS renditions labeled 'labeled 'audio/mp2t' ([#10473](https://github.com/shaka-project/shaka-player/issues/10473)) ([4253dd1](https://github.com/shaka-project/shaka-player/commit/4253dd1aa9e80ac0d7b3a98304634073dc321fe4))
+* **TS:** Fix slice_type parsing in multi-slice H.264 frames ([#10477](https://github.com/shaka-project/shaka-player/issues/10477)) ([2cea4bf](https://github.com/shaka-project/shaka-player/commit/2cea4bf5f47cb252f77ab5286b77cef3cea48e32)), closes [#10468](https://github.com/shaka-project/shaka-player/issues/10468)
+* **UI:** Include end boundary when matching last chapter ([#10475](https://github.com/shaka-project/shaka-player/issues/10475)) ([650ac3a](https://github.com/shaka-project/shaka-player/commit/650ac3a6126792baab5689033b0b4b486e043d94))
+
 ## [5.2.7](https://github.com/shaka-project/shaka-player/compare/v5.2.6...v5.2.7) (2026-08-21)
 
 
