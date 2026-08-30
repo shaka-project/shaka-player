@@ -180,6 +180,7 @@ unpadding
 unregisters
 unstore
 unviewed
+varint
 vint
 vints
 xywh
