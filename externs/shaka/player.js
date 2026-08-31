@@ -3384,7 +3384,8 @@ shaka.extern.PlayerConfiguration;
  * @typedef {{
  *   preloadNextUrlWindow: number,
  *   preloadPrevItem: boolean,
- *   repeatMode: shaka.config.RepeatMode
+ *   repeatMode: shaka.config.RepeatMode,
+ *   autoPlayNext: boolean,
  * }}
  *
  * @description
@@ -3402,6 +3403,8 @@ shaka.extern.PlayerConfiguration;
  *   Controls behavior of the queue when all items have been played.
  *   <br>
  *   Defaults to {@link shaka.config.RepeatMode#OFF}.
+ * @property {boolean} autoPlayNext
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.QueueConfiguration;
