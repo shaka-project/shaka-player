@@ -107,6 +107,96 @@ describe('LocTransmuxer', () => {
     return mdatOf(result.data);
   }
 
+  describe('decoder config cache', () => {
+    /**
+     * @param {number} id
+     * @return {shaka.extern.Stream}
+     */
+    function videoStream(id) {
+      return /** @type {shaka.extern.Stream} */ ({
+        id,
+        type: ContentType.VIDEO,
+        codecs: 'avc3.4d401f',
+        mimeType: 'moq/loc',
+        width: 1920,
+        height: 1080,
+        language: 'und',
+      });
+    }
+
+    // A length-prefixed non-IDR slice: no parameter sets, so it can never
+    // refresh the cache on its own.  This is what the first frames after a
+    // mid-GOP adaptation look like.
+    const nonKeyFrame = new Uint8Array([0, 0, 0, 3, 0x41, 0x9a, 0x02]);
+
+    /**
+     * The cache is the transmuxer's own state, and the only way to observe
+     * which rendition it describes.  Stands in for a key frame having
+     * populated it.
+     *
+     * @suppress {visibility}
+     */
+    function primeAvcInfo() {
+      transmuxer.avcInfo_ = {
+        videoConfig: new Uint8Array([1]),
+        hSpacing: 1,
+        vSpacing: 1,
+        width: 1920,
+        height: 1080,
+      };
+    }
+
+    /**
+     * @return {boolean}
+     * @suppress {visibility}
+     */
+    function hasAvcInfo() {
+      return transmuxer.avcInfo_ != null;
+    }
+
+    /**
+     * @param {shaka.extern.Stream} stream
+     * @return {!Promise}
+     */
+    function transmuxVideo(stream) {
+      return transmuxer.transmux(nonKeyFrame, stream, makeReference(),
+          /* duration= */ 1 / 25, ContentType.VIDEO);
+    }
+
+    it('keeps the cache while the rendition is unchanged', async () => {
+      const stream = videoStream(1);
+      await transmuxVideo(stream);
+
+      primeAvcInfo();
+      await transmuxVideo(stream);
+
+      expect(hasAvcInfo()).toBe(true);
+    });
+
+    it('drops the cache when the rendition changes', async () => {
+      // MediaSourceEngine keeps one transmuxer per content type and every LOC
+      // rendition normalises to the same base codec, so an adaptation reuses
+      // this instance with no changeType().  A switch lands mid-GOP, so the
+      // first frames of the new rendition cannot refresh the cache — and the
+      // initialization segment would describe the previous rendition.
+      await transmuxVideo(videoStream(1));
+      primeAvcInfo();
+
+      await transmuxVideo(videoStream(2));
+
+      expect(hasAvcInfo()).toBe(false);
+    });
+
+    it('emits nothing until the new rendition has a key frame', async () => {
+      await transmuxVideo(videoStream(1));
+      primeAvcInfo();
+
+      const result = /** @type {!shaka.extern.TransmuxerOutput} */ (
+        await transmuxVideo(videoStream(2)));
+      expect(result.data.byteLength).toBe(0);
+    });
+  });
+
   describe('AAC', () => {
     // A plausible stereo AAC-LC raw_data_block: starts with a CPE element,
     // so its first byte is 0x21 and it is NOT an ADTS frame.
