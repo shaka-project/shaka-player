@@ -892,6 +892,12 @@ shaka.extern.IUIRangeElement = class {
 
   /** @param {number} value */
   changeTo(value) {}
+
+  /**
+   * Ends an in-progress mouse interaction, if there is one, so that other
+   * controls can take over from a drag that is still in progress.
+   */
+  endMouseInteraction() {}
 };
 
 /**
