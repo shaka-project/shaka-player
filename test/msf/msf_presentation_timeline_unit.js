@@ -34,44 +34,45 @@ filterDescribe('shaka.msf.MSFPresentationTimeline', isMSFSupported, () => {
     timeline.notifyMaxSegmentDuration(duration);
   }
 
-  it('holds the live edge behind the furthest-ahead stream', () => {
-    // Audio published ahead of video, which is the normal case: the edge must
-    // not sit on top of the leading track or the trailing one can never be
-    // fetched.
+  it('puts the live edge on the newest segment end', () => {
+    // The edge must not be held back: getSeekRangeEnd() derives from it, so
+    // any margin here is latency the viewer pays, and it can drop the range
+    // end below the earliest known segment and invert the seek range.
     notifySegment(1000, 0.021);
 
-    expect(timeline.getSegmentAvailabilityEnd())
-        .toBeCloseTo(1000.021 - 0.5, 6);
+    expect(timeline.getSegmentAvailabilityEnd()).toBeCloseTo(1000.021, 6);
   });
 
-  it('keeps a window wide enough for a track arriving late', () => {
+  it('never inverts the seek range', () => {
+    // Right after load only one segment is known, so the start is floored at
+    // that segment's time.  If the end were pulled back behind it, seekRange()
+    // would report a negative width.
     notifySegment(1000, 0.021);
+    timeline.setSegmentAvailabilityDuration(1.5);
+
+    expect(timeline.getSeekRangeEnd())
+        .toBeGreaterThanOrEqual(timeline.getSeekRangeStart());
+  });
+
+  it('takes its window width from the availability duration', () => {
+    // The parser floors this so the window can hold the playhead and the
+    // trailing track; the timeline must not reimplement a second width.
+    notifySegment(1000, 0.021);
+    timeline.setSegmentAvailabilityDuration(1.5);
 
     const start = timeline.getSegmentAvailabilityStart();
     const end = timeline.getSegmentAvailabilityEnd();
-    // One segment of headroom would be 21ms; a track that lands a few hundred
-    // milliseconds later needs more than that.
-    expect(end - start).toBeGreaterThanOrEqual(0.5);
-  });
-
-  it('lets a long segment duration widen the window further', () => {
-    notifySegment(1000, 4);
-
-    const start = timeline.getSegmentAvailabilityStart();
-    const end = timeline.getSegmentAvailabilityEnd();
-    expect(end - start).toBeCloseTo(4, 6);
+    expect(end - start).toBeCloseTo(1.5, 6);
   });
 
   it('never reports a negative availability end', () => {
-    notifySegment(0.1, 0.021);
+    timeline.setSegmentAvailabilityDuration(1.5);
     expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
   });
 
   it('defers to the base class when static', () => {
     timeline.setStatic(true);
     notifySegment(1000, 0.021);
-    // The base class computes a static range from the duration, so the live
-    // margin must not be applied.
     expect(timeline.getSegmentAvailabilityStart()).toBe(0);
   });
 });
