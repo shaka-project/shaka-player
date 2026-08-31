@@ -172,6 +172,247 @@ describe('LOCParser', () => {
     });
   });
 
+  describe('video config', () => {
+    const SPS = new Uint8Array([0x67, 0x42, 0xc0, 0x1e]);
+    const PPS = new Uint8Array([0x68, 0xce, 0x3c, 0x80]);
+    const VPS = new Uint8Array([0x40, 0x01, 0x0c, 0x01]);
+    const slice = new Uint8Array([0, 0, 0, 2, 0x65, 0x88]);
+
+    /**
+     * Builds an AVCDecoderConfigurationRecord (ISO/IEC 14496-15 §5.3.3.1).
+     *
+     * @param {number=} version
+     * @return {!Uint8Array}
+     */
+    function avcc(version) {
+      return shaka.util.Uint8ArrayUtils.concat(
+          new Uint8Array([
+            version === undefined ? 1 : version,
+            0x42, 0xc0, 0x1e,
+            0xff, // lengthSizeMinusOne
+            0xe1, // numOfSPS = 1
+            0x00, SPS.byteLength,
+          ]),
+          SPS,
+          new Uint8Array([0x01, 0x00, PPS.byteLength]),
+          PPS);
+    }
+
+    /**
+     * Builds an HEVCDecoderConfigurationRecord (ISO/IEC 14496-15 §8.3.3.1):
+     * 22 bytes of fixed fields, numOfArrays, then one array per NAL type.
+     *
+     * @return {!Uint8Array}
+     */
+    function hvcc() {
+      const fixed = new Uint8Array(22);
+      fixed[0] = 1;
+      /** @type {!Array<!Uint8Array>} */
+      const arrays = [];
+      // NAL_unit_type 32 = VPS, 33 = SPS, 34 = PPS.
+      const entries = [[32, VPS], [33, SPS], [34, PPS]];
+      for (const [type, nalu] of entries) {
+        arrays.push(shaka.util.Uint8ArrayUtils.concat(
+            new Uint8Array([
+              0x80 | type, // array_completeness + NAL_unit_type
+              0x00, 0x01, // numNalus
+              0x00, nalu.byteLength,
+            ]),
+            nalu));
+      }
+      return shaka.util.Uint8ArrayUtils.concat(
+          fixed, new Uint8Array([arrays.length]), ...arrays);
+    }
+
+    /**
+     * @param {!Array<!Uint8Array>} paramSets
+     * @return {!Uint8Array}
+     */
+    function expectedPayload(paramSets) {
+      /** @type {!Array<!Uint8Array>} */
+      const chunks = [];
+      for (const ps of paramSets) {
+        chunks.push(new Uint8Array([0, 0, 0, ps.byteLength]));
+        chunks.push(ps);
+      }
+      chunks.push(slice);
+      return shaka.util.Uint8ArrayUtils.concat(...chunks);
+    }
+
+    it('restores AVC parameter sets stripped from the bitstream', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: avcc()},
+        {type: 0x10, value: 1000000},
+      ], slice));
+      expect(result.payload).toEqual(expectedPayload([SPS, PPS]));
+      expect(result.startTime).toBeCloseTo(1, 6);
+    });
+
+    it('restores HEVC parameter sets stripped from the bitstream', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'hevc');
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: hvcc()},
+        {type: 0x10, value: 1000000},
+      ], slice));
+      expect(result.payload).toEqual(expectedPayload([VPS, SPS, PPS]));
+    });
+
+    it('leaves the payload alone when no config is carried', () => {
+      // moqlivemock and any publisher using LOC-04 2.1.1 send parameter sets
+      // in the bitstream, so this is the common case.
+      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const result = parser.parse(
+          moqObject([{type: 0x10, value: 1000000}], slice));
+      expect(result.payload).toEqual(slice);
+    });
+
+    it('leaves the payload alone for a codec with no record layout', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'aac');
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: avcc()},
+        {type: 0x10, value: 1000000},
+      ], slice));
+      expect(result.payload).toEqual(slice);
+    });
+
+    it('leaves the payload alone when the record version is unknown', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: avcc(/* version= */ 2)},
+        {type: 0x10, value: 1000000},
+      ], slice));
+      expect(result.payload).toEqual(slice);
+    });
+
+    it('leaves the payload alone when the record is truncated', () => {
+      // A bad config must degrade to the previous behaviour, never corrupt
+      // the bitstream.
+      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const short = avcc().subarray(0, 9);
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: short},
+        {type: 0x10, value: 1000000},
+      ], slice));
+      expect(result.payload).toEqual(slice);
+    });
+  });
+
+  describe('reference timeline', () => {
+    /**
+     * @param {!shaka.msf.LOCParser} parser
+     * @param {!Array<number>} timestampsUs
+     * @return {!Array<{startTime: number, duration: number}>}
+     */
+    function parseAll(parser, timestampsUs) {
+      return timestampsUs.map((ts) => parser.parse(
+          moqObject([{type: 0x10, value: Math.round(ts)}])));
+    }
+
+    /**
+     * @param {!Array<{startTime: number, duration: number}>} refs
+     * @return {number}
+     */
+    function discontinuities(refs) {
+      let count = 0;
+      for (let i = 1; i < refs.length; i++) {
+        const prevEnd = refs[i - 1].startTime + refs[i - 1].duration;
+        if (Math.abs(refs[i].startTime - prevEnd) > 1e-9) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    it('closes the gaps left by an exact but inexpressible clock', () => {
+      // A frame of 1024/48000 s is not a whole number of microseconds, so
+      // even a publisher whose timestamps are exact leaves sub-microsecond
+      // gaps — and SegmentIndex.find() misses a hole of any width.
+      const base = 1787902100000000;
+      const timestamps = [];
+      for (let i = 0; i < 60; i++) {
+        timestamps.push(Math.floor(base + i * 1024 * 1e6 / 48000));
+      }
+
+      const parser = new shaka.msf.LOCParser(FRAME);
+      expect(discontinuities(parseAll(parser, timestamps))).toBe(0);
+    });
+
+    it('produces a contiguous timeline from a jittery clock', () => {
+      const parser = new shaka.msf.LOCParser(FRAME);
+      const steps = [20400, 20300, 20500, 20200, 20400, 20500, 20300, 20400];
+      const timestamps = [];
+      let ts = 1787902100000000;
+      for (const step of steps) {
+        timestamps.push(ts);
+        ts += step;
+      }
+      expect(discontinuities(parseAll(parser, timestamps))).toBe(0);
+    });
+
+    it('absorbs jitter wider than one frame', () => {
+      // Jitter is not bounded by a fraction of a frame, so the tolerance is
+      // floored in the time domain rather than counted in frames.
+      const parser = new shaka.msf.LOCParser(FRAME);
+      const steps = [30500, 20400, 30800, 20300, 30500, 20400];
+      const timestamps = [];
+      let ts = 1787902100000000;
+      for (const step of steps) {
+        timestamps.push(ts);
+        ts += step;
+      }
+      expect(discontinuities(parseAll(parser, timestamps))).toBe(0);
+    });
+
+    it('resyncs on a real discontinuity instead of snapping', () => {
+      const parser = new shaka.msf.LOCParser(FRAME);
+      const base = 1787902100000000;
+      const first = parser.parse(moqObject([{type: 0x10, value: base}]));
+      const jumped = base + 5000000;
+      const after = parser.parse(moqObject([{type: 0x10, value: jumped}]));
+
+      expect(after.startTime).toBeCloseTo(jumped / 1e6, 6);
+      expect(after.startTime).toBeGreaterThan(first.startTime + 1);
+    });
+
+    it('stops snapping just past the tolerance', () => {
+      const parser = new shaka.msf.LOCParser(FRAME);
+      const base = 1787902100000000;
+      parser.parse(moqObject([{type: 0x10, value: base}]));
+
+      // The tolerance is the time-domain floor here, because two frames of
+      // 48 kHz AAC is 42.7 ms.
+      const toleranceUs = 0.06 * 1e6;
+      const farUs = Math.round(base + FRAME * 1e6 + toleranceUs + 1000);
+      const far = parser.parse(moqObject([{type: 0x10, value: farUs}]));
+      expect(far.startTime).toBeCloseTo(farUs / 1e6, 6);
+    });
+
+    it('uses the frame-based tolerance for long frames', () => {
+      // Two frames of 4 fps video is 500 ms, well past the 60 ms floor, so a
+      // 400 ms excursion must still be treated as jitter.
+      const longFrame = 0.25;
+      const parser = new shaka.msf.LOCParser(longFrame);
+      const base = 1787902100000000;
+      parser.parse(moqObject([{type: 0x10, value: base}]));
+
+      const nextUs = Math.round(base + longFrame * 1e6 + 400000);
+      const next = parser.parse(moqObject([{type: 0x10, value: nextUs}]));
+      expect(next.startTime).toBeCloseTo(base / 1e6 + longFrame, 6);
+    });
+
+    it('snaps the group-number fallback too', () => {
+      // A track with no Timestamp still has to produce a usable timeline.
+      const parser = new shaka.msf.LOCParser(FRAME);
+      const refs = [];
+      for (let group = 0; group < 5; group++) {
+        refs.push(parser.parse(
+            moqObject([], undefined, /* group= */ group)));
+      }
+      expect(discontinuities(refs)).toBe(0);
+    });
+  });
+
   describe('malformed properties', () => {
     it('falls back to the group number when the block is truncated', () => {
       const obj = moqObject([{type: 0x10, value: 1000000}],
