@@ -129,6 +129,7 @@ displayer
 displayers
 ewma
 externed
+extradata
 gendep
 gendeps
 golomb
@@ -163,6 +164,7 @@ statelessly
 stringifiers
 styleable
 syncsafe
+syncword
 testcheckstamp
 textproto
 transmux
