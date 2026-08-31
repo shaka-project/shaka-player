@@ -529,6 +529,10 @@ shakaDemo.Config = class {
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Interstitial cooldown',
+            'ads.interstitialCooldown',
+            /* canBeDecimal= */ true,
             /* canBeZero= */ true);
   }
 
