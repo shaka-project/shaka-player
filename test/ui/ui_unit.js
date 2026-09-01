@@ -2166,6 +2166,159 @@ describe('UI', () => {
         expect(thumbnailContainer.style.visibility).not.toBe('visible');
       });
     });
+
+    describe('keyboard during a seek bar drag', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLInputElement} */
+      let seekBar;
+      /** @type {boolean} */
+      let paused;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        // The element has no source, so drive its playback state by hand.
+        paused = true;
+        Object.defineProperty(video, 'paused', {
+          get: () => paused,
+          configurable: true,
+        });
+        spyOn(video, 'play').and.callFake(() => {
+          paused = false;
+        });
+        spyOn(video, 'pause').and.callFake(() => {
+          paused = true;
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = /** @type {!HTMLInputElement} */ (
+          UiUtils.getElementByClassName(videoContainer, 'shaka-seek-bar'));
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        // The bar is built disabled and is only enabled when the controls go
+        // from hidden to visible, which never happens here because they are
+        // already visible.  A disabled input cannot take focus.
+        seekBar.disabled = false;
+        seekBar.focus();
+      });
+
+      /**
+       * @param {number} fraction
+       * @return {number} the clientX for that point of the bar
+       */
+      function positionOfBar(fraction) {
+        const rect = seekBar.getBoundingClientRect();
+        return rect.left + (rect.width * fraction);
+      }
+
+      /**
+       * @param {string} type
+       * @param {number} clientX
+       * @param {!EventTarget=} target
+       */
+      function mouseEvent(type, clientX, target) {
+        (target || seekBar).dispatchEvent(new MouseEvent(type, {
+          clientX,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      it('seeks from where the drag left the bar', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+        expect(controls.isSeeking()).toBe(true);
+
+        pressKey('ArrowRight');
+
+        const keyboardSeekDistance =
+            controls.getConfig().keyboardSeekDistance;
+        expect(video.currentTime).toBe(dragTime + keyboardSeekDistance);
+        // The keyboard took the interaction over from the pointer.
+        expect(controls.isSeeking()).toBe(false);
+      });
+
+      it('is not undone when the drag ends', async () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+
+        pressKey('ArrowRight');
+        const timeAfterKey = video.currentTime;
+
+        // Moving and releasing the mouse somewhere else no longer drives the
+        // bar, so the keyboard seek stands.
+        mouseEvent('mousemove', positionOfBar(0.75), document);
+        mouseEvent('mouseup', positionOfBar(0.75), document);
+        await Util.delay(0.3);
+
+        expect(video.currentTime).toBe(timeAfterKey);
+      });
+
+      it('pauses when play/pause is pressed during a drag', async () => {
+        video.play();
+        expect(video.paused).toBe(false);
+
+        // Scrubbing pauses the video until the drag is over.
+        mouseEvent('mousedown', positionOfBar(0.25));
+        expect(video.paused).toBe(true);
+
+        pressKey(' ');
+
+        // The toggle is not swallowed by the resume at the end of the drag.
+        expect(controls.isSeeking()).toBe(false);
+        expect(video.paused).toBe(true);
+
+        mouseEvent('mouseup', positionOfBar(0.25), document);
+        await Util.delay(0.3);
+        expect(video.paused).toBe(true);
+      });
+
+      it('does not end the drag for unrelated shortcuts', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+
+        // The test video element is created muted.
+        expect(video.muted).toBe(true);
+        pressKey(controls.getConfig().shortcuts.mute);
+
+        expect(video.muted).toBe(false);
+        // Muting does not interrupt the drag.
+        expect(controls.isSeeking()).toBe(true);
+        expect(parseFloat(seekBar.value)).toBe(dragTime);
+      });
+    });
   });
 
 

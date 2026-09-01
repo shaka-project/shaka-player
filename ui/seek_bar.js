@@ -394,6 +394,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.controls.setSeeking(false);
 
     if (this.wasPlaying_) {
+      // The caller may pause the video right after this, e.g. when a play/pause
+      // shortcut ends the interaction, which rejects this promise.  That is not
+      // an error we need to report.
       this.video.play();
     }
 
