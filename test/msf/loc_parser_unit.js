@@ -9,6 +9,19 @@ describe('LOCParser', () => {
   const FRAME = 1024 / 48000;
 
   /**
+   * @param {number} frameDuration
+   * @param {string=} normalizedCodec
+   * @param {shaka.extern.MsfCodec=} codec Defaults to the encoding every
+   *   draft up to 16 used.
+   * @return {!shaka.msf.LOCParser}
+   */
+  function locParser(frameDuration, normalizedCodec, codec) {
+    return new shaka.msf.LOCParser(
+        codec || new shaka.msf.QuicVarIntCodec(), frameDuration,
+        normalizedCodec);
+  }
+
+  /**
    * Encodes a QUIC variable-length integer (RFC 9000 §16).
    *
    * @param {bigint} value
@@ -92,7 +105,7 @@ describe('LOCParser', () => {
     it('delta decodes the type of every property after the first', () => {
       // Timestamp (0x10) then Timescale (0x08) cannot both be expressed by an
       // absolute reader: written in ascending order the deltas are 8 and 8.
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([
         {type: 0x08, value: 1000},
         {type: 0x10, value: 5000},
@@ -103,7 +116,7 @@ describe('LOCParser', () => {
     });
 
     it('reads a lone property as an absolute type', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([{type: 0x10, value: 2500000}]));
       expect(result.startTime).toBeCloseTo(2.5, 6);
     });
@@ -111,7 +124,7 @@ describe('LOCParser', () => {
     it('does not bind a delta to an unrelated property', () => {
       // Read absolutely, the second pair's delta of 8 would be taken as
       // Timescale (0x08) and the timeline would be out by a factor of 125000.
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([
         {type: 0x08, value: 90000},
         {type: 0x10, value: 90000},
@@ -120,22 +133,90 @@ describe('LOCParser', () => {
     });
   });
 
+  describe('variable-length integer encoding', () => {
+    /**
+     * Encodes a draft-18 variable-length integer, whose length is the count of
+     * leading 1 bits of the first byte plus one (draft-18 section 1.4.1).
+     *
+     * @param {bigint} value
+     * @return {!Uint8Array}
+     */
+    function varint18(value) {
+      let length = 1;
+      while (length < 9 && value >= (BigInt(1) << BigInt(7 * length))) {
+        length++;
+      }
+      const bytes = new Uint8Array(length);
+      for (let i = length - 1; i >= 0; i--) {
+        bytes[i] = Number((value >> BigInt(8 * (length - 1 - i))) &
+            BigInt(0xff));
+      }
+      if (length == 9) {
+        return shaka.util.Uint8ArrayUtils.concat(
+            new Uint8Array([0xff]), bytes.subarray(1));
+      }
+      bytes[0] |= (0xff << (9 - length)) & 0xff;
+      return bytes;
+    }
+
+    /**
+     * @param {!Uint8Array} extensions
+     * @return {!shaka.msf.Utils.MOQObject}
+     */
+    function objectWith(extensions) {
+      const obj = moqObject([]);
+      obj.extensions = extensions;
+      return obj;
+    }
+
+    /** A Timestamp property holding wall-clock microseconds. */
+    const timestampUs = BigInt(1788270271000000);
+    const block18 = shaka.util.Uint8ArrayUtils.concat(
+        varint18(BigInt(0x10)), varint18(timestampUs));
+
+    it('reads draft-18 properties with the draft-18 codec', () => {
+      const parser =
+          locParser(FRAME, undefined, new shaka.msf.draft18.Codec());
+      const result = parser.parse(objectWith(block18));
+      expect(result.startTime).toBeCloseTo(1788270271, 3);
+    });
+
+    it('misreads draft-18 properties with the draft-16 codec', () => {
+      // Not a wish, a warning: both codecs decode these bytes without
+      // complaint, so nothing but the negotiated draft says which is right.
+      // The QUIC reader takes 0xfe as a two-bit length tag of 0b11 and keeps
+      // 62 bits of a byte that is all prefix, and the timeline lands three
+      // orders of magnitude away.
+      const parser = locParser(FRAME);
+      const result = parser.parse(objectWith(block18));
+      expect(result.startTime).not.toBeCloseTo(1788270271, 3);
+    });
+
+    it('reads draft-16 properties with the draft-16 codec', () => {
+      const block16 = shaka.util.Uint8ArrayUtils.concat(
+          varint(BigInt(0x10)), varint(timestampUs));
+      const parser = locParser(FRAME);
+      const result = parser.parse(objectWith(block16));
+      expect(result.startTime).toBeCloseTo(1788270271, 3);
+    });
+  });
+
   describe('timestamp property ID', () => {
     it('reads the draft-04 ID (0x10)', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([{type: 0x10, value: 1500000}]));
       expect(result.startTime).toBeCloseTo(1.5, 6);
     });
 
     it('reads the legacy draft-02 ID (0x06)', () => {
       // moqlivemock publishes this one.
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([{type: 0x06, value: 1500000}]));
       expect(result.startTime).toBeCloseTo(1.5, 6);
     });
 
     it('prefers the draft-04 ID when both are present', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(moqObject([
         {type: 0x06, value: 1000000},
         {type: 0x10, value: 3000000},
@@ -144,7 +225,7 @@ describe('LOCParser', () => {
     });
 
     it('falls back to the group number when neither is present', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(
           moqObject([{type: 0x0c, value: 42}], undefined, /* group= */ 7));
       expect(result.startTime).toBeCloseTo(7 * FRAME, 9);
@@ -157,7 +238,7 @@ describe('LOCParser', () => {
       // private-properties strip read as a count of 32/33 and tried to parse
       // as key-value pairs.
       const aac = new Uint8Array([0x21, 0x11, 0x45, 0x00, 0x14, 0x50]);
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(
           moqObject([{type: 0x10, value: 1000000}], aac));
       expect(result.payload).toEqual(aac);
@@ -165,7 +246,7 @@ describe('LOCParser', () => {
 
     it('passes a length-prefixed NALU payload through untouched', () => {
       const avc = new Uint8Array([0, 0, 0, 2, 0x65, 0x88]);
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(
           moqObject([{type: 0x10, value: 1000000}], avc));
       expect(result.payload).toEqual(avc);
@@ -240,7 +321,7 @@ describe('LOCParser', () => {
     }
 
     it('restores AVC parameter sets stripped from the bitstream', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const parser = locParser(FRAME, 'avc');
       const result = parser.parse(moqObject([
         {type: 0x0d, value: avcc()},
         {type: 0x10, value: 1000000},
@@ -250,7 +331,7 @@ describe('LOCParser', () => {
     });
 
     it('restores HEVC parameter sets stripped from the bitstream', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'hevc');
+      const parser = locParser(FRAME, 'hevc');
       const result = parser.parse(moqObject([
         {type: 0x0d, value: hvcc()},
         {type: 0x10, value: 1000000},
@@ -261,14 +342,14 @@ describe('LOCParser', () => {
     it('leaves the payload alone when no config is carried', () => {
       // moqlivemock and any publisher using LOC-04 2.1.1 send parameter sets
       // in the bitstream, so this is the common case.
-      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const parser = locParser(FRAME, 'avc');
       const result = parser.parse(
           moqObject([{type: 0x10, value: 1000000}], slice));
       expect(result.payload).toEqual(slice);
     });
 
     it('leaves the payload alone for a codec with no record layout', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'aac');
+      const parser = locParser(FRAME, 'aac');
       const result = parser.parse(moqObject([
         {type: 0x0d, value: avcc()},
         {type: 0x10, value: 1000000},
@@ -277,7 +358,7 @@ describe('LOCParser', () => {
     });
 
     it('leaves the payload alone when the record version is unknown', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const parser = locParser(FRAME, 'avc');
       const result = parser.parse(moqObject([
         {type: 0x0d, value: avcc(/* version= */ 2)},
         {type: 0x10, value: 1000000},
@@ -288,7 +369,7 @@ describe('LOCParser', () => {
     it('leaves the payload alone when the record is truncated', () => {
       // A bad config must degrade to the previous behaviour, never corrupt
       // the bitstream.
-      const parser = new shaka.msf.LOCParser(FRAME, 'avc');
+      const parser = locParser(FRAME, 'avc');
       const short = avcc().subarray(0, 9);
       const result = parser.parse(moqObject([
         {type: 0x0d, value: short},
@@ -334,12 +415,12 @@ describe('LOCParser', () => {
         timestamps.push(Math.floor(base + i * 1024 * 1e6 / 48000));
       }
 
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       expect(discontinuities(parseAll(parser, timestamps))).toBe(0);
     });
 
     it('produces a contiguous timeline from a jittery clock', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const steps = [20400, 20300, 20500, 20200, 20400, 20500, 20300, 20400];
       const timestamps = [];
       let ts = 1787902100000000;
@@ -353,7 +434,7 @@ describe('LOCParser', () => {
     it('absorbs jitter wider than one frame', () => {
       // Jitter is not bounded by a fraction of a frame, so the tolerance is
       // floored in the time domain rather than counted in frames.
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const steps = [30500, 20400, 30800, 20300, 30500, 20400];
       const timestamps = [];
       let ts = 1787902100000000;
@@ -365,7 +446,7 @@ describe('LOCParser', () => {
     });
 
     it('resyncs on a real discontinuity instead of snapping', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const base = 1787902100000000;
       const first = parser.parse(moqObject([{type: 0x10, value: base}]));
       const jumped = base + 5000000;
@@ -376,7 +457,7 @@ describe('LOCParser', () => {
     });
 
     it('stops snapping just past the tolerance', () => {
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const base = 1787902100000000;
       parser.parse(moqObject([{type: 0x10, value: base}]));
 
@@ -392,7 +473,7 @@ describe('LOCParser', () => {
       // Two frames of 4 fps video is 500 ms, well past the 60 ms floor, so a
       // 400 ms excursion must still be treated as jitter.
       const longFrame = 0.25;
-      const parser = new shaka.msf.LOCParser(longFrame);
+      const parser = locParser(longFrame);
       const base = 1787902100000000;
       parser.parse(moqObject([{type: 0x10, value: base}]));
 
@@ -403,7 +484,7 @@ describe('LOCParser', () => {
 
     it('snaps the group-number fallback too', () => {
       // A track with no Timestamp still has to produce a usable timeline.
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const refs = [];
       for (let group = 0; group < 5; group++) {
         refs.push(parser.parse(
@@ -419,7 +500,7 @@ describe('LOCParser', () => {
           undefined, /* group= */ 3);
       // Cut the value short so readVi64At_ underflows.
       obj.extensions = obj.extensions.subarray(0, 1);
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(obj);
       expect(result.startTime).toBeCloseTo(3 * FRAME, 9);
     });
@@ -432,7 +513,7 @@ describe('LOCParser', () => {
       const obj = moqObject([]);
       // Drop the trailing byte-string value, keeping the Timestamp intact.
       obj.extensions = full.subarray(0, full.byteLength - 2);
-      const parser = new shaka.msf.LOCParser(FRAME);
+      const parser = locParser(FRAME);
       const result = parser.parse(obj);
       expect(result.startTime).toBeCloseTo(1, 6);
     });
