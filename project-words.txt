@@ -332,6 +332,7 @@ imsc
 inband
 isom
 isrc
+itut
 keyids
 keysystem
 latm
