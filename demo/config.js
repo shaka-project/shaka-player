@@ -554,7 +554,9 @@ shakaDemo.Config = class {
         .addSelectInput_('Repeat mode',
             'queue.repeatMode',
             repeatModeOptions,
-            repeatModeOptionNames);
+            repeatModeOptionNames)
+        .addBoolInput_('Auto play next item',
+            'queue.autoPlayNext');
   }
 
   /** @private */

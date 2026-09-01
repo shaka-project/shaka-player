@@ -99,6 +99,7 @@ goog.require('shaka.ui.PlayButton');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.AudioLanguageSelection');
+goog.require('shaka.ui.AutoPlayNextButton');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.AdStatisticsButton');
 goog.require('shaka.ui.CastButton');

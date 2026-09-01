@@ -111,3 +111,91 @@
 .shaka-forward-rewind-container-icon {
   font-size: 32px;
 }
+
+/* The autoplay toggle is drawn as a switch rather than an icon, because it
+ * reflects a persistent setting instead of an action.  The glyph inside the
+ * knob shows what happens when the current item ends: play the next one, or
+ * stop. */
+.autoplay-switch-size(@scale) {
+  .shaka-autoplay-switch {
+    width: calc(var(--shaka-icon-size) * @scale * 0.75);
+    height: calc(var(--shaka-icon-size) * @scale * 0.42);
+    padding: calc(var(--shaka-icon-size) * @scale * 0.04);
+    border-radius: calc(var(--shaka-icon-size) * @scale * 0.21);
+  }
+
+  .shaka-autoplay-knob {
+    width: calc(var(--shaka-icon-size) * @scale * 0.34);
+    height: calc(var(--shaka-icon-size) * @scale * 0.34);
+
+    .shaka-ui-icon {
+      font-size: calc(var(--shaka-icon-size) * @scale * 0.2);
+    }
+  }
+
+  &[aria-pressed="true"] .shaka-autoplay-knob {
+    transform: translateX(calc(var(--shaka-icon-size) * @scale * 0.33));
+  }
+}
+
+.shaka-autoplay-button {
+  .autoplay-switch-size(1);
+
+  .shaka-autoplay-switch {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 30%);
+    transition: background cubic-bezier(0.4, 0, 0.6, 1) 100ms;
+  }
+
+  .shaka-autoplay-knob {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--shaka-font-color);
+    color: var(--shaka-bg-solid);
+    transition: transform cubic-bezier(0.4, 0, 0.6, 1) 100ms;
+
+    .shaka-ui-icon {
+      /* The overflow menu pads the icons of its rows; inside the knob the
+       * glyph has to stay centred. */
+      padding: 0;
+    }
+  }
+
+  &[aria-pressed="true"] {
+    .shaka-autoplay-switch {
+      background: var(--shaka-font-color);
+    }
+
+    .shaka-autoplay-knob {
+      background: var(--shaka-bg-solid);
+      color: var(--shaka-font-color);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shaka-autoplay-switch,
+    .shaka-autoplay-knob {
+      transition: none;
+    }
+  }
+}
+
+/* Inside the overflow menu the switch stands in for a row icon, so it is
+ * scaled down to the width of the icon column and given the same gap before
+ * the label.  At that size the glyph is unreadable, and the row already
+ * spells the state out ("On" / "Off"), so it is dropped. */
+.shaka-overflow-menu .shaka-autoplay-button {
+  .autoplay-switch-size(0.667);
+
+  .shaka-autoplay-switch {
+    margin-right: 10px;
+  }
+
+  .shaka-autoplay-knob .shaka-ui-icon {
+    display: none;
+  }
+}
