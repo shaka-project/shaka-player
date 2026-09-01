@@ -94,6 +94,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         // consistently with the hover preview.
         e.preventDefault();
         this.bar.focus();
+        // A keyboard interaction may still be waiting to end.  This one takes
+        // over from it, so that its timer does not end this interaction.
+        this.endFakeChangeTimer_.stop();
         this.isChanging_ = true;
         this.isMouseChanging_ = true;
         this.setBarValueForMouse_(e);
@@ -128,6 +131,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     if (navigator.maxTouchPoints > 0) {
       this.eventManager.listen(this.bar, 'touchstart', (e) => {
         if (!this.bar.disabled) {
+          // See the comment in the mousedown handler above.
+          this.endFakeChangeTimer_.stop();
           this.isChanging_ = true;
           this.setBarValueForTouch_(e);
           this.onChangeStart(/* fromTouchEvent= */ true);
@@ -292,6 +297,27 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.onChange();
 
     this.endFakeChangeTimer_.tickAfter(/* seconds= */ 0.5);
+  }
+
+  /**
+   * Ends an in-progress mouse interaction, if there is one, as if the user had
+   * released the button with the bar where it currently is.
+   *
+   * This lets other controls, such as the keyboard ones, take over from a drag
+   * that is still in progress.  The pointer stops driving the bar until the
+   * button is pressed again, and the mouseup that ends the drag is ignored.
+   *
+   * @override
+   * @export
+   */
+  endMouseInteraction() {
+    if (!this.isMouseChanging_) {
+      return;
+    }
+
+    this.isMouseChanging_ = false;
+    this.isChanging_ = false;
+    this.onChangeEnd();
   }
 
   /**
