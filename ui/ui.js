@@ -281,6 +281,7 @@ shaka.ui.Overlay = class {
     if ('remote' in HTMLMediaElement.prototype) {
       controlPanelElements.push('remote');
     }
+    controlPanelElements.push('autoplay');
     controlPanelElements.push('overflow_menu');
     controlPanelElements.push('fullscreen');
 
