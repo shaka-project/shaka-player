@@ -621,6 +621,92 @@ describe('UI', () => {
       });
     });
 
+    describe('autoplay button', () => {
+      /** @type {!HTMLElement} */
+      let autoPlayButton;
+      /** @type {shaka.extern.IQueueManager} */
+      let queueManager;
+
+      /**
+       * @param {string} manifestUri
+       * @return {shaka.extern.QueueItem}
+       */
+      function queueItem(manifestUri) {
+        return {
+          manifestUri,
+          preloadManager: null,
+          startTime: null,
+          mimeType: null,
+          config: null,
+          extraText: null,
+          extraThumbnail: null,
+          extraChapter: null,
+          metadata: null,
+        };
+      }
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'autoplay',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+        queueManager = player.getQueueManager();
+
+        // The click handler ignores clicks while the controls are hidden.
+        const container = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container');
+        container.setAttribute('shown', 'true');
+
+        autoPlayButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-autoplay-button');
+      });
+
+      it('is hidden until the queue has a next item', () => {
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:0')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:1')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('toggles the config on click', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(false);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+      });
+
+      it('reflects a config change made elsewhere', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        player.configure('queue.autoPlayNext', false);
+
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+      });
+
+      it('is accessible', () => {
+        expect(autoPlayButton.hasAttribute('aria-label')).toBe(true);
+      });
+    });
+
     describe('control panel buttons with submenus', () => {
       /** @type {!HTMLElement} */
       let resolutionMenu;

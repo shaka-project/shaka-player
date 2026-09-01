@@ -3404,6 +3404,12 @@ shaka.extern.PlayerConfiguration;
  *   <br>
  *   Defaults to {@link shaka.config.RepeatMode#OFF}.
  * @property {boolean} autoPlayNext
+ *   If <code>true</code>, the queue advances to the next item when the current
+ *   one ends, and the next item is preloaded as configured by
+ *   <code>preloadNextUrlWindow</code>.  If <code>false</code>, playback stops
+ *   at the end of the current item and nothing is preloaded.  This is
+ *   independent of <code>repeatMode</code>, which only controls repetition.
+ *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc
  */
