@@ -1249,6 +1249,9 @@ shakaDemo.Config = class {
         .addUINumberInput_('Playback Rate Slider Max',
             'playbackRateSliderMax',
             /* canBeDecimal= */ true)
+        .addUINumberInput_('Playback Rate Slider Step',
+            'playbackRateSliderStep',
+            /* canBeDecimal= */ true)
         .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
