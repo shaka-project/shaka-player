@@ -368,6 +368,7 @@ shaka.ui.Overlay = class {
       playbackRates: [1, 1.25, 1.5, 2, 3],
       playbackRateSliderMin: 0.5,
       playbackRateSliderMax: 3,
+      playbackRateSliderStep: 0.05,
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
