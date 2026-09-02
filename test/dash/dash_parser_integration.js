@@ -108,13 +108,23 @@ describe('DashParser', () => {
             deviceDetected.getDeviceName() === 'Tizen') {
       pending('Disabled on Tizen.');
     }
+
+    // Safari stalls at the second container boundary.  Measured 2026-09-01,
+    // 5 runs out of 5: playback gets through the VP9 section and the H.264
+    // one, then stops at 4.30 of 4.90 seconds, just past the splice back to
+    // VP9 at 4.204, with readyState falling to 1 and no error raised.  It is
+    // starvation at the boundary rather than the decoding errors this was
+    // originally disabled for, so the reason is recorded here rather than
+    // left pointing at issue #2746.
     const BrowserEngine = shaka.device.IDevice.BrowserEngine;
     if (deviceDetected.getBrowserEngine() === BrowserEngine.WEBKIT) {
-      pending('Disabled on Safari.');
+      pending('Disabled on Safari: stalls at the second container boundary.');
     }
+
     if (!await Util.isTypeSupported('video/webm; codecs="vp9"')) {
       pending('Codec VP9 is not supported by the platform.');
     }
+
     await player.load('/base/test/test/assets/dash-multitype-variant/dash.mpd');
     await video.play();
     expect(player.isLive()).toBe(false);
