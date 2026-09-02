@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('LOCParser', () => {
+filterDescribe('LOCParser', isMSFSupported, () => {
   /** AAC at 48 kHz: 1024 samples per frame. */
   const FRAME = 1024 / 48000;
 
@@ -169,10 +169,26 @@ describe('LOCParser', () => {
       return obj;
     }
 
-    /** A Timestamp property holding wall-clock microseconds. */
-    const timestampUs = BigInt(1788270271000000);
-    const block18 = shaka.util.Uint8ArrayUtils.concat(
-        varint18(BigInt(0x10)), varint18(timestampUs));
+    /**
+     * A Timestamp property holding wall-clock microseconds, and the draft-18
+     * block that carries it.
+     *
+     * Both are built in beforeEach rather than here, because the body of a
+     * filterDescribe runs even on platforms without BigInt, which is what
+     * isMSFSupported skips this suite for.
+     *
+     * @type {bigint}
+     */
+    let timestampUs;
+
+    /** @type {!Uint8Array} */
+    let block18;
+
+    beforeEach(() => {
+      timestampUs = BigInt(1788270271000000);
+      block18 = shaka.util.Uint8ArrayUtils.concat(
+          varint18(BigInt(0x10)), varint18(timestampUs));
+    });
 
     it('reads draft-18 properties with the draft-18 codec', () => {
       const parser =

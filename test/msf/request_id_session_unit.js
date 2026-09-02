@@ -39,9 +39,17 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
   });
 
   describe('unsubscribe', () => {
-    const ALIAS = BigInt(10);
     const NAMESPACE = ['msf', 'clear'];
     const TRACK = 'audio0';
+
+    /**
+     * Built in beforeEach rather than here, because the body of a
+     * filterDescribe runs even on platforms without BigInt, which is what
+     * isMSFSupported skips this suite for.
+     *
+     * @type {bigint}
+     */
+    let alias;
 
     /** @type {!shaka.msf.TrackAliasRegistry} */
     let registry;
@@ -64,25 +72,26 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
      */
     function register(requestId) {
       registry.registerTrackWithAlias(
-          NAMESPACE, TRACK, BigInt(requestId), ALIAS);
+          NAMESPACE, TRACK, BigInt(requestId), alias);
     }
 
     /**
      * @return {boolean}
      */
     function hasCallbacks() {
-      const info = registry.getTrackInfoFromAlias(ALIAS);
+      const info = registry.getTrackInfoFromAlias(alias);
       return !!info && info.callbacks.length > 0;
     }
 
     beforeEach(() => {
+      alias = BigInt(10);
       registry = registryOf();
       register(/* requestId= */ 4);
-      registry.registerCallback(ALIAS, () => {});
+      registry.registerCallback(alias, () => {});
     });
 
     it('tears the track down when nothing re-subscribed', async () => {
-      await session.unsubscribe(ALIAS);
+      await session.unsubscribe(alias);
 
       expect(sent.length).toBe(1);
       const unsubscribe =
@@ -97,15 +106,15 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
       // inside that window, and the relay hands out the same alias for the
       // same track name, so the delayed teardown would kill the NEW
       // subscription: the track goes silent forever with no error raised.
-      const done = session.unsubscribe(ALIAS);
+      const done = session.unsubscribe(alias);
 
       // The relay answers a fresh SUBSCRIBE with the same alias.
       register(/* requestId= */ 6);
-      registry.registerCallback(ALIAS, () => {});
+      registry.registerCallback(alias, () => {});
 
       await done;
 
-      const info = registry.getTrackInfoFromAlias(ALIAS);
+      const info = registry.getTrackInfoFromAlias(alias);
       expect(info.requestId).toBe(BigInt(6));
       expect(hasCallbacks()).toBe(true);
     });
