@@ -197,6 +197,118 @@ describe('LocTransmuxer', () => {
     });
   });
 
+  describe('AV1', () => {
+    // The sequence header OBU of moqlivemock's
+    // assets/test10s/video_600kbps_av1.mp4: 1280x720, profile 0, level 5,
+    // 8-bit 4:2:0.  moqlivemock sends it in-band ahead of every key frame,
+    // exactly as it appears here.
+    const sequenceHeaderObu = new Uint8Array([
+      0x0a, 0x0b,
+      0x00, 0x00, 0x00, 0x2d, 0x4c, 0xff, 0xb3, 0xc6, 0xaf, 0x98, 0x04,
+    ]);
+
+    // OBU_FRAME, 3-byte payload.  The first byte of the uncompressed header
+    // packs show_existing_frame f(1), frame_type f(2) and show_frame f(1).
+    const keyFrameObu = new Uint8Array([0x32, 0x03, 0x10, 0x00, 0x96]);
+    const interFrameObu = new Uint8Array([0x32, 0x03, 0x30, 0x00, 0x96]);
+
+    const keyFrameUnit =
+        shaka.util.Uint8ArrayUtils.concat(sequenceHeaderObu, keyFrameObu);
+
+    /**
+     * @param {number=} id
+     * @return {shaka.extern.Stream}
+     */
+    function av1Stream(id) {
+      return /** @type {shaka.extern.Stream} */ ({
+        id: id || 1,
+        type: ContentType.VIDEO,
+        codecs: 'av01.0.05M.08',
+        mimeType: 'moq/loc',
+        language: 'und',
+      });
+    }
+
+    /**
+     * @param {!Uint8Array} data
+     * @param {shaka.extern.Stream=} stream
+     * @return {!Promise<!shaka.extern.TransmuxerOutput>}
+     */
+    function transmuxAv1(data, stream) {
+      return /** @type {!Promise<!shaka.extern.TransmuxerOutput>} */ (
+        transmuxer.transmux(
+            data, stream || av1Stream(), makeReference(),
+            /* duration= */ 1 / 25, ContentType.VIDEO));
+    }
+
+    it('supports the codec', () => {
+      expect(transmuxer.isSupported(
+          'moq/loc; codecs="av01.0.05M.08"', ContentType.VIDEO)).toBe(true);
+    });
+
+    it('passes the temporal unit through as one sample', async () => {
+      // LOC carries the temporal unit exactly as an av01 sample wants it, so
+      // nothing is reframed: no start codes to strip, no length prefixes to
+      // add, and the sequence header OBU stays in the sample.
+      const result = await transmuxAv1(keyFrameUnit);
+      expect(mdatOf(result.data)).toEqual(keyFrameUnit);
+    });
+
+    it('takes the resolution from the sequence header', async () => {
+      const stream = av1Stream();
+      await transmuxAv1(keyFrameUnit, stream);
+
+      expect(stream.width).toBe(1280);
+      expect(stream.height).toBe(720);
+    });
+
+    it('builds an av01 sample entry with an av1C box', async () => {
+      const result = await transmuxAv1(keyFrameUnit);
+      goog.asserts.assert(result.init, 'Should have an init segment');
+
+      let av1C = null;
+      new shaka.util.Mp4Parser()
+          .box('moov', shaka.util.Mp4Parser.children)
+          .box('trak', shaka.util.Mp4Parser.children)
+          .box('mdia', shaka.util.Mp4Parser.children)
+          .box('minf', shaka.util.Mp4Parser.children)
+          .box('stbl', shaka.util.Mp4Parser.children)
+          .fullBox('stsd', shaka.util.Mp4Parser.sampleDescription)
+          .box('av01', shaka.util.Mp4Parser.visualSampleEntry)
+          .box('av1C', (box) => {
+            av1C = box.reader.readBytes(
+                box.reader.getLength() - box.reader.getPosition(),
+                /* clone= */ true);
+          })
+          .parse(result.init);
+
+      goog.asserts.assert(av1C, 'Should have found an av1C box');
+      expect(av1C).toEqual(shaka.util.Uint8ArrayUtils.concat(
+          new Uint8Array([0x81, 0x05, 0x0c, 0x00]), sequenceHeaderObu));
+    });
+
+    it('emits nothing before the first sequence header', async () => {
+      // An inter frame carries no sequence header, so there is nothing to
+      // describe the stream with yet.
+      const result = await transmuxAv1(interFrameObu);
+      expect(result.data.byteLength).toBe(0);
+    });
+
+    it('reuses the cached sequence header for inter frames', async () => {
+      await transmuxAv1(keyFrameUnit);
+
+      const result = await transmuxAv1(interFrameObu);
+      expect(mdatOf(result.data)).toEqual(interFrameObu);
+    });
+
+    it('drops the cache when the rendition changes', async () => {
+      await transmuxAv1(keyFrameUnit, av1Stream(1));
+
+      const result = await transmuxAv1(interFrameObu, av1Stream(2));
+      expect(result.data.byteLength).toBe(0);
+    });
+  });
+
   describe('AAC', () => {
     // A plausible stereo AAC-LC raw_data_block: starts with a CPE element,
     // so its first byte is 0x21 and it is NOT an ADTS frame.

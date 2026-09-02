@@ -224,6 +224,25 @@ describe('LOCParser', () => {
           fixed, new Uint8Array([arrays.length]), ...arrays);
     }
 
+    // The sequence header OBU and av1C fixed bytes of moqlivemock's
+    // assets/test10s/video_600kbps_av1.mp4.
+    const sequenceHeaderObu = new Uint8Array([
+      0x0a, 0x0b,
+      0x00, 0x00, 0x00, 0x2d, 0x4c, 0xff, 0xb3, 0xc6, 0xaf, 0x98, 0x04,
+    ]);
+    const frameObu = new Uint8Array([0x32, 0x03, 0x10, 0x00, 0x96]);
+
+    /**
+     * Builds an AV1CodecConfigurationRecord: four fixed bytes, then the
+     * sequence header OBU as configOBUs.
+     *
+     * @return {!Uint8Array}
+     */
+    function av1c() {
+      return shaka.util.Uint8ArrayUtils.concat(
+          new Uint8Array([0x81, 0x05, 0x0c, 0x00]), sequenceHeaderObu);
+    }
+
     /**
      * @param {!Array<!Uint8Array>} paramSets
      * @return {!Uint8Array}
@@ -256,6 +275,40 @@ describe('LOCParser', () => {
         {type: 0x10, value: 1000000},
       ], slice));
       expect(result.payload).toEqual(expectedPayload([VPS, SPS, PPS]));
+    });
+
+    it('restores an AV1 sequence header stripped from the bitstream', () => {
+      // AV1 OBUs are self-delimiting, so configOBUs is concatenated raw: a
+      // 4-byte length prefix would be read as an OBU header and desynchronise
+      // the temporal unit.
+      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: av1c()},
+        {type: 0x10, value: 1000000},
+      ], frameObu));
+      expect(result.payload).toEqual(
+          shaka.util.Uint8ArrayUtils.concat(sequenceHeaderObu, frameObu));
+    });
+
+    it('leaves the payload alone when the av1C is truncated', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const result = parser.parse(moqObject([
+        // The four fixed bytes alone carry no configOBUs.
+        {type: 0x0d, value: av1c().subarray(0, 4)},
+        {type: 0x10, value: 1000000},
+      ], frameObu));
+      expect(result.payload).toEqual(frameObu);
+    });
+
+    it('leaves the payload alone when the av1C marker is wrong', () => {
+      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const bad = av1c();
+      bad[0] = 0x01; // marker cleared, version 1
+      const result = parser.parse(moqObject([
+        {type: 0x0d, value: bad},
+        {type: 0x10, value: 1000000},
+      ], frameObu));
+      expect(result.payload).toEqual(frameObu);
     });
 
     it('leaves the payload alone when no config is carried', () => {
