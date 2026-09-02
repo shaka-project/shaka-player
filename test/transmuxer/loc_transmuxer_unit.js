@@ -241,7 +241,13 @@ describe('LocTransmuxer', () => {
             /* duration= */ 1 / 25, ContentType.VIDEO));
     }
 
-    it('supports the codec', () => {
+    it('supports the codec', async () => {
+      if (!await shaka.test.Util.isTypeSupported(
+          'video/mp4; codecs="av01.0.05M.08"',
+          /* width= */ 1280, /* height= */ 720)) {
+        pending('Codec AV1 is not supported by the platform.');
+      }
+
       expect(transmuxer.isSupported(
           'moq/loc; codecs="av01.0.05M.08"', ContentType.VIDEO)).toBe(true);
     });
