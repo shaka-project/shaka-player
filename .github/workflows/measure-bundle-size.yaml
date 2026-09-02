@@ -1,0 +1,125 @@
+name: Measure Bundle Size
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# If another instance of this workflow is started for the same PR, cancel the
+# old one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || inputs.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-head:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          path: head-source
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Build head source
+        working-directory: head-source
+        run: python3 build/all.py
+      
+      - name: Measure head bundles
+        working-directory: head-source
+        run: |
+          python3 .github/workflows/compute-bundle-size.py measure \
+              --dir dist \
+              --out ../head-sizes.json
+          echo "Head json:"
+          cat ../head-sizes.json
+
+      - name: Upload head sizes
+        uses: actions/upload-artifact@v6
+        with:
+          name: head-sizes
+          path: head-sizes.json
+
+  build-base:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          path: base-source
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Build base source
+        working-directory: base-source
+        run: python3 build/all.py
+      
+      - name: Measure base bundles
+        working-directory: base-source
+        run: |
+          python3 .github/workflows/compute-bundle-size.py measure \
+              --dir dist \
+              --out ../base-sizes.json
+          echo "Base json:"
+          cat ../base-sizes.json
+      
+      - name: Upload base sizes
+        uses: actions/upload-artifact@v6
+        with:
+          name: base-sizes
+          path: base-sizes.json
+
+  compare:
+    runs-on: ubuntu-latest
+    needs: [build-head, build-base]
+
+    steps:
+      - name: Checkout repo (for script access)
+        uses: actions/checkout@v5
+        with:
+          # The script that generates the table should be run from `main`, not
+          # the PR that triggered the workflow.
+          ref: main
+          persist-credentials: false
+
+      - name: Download head sizes
+        uses: actions/download-artifact@v7
+        with:
+          name: head-sizes
+
+      - name: Download base sizes
+        uses: actions/download-artifact@v7
+        with:
+          name: base-sizes
+
+      - name: Generate report
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          python3 .github/workflows/compute-bundle-size.py compare \
+            --pr-number $PR_NUMBER \
+            --head head-sizes.json \
+            --base base-sizes.json > report.md
+          
+          cat report.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v6
+        with:
+          name: bundle-report
+          path: report.md
+          retention-days: 1

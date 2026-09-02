@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Unified Streaming Platform  (version=1.13.5-30103) -->
+<!-- Edited by Unified manifest-edit, using the following pipeline:
+mpd:
+- mpd.custom: null
+ -->
+<MPD
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="urn:mpeg:dash:schema:mpd:2011"
+  xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd"
+  type="static"
+  mediaPresentationDuration="PT8S"
+  maxSegmentDuration="PT5S"
+  minBufferTime="PT10S"
+  profiles="urn:mpeg:dash:profile:isoff-live:2011,urn:hbbtv:dash:profile:isoff-live:2012">
+  <Period
+    id="1"
+    duration="PT8S">
+    <AdaptationSet
+      id="2"
+      group="2"
+      contentType="video"
+      par="16:9"
+      segmentAlignment="true"
+      width="960"
+      height="540"
+      sar="1:1"
+      frameRate="30"
+      mimeType="video/mp4"
+      codecs="avc1.64001F"
+      startWithSAP="1">
+      <SupplementalProperty
+        schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016"
+        value="3" />
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
+      <SegmentTemplate
+        timescale="600"
+        initialization="out-sorted-$RepresentationID$.dash"
+        media="out-sorted-$RepresentationID$-$Time$.dash">
+        <SegmentTimeline>
+          <S t="0" d="2400" />
+          <S d="2400" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation
+        id="video=2521258"
+        bandwidth="2521258"
+        scanType="progressive">
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet
+      id="3"
+      group="2"
+      contentType="video"
+      par="16:9"
+      segmentAlignment="true"
+      width="1920"
+      height="1080"
+      frameRate="30"
+      sar="1:1"
+      mimeType="video/mp4"
+      codecs="lvc1"
+      startWithSAP="1">
+      <SupplementalProperty
+        schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016"
+        value="2" />
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main" />
+      <SegmentTemplate
+        timescale="15360"
+        initialization="out-sorted-$RepresentationID$.dash"
+        media="out-sorted-$RepresentationID$-$Time$.dash">
+        <SegmentTimeline>
+          <S t="0" d="61440" />
+          <S d="61440" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation
+        id="video_1=1877000"
+        bandwidth="4398258"
+        dependencyId="video=2521258"
+        scanType="unknown">
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

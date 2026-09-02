@@ -1,0 +1,220 @@
+# Shaka Player Upgrade Guide
+
+If you are upgrading from **v1 or v2**, these releases are no longer supported,
+and upgrade guides are no longer maintained.  You can still upgrade in stages
+using the following guides:
+
+## Upgrade to v2.4
+
+- [Upgrade v1 => v2](../upgrades/upgrade-v1-to-v2.md)
+- [Upgrade v2.0 => v2.4](../upgrades/upgrade-v2.0-to-v2.4.md)
+- [Upgrade v2.1 => v2.4](../upgrades/upgrade-v2.1-to-v2.4.md)
+- [Upgrade v2.2 => v2.4](../upgrades/upgrade-v2.2-to-v2.4.md)
+- [Upgrade v2.3 => v2.4](../upgrades/upgrade-v2.3-to-v2.4.md)
+
+## Upgrade v2.4 => v2.5
+
+- [Upgrade v2.3 => v2.5](../upgrades/upgrade-v2.3-to-v2.5.md)
+- [Upgrade v2.4 => v2.5](../upgrades/upgrade-v2.4-to-v2.5.md)
+
+## Upgrade v2.5 => v3.0
+
+- [Upgrade v2.4 => v3.0](../upgrades/upgrade-v2.4-to-v3.0.md)
+- [Upgrade v2.5 => v3.0](../upgrades/upgrade-v2.5-to-v3.0.md)
+
+Since v3.0, Shaka Player has been following semantic versioning.  (The
+IE11 deprecation announced before v3.0 happened in v3.1, which technically
+breaks semantic versioning guarantees.  It is the only intentional exception.)
+
+Upgrading from any v3 release to a newer v3 release should be backward
+compatible.  The same is true of all major version numbers (v4 => v4, etc).
+
+Here is a summary of breaking changes that might require upgrades to your
+application:
+
+
+## v3.1
+
+  - New dependencies:
+    - TextDecoder/TextEncoder platform support or polyfill required (affects
+      Xbox One, but not evergreen browsers); we suggest the polyfill
+      [https://github.com/anonyco/FastestSmallestTextEncoderDecoder](fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js)
+      Fallback included by default in v4.2
+
+  - Support removed:
+    - IE11 support removed
+
+
+## v4.0
+
+  - Support removed:
+    - Older TVs and set-top boxes that do not support MediaSource sequence mode
+      can no longer play HLS content (since we now use sequence mode for that)
+    - Support for iOS 12 and Safari 12 has been removed
+
+  - Configuration changes:
+    - `manifest.dash.defaultPresentationDelay` has been replaced by
+      `manifest.defaultPresentationDelay` (deprecated in v3.0.0)
+    - Configuration of factories should be plain factory functions, not
+      constructors; these will not be invoked with `new` (deprecated in v3.1.0)
+    - `drm.initDataTransform` now defaults to a no-op
+    - `streaming.smallGapLimit` and `streaming.jumpLargeGaps` have been removed;
+      all gaps will now be jumped
+    - `manifest.hls.useFullSegmentsForStartTime` has been removed; this setting
+      is no longer necessary, as we no longer fetch segments for start times in
+      the HLS parser
+
+  - Player API changes:
+    - `shaka.Player.prototype.addTextTrack()` has been replaced by
+      `addTextTrackAsync()`, which returns a `Promise` (deprecated in v3.1.0)
+
+  - UI API changes:
+    - `shaka.ui.TrackLabelFormat` has been renamed to
+      `shaka.ui.Overlay.TrackLabelFormat` (deprecated in v3.1.0)
+    - `shaka.ui.FailReasonCode` has been renamed to
+      `shaka.ui.Overlay.FailReasonCode` (deprecated in v3.1.0)
+
+  - Offline API changes:
+    - `shaka.offline.Storage.prototype.store()` returns `AbortableOperation`
+      instead of `Promise`; callers should change `.then()` to
+      `.promise.then()` and `await rv` to `await rv.promise` (deprecated in
+      v3.0.0)
+    - `shaka.offline.Storage.prototype.getStoreInProgress()` has been removed;
+      concurrent operations are supported since v3, so callers don't need to
+      check this (deprecated in v3.0.0)
+
+  - Utility API changes:
+    - `shaka.util.Uint8ArrayUtils.equal` has been replaced by
+      `shaka.util.BufferUtils.equal`, which can handle multiple types of
+      buffers (deprecated in v3.0.0)
+
+  - Manifest API changes:
+    - `shaka.media.SegmentIndex.prototype.destroy()` has been replaced by
+      `release()`, which is synchronous (deprecated in v3.0.0)
+    - `shaka.media.SegmentIterator.prototype.seek()`, which mutates the
+      iterator, has been replaced by
+      `shaka.media.SegmentIndex.getIteratorForTime()` (deprecated in v3.1.0)
+    - `shaka.media.SegmentIndex.prototype.merge()` has become private; use
+      `mergeAndEvict()` instead (deprecated in v3.2.0)
+
+  - Plugin changes:
+    - `AbrManager` plugins must implement the `playbackRateChanged()` method
+      (deprecated in v3.0.0)
+    - `shaka.extern.Cue.prototype.spacer` has been replaced by the more
+      clearly-named `lineBreak` (deprecated in v3.1.0)
+    - `IUIElement` plugins must have a `release()` method (not `destroy()`)
+      (deprecated in v3.0.0)
+
+## v5.0
+
+  - Configuration changes:
+    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`,
+      and now also applies to AAC, MP3, AC-3, and EC-3 (deprecated in v4.3.0)
+    - `manifest.dash.manifestPreprocessor` and `manifest.mss.manifestPreprocessor`
+      have been replaced with `manifest.dash.manifestPreprocessorTXml` and
+      `manifest.mss.manifestPreprocessorTXml` callbacks. These new callbacks now
+      accept `shaka.externs.xml.Node`. `getAttribute()` and `textContent` results
+      must now be decoded if they might contain escape sequences. You can use
+      `shaka.util.StringUtils.htmlUnescape` for this purpose.
+    - `streaming.useNativeHlsOnSafari` has removed. Now we have another config to do the same for FairPlay `streaming.useNativeHlsForFairPlay` or for HLS (any browser) `streaming.preferNativeHls`.
+    - `mediaSource.sourceBufferExtraFeatures` has been replaced with `mediaSource.addExtraFeaturesToSourceBuffer` callback.
+    - `streaming.liveSyncMinLatency` and `streaming.liveSyncMaxLatency` have
+      been removed in favor of `streaming.liveSync.targetLatency`. (deprecated
+      in v4.10.0)
+    - The following options on `streaming` have been removed: `liveSync`,
+      `liveSyncTargetLatency`, `liveSyncTargetLatencyTolerance`,
+      `liveSyncPlaybackRate`, `liveSyncMinPlaybackRate`, `liveSyncPanicMode`
+      `liveSyncPanicThreshold`. `streaming.liveSync` is now an options object
+      with the relevant options: `enabled`, `targetLatency`,
+      `targetLatencyTolerance`, `maxPlaybackRate`, `minPlaybackRate`, `panicMode`
+      `panicThreshold`. (deprecated in v4.10.0)
+    - `useSafariBehaviorForLive` has been removed.
+    - `parsePrftBox` has been removed.
+    - `videoRobustness` and `audioRobustness` are now only an array of strings. (deprecated in v4.13.0)
+    - `streaming.forceHTTP` has been moved to `networking.forceHTTP` (deprecated in v4.15.0)
+    - `streaming.forceHTTPS` has been moved to `networking.forceHTTPS` (deprecated in v4.15.0)
+    - `streaming.minBytesForProgressEvents` has been moved to `networking.minBytesForProgressEvents` (deprecated in v4.15.0)
+    - `manifest.dash.enableAudioGroups` has been moved to `manifest.enableAudioGroups`
+    - `preferredVariantRole` has been renamed to `preferredAudioRole` (deprecated in v4.16.0)
+    - `autoShowText` has been removed.
+    - `removeLatencyFromFirstPacketTime` has been removed.
+    - `streaming.speechToText` moved to `accessibility.speechToText`
+
+  - UI Configuration changes:
+    - `doubleClickForFullscreen` is now enabled by default for mobile.
+    - `preferDocumentPictureInPicture` has been renamed to `documentPictureInPicture.enabled`.
+    - `customContextMenu` is now enabled by default for desktop browsers.
+    - `addBigPlayButton` has been removed; use the `bigButtons` config instead.
+
+  - Plugin changes:
+    - `TextDisplayer` plugins must implement the `configure()` method.
+    - `TextParser` plugins must implement the `setManifestType()` method.
+    - `Transmuxer` plugins now has three new parameters in `transmux()` method.
+    - Removed `enableTextDisplayer` from `TextDisplayer` plugins.
+    - Replaced `SimpleTextDisplayer` with `NativeTextDisplayer`.
+    - Builtin `TextDisplayer` plugin constructors take a `shaka.Player` instance
+      as the only parameter.
+
+  - Player API Changes:
+    - The constructor no longer takes `mediaElement` as a parameter; use the `attach` method to attach to a media element instead. (Deprecated in v4.6)
+    - The `TimelineRegionInfo.eventElement` has been replaced with `TimelineRegionInfo.eventNode` property, the new property type is `shaka.externs.xml.Node` instead of `Element`
+    - `getAudioLanguages` and `getAudioLanguagesAndRoles` have been removed; instead, use the new `getAudioTracks` API (Deprecated in v4.14)
+    - `selectAudioLanguage` has been removed; instead, use the new `selectAudioTrack` API (Deprecated in v4.14)
+    - `shaka.util.FairPlayUtils` has been moved to `shaka.drm.FairPlay` (Deprecated in v4.14)
+    - `getChapters` is replaced by `getChaptersAsync` (Deprecated in v4.15)
+    - The `setTextTrackVisibility` method has been removed, along with the previous distinction between selecting a text track and toggling its visibility. Selecting a text track automatically makes it visible, there is no separate visibility control.
+    - Apps must call `updateStartTime` instead of setting the media element's `currentTime` directly during startup.
+
+  - Ad Manager API Changes:
+    - Added `setContainers` to set the CS and SS containers.
+    - Removed `video` and `player` params on all methods.
+    - Removed `initClientSide`, `initServerSide`, `initMediaTailor` and `initInterstitial`, since those things are now auto-initialized when necessary.
+    - `onDashTimedMetadata` has been removed.
+
+  - Initial track selection:
+    - With `autoShowText` removed, the player now determines the initial text track exclusively using `preferredTextLanguage` and `preferredTextRole`.
+    - The app may choose not to pass preferences and instead rely on the tracks API (`getTextTracks`, `getAudioTracks`) along with its own business logic.
+
+  - Error API changes:
+    - `MEDIA_SOURCE_OPERATION_THREW` error now includes object with details from media element error in `error.data[1]` or string with brief explanation.
+
+  - UI:
+    - `airplay` button has been removed; use the `remote` button instead
+
+
+## v6.0
+
+  - Configuration changes:
+    - Individual preference config fields have been replaced by structured
+      preference arrays.  (Deprecated in v5.1)
+      - `preferredAudioLanguage`, `preferredAudioRole`, `preferredAudioLabel`,
+        `preferredAudioChannelCount`, and `preferSpatialAudio` have been replaced
+        by `preferredAudio`, an array of `shaka.extern.AudioPreference` objects.
+      - `preferredAudioCodecs` has been replaced by `preferredAudio` with the
+        `codec` field in each entry.
+      - `preferredTextLanguage` and `preferredTextRole` have been replaced by
+        `preferredText`, an array of `shaka.extern.TextPreference` objects.
+      - `preferredTextFormats` has been replaced by `preferredText` with the
+        `format` field in each entry.
+      - `preferForcedSubs` has been replaced by the `forced` field in
+        `preferredText` entries (e.g.
+        `player.configure('preferredText', [{language: 'en', forced: true}])`).
+      - `preferredVideoLabel`, `preferredVideoRole`, `preferredVideoHdrLevel`,
+        and `preferredVideoLayout` have been replaced by `preferredVideo`, an
+        array of `shaka.extern.VideoPreference` objects.
+      - `preferredVideoCodecs` has been replaced by `preferredVideo` with the
+        `codec` field in each entry.
+      - The new structured arrays allow specifying multiple preference sets in
+        priority order. For example:
+        ```js
+        // Old way (deprecated, still works with a warning):
+        player.configure('preferredAudioLanguage', 'ko');
+        player.configure('preferredAudioChannelCount', 6);
+
+        // New way:
+        player.configure('preferredAudio', [
+          {language: 'ko', channelCount: 6},
+          {language: 'ko'},
+          {language: 'en'},
+        ]);
+        ```

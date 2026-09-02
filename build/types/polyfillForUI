@@ -1,0 +1,6 @@
+# Polyfills used to emulate missing browsers features.
+
++../../lib/polyfill/aria.js
++../../lib/polyfill/fullscreen.js
++../../lib/polyfill/orientation.js
++../../lib/polyfill/pip_webkit.js

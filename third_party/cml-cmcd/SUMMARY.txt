@@ -1,0 +1,113 @@
+cml-cmcd
+  Common Media Library CMCD encoder + reporter, v2.4.0,
+  by Streaming Video Technology Alliance / Casey Occhialini et al.
+  Apache 2.0 license.
+  https://github.com/streaming-video-technology-alliance/common-media-library
+    /tree/main/libs/cmcd
+  Source npm: @svta/cml-cmcd
+  Pinned tag: cmcd-v2.4.0
+  Pinned commit: 5c4fa8d60794e2a68e9b286fb636c0eb0b217f83
+
+  TRANSITIONAL: This vendored port exists because shaka-player uses Closure
+  Compiler. When shaka migrates to TypeScript (issue #8262), delete this
+  directory and replace `goog.require('cml.cmcd.X')` with
+  `import { X } from '@svta/cml-cmcd'`.
+
+  Local mods:
+    - TypeScript source converted to Closure-annotated JS by hand
+    - Type-only imports erased; replaced with local closure typedefs
+    - Decoders (decodeCmcd, fromCmcd*) omitted: shaka emits CMCD only.
+      The wire-format validators that would depend on these
+      (validateCmcdHeaders/Events/Request/EventReport) are also
+      omitted; the integration test does inline CMCD parsing instead.
+    - Data-level validators (validateCmcdKeys/Values/Structure +
+      composite validateCmcd) vendored at v2.4.0 as test-only — see
+      "Test-only additions" below.
+    - Predicates (`is_cmcd_*_key.js`, `is_token_field.js`,
+      `is_valid.js`) included: required at runtime by `prepareCmcdData`
+      even though spec § "Excluded > Predicates" had marked them
+      tooling-only. `groupCmcdHeaders` likewise included as it is the
+      shared encoder/decoder helper used by `toPreparedCmcdHeaders`.
+    - cml-utils dep absorbed into `cml_utils.js` shim:
+        * `uuid` (wraps `crypto.randomUUID()`; dead-codepath for shaka)
+        * `urlToRelativePath` (used by `CMCD_FORMATTER_MAP`'s `nor`)
+        * `getBaseUrl` (extracts origin + directory from a full URL;
+          used by `CmcdReporter` and the `nor` formatter to derive a
+          sibling-relative base from the current request URL)
+    - structured-field-values dep absorbed into `cml_sfv.js` shim:
+        * `SfItem` / `SfToken` runtime classes
+        * `encodeSfDict` (RFC 8941 §4.1 dictionary serializer; pulls in
+          its transitive serializer closure verbatim because every
+          CMCD wire byte routes through it)
+      Decoding (`decodeSfDict`, `decodeSfItem`) is not vendored — only
+      encoder surface is needed.
+    - Filenames disambiguated with `_const` suffix where TS files differ
+      only in case (e.g., `CmcdV1.ts` typedef + `CMCD_V1.ts` numeric const
+      → `cmcd_v1.js` + `cmcd_v1_const.js`). Affects v1, v2, HEADER_MAP,
+      and FORMATTER_MAP.
+    - `CmcdReporter` constructor: TS class private fields (`#field` /
+      `private`) translate to Closure trailing-underscore-named fields
+      with `@private` (`this.requestTarget_`, `this.config_`, etc.).
+      Constructor positional signature `(config, requester)` preserved.
+      Internal helpers (`processEventTargets`, `sendEventReport`,
+      `recordTargetEvent`, `resetSession`) are trailing-underscore
+      methods. Module-scope helpers (`createEncodingOptions`,
+      `createCmcdReporterConfig`) are namespaced under
+      `cml.cmcd.CmcdReporter_*_`. State machine (per-target sequence
+      counters, sid-change reset, batching/flushing) preserved
+      verbatim.
+    - `setInterval` whitelisted in build/conformance.textproto for
+      `cmcd_reporter.js`. Upstream uses `setInterval` directly in
+      `start()`; replacing with `shaka.util.Timer` would break the
+      verbatim-port property and the per-bump diff stability, so the
+      conformance allowlist is extended for this single file.
+
+  Test-only additions (vendored at v2.4.0):
+    - Files live in `test/test/util/cml-cmcd/`, not here. They use
+      the `cml.cmcd.*` namespace via `goog.provide` and are loaded
+      by karma via the existing `test/**/*.js` pattern; absent from
+      `shaka-player.compiled.js`.
+    - Why under `test/`: `build/check.py` rejects any .js file under
+      `third_party/` that is not in `build/types/core`. Adding these
+      to `build/types/core` would put them through the ADVANCED
+      production compile (which rejects them for unrelated reasons:
+      `setTimeout` conformance whitelist, strict-inexistent-property
+      warnings on `Object<string,*>` accesses, etc.). Living under
+      `test/` avoids both constraints.
+    - ESLint override in `eslint.config.mjs` exempts these files from
+      shaka style rules (function expressions, 2-space indent,
+      `.prototype` patching, etc.) so they stay verbatim ports of
+      upstream TS.
+    - Used by `test/util/cmcd_integration.js` to drive a real
+      `shaka.Player` against a local HLS stream + capture CMCD
+      wire output + validate decoded data against the CMCD spec.
+
+    Recorder + transport adapters (port of v2.4.0 additions):
+      - `cmcd_report_recorder.js` (the recorder class)
+      - `cmcd_recorded_report.js`, `cmcd_recorded_report_mode.js`,
+        `cmcd_recorded_request_type.js` (typedefs / enums)
+      - `cmcd_report_recorder_options.js`,
+        `cmcd_report_recorder_wait_options.js` (typedefs)
+      - `cmcd_transport_adapter.js` (typedef for the adapter contract
+        + `CmcdRequestDeliver` callback)
+      - `create_fetch_transport.js` (patches `window.fetch`; upstream
+        uses `globalThis`, which is missing on Chromium < 71 devices
+        like older Tizen and is not polyfilled in karma's babel path)
+      - `create_xhr_transport.js` (patches `XMLHttpRequest.prototype`)
+
+    Data-level validators (work on pre-decoded data):
+      - `validate_cmcd.js` (composite)
+      - `validate_cmcd_keys.js`, `validate_cmcd_values.js`,
+        `validate_cmcd_structure.js` (parts)
+      - `merge_validation_results.js` (helper)
+      - `cmcd_validation_severity.js`, `cmcd_validation_issue.js`,
+        `cmcd_validation_options.js`, `cmcd_validation_result.js`,
+        `cmcd_data_validation_result.js`,
+        `cmcd_events_validation_result.js` (typedefs)
+
+    Deliberately NOT vendored (would require porting upstream's
+    SFV decoder grammar, ~800 LoC of @svta/cml-structured-field-values):
+      - `decodeCmcd`, `fromCmcdHeaders`, `fromCmcdQuery`, `fromCmcdUrl`
+      - `validateCmcdHeaders`, `validateCmcdEvents`,
+        `validateCmcdRequest`, `validateCmcdEventReport`
+    The integration test does inline CMCD parsing instead.

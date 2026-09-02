@@ -1,0 +1,35 @@
+# Generate png with: dot -Tpng -O cast.gv
+
+digraph shaka2_cast {
+  label=<<u>Shaka 2 Cast Diagram</u>>
+  labelloc=t
+  node [ shape=rectangle ]
+  edge [ fontsize=10 ]
+
+  # Video tags are part of the local browser and remote Cast device
+  "local <video>" [ shape=oval ]
+  "remote <video>" [ shape=oval ]
+
+  # Controls are provided by the app
+  "video controls" [ shape=polygon ]
+
+  # The CastProxy class creates proxies for both Player and video tag
+  CastProxy -> "proxy Player" [ label=".getPlayer()  " ]
+  CastProxy -> "proxy <video>" [ label=".getVideo()  " ]
+
+  # Each Player owns its respective video tag
+  "local Player" -> "local <video>"
+  "remote Player" -> "remote <video>"
+
+  # The proxies forward/delegate to the correct instance based on casting state
+  "proxy Player" -> "local Player" [ style=dotted label="delegate" dir=both ]
+  "proxy Player" -> "remote Player" [ style=dotted label="delegate" dir=both ]
+  "proxy <video>" -> "local <video>" [ style=dotted label="delegate" dir=both ]
+  "proxy <video>" -> "remote <video>" [ style=dotted label="delegate" dir=both ]
+
+  # The app's controls go through the proxy and don't worry about cast state
+  "video controls" -> "proxy Player" [ label=".configure()\n.load()\nevents" dir=both ]
+  "video controls" -> "proxy <video>" [ label=".play()\n.pause()\n.currentTime\nevents" dir=both ]
+  # The app asks the proxy to cast
+  "video controls" -> CastProxy [ label=".cast()" ]
+}

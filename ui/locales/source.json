@@ -1,0 +1,294 @@
+{
+  "AD_DURATION": {
+    "description": "An aria label for the ad countdown element that shows how long the current ad is going to last.",
+    "message": "Ad duration"
+  },
+  "AD_PROGRESS": {
+    "description": "The contents of the ad countdown element, describing what ad you are on in a sequence of ads.",
+    "message": "Ad [AD_ON:1] of [NUM_ADS:6]"
+  },
+  "AD_STATISTICS": {
+    "description": "Label for a button that displays ad statistics.",
+    "message": "Ad statistics"
+  },
+  "AD_TIME": {
+    "description": "The text content of a label that shows how much time is left in the current ad.",
+    "message": "Ad: [AD_TIME:0:05/0:10]"
+  },
+  "AIRPLAY": {
+    "description": "Label for a button used to open the native AirPlay dialog in the browser and select a destination to AirPlay to.",
+    "message": "AirPlay"
+  },
+  "AUDIO_DESCRIPTION": {
+    "description": "Label for a button used to select an audio track which contains audio description.",
+    "message": "Audio description"
+  },
+  "AUTO_GENERATED": {
+    "description": "Label for a button used to select an auto generated text track.",
+    "message": "Auto generated"
+  },
+  "MACHINE_GENERATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically generated (e.g. 'English Generated').",
+    "message": "Generated"
+  },
+  "MACHINE_TRANSLATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically translated (e.g. 'Spanish Translated').",
+    "message": "Translated"
+  },
+  "AUTO_QUALITY": {
+    "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically.",
+    "meaning": "Automatic",
+    "message": "Auto"
+  },
+  "BACK": {
+    "description": "Label for a button used to return to the previous menu in the video player's settings.",
+    "meaning": "Return to previous menu",
+    "message": "Back"
+  },
+  "BOTTOM_CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom center"
+  },
+  "BOTTOM_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom left"
+  },
+  "BOTTOM_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Bottom right"
+  },
+  "BUFFERING": {
+    "description": "Label for a button used to indicate that the video is currently buffering/loading data.",
+    "message": "Buffering"
+  },
+  "CAPTIONS": {
+    "description": "Label for a button used to navigate to a submenu to choose captions/subtitles in the video player.",
+    "message": "Captions"
+  },
+  "CAST": {
+    "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
+    "message": "Cast..."
+  },
+  "CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center"
+  },
+  "CENTER_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center left"
+  },
+  "CENTER_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Center right"
+  },
+  "CHAPTERS": {
+    "description": "Label for a button used to open a submenu to choose a chapter.",
+    "message": "Chapters"
+  },
+  "COPY_VIDEO_FRAME": {
+    "description": "Label for a button used to copy the current video frame to the clipboard.",
+    "message": "Copy video frame"
+  },
+  "DEFAULT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Default"
+  },
+  "DOWNLOAD_VIDEO_FRAME": {
+    "description": "Label for a button used to download the current video frame.",
+    "message": "Save video frame"
+  },
+  "ENTER_LOOP_MODE": {
+    "description": "Label for a button that controls the loop mode of a video player. This mode will loop (play over and over) currently selected video.",
+    "message": "Loop the current video"
+  },
+  "ENTER_PICTURE_IN_PICTURE": {
+    "description": "Label for a button used to enter Picture-in-Picture mode in a video player.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications.",
+    "message": "Enter Picture-in-Picture"
+  },
+  "EXIT_FULL_SCREEN": {
+    "description": "Label for a button used to exit full screen mode in the video player.",
+    "message": "Exit full screen"
+  },
+  "EXIT_LOOP_MODE": {
+    "description": "Label for a button that exits the loop mode of a video player.",
+    "message": "Stop looping the current video"
+  },
+  "EXIT_PICTURE_IN_PICTURE": {
+    "description": "Label for a button used to exit Picture-in-Picture mode in a video player.  This will bring the video back into the web page, rather than floating on top of the user's desktop.",
+    "message": "Exit Picture-in-Picture"
+  },
+  "FAST_FORWARD": {
+    "description": "Label for a button used to play video at a higher rate than normal.",
+    "message": "Fast-forward"
+  },
+  "FULL_SCREEN": {
+    "description": "Label for a button used to enter full screen mode in the video player.",
+    "message": "Full screen"
+  },
+  "LANGUAGE": {
+    "description": "Label for a button used to navigate to a submenu to choose the audio language in the video player.",
+    "message": "Language"
+  },
+  "LIVE": {
+    "description": "Label to indicate that a video is already playing at the live broadcast.",
+    "message": "Live"
+  },
+  "LOOP": {
+    "description": "The text content of a name label for the loop button.",
+    "message": "Loop"
+  },
+  "MORE_SETTINGS": {
+    "description": "Label for a button used to open a menu with additional settings in the video player.",
+    "message": "More settings"
+  },
+  "MULTIPLE_LANGUAGES": {
+    "description": "Label for a button used to select an audio track which contains content in multiple languages.",
+    "message": "Multiple languages"
+  },
+  "MUTE": {
+    "description": "Label for a button used to mute the sound in the video player.",
+    "message": "Mute"
+  },
+  "NOT_APPLICABLE": {
+    "description": "Label for a button used to select an audio track for which language is not applicable, such as content without spoken words.",
+    "message": "Not applicable"
+  },
+  "OFF": {
+    "description": "Title beneath a button showing that this feature of the video player is not currently enabled.  Currently used for Cast, Picture-in-Picture, and Captions/Subtitles, but could apply to other features in the future.",
+    "message": "Off"
+  },
+  "ON": {
+    "description": "Title beneath a button showing that this feature of the video player is current enabled.  Currently used for Picture-in-Picture, but could apply to other features in the future.",
+    "message": "On"
+  },
+  "ORIGINAL_VERSION": {
+    "description": "Label for a button used to select an audio track which contains audio in original version.",
+    "message": "Original version"
+  },
+  "PAUSE": {
+    "description": "Label for a button used to pause a video in the video player.",
+    "message": "Pause"
+  },
+  "PICTURE_IN_PICTURE": {
+    "description": "Label for a button used to control the Picture-in-Picture mode of a video player.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications.",
+    "message": "Picture-in-Picture"
+  },
+  "PLAY": {
+    "description": "Label for a button used to play or unpause video in a video player.",
+    "message": "Play"
+  },
+  "PLAYBACK_RATE": {
+    "message": "Playback speed",
+    "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
+  },
+  "QUALITY": {
+    "description": "Label for a button used to open a submenu to choose audio quality in the video player.",
+    "meaning": "Audio quality",
+    "message": "Quality"
+  },
+  "RECENTER_VR": {
+    "description": "Label for a button used to recenter the VR view.",
+    "message": "Recenter"
+  },
+  "REPLAY": {
+    "description": "Label for a button used to replay the video in a video player.",
+    "message": "Replay"
+  },
+  "RESOLUTION": {
+    "description": "Label for a button used to open a submenu to choose a video resolution in the video player.",
+    "meaning": "Visual quality",
+    "message": "Resolution"
+  },
+  "REWIND": {
+    "description": "Label for a button used to rewind video by seeking repeatedly backward.",
+    "message": "Rewind"
+  },
+  "SEEK": {
+    "description": "Label for a slider used to show progress or seek to a particular time in a video.",
+    "message": "Seek"
+  },
+  "SKIP_AD": {
+    "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",
+    "message": "Skip Ad"
+  },
+  "SKIP_TO_LIVE": {
+    "description": "Label for a button used to skip ahead to the live broadcast.",
+    "message": "Skip ahead to live"
+  },
+  "SKIP_NEXT": {
+    "description": "Label for a button used to skip next.",
+    "message": "Next"
+  },
+  "SKIP_PREVIOUS": {
+    "description": "Label for a button used to skip previous.",
+    "message": "Previous"
+  },
+  "STATISTICS": {
+    "description": "Label for a button that displays statistics of the video.",
+    "message": "Statistics"
+  },
+  "SUBTITLE_FORCED": {
+    "description": "Label used to identify a subtitle track that is forced to be shown.",
+    "message": "Forced"
+  },
+  "SUBTITLES_EXAMPLE": {
+    "description": "Example subtitle text shown while previewing subtitle style settings when no subtitle is currently visible.",
+    "message": "Subtitles example"
+  },
+  "SUBTITLE_POSITION": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Subtitle position"
+  },
+  "SUBTITLE_SIZE": {
+    "description": "Label for a button used to indicate a subtitle size.",
+    "message": "Subtitle size"
+  },
+  "SURROUND": {
+    "description": "Label used to identify a audio track that has surround audio.",
+    "message": "Surround"
+  },
+  "TOGGLE_STEREOSCOPIC": {
+    "description": "Label for a button that toggle between monoscopic and stereoscopic.",
+    "message": "Toggle stereoscopic"
+  },
+  "TOP_CENTER": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top center"
+  },
+  "TOP_LEFT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top left"
+  },
+  "TOP_RIGHT": {
+    "description": "Label for a button used to indicate a subtitle position.",
+    "message": "Top right"
+  },
+  "UNDETERMINED_LANGUAGE": {
+    "description": "Label for a button used to select an audio track whose language is undetermined or unknown.",
+    "message": "Undetermined"
+  },
+  "UNMUTE": {
+    "description": "Label for a button used to unmute the sound in the video player.",
+    "message": "Unmute"
+  },
+  "UNRECOGNIZED_LANGUAGE": {
+    "description": "Label for a button used to select an audio language whose language code we do not recognize.  This will be followed by the language code in parentheses.  For example, \"Unrecognized (sjn)\".",
+    "message": "Unrecognized"
+  },
+  "VIDEO_MAIN": {
+    "description": "Label used to identify that it is the main video.",
+    "message": "Main"
+  },
+  "VIDEO_SIGN": {
+    "description": "Label used to identify that it is the sign language video.",
+    "message": "Sign language"
+  },
+  "VIDEO_TYPE": {
+    "description": "Label for a button used to change the video type in the video player.",
+    "message": "Video type"
+  },
+  "VOLUME": {
+    "description": "Label for a slider used to set the volume level of the video player.",
+    "message": "Volume"
+  }
+}

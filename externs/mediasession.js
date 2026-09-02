@@ -1,0 +1,73 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/**
+ * @fileoverview Externs for MediaSession based on
+ * {@link https://bit.ly/2Id3dGD Editor's Draft, 12 January 2017}
+ *
+ * @externs
+ */
+
+
+/**
+ * @typedef {{
+ *   action: string,
+ *   seekOffset: (number|undefined),
+ *   seekTime: (number|undefined),
+ *   fastSeek: (boolean|undefined),
+ *   enterPictureInPictureReason: (string|undefined)
+ * }}
+ */
+var MediaSessionActionDetails;
+
+
+const MediaMetadata = class {
+  constructor(options) {
+    /** @type {string} */
+    this.title;
+
+    /** @type {string} */
+    this.artist;
+
+    /** @type {string} */
+    this.album;
+
+    /** @type {!Object} */
+    this.artwork;
+
+    /** @type {!Object} */
+    this.chapterInfo;
+  }
+};
+
+
+const MediaSession = class {
+  constructor() {
+    /** @type {?MediaMetadata} */
+    this.metadata;
+  }
+
+  setActionHandler(type, callback) {
+    /** @type {string} */
+    this.type = type;
+
+    /**
+     * @type {!function(!MediaSessionActionDetails)}
+     */
+    this.callback = callback;
+  }
+
+  /**
+   * @param {?{duration: ?number, playbackRate: ?number,
+   *         position: ?number}=} stateDict
+   */
+  setPositionState(stateDict) {}
+};
+
+
+/** @type {MediaSession} */
+Navigator.prototype.mediaSession;

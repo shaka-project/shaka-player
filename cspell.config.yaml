@@ -1,0 +1,27 @@
+$schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+version: '0.2'
+language: en
+dictionaryDefinitions:
+  - name: project-words
+    path: ./project-words.txt
+    addWords: true
+dictionaries:
+  - en_US
+  - en-gb
+  - typescript
+  - python
+  - project-words
+ignorePaths:
+  - /**/*.html
+  - /**/*.less
+  - /**/*.sh
+  - /**/*.svg
+  - /**/*.yaml
+  - node_modules
+  - build/types
+  - build/README.md
+  - dist
+  - externs/*.js
+  - test/test/assets
+  - ui/locales
+  - /project-words.txt

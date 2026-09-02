@@ -1,0 +1,5 @@
+# Metadata
+
++../../lib/metadata/id3v1_utils.js
++../../lib/metadata/ilst_utils.js
++../../lib/metadata/vorbis_utils.js

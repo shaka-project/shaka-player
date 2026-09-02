@@ -1,0 +1,174 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+goog.provide('shaka.ui.ContextMenu');
+
+goog.require('goog.asserts');
+goog.require('shaka.log');
+goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.Iterables');
+goog.requireType('shaka.ui.Controls');
+
+
+/**
+ * @extends {shaka.ui.Element}
+ * @final
+ * @export
+ */
+shaka.ui.ContextMenu = class extends shaka.ui.Element {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    super(parent, controls);
+
+    /** @private {!shaka.extern.UIConfiguration} */
+    this.config_ = this.controls.getConfig();
+
+    /** @private {HTMLElement} */
+    this.controlsContainer_ = this.controls.getControlsContainer();
+
+    /** @private {!Array<shaka.extern.IUIElement>} */
+    this.children_ = [];
+
+    /** @private {!HTMLElement} */
+    this.contextMenu_ = shaka.util.Dom.createHTMLElement('div');
+    this.contextMenu_.classList.add('shaka-no-propagation');
+    this.contextMenu_.classList.add('shaka-context-menu');
+    this.contextMenu_.classList.add('shaka-hidden');
+    this.contextMenu_.setAttribute('role', 'menu');
+
+    this.controlsContainer_.appendChild(this.contextMenu_);
+
+    this.eventManager.listen(this.controlsContainer_, 'contextmenu', (e) => {
+      if (this.controls.anySettingsMenusAreOpen()) {
+        this.controls.hideSettingsMenus();
+      }
+      // Force to close any submenu.
+      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+
+      const isDisplayed =
+          (element) => element.classList.contains('shaka-hidden') == false;
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isDisplayed)) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const controlsRect = this.controlsContainer_.getBoundingClientRect();
+
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+
+      const middleX = controlsRect.left + controlsRect.width / 2;
+      const openLeftwards = clickX > middleX;
+
+      if (openLeftwards) {
+        this.contextMenu_.style.left = 'auto';
+        this.contextMenu_.style.right = `${controlsRect.right - clickX}px`;
+      } else {
+        this.contextMenu_.style.left = `${clickX - controlsRect.left}px`;
+        this.contextMenu_.style.right = 'auto';
+      }
+
+      const middleY = controlsRect.top + controlsRect.height / 2;
+      const openUpwards = clickY > middleY;
+
+      let availableHeight;
+      if (openUpwards) {
+        this.contextMenu_.style.bottom = `${controlsRect.bottom - clickY}px`;
+        this.contextMenu_.style.top = 'auto';
+        availableHeight = clickY - controlsRect.top;
+      } else {
+        this.contextMenu_.style.bottom = 'auto';
+        this.contextMenu_.style.top = `${clickY - controlsRect.top}px`;
+        availableHeight = controlsRect.bottom - clickY;
+      }
+
+      if (availableHeight > 0) {
+        this.contextMenu_.style.maxHeight = `${availableHeight}px`;
+      }
+
+      shaka.ui.Utils.setDisplay(this.contextMenu_, true);
+    });
+
+    this.eventManager.listen(this.contextMenu_, 'click', () => {
+      const isSubMenuDisplayed = (element) => {
+        return !element.classList.contains('shaka-hidden') &&
+            element.classList.contains('shaka-sub-menu');
+      };
+      const Iterables = shaka.util.Iterables;
+      if (!Iterables.some(this.contextMenu_.childNodes, isSubMenuDisplayed)) {
+        this.closeMenu();
+      }
+    });
+
+    // Close the context menu on any left-click outside the controls container
+    this.eventManager.listen(document, 'click', (e) => {
+      if (this.controlsContainer_ &&
+          !this.contextMenu_.classList.contains('shaka-hidden') &&
+          !this.controlsContainer_.contains(/** @type {Node} */ (e.target))) {
+        this.closeMenu();
+      }
+    });
+
+    this.createChildren_();
+  }
+
+  /** @override */
+  release() {
+    this.controlsContainer_ = null;
+
+    for (const element of this.children_) {
+      element.release();
+    }
+
+    this.children_ = [];
+    super.release();
+  }
+
+  /**
+   * @export
+   */
+  closeMenu() {
+    shaka.ui.Utils.setDisplay(this.contextMenu_, false);
+    this.controls.hideTextStylePreview();
+  }
+
+  /**
+   * @param {string} name
+   * @param {!shaka.extern.IUIElement.Factory} factory
+   * @export
+   */
+  static registerElement(name, factory) {
+    shaka.ui.ContextMenu.elementNamesToFactories_.set(name, factory);
+  }
+
+  /**
+   * @private
+   */
+  createChildren_() {
+    for (const name of this.config_.contextMenuElements) {
+      const factory =
+          shaka.ui.ContextMenu.elementNamesToFactories_.get(name);
+      if (factory) {
+        goog.asserts.assert(this.controls, 'Controls should not be null!');
+        this.children_.push(factory.create(this.contextMenu_, this.controls));
+      } else {
+        shaka.log.alwaysWarn('Unrecognized context menu element:', name);
+      }
+    }
+  }
+};
+
+/** @private {!Map<string, !shaka.extern.IUIElement.Factory>} */
+shaka.ui.ContextMenu.elementNamesToFactories_ = new Map();

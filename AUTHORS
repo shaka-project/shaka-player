@@ -1,0 +1,132 @@
+# This is the official list of shaka-player authors for copyright purposes.
+# This file is distinct from the CONTRIBUTORS files.
+# See the latter for an explanation.
+#
+# Names should be added to this file with one of the following patterns:
+#
+# For individual contributors:
+# Name <email address>
+#
+# For corporate contributors:
+# Organization <fnmatch pattern>
+# See examples below or python fnmatch module documentation for more information.
+#
+# Please keep the list sorted.
+
+Adrián Gómez Llorente <adgllorente@gmail.com>
+AdsWizz <*@adswizz.com>
+Albin Larsson <albin.larsson@eyevinn.se>
+Alex Jones <alexedwardjones@gmail.com>
+Alugha GmbH <*@alugha.com>
+Alvaro Velad Galvan <ladvan91@hotmail.com>
+Amila Sampath <lucksy@gmail.com>
+Anthony Stansbridge <github@anthonystansbridge.co.uk>
+Antonio Diaz Correa <hello@antoniodiaz.me>
+Armand Zangue <armand.zangue@gmail.com>
+Benjamin Wallberg <me@bwallberg.com>
+Beverley Hatzl <beverleyhatzl@gmail.com>
+Bonnier Broadcasting <*@bonnierbroadcasting.com>
+Bryan Huh <bhh1988@gmail.com>
+Charter Communications Inc <*@charter.com>
+Code It <*@code-it.fr>
+Cristian Atehortua <cristian25a32@gmail.com>
+Daiki Matsui <mti.daiki@gmail.com>
+Damien Deis <developer.deis@gmail.com>
+Dany L'Hébreux <danylhebreux@gmail.com>
+Dave Nicholas <davenicholasuk@gmail.com>
+David Pfister <pfisterdd10@gmail.com>
+Davide Zordan <mail@davide.dev>
+dev-satoshi <dev.satoshi.1016@gmail.com>
+Dl Dador <dldador@gmail.com>
+DPG Media <*@dpgmedia.be>
+Edgeware AB <*@edgeware.tv>
+Enson Choy <enson.choy@harmonicinc.com>
+Esteban Dosztal <edosztal@gmail.com>
+Elchin Hasanov <elcin.hasanov@gmail.com>
+Fadomire <fadomire@gmail.com>
+Fernando Neira <slocomber@gmail.com>
+Fredrik Höglin <fredrik.hoglin@teliacompany.com>
+Gabor Balogh <grabomobil23@gmail.com>
+Gerardo Meola <meola.gerardo@gmail.com>
+Gil Gonen <gil.gonen@gmail.com>
+Giorgio Gamberoni <giorgio.gamberoni@gmail.com>
+Giuseppe Samela <giuseppe.samela@gmail.com>
+Google Inc. <*@google.com>
+Hassan Bashir <has.992.sky@gmail.com>
+Ivan Kohut <i.kohut@yahoo.com>
+Itay Kinnrot <Itay.Kinnrot@Kaltura.com>
+Jaeseok Lee <devsunb@gmail.com>
+Jason Palmer <jason@jason-palmer.com>
+Jean-alexandre Iragne <jairagne@gmail.com>
+Jesper Haug Karsrud <jesper.karsrud@gmail.com>
+Johan Sundström <oyasumi@gmail.com>
+Jonas Birmé <jonas.birme@eyevinn.se>
+Josh Hull <joshbuddy@gmail.com>
+Jozef Chúťka <jozefchutka@gmail.com>
+Juliane Holzt <juliane@box.fqdn.org>
+Jun Hong Chong <chongjunhong@gmail.com>
+Jürgen Kartnaller <kartnaller@lovelysystems.com>
+Justin Swaney <justin.mark.swaney@gmail.com>
+JW Player <*@jwplayer.com>
+KimKyuHoi <k546kh@gmail.com>
+Konstantin Grushetsky <github@grushetsky.net>
+Lucas Gabriel Sánchez <unkiwii@gmail.com>
+Martin Stark <martin.stark@eyevinn.se>
+Mariano Facundo Scigliano <mfacundo94@gmail.com>
+Matthias Van Parijs <matvp91@gmail.com>
+Mattias Wadman <mattias.wadman@gmail.com>
+Mehmet Guney <mguney05@gmail.com>
+Mirego <*@mirego.com>
+Mohamed Rashid <ge_rashid@hotmail.co.uk>
+Morten Hansen <mimo@mimo-design.com>
+Mudit Jain <muditsjain@gmail.com>
+Nick Desaulniers <nick@mozilla.com>
+Oskar Arvidsson <oskar@irock.se>
+Patrick Cruikshank <patrick.cruikshank@gmail.com>
+Patrick Kunka <patrick@kunkalabs.com>
+Paul Jordaan <pdjordaan@gmail.com>
+Pavel Zablockij <epavelas@gmail.com>
+Percy Tse <percy.tse@gmail.com>
+Peter Nycander <peter.nycander@gmail.com>
+Philo Inc. <*@philo.com>
+PikachuEXE <git@pikachuexe.net>
+Prakash <duggaraju@gmail.com>
+Qualabs <*@qualabs.com>
+Ravikumar Ramasamy <ravikr@kaarinfotech.com>
+Robert Colantuoni <rgc@colantuoni.com>
+Robert Galluccio <robertnw5@gmail.com>
+Rodolphe Breton <robloche@gmail.com>
+Rohan Gupta <hi@winoffrg.dev>
+Roi Lipman <roilipman@gmail.com>
+Roksolana Ivanyshyn <roksolana.ivanyshyn.pub@gmail.com>
+Rostislav Hejduk <Ross-cz@users.noreply.github.com>
+SameGoal Inc. <*@samegoal.com>
+Sanborn Hilland <sanbornh@rogers.com>
+Sander Saares <sander@saares.eu>
+Sanil Raut <sr1990003@gmail.com>
+Seongryun Jo <ocipap0531@gmail.com>
+Swank Motion Pictures Inc. <*@swankmp.com>
+TalkTalk Plc <*@talktalkplc.com>
+Tatsiana Gelahova <tatsiana.gelahova@gmail.com>
+Tian Shao <tyrelltle@gmail.com>
+Thomas Champion <thchampi@gmail.com>
+Tomas Tichy <mr.tichyt@gmail.com>
+Tomohiro Matsuzawa <thmatuza75@hotmail.com>
+Toshihiro Suzuki <t.suzuki326@gmail.com>
+uStudio Inc. <*@ustudio.com>
+Verizon Digital Media Services <*@verizondigitalmedia.com>
+ViacomCBS <*@viacomcbs.com>
+Vincent Valot <valot.vince@gmail.com>
+V-Nova Limited <*@v-nova.com>
+Wayne Morgan <wayne.morgan.dev@gmail.com>
+Wen Ren <renwen0615@gmail.com>
+Wojciech Tyczyński <tykus160@gmail.com>
+Woody Hill <wondertrot@gmail.com>
+Raymond Cheng <raycheng100@gmail.com>
+Blue Billywig <*@bluebillywig.com>
+João Nabais <jlnabais@gmail.com>
+Koen Romers <koenromers@gmail.com>
+Zhenghang Chen <czhtju@gmail.com>
+Xperi <*@xperi.com>
+Xiao Shen <dead.xx@gmail.com>
+Soumalya Bhattacharya <soumalyabhattacharya6@gmail.com>

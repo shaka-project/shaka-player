@@ -1,0 +1,336 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - v[0-9]*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      patch: ${{ steps.release.outputs.patch }}
+
+    permissions:
+      # Write to "contents" is needed to create a release
+      contents: write
+      # Write to pull-requests is needed to create and update the release PR
+      pull-requests: write
+
+    steps:
+      # On main, we never want a *patch* release PR.  Patch releases are cut
+      # from the automatic release branches, not from main.  If release-please
+      # opened a patch-level PR on main, a maintainer could merge it by mistake.
+      #
+      # This step's ONLY job is to suppress release-please in that one case.
+      # It writes "run=false" when (and only when) it is confident the pending
+      # release on main is a patch.  The release-please step below treats
+      # anything other than "false" as "go", and this step continues on error,
+      # so any unexpected failure here leaves the output unset and lets
+      # release-please run by default.
+      - name: Decide whether to run release-please
+        id: gate
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          # Only main is ever suppressed; release branches always release.
+          if [[ "${{ github.ref_name }}" != "main" ]]; then
+            echo "On a release branch: running."
+            exit 0
+          fi
+
+          # Ask release-please itself what it *would* do, as a dry run.  Keep
+          # this version roughly in step with the release-please-action above.
+          if ! npx --yes release-please@17.10.3 release-pr \
+              --token="$GH_TOKEN" \
+              --repo-url="${{ github.repository }}" \
+              --target-branch=main \
+              --config-file=.release-please-config.json \
+              --manifest-file=.release-please-manifest.json \
+              --dry-run > dry-run.log 2>&1; then
+            echo "release-please dry-run failed: running."
+            cat dry-run.log || true
+            exit 0
+          fi
+          cat dry-run.log
+
+          # Extract the proposed version from the dry-run output.
+          NEXT=$(grep -oE '^title: .*release [0-9]+\.[0-9]+\.[0-9]+' dry-run.log \
+            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)
+          echo "Proposed version: ${NEXT:-<none>}"
+          if [[ -z "$NEXT" ]]; then
+            echo "Could not find a proposed version: running."
+            exit 0
+          fi
+
+          # The one case we suppress: the third part of the version is non-zero.
+          if [[ "$NEXT" =~ \.0$ ]]; then
+            echo "Proposed version is a feature release: running."
+          else
+            echo "Proposed version is a patch release: suppressing PR on main."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Create/update release PR.  Skipped only when the gate above is confident
+      # the pending release on main would be a patch (see that step).
+      - uses: googleapis/release-please-action@v4
+        id: release
+        # NOTE: The gate only sets run=false, or nothing at all.  Don't change.
+        if: steps.gate.outputs.run != 'false'
+        with:
+          # Make sure we create the PR against the correct branch.
+          target-branch: ${{ github.ref_name }}
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # See also settings in these files:
+          manifest-file: .release-please-manifest.json
+          config-file: .release-please-config.json
+
+  # The jobs below are all conditional on a release having been created by
+  # someone merging the release PR.  They all run in parallel.
+
+  compute-latest:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created
+    outputs:
+      is_latest: ${{ steps.compute.outputs.is_latest }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          persist-credentials: false
+          # Needed to view all tags and correctly compute the latest tag.
+          fetch-depth: 0
+
+      - name: Compute latest release
+        id: compute
+        run: |
+          # We only push the demo to GitHub Pages for the latest release
+          # version from the latest release branch.
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+          TAG_NAME=${{ needs.release.outputs.tag_name }}
+
+          if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            IS_LATEST=true
+          else
+            IS_LATEST=false
+          fi
+          echo IS_LATEST=$IS_LATEST >> $GITHUB_OUTPUT
+
+          # Debug the decisions made here.
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $TAG_NAME"
+          echo "Is latest: $IS_LATEST"
+
+  tag-main:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created && needs.release.outputs.patch != '0'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Check out the origin repo, and do it at main, not the PR branch.
+          ref: main
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # We want to explicitly use these credentials to push a tag.
+          # The job is only one more step, so they don't leak.
+          persist-credentials: true
+
+      - name: Tag the main branch
+        run: |
+          # Set missing git config for the tag.
+          git config user.name "shaka-bot"
+          git config user.email "shaka-bot@users.noreply.github.com"
+          # Tag the main branch.
+          VERSION=${{ needs.release.outputs.tag_name }}
+          git tag -m "$VERSION-main" "$VERSION-main"
+          git push origin "$VERSION-main"
+
+  npm:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created
+
+    permissions:
+      # Required for OIDC ("trusted publishing")
+      id-token: write
+      # Write to "contents" is needed to attach files to the release
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          persist-credentials: false
+          # Needed to view all tags and correctly compute the latest tag.
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: actions/setup-node@v5
+        with:
+          # NOTE: OIDC fails with node less than 24.
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # NOTE: OIDC fails with npm less than 11.5.1.
+      - name: Update npm
+        run: sudo npm install -g npm@11.7
+
+      - name: Compute NPM tags
+        run: |
+          # NPM publish always sets a tag.  If you don't provide an explicit
+          # tag, you get the "latest" tag by default, but we want "latest" to
+          # always point to the highest version number.  So we set an explicit
+          # tag on every "publish" command, either "latest" for the latest, or
+          # a dummy tag otherwise.
+
+          # We only tag the NPM package as "latest" if this release is the
+          # highest version to date.
+          GIT_TAG_NAME=${{ needs.release.outputs.tag_name }}
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+
+          if [[ "$GIT_TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            NPM_LATEST=true
+          else
+            NPM_LATEST=false
+          fi
+          echo NPM_LATEST=$NPM_LATEST >> $GITHUB_ENV
+
+          # Debug the decisions made here.
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $GIT_TAG_NAME"
+          echo "NPM latest: $NPM_LATEST"
+
+      - run: npm ci
+
+      # NOTE: OIDC fails if the repository URL doesn't match package.json, but
+      # Shaka Player's prepublish checks will reject any local changes beyond
+      # the tag.  So if you fork this package, update repository.url in
+      # package.json to match.
+      - name: Publish
+        run: |
+          set -x
+
+          # Publish with an explicit tag.
+          # NOTE: --access public is required for scoped forks.
+          if [[ "$NPM_LATEST" == "true" ]]; then
+            # The "latest" tag is implied and automatic.
+            npm publish --access public
+          else
+            # You can't **not** have a tag.  So if we don't want to overwrite
+            # "latest" (implied default), we have to overwrite something else.
+            # Even with NPM 11, if you don't do this, instead of overwriting
+            # "latest", it will detect that it's inappropriate, and **fail**.
+            # See https://github.com/npm/npm/issues/10625
+            # and https://github.com/npm/cli/issues/7553
+            # See also https://github.com/npm/cli/issues/8547, which killed our
+            # system of branch-specific tags.
+            npm publish --access public --tag tag-required-see-npm-bug-10625
+          fi
+
+      # Stores the file name into the file "tarball" (unpredictable for forks).
+      - run: npm pack --ignore-scripts > tarball
+
+      - name: Attach to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        # Reads the file name from the file "tarball".
+        run: gh release upload --clobber "${{ needs.release.outputs.tag_name }}" "$(cat tarball)"
+
+  demo-release:
+    runs-on: ubuntu-latest
+    needs: [release, compute-latest]
+    if: needs.compute-latest.outputs.is_latest == 'true'
+    steps:
+      - name: Check out source repo
+        uses: actions/checkout@v5
+        with:
+          # Check out the source repo at the release tag.
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          # Needed to view all tags.
+          fetch-depth: 0
+          # No credentials.
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: ./.github/workflows/custom-actions/prep-demo-for-deployment
+
+      - name: Prep demo release commit
+        run: |
+          # Switch git context over to the demo release repo.
+          git init
+          git remote add origin https://github.com/${{ github.repository }}-release
+          git fetch origin
+
+          # Reset the tracking state to origin/main without touching the working directory.
+          git reset --soft origin/main
+
+          # Create a simple README for the repo
+          echo "# Shaka Player Demo - Release Version" > README.md
+          echo "" >> README.md
+          echo "Version ${{ needs.release.outputs.tag_name }}" >> README.md
+
+          # Prevent pages from processing, manipulating, or excluding anything.
+          touch .nojekyll
+
+          # Create a clean commit for the new demo release.
+          git add -A
+          git config user.email shaka-bot@users.noreply.github.com
+          git config user.name "Shaka Bot"
+          git commit -m 'Release demo ${{ needs.release.outputs.tag_name }}'
+
+          # Rebase it on top of the existing repo history.
+          git rebase origin/main
+
+      - name: Push demo release commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          # Authenticate with GITHUB_TOKEN.
+          gh auth setup-git
+
+          # Push the changes.
+          git push origin HEAD:main
+
+  auto-branch:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created && needs.release.outputs.patch == '0'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          fetch-depth: 0
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # We want to explicitly use these credentials to create the branch.
+          # The job is only one more step, so they don't leak.
+          persist-credentials: true
+
+      - name: Create release branch
+        run: |
+          TAG=${{ needs.release.outputs.tag_name }}
+          BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
+          git push origin refs/tags/"$TAG"^{commit}:refs/heads/"$BRANCH"

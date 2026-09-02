@@ -1,0 +1,24 @@
+{
+    "extends": "stylelint-config-standard",
+    "customSyntax": "postcss-less",
+    "rules": {
+      "at-rule-prelude-no-invalid": null,
+      "color-function-alias-notation": null,
+      "declaration-block-single-line-max-declarations": null,
+      "declaration-property-value-keyword-no-deprecated": null,
+      "declaration-property-value-no-unknown": null,
+      "font-family-no-missing-generic-family-keyword": null,
+      "function-no-unknown": [true, {
+        "ignoreFunctions": [
+          "data-uri",
+          "lighten",
+          "percentage"
+        ]
+      }],
+      "no-descending-specificity": null,
+      "property-no-vendor-prefix": null,
+      "selector-no-vendor-prefix": null,
+      "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh", "vw", "dvh", "dvw"],
+      "color-function-notation": "legacy"
+    }
+}

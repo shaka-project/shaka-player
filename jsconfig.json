@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "checkJs": false
+  },
+  "include": [
+    "lib/**/*.js",
+    "ui/**/*.js",
+    "demo/**/*.js",
+    "test/**/*.js",
+    "externs/**/*.js",
+    "third_party/**/*.js",
+    "conditional/**/*.js",
+    "shaka-player.uncompiled.js",
+    "transmuxer_worker.uncompiled.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
+}

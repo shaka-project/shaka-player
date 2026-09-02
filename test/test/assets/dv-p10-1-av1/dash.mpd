@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:ns1="urn:scte:dash:scte214-extensions" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2.00S" mediaPresentationDuration="PT46.680S" type="static">
+  <!-- Created with Bento4 mp4-dash.py, VERSION=2.0.0-637 -->
+  <Period>
+    <!-- Video -->
+    <AdaptationSet mimeType="video/mp4" segmentAlignment="true" startWithSAP="1" maxWidth="854" maxHeight="480" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <SupplementalProperty schemeIdUri="urn:mpeg:mpegB:cicp:MatrixCoefficients" value="9" />
+      <SupplementalProperty schemeIdUri="urn:mpeg:mpegB:cicp:ColourPrimaries" value="9" />
+      <SupplementalProperty schemeIdUri="urn:mpeg:mpegB:cicp:TransferCharacteristics" value="16" />
+      <Representation id="video-av01-dav1-db1p-1" codecs="av01.0.31M.10.0.111.09.16.09.0" width="854" height="480" scanType="progressive" frameRate="25" bandwidth="1362913" ns1:supplementalCodecs="dav1.10.01" ns1:supplementalProfiles="db1p">
+        <BaseURL>media-video-av01-dav1-db1p-1.mp4</BaseURL>
+        <SegmentBase indexRange="730-1049">
+          <Initialization range="0-729" />
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    </Period>
+</MPD>

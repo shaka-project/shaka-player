@@ -1,0 +1,202 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+goog.provide('shaka.ui.Utils');
+
+goog.require('goog.asserts');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Icon');
+goog.require('shaka.util.Dom');
+goog.require('shaka.util.Mp4Parser');
+goog.requireType('shaka.util.EventManager');
+
+
+shaka.ui.Utils = class {
+  /**
+   * @param {!HTMLElement} element
+   * @param {string} className
+   * @return {!HTMLElement}
+   */
+  static getFirstDescendantWithClassName(element, className) {
+    // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
+
+    const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
+    goog.asserts.assert(descendant != null, 'Should not be null!');
+
+    return descendant;
+  }
+
+
+  /**
+   * @param {!HTMLElement} element
+   * @param {string} className
+   * @return {?HTMLElement}
+   */
+  static getDescendantIfExists(element, className) {
+    const childrenWithClassName = element.getElementsByClassName(className);
+    if (childrenWithClassName.length) {
+      return /** @type {!HTMLElement} */ (childrenWithClassName[0]);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Finds a descendant of |menu| that has a 'shaka-chosen-item' class
+   * and focuses on its' parent.
+   *
+   * @param {HTMLElement} menu
+   */
+  static focusOnTheChosenItem(menu) {
+    if (!menu) {
+      return;
+    }
+    const chosenItem = shaka.ui.Utils.getDescendantIfExists(
+        menu, 'shaka-chosen-item');
+    if (chosenItem) {
+      chosenItem.parentElement.focus();
+    }
+  }
+
+
+  /**
+   * Clears out a submenu, preserving its "back to overflow menu" button so
+   * the submenu can be rebuilt from scratch.
+   *
+   * @param {!HTMLElement} menu
+   */
+  static clearMenuKeepingBackButton(menu) {
+    // 1. Save the back to menu button.
+    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+        menu, 'shaka-back-to-overflow-button');
+
+    // 2. Remove everything.
+    shaka.util.Dom.removeAllChildren(menu);
+
+    // 3. Add the back-to-menu button back.
+    menu.appendChild(backButton);
+  }
+
+
+  /**
+   * @return {!SVGElement}
+   */
+  static checkmarkIcon() {
+    const icon = new shaka.ui.Icon(null,
+        shaka.ui.Enums.MaterialDesignSVGIcons['CHECKMARK']);
+    const iconElement = icon.getSvgElement();
+    iconElement.classList.add('shaka-chosen-item');
+
+    return iconElement;
+  }
+
+
+  /**
+   * Depending on the value of display, sets/removes the css class of element to
+   * either display it or hide it.
+   *
+   * @param {Element} element
+   * @param {boolean} display
+   */
+  static setDisplay(element, display) {
+    if (!element) {
+      return;
+    }
+
+    if (display) {
+      // Removing a non-existent class doesn't throw, so, even if
+      // the element is not hidden, this should be fine.
+      element.classList.remove('shaka-hidden');
+    } else {
+      element.classList.add('shaka-hidden');
+    }
+  }
+
+  /**
+   * @param {!shaka.util.EventManager} eventManager
+   * @param {!Element} element
+   * @param {function()} onHoverOrFocus
+   * @param {function()} onLeaveOrBlur
+   */
+  static addHoverAndFocusListeners(
+      eventManager, element, onHoverOrFocus, onLeaveOrBlur) {
+    eventManager.listen(element, 'mouseenter', onHoverOrFocus);
+    eventManager.listen(element, 'mouseleave', onLeaveOrBlur);
+    eventManager.listen(element, 'focus', onHoverOrFocus);
+    eventManager.listen(element, 'blur', onLeaveOrBlur);
+  }
+
+
+  /**
+   * Builds a time string, e.g., 01:04:23, from |displayTime|.
+   *
+   * @param {number} displayTime (in seconds)
+   * @param {boolean} showHour
+   * @return {string}
+   */
+  static buildTimeString(displayTime, showHour) {
+    const d = Math.floor(displayTime / 86400);
+    const h = Math.floor((displayTime % 86400) / 3600);
+    const m = Math.floor((displayTime / 60) % 60);
+    let s = Math.floor(displayTime % 60);
+    if (s < 10) {
+      s = '0' + s;
+    }
+    let text = m + ':' + s;
+    if (showHour) {
+      if (m < 10) {
+        text = '0' + text;
+      }
+      text = h + ':' + text;
+      if (d > 0) {
+        if (h < 10) {
+          text = '0' + text;
+        }
+        text = d + ':' + text;
+      }
+    }
+    return text;
+  }
+
+
+  /**
+   * Marks a menu item as selected or unselected by toggling the ARIA state
+   * and the visual indicator class atomically.
+   * @param {!HTMLElement} button
+   * @param {!HTMLElement} chosenItemElement
+   * @param {boolean=} chosen
+   */
+  static setChosenItem(button, chosenItemElement, chosen = true) {
+    button.setAttribute('aria-checked', chosen ? 'true' : 'false');
+    chosenItemElement.classList.toggle('shaka-chosen-item', chosen);
+  }
+
+
+  /**
+   * @param {!shaka.extern.Thumbnail} thumbnail
+   * @param {!shaka.extern.Response} response
+   * @return {string}
+   */
+  static getUriFromThumbnailResponse(thumbnail, response) {
+    let uri = '';
+    if (thumbnail.codecs == 'mjpg') {
+      const parser = new shaka.util.Mp4Parser()
+          .box('mdat', shaka.util.Mp4Parser.allData((data) => {
+            const blob = new Blob([data], {type: 'image/jpeg'});
+            uri = URL.createObjectURL(blob);
+            // Free up the rest of the segment and just clone the mdat.
+          }, /* clone= */ true));
+      parser.parse(response.data, /* partialOkay= */ false);
+    } else {
+      const mimeType = thumbnail.mimeType || 'image/jpeg';
+      const blob = new Blob([response.data], {type: mimeType});
+      uri = URL.createObjectURL(blob);
+    }
+    return uri;
+  }
+};

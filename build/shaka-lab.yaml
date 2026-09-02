@@ -1,0 +1,309 @@
+# Selenium grid config for the Shaka lab.  This is the source of truth for the
+# browsers and devices in the Shaka lab at Google.
+
+# For syntax and general information, see docs/tutorials/selenium-grid-config.md
+
+
+# A set of variables to contain repeated configurations which can then be
+# referenced below.  The syntax for the variable is "name: &name", which
+# generates an "anchor" with the given name.  Later, you can inject the
+# contents of the variable with "*name".
+vars:
+  basic_firefox_config: &basic_firefox_config
+    moz:firefoxOptions:
+      # Override Firefox default preferences in the temporary profile created
+      # for each test run.
+      prefs:
+        # Overrides Selenium's explicit default setting, to allow Firefox to
+        # install the Widevine CDM on demand and use it.
+        media.gmp-manager.updateEnabled: true
+        media.gmp-widevinecdm.enabled: true
+        media.gmp-widevinecdm.visible: true
+        # Overrides Firefox's Linux-specific default setting to disable DRM.
+        media.eme.enabled: true
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        media.gpu-process-decoder: false
+        media.hardware-video-decoding.enabled: false
+        media.hardware-video-decoding.force-enabled: false
+
+  firefox_windows_config: &firefox_windows_config
+    moz:firefoxOptions:
+      # Since Firefox 145(-ish), our lab can no longer run Firefox in a Windows
+      # service without an explicit headless mode.
+      args:
+        - "-headless"
+
+  basic_chrome_config: &basic_chrome_config
+    goog:chromeOptions:
+      args:
+        # On Chrome m59+ we can test EME on platforms with pop-up prompts, such
+        # as Android and ChromeOS.  Note that this flag does not take a port
+        # number (domain vs origin).  This flag requires setting
+        # --user-data-dir as well, however, webdriver already takes care of
+        # that for us (except on Android).
+        - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+        # Normally, Chrome disallows autoplaying videos in many cases.  Enable
+        # it for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        # NOTE: This breaks WebGL-based tests, specifically on Mac.  Other
+        # platforms seem to fall back to software GL.
+        - "--disable-gpu"
+
+      # Instruct chromedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
+      excludeSwitches:
+        - "disable-component-update"
+
+  basic_edge_config: &basic_edge_config
+    ms:edgeOptions:
+      args:
+        # Normally, Edge disallows autoplaying videos in many cases.  Enable it
+        # for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
+        # Disable GPU acceleration to avoid contention for hardware resources
+        # during parallel testing and to create more stability for screenshots.
+        - "--disable-gpu"
+
+      # Instruct edgedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
+      excludeSwitches:
+        - "disable-component-update"
+
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Linux.
+  edge_linux_config: &edge_linux_config
+    ms:edgeOptions:
+      binary: /usr/bin/microsoft-edge
+
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Mac.
+  edge_mac_config: &edge_mac_config
+    ms:edgeOptions:
+      binary: /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge
+
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Mac.
+  edge_windows_config: &edge_windows_config
+    ms:edgeOptions:
+      binary: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+
+  android_chrome_config: &android_chrome_config
+    goog:chromeOptions:
+      args:
+        # On Android we must set --user-data-dir.  WebDriver does not do it for
+        # us as it does on other platforms.  Without --user-data-dir,
+        # --unsafely-allow... does not work.
+        - "--user-data-dir=/data/data/com.android.chrome/cache"
+
+      excludeSwitches:
+        # On Android, we must override the --disable-gpu set in the general
+        # Chrome settings.  This flag is not supported on Android, where GPU is
+        # required.
+        - "disable-gpu"
+
+      # Once the new session request reaches chromedriver, it will take
+      # the androidPackage option as a request to start Chrome through
+      # adb on the tethered device.
+      androidPackage: com.android.chrome
+
+  mac_chrome_config: &mac_chrome_config
+    goog:chromeOptions:
+      args:
+        # On macOS Sequoia and newer, Chrome is failing because of Local
+        # Network Permission (LNP).  Granting permission doesn't persist,
+        # because every Chrome update loses its previously-granted permissions.
+        # So we need a proxy service running to access a Karma instance running
+        # on the local network.  The proxy's permission will persist.
+        # See also https://github.com/shaka-project/shaka-lab/pull/84
+        # and https://github.com/shaka-project/shaka-lab/blob/main/shaka-lab-node/macos/local-network-privacy.md
+        - "--proxy-pac-url=data:application/x-ns-proxy-autoconfig;base64,ZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHUsaCl7dmFyIGk9L15cZCtcLlxkK1wuXGQrXC5cZCskLy50ZXN0KGgpP2g6ZG5zUmVzb2x2ZShoKTtyZXR1cm4gaSYmKGlzSW5OZXQoaSwiMTAuMC4wLjAiLCIyNTUuMC4wLjAiKXx8aXNJbk5ldChpLCIxNzIuMTYuMC4wIiwiMjU1LjI0MC4wLjAiKXx8aXNJbk5ldChpLCIxOTIuMTY4LjAuMCIsIjI1NS4yNTUuMC4wIil8fGlzSW5OZXQoaSwiMTY5LjI1NC4wLjAiLCIyNTUuMjU1LjAuMCIpKT8iUFJPWFkgMTI3LjAuMC4xOjEwODAiOiJESVJFQ1QiO30="
+
+  chromeos_config: &chromeos_config
+    # Pass Chrome arguments through generic-webdriver-server.
+    # This array will be appended after "--" instead of being set through one
+    # specific flag.  For example, with ["--foo", "--bar=baz"] in the args,
+    # this would generate a command like:
+    #   chromeos-webdriver-server.js -- --foo --bar=baz
+    # Those parameters will be passed on to Chrome instead of used by the
+    # WebDriver server.
+    generic:args:
+      # On Chrome m59+ we can test EME on platforms with pop-up prompts, such
+      # as Android and ChromeOS.  Note that this flag does not take a port
+      # number (domain vs origin).  This flag requires setting
+      # --user-data-dir as well, however, webdriver already takes care of
+      # that for us (except on Android).
+      - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+      # Normally, Chrome disallows autoplaying videos in many cases.  Enable
+      # it for testing.
+      - "--autoplay-policy=no-user-gesture-required"
+      # Allow remote attestation even though the device may be in dev mode.  This
+      # is critical for testing involving L1 content licenses.
+      - "--allow-ra-in-dev-mode"
+      # Disable browser features that try to save power by suspending media,
+      # throttling timers, etc.
+      - "--disable-background-media-suspend"
+      - "--disable-background-timer-throttling"
+      - "--disable-backgrounding-occluded-windows"
+
+  safari_tp_config: &safari_tp_config
+    safari.options:
+      technologyPreview: true
+
+
+### Mac ###
+
+ChromeMac:
+  browser: chrome
+  os: Mac
+  extra_configs:
+    - *basic_chrome_config
+    - *mac_chrome_config
+
+FirefoxMac:
+  browser: firefox
+  os: Mac
+  extra_configs:
+    - *basic_firefox_config
+
+EdgeMac:
+  browser: msedge
+  os: Mac
+  extra_configs:
+    - *basic_edge_config
+    - *edge_mac_config
+
+Safari:
+  browser: safari
+  os: Mac
+
+SafariTP:
+  # TODO(b/152646297): Safari TP not launching as of Safari 15.4
+  disabled: true
+  browser: safari
+  os: Mac
+  extra_configs:
+    - *safari_tp_config
+
+
+### Windows ###
+
+ChromeWindows:
+  browser: chrome
+  os: Windows
+  extra_configs:
+    - *basic_chrome_config
+
+FirefoxWindows:
+  browser: firefox
+  os: Windows
+  extra_configs:
+    - *basic_firefox_config
+    - *firefox_windows_config
+
+Edge:
+  browser: msedge
+  os: Windows
+  extra_configs:
+    - *basic_edge_config
+    - *edge_windows_config
+
+
+### Linux ###
+
+ChromeLinux:
+  browser: chrome
+  os: Linux
+  extra_configs:
+    - *basic_chrome_config
+
+FirefoxLinux:
+  browser: firefox
+  os: Linux
+  extra_configs:
+    - *basic_firefox_config
+
+EdgeLinux:
+  browser: msedge
+  os: Linux
+  extra_configs:
+    - *basic_edge_config
+    - *edge_linux_config
+
+
+### Misc ###
+
+ChromeAndroid:
+  # Device has failed in the lab and needs to be replaced.
+  disabled: true
+  browser: chrome
+  os: Android
+  extra_configs:
+    - *basic_chrome_config
+    - *android_chrome_config
+
+ChromecastUltra:
+  browser: chromecast
+  version: Ultra
+
+ChromecastGTV:
+  browser: chromecast
+  version: GTV
+
+ChromecastHub:
+  browser: chromecast
+  version: hub
+  # Disabled by default until we resolve issues with autoplay on Fuchsia.
+  disabled: true
+
+ChromecastSpeaker:
+  # This is a headless device, and our tests are not yet known to work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
+  browser: chromecast
+  version: speaker
+
+ChromecastV1:
+  # This is a very low-performing device, and many of our tests don't work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
+  browser: chromecast
+  version: v1
+
+ChromecastStreamer:
+  # This is publicly the "Google TV Streamer", but it's still a Chromecast, too.
+  browser: chromecast
+  version: streamer
+
+ChromeOS:
+  # TODO(b/145916766): Persistent license tests failing
+  disabled: true
+  browser: chromeos
+  # https://www.acer.com/us-en/desktops-and-all-in-ones/acer-chromebox/acer-chromebox-cxi3/indexnew
+  version: Acer-CXI3
+  extra_configs:
+    - *chromeos_config
+
+Tizen:
+  browser: tizen
+
+XboxOne:
+  browser: xboxone
+  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
+  disabled: true

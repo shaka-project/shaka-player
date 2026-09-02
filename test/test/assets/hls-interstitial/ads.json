@@ -1,0 +1,12 @@
+{
+  "ASSETS": [
+    {
+      "URI": "ad.m3u8",
+      "DURATION": 4
+    },
+    {
+      "URI": "ad1.m3u8",
+      "DURATION": 4
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/**
+ * @externs
+ */
+
+
+/**
+ * An interface for plugins that parse text tracks.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.TextParser = class {
+  /**
+   * Parse an initialization segment. Some formats do not have init
+   * segments so this won't always be called.
+   *
+   * @param {!Uint8Array} data
+   *    The data that makes up the init segment.
+   *
+   * @exportDoc
+   */
+  parseInit(data) {}
+
+  /**
+   * Parse a media segment and return the cues that make up the segment.
+   *
+   * @param {!Uint8Array} data
+   *    The next section of buffer.
+   * @param {shaka.extern.TextParser.TimeContext} timeContext
+   *    The time information that should be used to adjust the times values
+   *    for each cue.
+   * @param {?(string|undefined)} uri
+   *    The media uri.
+   * @param {!Array<string>} images
+   * @return {!Array<!shaka.text.Cue>}
+   *
+   * @exportDoc
+   */
+  parseMedia(data, timeContext, uri, images) {}
+
+  /**
+   * Notifies the manifest type.
+   *
+   * @param {string} manifestType
+   */
+  setManifestType(manifestType) {}
+};
+
+
+/**
+ * A collection of time offsets used to adjust text cue times.
+ *
+ * @typedef {{
+ *   periodStart: number,
+ *   segmentStart: number,
+ *   segmentEnd: number,
+ *   vttOffset: number,
+ *   isMpegTs: boolean,
+ * }}
+ *
+ * @property {number} periodStart
+ *     The absolute start time of the period in seconds.
+ * @property {number} segmentStart
+ *     The absolute start time of the segment in seconds.
+ * @property {number} segmentEnd
+ *     The absolute end time of the segment in seconds.
+ * @property {number} vttOffset
+ *     The start time relative to either segment or period start depending
+ *     on <code>segmentRelativeVttTiming</code> configuration.
+ * @property {boolean} isMpegTs
+ *     True if the media container type is MPEG-TS (not fMP4)
+ *     needed to know if we should use rollover wrapping when
+ *     calculating offset for webvtt cues in hls streams
+ *
+ * @exportDoc
+ */
+shaka.extern.TextParser.TimeContext;
+
+
+/**
+ * A callback used for editing cues before appending.
+ * Provides the cue, the URI of the captions file the cue was parsed from, and
+ * the time context that was used when generating that cue.
+ * You can edit the cue object passed in.
+ * @typedef {function(!shaka.text.Cue, ?string,
+ *    !shaka.extern.TextParser.TimeContext)}
+ * @exportDoc
+ */
+shaka.extern.TextParser.ModifyCueCallback;
+
+
+/**
+ * @typedef {function():!shaka.extern.TextParser}
+ * @exportDoc
+ */
+shaka.extern.TextParserPlugin;
+
+
+/**
+ * @summary
+ * An interface for plugins that display text.
+ *
+ * @description
+ * This should handle displaying the text cues on the page.  This is given the
+ * cues to display and told when to start and stop displaying.  This should only
+ * display the cues it is given and remove cues when told to.
+ *
+ * <p>
+ * This should only change whether it is displaying the cues through the
+ * <code>setTextVisibility</code> function; the app should not change the text
+ * visibility outside the top-level Player methods.
+ *
+ * @interface
+ * @extends {shaka.util.IDestroyable}
+ * @exportDoc
+ */
+shaka.extern.TextDisplayer = class {
+  /**
+   * @param {shaka.Player} player
+   * @exportDoc
+   */
+  constructor(player) {}
+
+  /**
+   * @override
+   * @exportDoc
+   */
+  destroy() {}
+
+  /**
+   * Sets the TextDisplayer configuration.
+   *
+   * @param {shaka.extern.TextDisplayerConfiguration} config
+   */
+  configure(config) {}
+
+  /**
+   * Append given text cues to the list of cues to be displayed.
+   *
+   * @param {!Array<!shaka.text.Cue>} cues
+   *    Text cues to be appended.
+   *
+   * @exportDoc
+   */
+  append(cues) {}
+
+  /**
+   * Remove all cues that are fully contained by the given time range (relative
+   * to the presentation). <code>endTime</code> will be greater to equal to
+   * <code>startTime</code>.  <code>remove</code> should only return
+   * <code>false</code> if the displayer has been destroyed. If the displayer
+   * has not been destroyed <code>remove</code> should return <code>true</code>.
+   *
+   * @param {number} startTime
+   * @param {number} endTime
+   *
+   * @return {boolean}
+   *
+   * @exportDoc
+   */
+  remove(startTime, endTime) {}
+
+  /**
+   * Returns true if text is currently visible.
+   *
+   * @return {boolean}
+   *
+   * @exportDoc
+   */
+  isTextVisible() {}
+
+  /**
+   * Set text visibility.
+   *
+   * @param {boolean} on
+   *
+   * @exportDoc
+   */
+  setTextVisibility(on) {}
+
+  /**
+   * Set the current language.
+   *
+   * @param {string} language
+   *
+   * @exportDoc
+   */
+  setTextLanguage(language) {}
+};
+
+
+/**
+ * A factory for creating a TextDisplayer.
+ *
+ * @typedef {function(!shaka.Player):!shaka.extern.TextDisplayer}
+ * @exportDoc
+ */
+shaka.extern.TextDisplayer.Factory;

@@ -1,0 +1,6 @@
+# Cast support.
+
++../../lib/cast/cast_proxy.js
++../../lib/cast/cast_receiver.js
++../../lib/cast/cast_sender.js
++../../lib/cast/cast_utils.js

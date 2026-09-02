@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<MPD xmlns:scte214="urn:scte:dash:scte214-extensions" xmlns="urn:mpeg:dash:schema:mpd:2011" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT1.98S" mediaPresentationDuration="PT1M11.708S" type="static">
+  <Period>
+    <AdaptationSet mimeType="video/mp4" segmentAlignment="true" startWithSAP="1" maxWidth="854" maxHeight="480" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+      <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:MatrixCoefficients" value="9"/>
+      <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:ColourPrimaries" value="9"/>
+      <EssentialProperty schemeIdUri="urn:mpeg:mpegB:cicp:TransferCharacteristics" value="18"/>
+      <Representation id="video-hvc1-dvh1-db4h-1" codecs="hvc1.2.4.L90.b0" width="854" height="480" scanType="progressive" frameRate="24" bandwidth="1216343" scte214:supplementalCodecs="dvh1.08.01" scte214:supplementalProfiles="db4h">
+        <BaseURL>media-video-hvc1-dvh1-db4h-1.mp4</BaseURL>
+        <SegmentBase indexRange="803-1266">
+          <Initialization range="0-802"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

@@ -1,0 +1,232 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+describe('Ad manager', () => {
+  const originalGoogle = window['google'];
+  /** @type {!shaka.test.FakeVideo} */
+  let mockVideo;
+  /** @type {!shaka.Player} */
+  let player;
+  /** @type {shaka.extern.IAdManager} */
+  let adManager;
+  /** @type {!HTMLElement} */
+  let adContainer;
+  /** @type {google.ima.AdsRenderingSettings} */
+  let adsRenderingSettings;
+
+  beforeEach(async () => {
+    window['google'] = null;
+    mockVideo = new shaka.test.FakeVideo();
+    player = new shaka.Player();
+    await player.attach(mockVideo, /* initializeMediaSource= */ false);
+    adManager = player.getAdManager();
+    expect(adManager instanceof shaka.ads.AdManager).toBe(true);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    // Since we are using a fake video we cannot use a custom playhead tracker
+    // in these tests.
+    config.customPlayheadTracker = false;
+    adManager.configure(config);
+
+    adContainer =
+      /** @type {!HTMLElement} */ (document.createElement('div'));
+
+    adManager.setContainers(adContainer, adContainer);
+  });
+
+  afterEach(() => {
+    window['google'] = originalGoogle;
+  });
+
+  describe('client side', () => {
+    it('doesn\'t request ads if CS events return no ad', () => {
+      setupFakeIMA();
+
+      const request = new google.ima.AdsRequest();
+      request.adTagUrl = 'fakeTag';
+
+      /** @type {google.ima.AdsLoader} */
+      let mockAdsLoaderInstance;
+      let numAdsRequested = 0;
+      /** @type {google.ima.AdsManager} */
+      let mockAdsManagerInstance;
+      /** @type {Event} */
+      let loadEvent;
+      /** @type {Event} */
+      let startedEventA;
+      /** @type {Event} */
+      let startedEventB;
+
+      /** @suppress {invalidCasts} */
+      function makeMocks() {
+        const mockAdsLoader = class extends shaka.util.FakeEventTarget {
+          constructor(container) {
+            super();
+            mockAdsLoaderInstance = /** @type {!google.ima.AdsLoader} */ (this);
+          }
+
+          getSettings() {
+            return {
+              setPlayerType: (type) => {},
+              setPlayerVersion: (version) => {},
+            };
+          }
+
+          requestAds(imaRequest) {
+            numAdsRequested += 1;
+          }
+
+          contentComplete() {
+            // Nothing
+          }
+        };
+        window['google'].ima.AdsLoader = mockAdsLoader;
+
+        loadEvent = /** @type {!google.ima.AdsManagerLoadedEvent} */ (
+          new shaka.util.FakeEvent(
+              google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED));
+        loadEvent.getAdsManager = () => {
+          const MockAdManager = class extends shaka.util.FakeEventTarget {
+            constructor() {
+              super();
+              mockAdsManagerInstance =
+              /** @type {!google.ima.AdsManager} */ (this);
+            }
+
+            destroy() {
+              // Nothing
+            }
+
+            getCuePoints() {
+              return [];
+            }
+
+            getVolume() {
+              return 0;
+            }
+
+            setVolume() {
+              // Nothing
+            }
+          };
+          return new MockAdManager();
+        };
+        startedEventA = /** @type {!google.ima.AdEvent} */ (
+          new shaka.util.FakeEvent(google.ima.AdEvent.Type.STARTED));
+        startedEventA.getAd = () => {
+          return null;
+        };
+        startedEventB = /** @type {!google.ima.AdEvent} */ (
+          new shaka.util.FakeEvent(google.ima.AdEvent.Type.STARTED));
+        startedEventB.getAd = () => {
+          return {
+            isLinear: () => true,
+          };
+        };
+      }
+      makeMocks();
+
+      // Set up event listeners.
+      const eventManager = new shaka.util.EventManager();
+      let loaded = false;
+      let numAdStarted = 0;
+      eventManager.listen(adManager,
+          shaka.ads.Utils.IMA_AD_MANAGER_LOADED, () => {
+            loaded = true;
+          });
+      eventManager.listen(adManager, shaka.ads.Utils.AD_STARTED, () => {
+        numAdStarted += 1;
+      });
+
+      // Set up the ad manager.
+
+      // Request an ad, but create an event with no ad.
+      adManager.requestClientSideAds(request, adsRenderingSettings);
+
+      goog.asserts.assert(loadEvent != null, 'loadEvent exists');
+      mockAdsLoaderInstance.dispatchEvent(/** @type {!Event} */ (loadEvent));
+      expect(loaded).toBe(true);
+
+      expect(numAdsRequested).toBe(1);
+      mockAdsManagerInstance.dispatchEvent(/** @type {!Event} */ (
+        startedEventA));
+      expect(numAdStarted).toBe(0);
+
+      // Request another ad. This time, the IMA event has an ad, so the ad
+      // manager should fire a started event.
+      adManager.requestClientSideAds(request, null);
+      expect(numAdsRequested).toBe(2);
+      mockAdsManagerInstance.dispatchEvent(/** @type {!Event} */ (
+        startedEventB));
+      expect(numAdStarted).toBe(1);
+    });
+  });
+
+  /**
+   * @param {shaka.util.Error.Severity} severity
+   * @param {shaka.util.Error.Code} code
+   * @return {Object}
+   */
+  function createError(severity, code) {
+    return shaka.test.Util.jasmineError(new shaka.util.Error(
+        severity,
+        shaka.util.Error.Category.ADS,
+        code));
+  }
+
+  function setupFakeIMA() {
+    window['google'] = {};
+    window['google'].ima = {};
+    window['google'].ima.AdsLoader = {};
+    window['google'].ima.dai = {};
+    window['google'].ima.AdsRenderingSettings = class {};
+    window['google'].ima.AdsRequest = class {};
+    window['google'].ima.dai.api = {};
+    window['google'].ima.dai.api.StreamRequest = class {};
+    window['google'].ima.settings = {};
+    window['google'].ima.settings.setLocale = (locale) => {};
+    // eslint-disable-next-line @stylistic/max-len
+    window['google'].ima.settings.setDisableCustomPlaybackForIOS10Plus = (disable) => {};
+    window['google'].ima.AdsManagerLoadedEvent = {};
+    window['google'].ima.AdsManagerLoadedEvent.Type = {
+      ADS_MANAGER_LOADED: 'ADS_MANAGER_LOADED',
+    };
+    window['google'].ima.AdErrorEvent = {};
+    window['google'].ima.AdErrorEvent.Type = {
+      AD_ERROR: 'AD_ERROR',
+    };
+    window['google'].ima.AdEvent = {};
+    window['google'].ima.AdEvent.Type = {
+      CONTENT_PAUSE_REQUESTED: 'CONTENT_PAUSE_REQUESTED',
+      STARTED: 'STARTED',
+      FIRST_QUARTILE: 'FIRST_QUARTILE',
+      MIDPOINT: 'MIDPOINT',
+      THIRD_QUARTILE: 'THIRD_QUARTILE',
+      COMPLETE: 'COMPLETE',
+      CONTENT_RESUME_REQUESTED: 'CONTENT_RESUME_REQUESTED',
+      ALL_ADS_COMPLETED: 'ALL_ADS_COMPLETED',
+      SKIPPED: 'SKIPPED',
+      VOLUME_CHANGED: 'VOLUME_CHANGED',
+      VOLUME_MUTED: 'VOLUME_MUTED',
+      PAUSED: 'PAUSED',
+      RESUMED: 'RESUMED',
+      SKIPPABLE_STATE_CHANGED: 'SKIPPABLE_STATE_CHANGED',
+      CLICK: 'CLICK',
+      AD_PROGRESS: 'AD_PROGRESS',
+      AD_BUFFERING: 'AD_BUFFERING',
+      IMPRESSION: 'IMPRESSION',
+      DURATION_CHANGE: 'DURATION_CHANGE',
+      USER_CLOSE: 'USER_CLOSE',
+      LOADED: 'LOADED',
+      LINEAR_CHANGED: 'LINEAR_CHANGED',
+      AD_METADATA: 'AD_METADATA',
+      LOG: 'LOG',
+      AD_BREAK_READY: 'AD_BREAK_READY',
+      INTERACTION: 'INTERACTION',
+    };
+    window['google'].ima.AdDisplayContainer = class { initialize() {} };
+  }
+});

@@ -1,0 +1,1827 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+goog.provide('shakaDemo.Config');
+
+goog.require('goog.asserts');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.DatalistInput');
+goog.require('shakaDemo.Icons');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.NumberInput');
+goog.require('shakaDemo.SelectInput');
+goog.require('shakaDemo.TextInput');
+goog.requireType('shakaDemo.Input');
+
+/** @type {?shakaDemo.Config} */
+let shakaDemoConfig;
+
+
+/**
+ * Shaka Player demo, configuration page layout.
+ */
+shakaDemo.Config = class {
+  /**
+   * Register the page configuration.
+   */
+  static init() {
+    const container = shakaDemoMain.getHamburgerMenu();
+    shakaDemoConfig = new shakaDemo.Config(container);
+  }
+
+  /** @param {!Element} container */
+  constructor(container) {
+    /** @private {!Element} */
+    this.container_ = container;
+
+    /**
+     * A list of all sections.
+     * @private {!Array<!shakaDemo.InputContainer>}
+     */
+    this.sections_ = [];
+
+    /**
+     * The input object for the control currently being constructed.
+     * @private {?shakaDemo.Input}
+     */
+    this.latestInput_ = null;
+
+    this.reload_();
+
+    // Listen to external config changes (i.e. from hash changes).
+    document.addEventListener('shaka-main-config-change', () => {
+      // Respond to them by remaking. This is to avoid triggering any config
+      // changes based on the config changes.
+      this.reloadAndSaveState_();
+    });
+    document.addEventListener('shaka-main-drawer-state-change', () => {
+      this.setContentAvailability_(shakaDemoMain.getIsDrawerOpen());
+    });
+    this.setContentAvailability_(shakaDemoMain.getIsDrawerOpen());
+  }
+
+  /**
+   * @param {boolean} availability
+   * @private
+   */
+  setContentAvailability_(availability) {
+    if (availability) {
+      this.container_.classList.remove('hidden');
+    } else {
+      this.container_.classList.add('hidden');
+    }
+  }
+
+  /** @private */
+  reload_() {
+    shaka.util.Dom.removeAllChildren(this.container_);
+    this.sections_ = [];
+
+    this.addMetaSection_();
+    this.addAudioPreferenceSection_();
+    this.addTextPreferenceSection_();
+    this.addVideoPreferenceSection_();
+    this.addAccessibilitySection_();
+    this.addAbrSection_();
+    this.addOfflineSection_();
+    this.addDrmSection_();
+    this.addStreamingSection_();
+    this.addNetworkingSection_();
+    this.addMediaSourceSection_();
+    this.addManifestSection_();
+    this.addDashManifestSection_();
+    this.addHlsManifestSection_();
+    this.addMsfManifestSection_();
+    this.addRetrySection_('manifest', 'Manifest Retry Parameters');
+    this.addRestrictionsSection_('', 'Restrictions');
+    this.addTextDisplayerSection_();
+    this.addCmcdSection_();
+    this.addCmsdSection_();
+    this.addLcevcSection_();
+    this.addAdsSection_();
+    this.addQueueManagerSection_();
+    this.addUISection_();
+    this.addUISeekBarColorsSection_();
+    this.addUIVolumeBarColorsSection_();
+    this.addUIPlaybackRateBarColorsSection_();
+    this.addUIQualityMarksSection_();
+    this.addUIMediaSessionSection_();
+    this.addUIDocumentPiPSection_();
+    this.addUIShortcutsSection_();
+  }
+
+  /**
+   * Remake the contents of the div. Unlike |reload_|, this will also remember
+   * which sections were open.
+   * @private
+   */
+  reloadAndSaveState_() {
+    const wasOpenArray = this.sections_.map((section) => section.getIsOpen());
+    this.reload_();
+    for (let i = 0; i < wasOpenArray.length; i++) {
+      const wasOpen = wasOpenArray[i];
+      const section = this.sections_[i];
+      if (wasOpen) {
+        section.open();
+      }
+    }
+
+    // Update the componentHandler, to account for any new MDL elements added.
+    componentHandler.upgradeDom();
+  }
+
+  /** @private */
+  addDrmSection_() {
+    const widevineRobustnessLevels = {
+      '': '',
+      'SW_SECURE_CRYPTO': 'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE': 'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO': 'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE': 'HW_SECURE_DECODE',
+      'HW_SECURE_ALL': 'HW_SECURE_ALL',
+    };
+    const docLink = this.resolveExternLink_('.DrmConfiguration');
+    this.addSection_('DRM', docLink)
+        .addBoolInput_('Delay License Request Until Played',
+            'drm.delayLicenseRequestUntilPlayed')
+        .addBoolInput_('Log license exchange data', 'drm.logLicenseExchange')
+        .addNumberInput_('Update expiration time',
+            'drm.updateExpirationTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addBoolInput_('Parse inband "pssh" from media segments',
+            'drm.parseInbandPsshEnabled')
+        .addTextInput_('Min HDCP version', 'drm.minHdcpVersion')
+        .addBoolInput_('Ignore duplicate init data',
+            'drm.ignoreDuplicateInitData')
+        .addSelectInput_('Default audio robustness for Widevine',
+            'drm.defaultAudioRobustnessForWidevine',
+            widevineRobustnessLevels, widevineRobustnessLevels)
+        .addSelectInput_('Default video robustness for Widevine',
+            'drm.defaultVideoRobustnessForWidevine',
+            widevineRobustnessLevels, widevineRobustnessLevels)
+        .addNumberInput_('Renewal Interval (sec)',
+            'drm.renewalIntervalSec',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true)
+        .addArrayStringInput_('preferredKeySystems',
+            'drm.preferredKeySystems');
+    const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
+    const addDRMAdvancedField = (name, valueName, suggestions,
+        arrayString = false) => {
+      // All advanced fields of a given type are set at once.
+      this.addDatalistInput_(name, suggestions, (input) => {
+        // Add in any common drmSystem not currently in advanced.
+        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
+          if (!(drmSystem in advanced)) {
+            advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
+          }
+        }
+        // Set the robustness.
+        for (const drmSystem in advanced) {
+          advanced[drmSystem][valueName] = arrayString ?
+              input.value.split(',').filter(Boolean) :
+              input.value;
+        }
+        shakaDemoMain.configure('drm.advanced', advanced);
+        shakaDemoMain.remakeHash();
+      });
+      const keySystem = Object.keys(advanced)[0];
+      if (keySystem) {
+        const currentValue = advanced[keySystem][valueName];
+        this.latestInput_.input().value = currentValue;
+      }
+    };
+
+    const robustnessSuggestions = [
+      'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE',
+      'HW_SECURE_ALL',
+      '150',
+      '2000',
+      '3000',
+    ];
+
+    const sessionTypeSuggestions = ['temporary', 'persistent-license'];
+
+    addDRMAdvancedField(
+        'Video Robustness', 'videoRobustness', robustnessSuggestions,
+        /* arrayString= */ true);
+    addDRMAdvancedField(
+        'Audio Robustness', 'audioRobustness', robustnessSuggestions,
+        /* arrayString= */ true);
+    addDRMAdvancedField('Session Type', 'sessionType', sessionTypeSuggestions);
+
+    this.addRetrySection_('drm', 'DRM Retry Parameters');
+  }
+
+  /** @private */
+  addManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('Manifest', docLink)
+        .addNumberInput_('Availability Window Override',
+            'manifest.availabilityWindowOverride',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addNumberInput_('Default Presentation Delay',
+            'manifest.defaultPresentationDelay',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addBoolInput_('Disable Audio', 'manifest.disableAudio')
+        .addBoolInput_('Disable Video', 'manifest.disableVideo')
+        .addBoolInput_('Disable Text', 'manifest.disableText')
+        .addBoolInput_('Disable Thumbnails', 'manifest.disableThumbnails')
+        .addBoolInput_('Disable I-Frames', 'manifest.disableIFrames')
+        .addBoolInput_('Disable Chapters', 'manifest.disableChapters')
+        .addBoolInput_('Enable segment-relative VTT Timing',
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_('Continue loading when paused',
+            'manifest.continueLoadingWhenPaused')
+        .addBoolInput_('Ignore supplemental codecs',
+            'manifest.ignoreSupplementalCodecs')
+        .addNumberInput_('Override the Update time of the manifest',
+            'manifest.updatePeriod')
+        .addBoolInput_('Ignore DRM Info', 'manifest.ignoreDrmInfo')
+        .addBoolInput_('Enable Audio Groups', 'manifest.enableAudioGroups');
+  }
+
+  /** @private */
+  addDashManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('DASH Manifest', docLink)
+        .addBoolInput_('Auto-Correct DASH Drift',
+            'manifest.dash.autoCorrectDrift')
+        .addBoolInput_('Xlink Should Fail Gracefully',
+            'manifest.dash.xlinkFailGracefully')
+        .addBoolInput_('Ignore DASH suggestedPresentationDelay',
+            'manifest.dash.ignoreSuggestedPresentationDelay')
+        .addBoolInput_('Ignore empty DASH AdaptationSets',
+            'manifest.dash.ignoreEmptyAdaptationSet')
+        .addBoolInput_('Ignore DASH maxSegmentDuration',
+            'manifest.dash.ignoreMaxSegmentDuration')
+        .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
+        .addBoolInput_('Ignore Min Buffer Time',
+            'manifest.dash.ignoreMinBufferTime')
+        .addNumberInput_('Initial Segment Limit',
+            'manifest.dash.initialSegmentLimit',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addBoolInput_('Enable DASH sequence mode',
+            'manifest.dash.sequenceMode')
+        .addBoolInput_('Use stream once in period flattening',
+            'manifest.dash.useStreamOnceInPeriodFlattening')
+        .addBoolInput_('Enable fast switching',
+            'manifest.dash.enableFastSwitching');
+  }
+
+  /** @private */
+  addHlsManifestSection_() {
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('HLS Manifest', docLink)
+        .addBoolInput_('Ignore HLS Text Stream Failures',
+            'manifest.hls.ignoreTextStreamFailures')
+        .addBoolInput_('Ignore HLS Image Stream Failures',
+            'manifest.hls.ignoreImageStreamFailures')
+        .addTextInput_('Default Audio Codec', 'manifest.hls.defaultAudioCodec')
+        .addTextInput_('Default Video Codec', 'manifest.hls.defaultVideoCodec')
+        .addTextInput_('Default media playlist full mime type',
+            'manifest.hls.mediaPlaylistFullMimeType')
+        .addBoolInput_('Ignore Program Date Time from manifest',
+            'manifest.hls.ignoreManifestProgramDateTime')
+        .addNumberInput_('Live segments delay',
+            'manifest.hls.liveSegmentsDelay')
+        .addBoolInput_('Enable HLS sequence mode', 'manifest.hls.sequenceMode')
+        .addBoolInput_('Ignore Manifest Timestamps in Segments Mode',
+            'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
+        .addBoolInput_('Disable codec guessing',
+            'manifest.hls.disableCodecGuessing')
+        .addBoolInput_('Disable closed caption detection',
+            'manifest.hls.disableClosedCaptionsDetection')
+        .addBoolInput_('Allow LL-HLS byterange optimization',
+            'manifest.hls.allowLowLatencyByteRangeOptimization')
+        .addBoolInput_('Allow range request to guess mime type',
+            'manifest.hls.allowRangeRequestsToGuessMimeType')
+        .addTextInput_('Chapter URI',
+            'manifest.hls.chaptersUri');
+  }
+
+  /** @private */
+  addMsfManifestSection_() {
+    const msfFilterTypeOptions = shaka.config.MsfFilterType;
+    const msfFilterTypeOptionNames = {
+      'NONE': 'NONE',
+      'NEXT_GROUP_START': 'NEXT_GROUP_START',
+      'LARGEST_OBJECT': 'LARGEST_OBJECT',
+      'ABSOLUTE_START': 'ABSOLUTE_START',
+      'ABSOLUTE_RANGE': 'ABSOLUTE_RANGE',
+    };
+
+    const msfVersionOptions = shaka.config.MsfVersion;
+    const msfVersionOptionNames = {
+      'AUTO': 'Auto',
+      'DRAFT_14': 'draft-14 (deprecated)',
+      'DRAFT_16': 'draft-16',
+      'DRAFT_18': 'draft-18',
+    };
+
+    const docLink = this.resolveExternLink_('.ManifestConfiguration');
+    this.addSection_('MSF', docLink)
+        .addTextInput_('Fingerprint URI',
+            'manifest.msf.fingerprintUri')
+        .addArrayStringInput_('Namespaces',
+            'manifest.msf.namespaces')
+        .addTextInput_('Authorization token',
+            'manifest.msf.authorizationToken')
+        .addSelectInput_('Subscribe FilterType',
+            'manifest.msf.subscribeFilterType',
+            msfFilterTypeOptions,
+            msfFilterTypeOptionNames)
+        .addBoolInput_('Use FETCH to retrieve the catalog',
+            'manifest.msf.useFetchCatalog')
+        .addSelectInput_('MoQ version used in the connection',
+            'manifest.msf.version',
+            msfVersionOptions,
+            msfVersionOptionNames);
+  }
+
+  /** @private */
+  addAbrSection_() {
+    const docLink = this.resolveExternLink_('.AbrConfiguration');
+    this.addSection_('Adaptation', docLink)
+        .addBoolInput_('Enabled', 'abr.enabled')
+        .addBoolInput_('Use Network Information API',
+            'abr.useNetworkInformation')
+        .addNumberInput_('Default Bandwidth Estimate',
+            'abr.defaultBandwidthEstimate')
+        .addNumberInput_('Bandwidth Downgrade Target',
+            'abr.bandwidthDowngradeTarget',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Bandwidth Upgrade Target',
+            'abr.bandwidthUpgradeTarget',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Switch Interval', 'abr.switchInterval',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Min total Bytes', 'abr.advanced.minTotalBytes')
+        .addNumberInput_('Min Bytes', 'abr.advanced.minBytes')
+        .addNumberInput_('Fast half life', 'abr.advanced.fastHalfLife',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Slow half life', 'abr.advanced.slowHalfLife',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Restrict to element size', 'abr.restrictToElementSize')
+        .addBoolInput_('Restrict to screen size', 'abr.restrictToScreenSize')
+        .addBoolInput_('Ignore device pixel ratio',
+            'abr.ignoreDevicePixelRatio')
+        .addBoolInput_('Clear video buffer on abr rendition switch',
+            'abr.clearBufferSwitch')
+        .addNumberInput_('Safe margin on abr switch rendition',
+            'abr.safeMarginSwitch',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Milliseconds to consider a request cached',
+            'abr.cacheLoadThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Minimum time to switch',
+            'abr.minTimeToSwitch',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addBoolInput_('Prefer Network Information bandwidth',
+            'abr.preferNetworkInformationBandwidth')
+        .addBoolInput_('Dropped Frames Protection Enabled',
+            'abr.droppedFrames')
+        .addNumberInput_('Dropped Frames Threshold',
+            'abr.advanced.droppedFramesThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frames Interval',
+            'abr.advanced.droppedFramesInterval',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Dropped Frames Ban Duration',
+            'abr.advanced.droppedFramesBanDuration');
+    this.addRestrictionsSection_('abr', 'Adaptation Restrictions');
+  }
+
+  /** @private */
+  addTextDisplayerSection_() {
+    const positionAreaOptions = shaka.config.PositionArea;
+    const positionAreaOptionNames = {
+      'DEFAULT': 'Default',
+      'TOP_LEFT': 'top left',
+      'TOP_CENTER': 'top center',
+      'TOP_RIGHT': 'top right',
+      'CENTER_LEFT': 'center left',
+      'CENTER': 'center',
+      'CENTER_RIGHT': 'center right',
+      'BOTTOM_LEFT': 'bottom left',
+      'BOTTOM_CENTER': 'bottom center',
+      'BOTTOM_RIGHT': 'bottom right',
+    };
+
+    const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
+    this.addSection_('Text displayer', docLink)
+        .addNumberInput_('Font scale factor',
+            'textDisplayer.fontScaleFactor',
+            /* canBeDecimal= */ true)
+        .addSelectInput_('Position area',
+            'textDisplayer.positionArea',
+            positionAreaOptions,
+            positionAreaOptionNames)
+        .addNumberInput_('Subtitle delay (seconds)',
+            'textDisplayer.subtitleDelay',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Suspend rendering when hidden',
+            'textDisplayer.suspendRenderingWhenHidden');
+  }
+
+  /** @private */
+  addCmcdSection_() {
+    const docLink = this.resolveExternLink_('.CmcdConfiguration');
+    this.addSection_('CMCD', docLink)
+        .addBoolInput_('Enabled', 'cmcd.enabled')
+        .addTextInput_('Session ID', 'cmcd.sessionId')
+        .addTextInput_('Content ID', 'cmcd.contentId')
+        .addNumberInput_('Version', 'cmcd.version',
+            /* canBeDecimal= */ false)
+        .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+
+    // CMCD v2 event-mode targets. JSON because the typedef is an
+    // array of objects with several fields each; a per-field UI would
+    // bloat the demo significantly.
+    const eventTargetsTooltip =
+        'JSON array of event-mode CmcdTarget objects, e.g. ' +
+        '[{"enabled":true,"url":"https://collector/cmcd",' +
+        '"events":["ps","rr"],"interval":30,"includeKeys":[]}]';
+    const onTargetsChange = (input) => {
+      try {
+        const parsed = input.value.trim() ? JSON.parse(input.value) : [];
+        shakaDemoMain.configure('cmcd.eventTargets', parsed);
+        shakaDemoMain.remakeHash();
+        input.setCustomValidity('');
+      } catch (e) {
+        input.setCustomValidity('Invalid JSON');
+      }
+    };
+    this.addCustomTextInput_(
+        'Event Targets (JSON)', onTargetsChange, eventTargetsTooltip);
+    const current = /** @type {Array<*>} */ (
+      shakaDemoMain.getCurrentConfigValue('cmcd.eventTargets'));
+    this.latestInput_.input().value =
+        (current && current.length) ? JSON.stringify(current) : '';
+  }
+
+  /** @private */
+  addCmsdSection_() {
+    const docLink = this.resolveExternLink_('.CmsdConfiguration');
+    this.addSection_('CMSD', docLink)
+        .addBoolInput_('Enabled', 'cmsd.enabled')
+        .addBoolInput_('Apply maximum suggested bitrate',
+            'cmsd.applyMaximumSuggestedBitrate')
+        .addNumberInput_('Estimated throughput weight ratio',
+            'cmsd.estimatedThroughputWeightRatio',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
+  }
+
+  /** @private */
+  addLcevcSection_() {
+    const docLink = this.resolveExternLink_('.LcevcConfiguration');
+    this.addSection_('MPEG-5 Part-2 LCEVC', docLink)
+        .addBoolInput_('Enabled', 'lcevc.enabled')
+        .addBoolInput_('LCEVC Dynamic Performance scaling',
+            'lcevc.dynamicPerformanceScaling')
+        .addNumberInput_('LCEVC Log Level', 'lcevc.logLevel')
+        .addBoolInput_('Draw LCEVC Logo', 'lcevc.drawLogo')
+        .addBoolInput_('Enable LCEVC Poster', 'lcevc.poster');
+  }
+
+  /** @private */
+  addAdsSection_() {
+    const docLink = this.resolveExternLink_('.AdsConfiguration');
+    this.addSection_('Ads', docLink)
+        .addBoolInput_('Custom playhead tracker',
+            'ads.customPlayheadTracker')
+        .addBoolInput_('Skip play detection',
+            'ads.skipPlayDetection')
+        .addBoolInput_('Supports multiple media elements',
+            'ads.supportsMultipleMediaElements')
+        .addBoolInput_('Ignore HLS Interstitial',
+            'ads.disableHLSInterstitial')
+        .addBoolInput_('Ignore DASH Interstitial',
+            'ads.disableDASHInterstitial')
+        .addBoolInput_('Allow preload on DOM elements',
+            'ads.allowPreloadOnDomElements')
+        .addBoolInput_('Allow start in the middle of an interstitial',
+            'ads.allowStartInMiddleOfInterstitial')
+        .addBoolInput_('Disable tracking events',
+            'ads.disableTrackingEvents')
+        .addBoolInput_('Disable Snapback',
+            'ads.disableSnapback')
+        .addBoolInput_('Disable played linear ad skip (MediaTailor)',
+            'ads.disablePlayedLinearAdSkip')
+        .addBoolInput_('Disable tracking for played linear ads (MediaTailor)',
+            'ads.disableTrackingForPlayedLinearAds')
+        .addNumberInput_('Interstitial preload ahead time',
+            'ads.interstitialPreloadAheadTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
+  }
+
+  /** @private */
+  addQueueManagerSection_() {
+    const repeatModeOptions = shaka.config.RepeatMode;
+    const repeatModeOptionNames = {
+      'OFF': 'Off',
+      'ALL': 'All',
+      'SINGLE': 'Single',
+    };
+
+    const docLink = this.resolveExternLink_('.QueueConfiguration');
+    this.addSection_('Queue Manager', docLink)
+        .addNumberInput_('Time window at end to preload next Queue item',
+            'queue.preloadNextUrlWindow',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addBoolInput_('Allow preload prev item',
+            'queue.preloadPrevItem')
+        .addSelectInput_('Repeat mode',
+            'queue.repeatMode',
+            repeatModeOptions,
+            repeatModeOptionNames)
+        .addBoolInput_('Auto play next item',
+            'queue.autoPlayNext');
+  }
+
+  /** @private */
+  addAccessibilitySection_() {
+    const docLink = this.resolveExternLink_('.AccessibilityConfiguration');
+    this.addSection_('Accessibility', docLink)
+        .addBoolInput_(
+            'Handle forced subtitles automatically',
+            'accessibility.handleForcedSubtitlesAutomatically');
+    this.addSpeechToTextSection_();
+  }
+
+  /** @private */
+  addSpeechToTextSection_() {
+    const docLink = this.resolveExternLink_('.SpeechToTextConfiguration');
+    this.addSection_('Speech to text', docLink);
+    this.addBoolInput_('Speech to text', 'accessibility.speechToText.enabled')
+        .addNumberInput_('Max text length (characters)',
+            'accessibility.speechToText.maxTextLength')
+        .addBoolInput_('Performed locally on the user’s device',
+            'accessibility.speechToText.processLocally')
+        .addArrayStringInput_('Languages to translate into',
+            'accessibility.speechToText.languagesToTranslate');
+  }
+
+  /**
+   * @param {string} category
+   * @param {string} sectionName
+   * @private
+   */
+  addRestrictionsSection_(category, sectionName) {
+    const prefix = (category ? category + '.' : '') + 'restrictions.';
+    const docLink = this.resolveExternLink_('.Restrictions');
+    this.addSection_(sectionName, docLink)
+        .addNumberInput_('Min Width', prefix + 'minWidth')
+        .addNumberInput_('Max Width', prefix + 'maxWidth')
+        .addNumberInput_('Min Height', prefix + 'minHeight')
+        .addNumberInput_('Max Height', prefix + 'maxHeight')
+        .addNumberInput_('Min Pixels', prefix + 'minPixels')
+        .addNumberInput_('Max Pixels', prefix + 'maxPixels')
+        .addNumberInput_('Min Framerate', prefix + 'minFrameRate')
+        .addNumberInput_('Max Framerate', prefix + 'maxFrameRate')
+        .addNumberInput_('Min Bandwidth', prefix + 'minBandwidth')
+        .addNumberInput_('Max Bandwidth', prefix + 'maxBandwidth')
+        .addNumberInput_('Min Channels Count', prefix + 'minChannelsCount')
+        .addNumberInput_('Max Channels Count', prefix + 'maxChannelsCount');
+  }
+
+  /**
+   * @param {string} category
+   * @param {string} sectionName
+   * @private
+   */
+  addRetrySection_(category, sectionName) {
+    const prefix = category + '.retryParameters.';
+    const docLink = this.resolveExternLink_('.RetryParameters');
+    this.addSection_(sectionName, docLink)
+        .addNumberInput_('Max Attempts', prefix + 'maxAttempts',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false)
+        .addNumberInput_('Base Delay', prefix + 'baseDelay',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Backoff Factor', prefix + 'backoffFactor',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Fuzz Factor', prefix + 'fuzzFactor',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Timeout Factor', prefix + 'timeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Stall Timeout', prefix + 'stallTimeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Connection Timeout', prefix + 'connectionTimeout',
+            /* canBeDecimal= */ true);
+  }
+
+  /** @private */
+  addOfflineSection_() {
+    const docLink = this.resolveExternLink_('.OfflineConfiguration');
+    this.addSection_('Offline', docLink)
+        .addBoolInput_('Use Persistent Licenses',
+            'offline.usePersistentLicense')
+        .addNumberInput_('Number of Parallel Downloads',
+            'offline.numberOfParallelDownloads');
+  }
+
+  /** @private */
+  addStreamingSection_() {
+    const docLink = this.resolveExternLink_('.StreamingConfiguration');
+    this.addSection_('Streaming', docLink)
+        .addNumberInput_('Gap detection threshold',
+            'streaming.gapDetectionThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Gap padding',
+            'streaming.gapPadding',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Gap Jump Timer Time', 'streaming.gapJumpTimerTime',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Buffering Goal', 'streaming.bufferingGoal',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Duration Backoff', 'streaming.durationBackoff',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Rebuffering Goal', 'streaming.rebufferingGoal',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Eviction Goal', 'streaming.evictionGoal',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekEndOffset',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('Inaccurate Manifest Tolerance',
+            'streaming.inaccurateManifestTolerance',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Low Latency Mode', 'streaming.lowLatencyMode')
+        .addBoolInput_('Prefer native DASH playback when available',
+            'streaming.preferNativeDash')
+        .addBoolInput_('Prefer native HLS playback when available',
+            'streaming.preferNativeHls')
+        .addNumberInput_('Update interval seconds',
+            'streaming.updateIntervalSeconds',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Observe media quality changes',
+            'streaming.observeQualityChanges')
+        .addNumberInput_('Max Variant Disabled Time',
+            'streaming.maxDisabledTime')
+        .addNumberInput_('Segment Prefetch Limit',
+            'streaming.segmentPrefetchLimit',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addCustomTextInput_('Prefetch audio languages', (input) => {
+          shakaDemoMain.configure(
+              'streaming.prefetchAudioLanguages',
+              input.value.split(',').filter(Boolean));
+        })
+        .addBoolInput_('Disable Audio Prefetch',
+            'streaming.disableAudioPrefetch')
+        .addBoolInput_('Disable Text Prefetch',
+            'streaming.disableTextPrefetch')
+        .addBoolInput_('Disable Video Prefetch',
+            'streaming.disableVideoPrefetch')
+        .addBoolInput_('Allow Media Source recoveries',
+            'streaming.allowMediaSourceRecoveries')
+        .addNumberInput_('Minimum time between recoveries',
+            'streaming.minTimeBetweenRecoveries')
+        .addBoolInput_('VOD Dynamic Playback Rate Buffer Control',
+            'streaming.vodDynamicPlaybackRate')
+        .addNumberInput_('VOD Dynamic Playback Rate Low Buffer Rate',
+            'streaming.vodDynamicPlaybackRateLowBufferRate',
+            /* canBeDecimal= */ true)
+        .addNumberInput_('VOD Dynamic Playback Rate Buffer Ratio',
+            'streaming.vodDynamicPlaybackRateBufferRatio',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Clear decodingInfo cache on unload',
+            'streaming.clearDecodingCache')
+        .addBoolInput_('Limit the buffer to the presentation duration',
+            'streaming.clampAppendWindowToDuration');
+
+    const strategyOptions = shaka.config.CrossBoundaryStrategy;
+    const strategyOptionsNames = {
+      'KEEP': 'Keep',
+      'RESET': 'Reset',
+      'RESET_TO_ENCRYPTED': 'Reset to encrypted',
+      'RESET_ON_ENCRYPTION_CHANGE': 'Reset on encryption change',
+    };
+
+    this.addBoolInput_('Start At Segment Boundary',
+        'streaming.startAtSegmentBoundary')
+        .addBoolInput_('Ignore Text Stream Failures',
+            'streaming.ignoreTextStreamFailures')
+        .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
+        .addBoolInput_('Use native HLS for FairPlay',
+            'streaming.useNativeHlsForFairPlay')
+        .addNumberInput_('Time window at end to preload next URL',
+            'streaming.preloadNextUrlWindow',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Load timeout for src=',
+            'streaming.loadTimeout',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Don\'t choose codecs',
+            'streaming.dontChooseCodecs')
+        .addBoolInput_('Should fix timestampOffset',
+            'streaming.shouldFixTimestampOffset')
+        .addBoolInput_('Avoid eviction on QuotaExceededError',
+            'streaming.avoidEvictionOnQuotaExceededError')
+        .addSelectInput_('Cross Boundary Strategy',
+            'streaming.crossBoundaryStrategy',
+            strategyOptions, strategyOptionsNames)
+        .addBoolInput_(
+            'Return to end of live window when outside of live window',
+            'streaming.returnToEndOfLiveWindowWhenOutside')
+        .addBoolInput_(
+            'Stop fetching new segments on pause',
+            'streaming.stopFetchingOnPause')
+        .addBoolInput_(
+            'Process metadata when using src=',
+            'streaming.processSrcEqualMetadata');
+    this.addRetrySection_('streaming', 'Streaming Retry Parameters');
+    this.addLiveSyncSection_();
+  }
+
+  /** @private */
+  addLiveSyncSection_() {
+    const docLink = this.resolveExternLink_('.LiveSyncConfiguration');
+    this.addSection_('Streaming Live Sync', docLink);
+    this.addBoolInput_('Live Sync', 'streaming.liveSync.enabled')
+        .addNumberInput_('Target latency',
+            'streaming.liveSync.targetLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Target latency tolerance',
+            'streaming.liveSync.targetLatencyTolerance',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Max playback rate',
+            'streaming.liveSync.maxPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_('Min playback rate',
+            'streaming.liveSync.minPlaybackRate',
+            /* canBeDecimal= */ true)
+        .addBoolInput_('Panic Mode', 'streaming.liveSync.panicMode')
+        .addNumberInput_('Panic Mode Threshold',
+            'streaming.liveSync.panicThreshold')
+        .addBoolInput_('Dynamic Target Latency',
+            'streaming.liveSync.dynamicTargetLatency.enabled')
+        .addNumberInput_('Dynamic Target Latency Stability Threshold',
+            'streaming.liveSync.dynamicTargetLatency.stabilityThreshold')
+        .addNumberInput_('Dynamic Target Latency Rebuffer Increment',
+            'streaming.liveSync.dynamicTargetLatency.rebufferIncrement',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Dynamic Target Latency Max Attempts',
+            'streaming.liveSync.dynamicTargetLatency.maxAttempts')
+        .addNumberInput_('Dynamic Target Latency Max Latency',
+            'streaming.liveSync.dynamicTargetLatency.maxLatency')
+        .addNumberInput_('Dynamic Target Latency Min Latency',
+            'streaming.liveSync.dynamicTargetLatency.minLatency');
+  }
+
+  /** @private */
+  addNetworkingSection_() {
+    const docLink = this.resolveExternLink_('.NetworkingConfiguration');
+    this.addSection_('Networking', docLink)
+        .addBoolInput_('Force HTTP', 'networking.forceHTTP')
+        .addBoolInput_('Force HTTPS', 'networking.forceHTTPS')
+        .addNumberInput_('Min bytes for progress events',
+            'networking.minBytesForProgressEvents')
+        .addTextInput_('Common Access Token header name',
+            'networking.commonAccessTokenHeaderName');
+  }
+
+  /** @private */
+  addMediaSourceSection_() {
+    const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
+    const strategyOptionsNames = {
+      'RELOAD': 'reload',
+      'SMOOTH': 'smooth',
+    };
+
+    this.addSection_('Media source', docLink)
+        .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
+        .addBoolInput_('Insert fake encryption in init segments when needed ' +
+            'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
+        .addBoolInput_('Force enca.ChannelCount to 2 for EC-3 audio if ' +
+          'needed by the platform.', 'mediaSource.correctEc3Enca')
+        .addSelectInput_(
+            'Codec Switching Strategy',
+            'mediaSource.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames)
+        .addBoolInput_('Dispatch all emsg boxes',
+            'mediaSource.dispatchAllEmsgBoxes')
+        .addBoolInput_('Uses source elements',
+            'mediaSource.useSourceElements')
+        .addBoolInput_('Expect updateEnd when duration is truncated',
+            'mediaSource.durationReductionEmitsUpdateEnd')
+        .addBoolInput_('Repair I-Frames segments',
+            'mediaSource.repairIFrames');
+
+    const transmuxWorkerToggleOnChange = (input) => {
+      const url = input.checked ?
+          shakaDemoMain.getTransmuxerWorkerUrl() : '';
+      shakaDemoMain.configure('mediaSource.transmuxWorkerUrl', url);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomBoolInput_(
+        'Use a worker for transmuxing', transmuxWorkerToggleOnChange);
+    if (shakaDemoMain.getCurrentConfigValue('mediaSource.transmuxWorkerUrl')) {
+      this.latestInput_.input().checked = true;
+    }
+  }
+
+  /**
+   * Builds a reusable inline expandable preference list UI.
+   * @param {string} configKey The config key (e.g. 'preferredAudio').
+   * @param {function():!Object} makeDefault Creates a default entry object.
+   * @param {function(!shakaDemo.InputContainer, !Object, number)} renderEntry
+   *   Renders fields for a single entry into the given container.
+   * @private
+   */
+  addPreferenceList_(configKey, makeDefault, renderEntry) {
+    const section = this.getLatestSection_();
+    const currentArray = /** @type {!Array<!Object>} */(
+      shakaDemoMain.getCurrentConfigValue(configKey));
+
+    for (let i = 0; i < currentArray.length; i++) {
+      const entry = currentArray[i];
+      const entryDiv = document.createElement('div');
+      entryDiv.classList.add('pref-entry');
+
+      // Header with number and delete button
+      const header = document.createElement('div');
+      header.classList.add('pref-entry-header');
+      const number = document.createElement('span');
+      number.classList.add('pref-entry-number');
+      number.textContent = '#' + (i + 1);
+      header.appendChild(number);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.classList.add(
+          'pref-entry-delete', 'mdl-button', 'mdl-js-button',
+          'mdl-button--icon');
+      const deleteIcon = shakaDemo.Icons.makeSvgIcon(shakaDemo.Icons.CLOSE);
+      deleteBtn.appendChild(deleteIcon);
+      const indexForDelete = i;
+      deleteBtn.addEventListener('click', () => {
+        const arr = /** @type {!Array} */(
+          shakaDemoMain.getCurrentConfigValue(configKey));
+        arr.splice(indexForDelete, 1);
+        shakaDemoMain.configure(configKey, arr);
+        shakaDemoMain.remakeHash();
+        this.reloadAndSaveState_();
+      });
+      header.appendChild(deleteBtn);
+      entryDiv.appendChild(header);
+
+      // Fields container
+      const fieldsDiv = document.createElement('div');
+      fieldsDiv.classList.add('pref-entry-fields');
+      entryDiv.appendChild(fieldsDiv);
+
+      // Create a mini InputContainer for this entry's fields
+      const miniContainer = new shakaDemo.InputContainer(
+          fieldsDiv, null, shakaDemo.InputContainer.Style.VERTICAL, null);
+
+      renderEntry(miniContainer, entry, i);
+      section.appendEntry(entryDiv);
+    }
+
+    // Add button
+    const addContainer = document.createElement('div');
+    addContainer.classList.add('pref-add-container');
+    const addBtn = document.createElement('button');
+    addBtn.classList.add(
+        'mdl-button', 'mdl-js-button', 'mdl-js-ripple-effect',
+        'mdl-button--colored');
+    addBtn.textContent = '+ Add';
+    addBtn.addEventListener('click', () => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr.push(makeDefault());
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+      this.reloadAndSaveState_();
+    });
+    addContainer.appendChild(addBtn);
+    section.appendEntry(addContainer);
+  }
+
+  /**
+   * Helper: add a text field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {string} value
+   * @param {function(string)} onChange
+   * @private
+   */
+  addPrefTextField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.TextInput(container, label, (inputEl) => {
+      onChange(inputEl.value);
+    });
+    input.input().value = value;
+  }
+
+  /**
+   * Helper: add a number field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {number} value
+   * @param {function(number)} onChange
+   * @private
+   */
+  addPrefNumberField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.NumberInput(
+        container, label, (inputEl) => {
+          onChange(Number(inputEl.value) || 0);
+        }, false, true, false);
+    input.input().value = String(value);
+  }
+
+  /**
+   * Helper: add a select field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {!Object<string, string>} optionNames
+   * @param {string} currentValue
+   * @param {function(string)} onChange
+   * @private
+   */
+  addPrefSelectField_(container, label, optionNames, currentValue, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.SelectInput(
+        container, null, (inputEl) => {
+          onChange(inputEl.value);
+        }, optionNames);
+    for (const key in optionNames) {
+      if (key === currentValue) {
+        input.input().value = key;
+        break;
+      }
+    }
+  }
+
+  /**
+   * Helper: add a bool field to a preference entry.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} label
+   * @param {boolean} value
+   * @param {function(boolean)} onChange
+   * @private
+   */
+  addPrefBoolField_(container, label, value, onChange) {
+    container.addRow(label, null);
+    const input = new shakaDemo.BoolInput(container, label, (inputEl) => {
+      onChange(inputEl.checked);
+    });
+    input.input().checked = value;
+  }
+
+  /** @private */
+  addAudioPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.AudioPreference');
+    this.addSection_('Audio Preferences', docLink);
+
+    const configKey = 'preferredAudio';
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      language: '',
+      role: '',
+      label: '',
+      channelCount: 2,
+      codec: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Label', entry['label'] || '',
+          (v) => makeChange(index, 'label', v));
+      this.addPrefNumberField_(container, 'Channel Count',
+          entry['channelCount'] || 0,
+          (v) => makeChange(index, 'channelCount', v));
+      this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
+          (v) => makeChange(index, 'codec', v));
+      this.addPrefBoolField_(container, 'Spatial Audio',
+          entry['spatialAudio'] || false,
+          (v) => makeChange(index, 'spatialAudio', v || undefined));
+    });
+  }
+
+  /** @private */
+  addTextPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.TextPreference');
+    this.addSection_('Text Preferences', docLink);
+
+    const configKey = 'preferredText';
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      language: '',
+      role: '',
+      format: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Format', entry['format'] || '',
+          (v) => makeChange(index, 'format', v));
+      this.addPrefBoolField_(container, 'Forced', entry['forced'] || false,
+          (v) => makeChange(index, 'forced', v || undefined));
+    });
+  }
+
+  /** @private */
+  addVideoPreferenceSection_() {
+    const docLink = this.resolveExternLink_('.VideoPreference');
+    this.addSection_('Video Preferences', docLink);
+
+    const configKey = 'preferredVideo';
+    const hdrLevelNames = {
+      'AUTO': 'Auto Detect',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+      '': 'No Preference',
+    };
+    const videoLayoutNames = {
+      'CH-STEREO': 'Stereoscopic',
+      'CH-MONO': 'Monoscopic',
+      '': 'No Preference',
+    };
+
+    const makeChange = (index, field, value) => {
+      const arr = /** @type {!Array} */(
+        shakaDemoMain.getCurrentConfigValue(configKey));
+      arr[index][field] = value;
+      shakaDemoMain.configure(configKey, arr);
+      shakaDemoMain.remakeHash();
+    };
+
+    this.addPreferenceList_(configKey, () => ({
+      label: '',
+      role: '',
+      language: '',
+      codec: '',
+      hdrLevel: 'AUTO',
+      layout: '',
+    }), (container, entry, index) => {
+      this.addPrefTextField_(container, 'Label', entry['label'] || '',
+          (v) => makeChange(index, 'label', v));
+      this.addPrefTextField_(container, 'Role', entry['role'] || '',
+          (v) => makeChange(index, 'role', v));
+      this.addPrefTextField_(container, 'Language', entry['language'] || '',
+          (v) => makeChange(index, 'language', v));
+      this.addPrefTextField_(container, 'Codec', entry['codec'] || '',
+          (v) => makeChange(index, 'codec', v));
+      this.addPrefSelectField_(container, 'HDR Level', hdrLevelNames,
+          entry['hdrLevel'] || '', (v) => makeChange(index, 'hdrLevel', v));
+      this.addPrefSelectField_(container, 'Video Layout', videoLayoutNames,
+          entry['layout'] || '', (v) => makeChange(index, 'layout', v));
+    });
+  }
+
+  /** @private */
+  addUISection_() {
+    const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
+    const trackLabelFormatOptions = {
+      'LANGUAGE': TrackLabelFormat.LANGUAGE,
+      'ROLE': TrackLabelFormat.ROLE,
+      'LANGUAGE_ROLE': TrackLabelFormat.LANGUAGE_ROLE,
+      'LABEL': TrackLabelFormat.LABEL,
+      'LABEL_OR_LANGUAGE': TrackLabelFormat.LABEL_OR_LANGUAGE,
+      'LANGUAGE_OR_LABEL': TrackLabelFormat.LANGUAGE_OR_LABEL,
+    };
+    const trackLabelFormatNames = {
+      'LANGUAGE': 'Language',
+      'ROLE': 'Role',
+      'LANGUAGE_ROLE': 'Language + Role',
+      'LABEL': 'Label',
+      'LABEL_OR_LANGUAGE': 'Label or Language',
+      'LANGUAGE_OR_LABEL': 'Language or Label',
+    };
+
+    const vrProjectionModeOptions = {
+      'equirectangular': 'equirectangular',
+      'halfequirectangular': 'halfequirectangular',
+      'fisheye': 'fisheye',
+      'cubemap': 'cubemap',
+    };
+    const vrProjectionModeNames = {
+      'equirectangular': 'Equirectangular',
+      'halfequirectangular': 'Half Equirectangular',
+      'fisheye': 'Fisheye',
+      'cubemap': 'Cubemap',
+    };
+
+    const docLink = this.resolveExternLink_('.UIConfiguration');
+    this.addSection_('UI', docLink)
+        .addUISelectInput_('Audio Track Label Format',
+            'trackLabelFormat',
+            trackLabelFormatOptions,
+            trackLabelFormatNames)
+        .addUISelectInput_('Text Track Label Format',
+            'textTrackLabelFormat',
+            trackLabelFormatOptions,
+            trackLabelFormatNames)
+        .addUIBoolInput_('Add Seek Bar', 'addSeekBar')
+        .addUIBoolInput_('Enable custom context Menu', 'customContextMenu')
+        .addUIBoolInput_('Clear Buffer On Quality Change',
+            'clearBufferOnQualityChange')
+        .addUIBoolInput_('Show Unbuffered Start', 'showUnbufferedStart')
+        .addUINumberInput_('Fade Delay (sec)', 'fadeDelay',
+            /* canBeDecimal= */ true)
+        .addUINumberInput_('Close Menus Delay (sec)', 'closeMenusDelay',
+            /* canBeDecimal= */ true)
+        .addUIBoolInput_('Double Click For Fullscreen',
+            'doubleClickForFullscreen')
+        .addUIBoolInput_('Single Click For Play And Pause',
+            'singleClickForPlayAndPause')
+        .addUIBoolInput_('Enable Keyboard Playback Controls',
+            'enableKeyboardPlaybackControls')
+        .addUIBoolInput_('Enable Keyboard Controls In Window',
+            'enableKeyboardPlaybackControlsInWindow')
+        .addUIBoolInput_('Enable Fullscreen On Rotation',
+            'enableFullscreenOnRotation')
+        .addUIBoolInput_('Force Landscape On Fullscreen',
+            'forceLandscapeOnFullscreen')
+        .addUIBoolInput_('Enable Tooltips', 'enableTooltips')
+        .addUINumberInput_('Keyboard Seek Distance (sec)',
+            'keyboardSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUINumberInput_('Keyboard Large Seek Distance (sec)',
+            'keyboardLargeSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUIBoolInput_('Show Audio Channel Count Variants',
+            'showAudioChannelCountVariants')
+        .addUIBoolInput_('Seek On Taps', 'seekOnTaps')
+        .addUINumberInput_('Tap Seek Distance (sec)', 'tapSeekDistance',
+            /* canBeDecimal= */ false)
+        .addUINumberInput_('Refresh Tick (sec)', 'refreshTickInSeconds',
+            /* canBeDecimal= */ true)
+        .addUIBoolInput_('Show Audio Codec', 'showAudioCodec')
+        .addUIBoolInput_('Show Video Codec', 'showVideoCodec')
+        .addUIBoolInput_('Always Show Volume Bar', 'alwaysShowVolumeBar')
+        .addUIBoolInput_('Menu Open Until User Closes It',
+            'menuOpenUntilUserClosesIt')
+        .addUIBoolInput_('Allow Toggle Presentation Time',
+            'allowTogglePresentationTime')
+        .addUIBoolInput_('Show Remaining Time In Presentation Time',
+            'showRemainingTimeInPresentationTime')
+        .addUIBoolInput_('Show UI Always', 'showUIAlways')
+        .addUIBoolInput_('Show UI Always On Audio Only',
+            'showUIAlwaysOnAudioOnly')
+        .addUIBoolInput_('Show UI On Paused', 'showUIOnPaused')
+        .addUIBoolInput_('Show menus on the right', 'showMenusOnTheRight')
+        .addUIBoolInput_('Prefer Intl Display Names', 'preferIntlDisplayNames')
+        .addUIBoolInput_('Captions Styles', 'captionsStyles')
+        .addUIBoolInput_('Display In VR Mode', 'displayInVrMode')
+        .addUISelectInput_('Default VR Projection Mode',
+            'defaultVrProjectionMode',
+            vrProjectionModeOptions,
+            vrProjectionModeNames)
+        .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
+        .addUIBoolInput_('Enable VR Wheel Zoom', 'enableVrWheelZoom')
+        .addUIBoolInput_('Prefer Video Fullscreen In VisionOS',
+            'preferVideoFullScreenInVisionOS')
+        .addUIBoolInput_('Cast Android Receiver Compatible',
+            'castAndroidReceiverCompatible')
+        .addUITextInput_('Cast Receiver App ID', 'castReceiverAppId')
+        .addUITextInput_('Cast Sender URL', 'castSenderUrl')
+        // Array types
+        .addUIArrayStringInput_('Control Panel Elements',
+            'controlPanelElements')
+        .addUIArrayStringInput_('Top Control Panel Elements',
+            'topControlPanelElements')
+        .addUIArrayStringInput_('Big Buttons', 'bigButtons')
+        .addUIArrayStringInput_('Overflow Menu Buttons', 'overflowMenuButtons')
+        .addUIArrayStringInput_('Context Menu Elements', 'contextMenuElements')
+        .addUIArrayStringInput_('Statistics List', 'statisticsList')
+        .addUIArrayStringInput_('Ad Statistics List', 'adStatisticsList')
+        .addUIArrayNumberInput_('Playback Rates', 'playbackRates')
+        .addUINumberInput_('Playback Rate Slider Min',
+            'playbackRateSliderMin',
+            /* canBeDecimal= */ true)
+        .addUINumberInput_('Playback Rate Slider Max',
+            'playbackRateSliderMax',
+            /* canBeDecimal= */ true)
+        .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
+        .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
+        .addUIArrayNumberInput_('Captions Font Scale Factors',
+            'captionsFontScaleFactors')
+        .addUIBoolInput_('Show buffering spinner', 'showBufferingSpinner');
+  }
+
+  /** @private */
+  addUISeekBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UISeekBarColors');
+    this.addSection_('UI: Seek Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'seekBarColors.base')
+        .addUITextInput_('Buffered Color', 'seekBarColors.buffered')
+        .addUITextInput_('Played Color', 'seekBarColors.played')
+        .addUITextInput_('Ad Breaks Color', 'seekBarColors.adBreaks')
+        .addUITextInput_('Chapters Color', 'seekBarColors.chapters');
+  }
+
+  /** @private */
+  addUIVolumeBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UIVolumeBarColors');
+    this.addSection_('UI: Volume Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'volumeBarColors.base')
+        .addUITextInput_('Level Color', 'volumeBarColors.level');
+  }
+
+  /** @private */
+  addUIPlaybackRateBarColorsSection_() {
+    const docLink = this.resolveExternLink_('.UIPlaybackRateBarColors');
+    this.addSection_('UI: Playback Rate Bar Colors', docLink)
+        .addUITextInput_('Base Color', 'playbackRateBarColors.base')
+        .addUITextInput_('Level Color', 'playbackRateBarColors.level');
+  }
+
+  /** @private */
+  addUIQualityMarksSection_() {
+    const docLink = this.resolveExternLink_('.UIQualityMarks');
+    this.addSection_('UI: Quality Marks', docLink)
+        .addUITextInput_('720p', 'qualityMarks.720')
+        .addUITextInput_('1080p', 'qualityMarks.1080')
+        .addUITextInput_('1440p', 'qualityMarks.1440')
+        .addUITextInput_('2160p', 'qualityMarks.2160')
+        .addUITextInput_('4320p', 'qualityMarks.4320');
+  }
+
+  /** @private */
+  addUIMediaSessionSection_() {
+    const docLink = this.resolveExternLink_('.UIMediaSession');
+    this.addSection_('UI: Media Session', docLink)
+        .addUIBoolInput_('Enabled', 'mediaSession.enabled')
+        .addUIBoolInput_('Handle Metadata', 'mediaSession.handleMetadata')
+        .addUIBoolInput_('Handle Actions', 'mediaSession.handleActions')
+        .addUIBoolInput_('Handle Position', 'mediaSession.handlePosition')
+        .addUIArrayNumberInput_('Supported actions',
+            'mediaSession.supportedActions')
+        .addUIBoolInput_('Allow auto PiP', 'mediaSession.allowAutoPiP');
+  }
+
+  /** @private */
+  addUIDocumentPiPSection_() {
+    const docLink = this.resolveExternLink_('.UIDocumentPictureInPicture');
+    this.addSection_('UI: Document Picture-in-Picture', docLink)
+        .addUIBoolInput_('Enabled', 'documentPictureInPicture.enabled')
+        .addUIBoolInput_('Prefer Initial Window Placement',
+            'documentPictureInPicture.preferInitialWindowPlacement')
+        .addUIBoolInput_('Disallow Return To Opener',
+            'documentPictureInPicture.disallowReturnToOpener');
+  }
+
+  /** @private */
+  addUIShortcutsSection_() {
+    const docLink = this.resolveExternLink_('.UIShortcuts');
+    this.addSection_('UI: Shortcuts', docLink)
+        .addUITextInput_('Small Rewind', 'shortcuts.small_rewind')
+        .addUITextInput_('Small Fast Forward', 'shortcuts.small_fast_forward')
+        .addUITextInput_('Large Rewind', 'shortcuts.large_rewind')
+        .addUITextInput_('Large Fast Forward', 'shortcuts.large_fast_forward')
+        .addUITextInput_('Home', 'shortcuts.home')
+        .addUITextInput_('End', 'shortcuts.end')
+        .addUITextInput_('Captions', 'shortcuts.captions')
+        .addUITextInput_('Fullscreen', 'shortcuts.fullscreen')
+        .addUITextInput_('Mute', 'shortcuts.mute')
+        .addUITextInput_('Picture In Picture', 'shortcuts.picture_in_picture')
+        .addUITextInput_('Increase Video Speed',
+            'shortcuts.increase_video_speed')
+        .addUITextInput_('Decrease Video Speed',
+            'shortcuts.decrease_video_speed')
+        .addUITextInput_('Play', 'shortcuts.play')
+        .addUITextInput_('Take Screenshot', 'shortcuts.take_screenshot')
+        .addUITextInput_('Last Frame', 'shortcuts.last_frame')
+        .addUITextInput_('Next Frame', 'shortcuts.next_frame');
+  }
+
+  /** @private */
+  addMetaSection_() {
+    this.addSection_(/* name= */ null, /* docLink= */ null);
+
+    this.addCustomBoolInput_('Shaka Controls', (input) => {
+      shakaDemoMain.setNativeControlsEnabled(!input.checked);
+      // Enabling/disabling Shaka Controls will change how other controls in
+      // the config work, so reload the page.
+      this.reloadAndSaveState_();
+    });
+    // TODO: Re-add the tooltipMessage of 'Takes effect next load.' once we
+    // are ready to add ALL of the tooltip messages.
+    if (!shakaDemoMain.getNativeControlsEnabled()) {
+      this.latestInput_.input().checked = true;
+    }
+
+    if (!shakaDemoMain.getNativeControlsEnabled()) {
+      this.addCustomBoolInput_('Enabled Trick Play Controls', (input) => {
+        shakaDemoMain.setTrickPlayControlsEnabled(input.checked);
+      });
+      if (shakaDemoMain.getTrickPlayControlsEnabled()) {
+        this.latestInput_.input().checked = true;
+      }
+    } else {
+      // Add a fake custom fixed "input" that warns the users not to change it.
+      const noop = (input) => {};
+      this.addCustomBoolInput_('Enabled Trick Play Controls',
+          noop, 'Trick Play controls require the Shaka UI.');
+      this.latestInput_.input().disabled = true;
+      this.latestInput_.input().checked = false;
+    }
+
+    this.addCustomTextInput_('Watermark text', (input) => {
+      shakaDemoMain.setWatermarkText(input.value);
+    });
+    this.latestInput_.input().value = shakaDemoMain.getWatermarkText();
+
+    const onLocaleChange = (input) => {
+      shakaDemoMain.setUILocale(input.value);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_('Preferred UI Locale', onLocaleChange);
+    this.latestInput_.input().value = shakaDemoMain.getUILocale();
+
+    // shaka.log is not set if logging isn't enabled.
+    // I.E. if using the release version of shaka.
+    if (!shaka['log']) {
+      return;
+    }
+
+    // Access shaka.log using bracket syntax because shaka.log is not exported.
+    // Exporting the logging methods proved to be a bad solution, both in terms
+    // of difficulty and in terms of what changes it would require of the
+    // architectural design of Shaka Player, so this non-type-safe solution is
+    // the best remaining way to get the Closure compiler to compile this
+    // method.
+    const Level = shaka['log']['Level'];
+    const setLevel = shaka['log']['setLevel'];
+
+    const logLevels = {
+      'info': 'Info',
+      'debug': 'Debug',
+      'v': 'Verbose',
+      'vv': 'Very Verbose',
+    };
+    const onChange = (input) => {
+      switch (input.value) {
+        case 'info':
+          setLevel(Level['INFO']);
+          break;
+        case 'debug':
+          setLevel(Level['DEBUG']);
+          break;
+        case 'vv':
+          setLevel(Level['V2']);
+          break;
+        case 'v':
+          setLevel(Level['V1']);
+          break;
+      }
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomSelectInput_('Log Level', logLevels, onChange);
+    const input = this.latestInput_.input();
+    switch (shaka['log']['currentLevel']) {
+      case Level['DEBUG']:
+        input.value = 'debug';
+        break;
+      case Level['V2']:
+        input.value = 'vv';
+        break;
+      case Level['V1']:
+        input.value = 'v';
+        break;
+      default:
+        input.value = 'info';
+        break;
+    }
+  }
+
+  /**
+   * @param {string} suffix
+   * @return {string}
+   * @private
+   */
+  resolveExternLink_(suffix) {
+    return '../docs/api/shaka.extern.html#' + suffix;
+  }
+
+  /**
+   * @param {?string} name
+   * @param {?string} docLink
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addSection_(name, docLink) {
+    const style = name ?
+                  shakaDemo.InputContainer.Style.ACCORDION :
+                  shakaDemo.InputContainer.Style.VERTICAL;
+    this.sections_.push(new shakaDemo.InputContainer(
+        this.container_, name, style, docLink));
+
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIBoolInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, input.checked);
+    };
+    this.addCustomBoolInput_(name, onChange, tooltipMessage);
+    if (shakaDemoMain.getCurrentUIConfigValue(valueName)) {
+      this.latestInput_.input().checked = true;
+    }
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {boolean=} canBeDecimal
+   * @param {boolean=} canBeZero
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUINumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
+      tooltipMessage) {
+    const onChange = (input) => {
+      const valueAsNumber = Number(input.value);
+      if (!isNaN(valueAsNumber)) {
+        shakaDemoMain.configureUI(valueName, valueAsNumber);
+      }
+    };
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.NumberInput(
+        this.getLatestSection_(), name, onChange, canBeDecimal, canBeZero,
+        /* canBeUnset= */ false);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentUIConfigValue(valueName);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUITextInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, input.value);
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentUIConfigValue(valueName);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIArrayStringInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName,
+          input.value.split(',').filter(Boolean));
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array<string>} */ (
+      shakaDemoMain.getCurrentUIConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUIArrayNumberInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      const values = input.value.split(',')
+          .map(Number)
+          .filter((v) => !isNaN(v));
+      shakaDemoMain.configureUI(valueName, values);
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array<number>} */ (
+      shakaDemoMain.getCurrentUIConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {!Object<string, ?>} options
+   * @param {!Object<string, string>} optionNames
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addUISelectInput_(name, valueName, options, optionNames, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configureUI(valueName, options[input.value]);
+    };
+
+    for (const key in options) {
+      if (!(key in optionNames)) {
+        optionNames[key] = key;
+      }
+    }
+
+    this.addCustomSelectInput_(name, optionNames, onChange, tooltipMessage);
+
+    const initialValue = shakaDemoMain.getCurrentUIConfigValue(valueName);
+    for (const key in options) {
+      if (options[key] == initialValue) {
+        this.latestInput_.input().value = key;
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addBoolInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName, input.checked);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomBoolInput_(name, onChange, tooltipMessage);
+    if (shakaDemoMain.getCurrentConfigValue(valueName)) {
+      this.latestInput_.input().checked = true;
+    }
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {function(!HTMLInputElement)} onChange
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addCustomBoolInput_(name, onChange, tooltipMessage) {
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.BoolInput(
+        this.getLatestSection_(), name, onChange);
+    return this;
+  }
+
+  /**
+   * @param {!string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addArrayStringInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName,
+          input.value.split(',').filter(Boolean));
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    const configValue = /** @type {!Array<string>} */ (
+      shakaDemoMain.getCurrentConfigValue(valueName));
+    this.latestInput_.input().value = configValue.join(',');
+    return this;
+  }
+
+  /**
+   * @param {!string} name
+   * @param {string} valueName
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addTextInput_(name, valueName, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName, input.value);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_(name, onChange, tooltipMessage);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentConfigValue(valueName);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {function(!HTMLInputElement)} onChange
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addCustomTextInput_(name, onChange, tooltipMessage) {
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.TextInput(
+        this.getLatestSection_(), name, onChange);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {boolean=} canBeDecimal
+   * @param {boolean=} canBeZero
+   * @param {boolean=} canBeUnset
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
+      canBeUnset = false, tooltipMessage) {
+    const onChange = (input) => {
+      if (input.value == 'Infinity') {
+        shakaDemoMain.configure(valueName, Infinity);
+      } else if (input.value == '' && canBeUnset) {
+        shakaDemoMain.resetConfiguration(valueName);
+      } else {
+        const valueAsNumber = Number(input.value);
+        if (valueAsNumber == 0 && !canBeZero) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else if (isNaN(valueAsNumber)) {
+          shakaDemoMain.resetConfiguration(valueName);
+        } else {
+          if (Math.floor(valueAsNumber) != valueAsNumber && !canBeDecimal) {
+            shakaDemoMain.resetConfiguration(valueName);
+          } else {
+            shakaDemoMain.configure(valueName, valueAsNumber);
+          }
+        }
+      }
+      shakaDemoMain.remakeHash();
+    };
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.NumberInput(
+        this.getLatestSection_(), name, onChange, canBeDecimal, canBeZero,
+        canBeUnset);
+    this.latestInput_.input().value =
+        shakaDemoMain.getCurrentConfigValue(valueName);
+    if (isNaN(Number(this.latestInput_.input().value)) && canBeUnset) {
+      this.latestInput_.input().value = '';
+    }
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {!Array<string>} values
+   * @param {function(!HTMLInputElement)} onChange
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addDatalistInput_(name, values, onChange, tooltipMessage) {
+    this.createRow_(name, tooltipMessage);
+    this.latestInput_ = new shakaDemo.DatalistInput(
+        this.getLatestSection_(), name, onChange, values);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {!Object<string, string>} values
+   * @param {function(!HTMLInputElement)} onChange
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addCustomSelectInput_(name, values, onChange, tooltipMessage) {
+    this.createRow_(name, tooltipMessage);
+    // The input is not provided a name, as (in this enclosed space) it makes
+    // the actual field unreadable.
+    this.latestInput_ = new shakaDemo.SelectInput(
+        this.getLatestSection_(), null, onChange, values);
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string} valueName
+   * @param {!Object<string, ?>} options
+   * @param {!Object<string, string>} optionNames
+   * @param {string=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addSelectInput_(name, valueName, options, optionNames, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName, options[input.value]);
+      shakaDemoMain.remakeHash();
+    };
+
+    // If there are any translations missing for option names, fill in the
+    // constant from the enum.  This ensures new enum values are usable in the
+    // demo in some form, even if they are forgotten in the demo config.
+    for (const key in options) {
+      if (!(key in optionNames)) {
+        optionNames[key] = key;
+      }
+    }
+
+    this.addCustomSelectInput_(name, optionNames, onChange, tooltipMessage);
+
+    const initialValue = shakaDemoMain.getCurrentConfigValue(valueName);
+    for (const key in options) {
+      if (options[key] == initialValue) {
+        this.latestInput_.input().value = key;
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} name
+   * @param {string=} tooltipMessage
+   * @private
+   */
+  createRow_(name, tooltipMessage) {
+    this.getLatestSection_().addRow(name, tooltipMessage || null);
+  }
+
+  /**
+   * Gets the latest section. Results in a failed assert if there is no latest
+   * section.
+   * @return {!shakaDemo.InputContainer}
+   * @private
+   */
+  getLatestSection_() {
+    goog.asserts.assert(this.sections_.length > 0,
+        'Must have at least one section.');
+    return this.sections_[this.sections_.length - 1];
+  }
+};
+
+
+document.addEventListener('shaka-main-loaded', shakaDemo.Config.init);
+document.addEventListener('shaka-main-cleanup', () => {
+  shakaDemoConfig = null;
+});

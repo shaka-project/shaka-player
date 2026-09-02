@@ -1,0 +1,2349 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+describe('UI', () => {
+  const UiUtils = shaka.test.UiUtils;
+  const Util = shaka.test.Util;
+
+  const fakeMimeType = 'application/test';
+
+  /** @type {shaka.Player} */
+  let player;
+  /** @type {!HTMLLinkElement} */
+  let cssLink;
+
+  beforeAll(async () => {
+    // Add css file
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
+    await UiUtils.setupCSS(cssLink);
+  });
+
+  afterEach(async () => {
+    shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
+    await UiUtils.cleanupUI();
+  });
+
+  afterAll(() => {
+    document.head.removeChild(cssLink);
+  });
+
+  describe('constructed through API', () => {
+    /** @type {!HTMLElement} */
+    let videoContainer;
+    /** @type {!HTMLVideoElement} */
+    let video;
+
+    beforeEach(async () => {
+      videoContainer =
+        /** @type {!HTMLElement} */ (document.createElement('div'));
+      document.body.appendChild(videoContainer);
+
+      video = shaka.test.UiUtils.createVideoElement();
+      videoContainer.appendChild(video);
+      await UiUtils.createUIThroughAPI(videoContainer, video);
+    });
+
+    it('has all the basic elements', () => {
+      checkBasicUIElements(videoContainer);
+    });
+  });
+
+  describe('constructed through DOM auto-setup', () => {
+    describe('set up with one container', () => {
+      /** @type {!HTMLElement} */
+      let container;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], /* videos= */ []);
+      });
+
+      it('has all the basic elements', () => {
+        checkBasicUIElements(container);
+      });
+    });
+
+    describe('set up with one container and src=', () => {
+      /** @type {!HTMLElement} */
+      let container;
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        video = shaka.test.UiUtils.createVideoElement();
+        video.src = 'test:sintel_multi_lingual_multi_res';
+        container.appendChild(video);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], [video]);
+      });
+
+      it('has loaded the video', () => {
+        // The above promise for DOMAutoSetup() doesn't guarantee that load()
+        // is complete, only that we started it.  So don't check duration or
+        // other things that require load() to complete.
+        const overlay = /** @type {!shaka.ui.Overlay} */(video['ui']);
+        const player = overlay.getControls().getPlayer();
+        expect(player.getAssetUri()).toBeTruthy();
+      });
+    });
+
+    describe('set up with one container and source element', () => {
+      /** @type {!HTMLElement} */
+      let container;
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        video = shaka.test.UiUtils.createVideoElement();
+        container.appendChild(video);
+
+        const sourceElement = shaka.util.Dom.createSourceElement(
+            'test:sintel_multi_lingual_multi_res');
+        video.appendChild(sourceElement);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], [video]);
+      });
+
+      it('has loaded the video', () => {
+        // The above promise for DOMAutoSetup() doesn't guarantee that load()
+        // is complete, only that we started it.  So don't check duration or
+        // other things that require load() to complete.
+        const overlay = /** @type {!shaka.ui.Overlay} */(video['ui']);
+        const player = overlay.getControls().getPlayer();
+        expect(player.getAssetUri()).toBeTruthy();
+      });
+    });
+
+    describe('set up with several containers', () => {
+      /** @type {!HTMLElement} */
+      let container1;
+
+      /** @type {!HTMLElement} */
+      let container2;
+
+      beforeEach(async () => {
+        container1 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container1);
+
+        container2 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container2);
+
+        await UiUtils.createUIThroughDOMAutoSetup([container1, container2],
+            /* videos= */ []);
+      });
+
+      it('has all the basic elements', () => {
+        checkBasicUIElements(container1);
+        checkBasicUIElements(container2);
+      });
+    });
+
+    describe('set up with one video', () => {
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        video = shaka.test.UiUtils.createVideoElement();
+        document.body.appendChild(video);
+
+        await UiUtils.createUIThroughDOMAutoSetup(
+            /* containers= */ [], [video]);
+      });
+
+      it('has all the basic elements', () => {
+        checkBasicUIElements(
+            /** @type {!HTMLVideoElement} */ (video.parentElement));
+      });
+    });
+
+    describe('set up with several videos', () => {
+      /** @type {!Array<!HTMLVideoElement>} */
+      const videos = [];
+
+      beforeEach(async () => {
+        // Four is just a random number I (ismena) came up with to test a
+        // multi-video use case. It could be replaces with any other
+        // (reasonable) number.
+        for (let i = 0; i < 4; i++) {
+          const video = shaka.test.UiUtils.createVideoElement();
+
+          document.body.appendChild(video);
+          videos.push(video);
+        }
+
+        await UiUtils.createUIThroughDOMAutoSetup(/* containers= */ [], videos);
+      });
+
+      it('has all the basic elements', () => {
+        for (const video of videos) {
+          checkBasicUIElements(
+              /** @type {!HTMLVideoElement} */ (video.parentElement));
+        }
+      });
+    });
+
+    describe('set up with a video and a container', () => {
+      /** @type {!HTMLElement} */
+      let container;
+      /** @type {!HTMLVideoElement} */
+      let video;
+
+      beforeEach(async () => {
+        container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container);
+
+        video = shaka.test.UiUtils.createVideoElement();
+        container.appendChild(video);
+
+        await UiUtils.createUIThroughDOMAutoSetup([container], [video]);
+      });
+
+      it('has all the basic elements', () => {
+        checkBasicUIElements(container);
+      });
+    });
+  });
+
+  describe('controls', () => {
+    /** @type {!HTMLElement} */
+    let videoContainer;
+    /** @type {!HTMLVideoElement} */
+    let video;
+
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    /**
+     * Creates a keydown event for |key|.
+     *
+     * Not every platform honors the "key" member of the init dictionary: on
+     * Tizen 3 the constructor accepts it but leaves event.key undefined, so
+     * the code under test throws instead of running the shortcut.  Force the
+     * property in that case, which is all the code under test reads.
+     *
+     * @param {string} key
+     * @return {!KeyboardEvent}
+     */
+    function createKeydownEvent(key) {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      if (event.key != key) {
+        Object.defineProperty(event, 'key', {
+          get: () => key,
+          configurable: true,
+        });
+      }
+
+      return event;
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
+    beforeEach(() => {
+      videoContainer =
+        /** @type {!HTMLElement} */ (document.createElement('div'));
+      document.body.appendChild(videoContainer);
+
+      video = shaka.test.UiUtils.createVideoElement();
+      videoContainer.appendChild(video);
+    });
+
+    it('goes into fullscreen on double click', async () => {
+      if (!document.fullscreenEnabled) {
+        pending('This test requires fullscreen support, which is unavailable.');
+      }
+
+      const config = {
+        controlPanelElements: [
+          'overflow_menu',
+        ],
+        overflowMenuButtons: [
+          'quality',
+        ],
+        doubleClickForFullscreen: false,
+      };
+      const ui = await UiUtils.createUIThroughAPI(
+          videoContainer, video, config);
+      const controls = ui.getControls();
+
+      const spy = spyOn(controls, 'toggleFullScreen');
+
+      const controlsContainer =
+          videoContainer.querySelector('.shaka-controls-container');
+      // When double-click for fullscreen is disabled, it shouldn't happen.
+      UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await Util.shortDelay();
+      expect(spy).not.toHaveBeenCalled();
+      // Change the configuration and try again.
+      config.doubleClickForFullscreen = true;
+      (/** @type {!shaka.ui.Overlay} */ (ui)).configure(config);
+      UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await Util.shortDelay();
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    describe('all the controls', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+
+      beforeEach(async () => {
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        player = ui.getControls().getLocalPlayer();
+        const controlsContainers =
+            videoContainer.getElementsByClassName('shaka-controls-container');
+        expect(controlsContainers.length).toBe(1);
+        controlsContainer = /** @type {!HTMLElement} */ (controlsContainers[0]);
+      });
+
+      it('stay visible if overflow menuButton is open', () => {
+        const overflowMenus =
+            videoContainer.getElementsByClassName('shaka-overflow-menu');
+        if (!overflowMenus.length) {
+          pending('There is no overflow menu button on this device.');
+        }
+        expect(overflowMenus.length).toBe(1);
+        const overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
+
+        const overflowMenuButtons =
+            videoContainer.getElementsByClassName('shaka-overflow-menu-button');
+        expect(overflowMenuButtons.length).toBe(1);
+        const overflowMenuButton = overflowMenuButtons[0];
+
+        overflowMenuButton.click();
+        expect(overflowMenu.style.display).not.toBe('none');
+        expect(controlsContainer.style.display).not.toBe('none');
+      });
+    });
+
+    describe('overflow menu', () => {
+      /** @type {!HTMLElement} */
+      let overflowMenu;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'overflow_menu',
+          ],
+          customContextMenu: false,
+          documentPictureInPicture: {
+            enabled: false,
+          },
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+
+        const overflowMenus =
+            videoContainer.getElementsByClassName('shaka-overflow-menu');
+        expect(overflowMenus.length).toBe(1);
+        overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
+      });
+
+      it('has default buttons', () => {
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-caption-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-resolution-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-language-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-pip-button');
+      });
+
+      it('becomes visible if overflowMenuButton was clicked', () => {
+        let display = window.getComputedStyle(overflowMenu, null).display;
+        expect(display).toBe('none');
+
+        const overflowMenuButtons =
+            videoContainer.getElementsByClassName('shaka-overflow-menu-button');
+        expect(overflowMenuButtons.length).toBe(1);
+        const overflowMenuButton = overflowMenuButtons[0];
+
+        overflowMenuButton.click();
+        display = overflowMenu.style.display;
+        expect(display).not.toBe('none');
+      });
+
+      it('allows picture-in-picture only when the content has video',
+          async () => {
+            // Load fake content that contains only audio.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(/* id= */ 0, (variant) => {
+                    variant.addAudio(/* id= */ 1);
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            const pipButtons =
+            videoContainer.getElementsByClassName('shaka-pip-button');
+            expect(pipButtons.length).toBe(1);
+            const pipButton = pipButtons[0];
+
+            // The picture-in-picture button should not be shown when the
+            // content only has audio.
+            expect(pipButton.classList.contains('shaka-hidden')).toBe(true);
+
+            // The picture-in-picture window should not be open when the content
+            // only has audio.
+            expect(document.pictureInPictureElement).toBeFalsy();
+          });
+
+      it('is accessible', () => {
+        for (const node of overflowMenu.childNodes) {
+          const element = /** @type {!HTMLElement} */ (node);
+          if (element.tagName.toLowerCase() == 'button') {
+            expect(element.hasAttribute('aria-label')).toBe(true);
+          }
+        }
+      });
+
+      it('has correct ARIA roles', () => {
+        expect(overflowMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('has aria-haspopup and aria-expanded on menu button', () => {
+        const menuButton = videoContainer.getElementsByClassName(
+            'shaka-overflow-menu-button')[0];
+        expect(menuButton.getAttribute('aria-haspopup')).toBe('true');
+        expect(menuButton.getAttribute('aria-expanded')).toBe('false');
+      });
+    });
+
+    describe('controls-button-panel', () => {
+      /** @type {!HTMLElement} */
+      let controlsButtonPanel;
+
+      it('has default elements', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+            'shaka-controls-button-panel');
+
+        expect(controlsButtonPanels.length).toBe(1);
+
+        controlsButtonPanel =
+          /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+
+        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-current-time');
+
+        UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
+
+        // The default settings vary in mobile/desktop context.
+        const deviceType = deviceDetected.getDeviceType();
+        if (deviceType == shaka.device.IDevice.DeviceType.MOBILE ||
+            deviceType == shaka.device.IDevice.DeviceType.TV) {
+          // Mute button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-volume-bar');
+        } else if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+          // Mute button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-volume-bar');
+        } else {
+          // Mute button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-mute-button');
+          // Fullscreen button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-fullscreen-button');
+          // Overflow button
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-overflow-menu-button');
+          // Big buttons
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-big-buttons-container');
+          // Small play button
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button');
+          // Volume bar
+          UiUtils.confirmElementFound(controlsButtonPanel,
+              'shaka-volume-bar');
+        }
+      });
+
+      it('is accessible', async () => {
+        function confirmAriaLabel(className) {
+          const elements =
+              controlsButtonPanel.getElementsByClassName(className);
+          expect(elements.length).toBe(1);
+          expect(elements[0].hasAttribute('aria-label')).toBe(true);
+        }
+
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'volume',
+            'fullscreen',
+            'overflow_menu',
+            'fast_forward',
+            'rewind',
+          ],
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+            'shaka-controls-button-panel');
+        expect(controlsButtonPanels.length).toBe(1);
+
+        controlsButtonPanel =
+          /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+
+        confirmAriaLabel('shaka-mute-button');
+        confirmAriaLabel('shaka-volume-bar');
+        confirmAriaLabel('shaka-fullscreen-button');
+        confirmAriaLabel('shaka-overflow-menu-button');
+        confirmAriaLabel('shaka-fast-forward-button');
+        confirmAriaLabel('shaka-rewind-button');
+      });
+
+      it('has toolbar role', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+            'shaka-controls-button-panel');
+        expect(controlsButtonPanels.length).toBe(1);
+        expect(controlsButtonPanels[0].getAttribute('role')).toBe('toolbar');
+      });
+
+      it('has aria-pressed on toggle buttons', async () => {
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'fullscreen',
+          ],
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const muteButton = videoContainer.getElementsByClassName(
+            'shaka-mute-button')[0];
+        const fullscreenButton = videoContainer.getElementsByClassName(
+            'shaka-fullscreen-button')[0];
+        expect(muteButton.hasAttribute('aria-pressed')).toBe(true);
+        expect(fullscreenButton.hasAttribute('aria-pressed')).toBe(true);
+      });
+
+      it('has aria-hidden on SVG icons', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video);
+        const icons = videoContainer.getElementsByClassName('shaka-ui-icon');
+        for (const icon of icons) {
+          expect(icon.getAttribute('aria-hidden')).toBe('true');
+        }
+      });
+    });
+
+    describe('autoplay button', () => {
+      /** @type {!HTMLElement} */
+      let autoPlayButton;
+      /** @type {shaka.extern.IQueueManager} */
+      let queueManager;
+
+      /**
+       * @param {string} manifestUri
+       * @return {shaka.extern.QueueItem}
+       */
+      function queueItem(manifestUri) {
+        return {
+          manifestUri,
+          preloadManager: null,
+          startTime: null,
+          mimeType: null,
+          config: null,
+          extraText: null,
+          extraThumbnail: null,
+          extraChapter: null,
+          metadata: null,
+        };
+      }
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'autoplay',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+        queueManager = player.getQueueManager();
+
+        // The click handler ignores clicks while the controls are hidden.
+        const container = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container');
+        container.setAttribute('shown', 'true');
+
+        autoPlayButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-autoplay-button');
+      });
+
+      it('is hidden until the queue has a next item', () => {
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:0')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:1')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('toggles the config on click', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(false);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+      });
+
+      it('reflects a config change made elsewhere', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        player.configure('queue.autoPlayNext', false);
+
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+      });
+
+      it('is accessible', () => {
+        expect(autoPlayButton.hasAttribute('aria-label')).toBe(true);
+      });
+    });
+
+    describe('control panel buttons with submenus', () => {
+      /** @type {!HTMLElement} */
+      let resolutionMenu;
+      /** @type {!Element} */
+      let resolutionMenuButton;
+      /** @type {!HTMLElement} */
+      let languageMenu;
+      /** @type {!Element} */
+      let languageMenuButton;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'quality',
+            'language',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+
+        const resolutionsMenus =
+        videoContainer.getElementsByClassName('shaka-resolutions');
+        expect(resolutionsMenus.length).toBe(1);
+        resolutionMenu = /** @type {!HTMLElement} */ (resolutionsMenus[0]);
+
+        const resolutionMenuButtons =
+        videoContainer.getElementsByClassName('shaka-resolution-button');
+        expect(resolutionMenuButtons.length).toBe(1);
+        resolutionMenuButton = resolutionMenuButtons[0];
+
+        const languageMenus =
+        videoContainer.getElementsByClassName('shaka-audio-languages');
+        expect(languageMenus.length).toBe(1);
+        languageMenu = /** @type {!HTMLElement} */ (languageMenus[0]);
+
+        const languageMenuButtons =
+        videoContainer.getElementsByClassName('shaka-language-button');
+        expect(languageMenuButtons.length).toBe(1);
+        languageMenuButton = languageMenuButtons[0];
+      });
+
+      it('menus are initially hidden', () => {
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('a menu becomes visible if the button is clicked', () => {
+        resolutionMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('a menu becomes hidden if the "close" button is clicked', () => {
+        resolutionMenuButton.click();
+
+        const backToOverflowButtons =
+        videoContainer.getElementsByClassName('shaka-back-to-overflow-button');
+        expect(backToOverflowButtons.length).toBe(2);
+        const backToOverflowButton =
+        /** @type {!HTMLElement} */ (backToOverflowButtons[0]);
+        backToOverflowButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('a menu becomes hidden if another one is opened', () => {
+        resolutionMenuButton.click();
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('settings menus have ARIA roles', () => {
+        expect(resolutionMenu.getAttribute('role')).toBe('menu');
+        expect(languageMenu.getAttribute('role')).toBe('menu');
+      });
+
+      it('settings menu buttons have aria-haspopup and aria-expanded', () => {
+        expect(resolutionMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+
+        expect(languageMenuButton.getAttribute('aria-haspopup'))
+            .toBe('true');
+        expect(languageMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+      });
+
+      it('aria-expanded updates when menu opens and closes', () => {
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('true');
+
+        resolutionMenuButton.click();
+        expect(resolutionMenuButton.getAttribute('aria-expanded'))
+            .toBe('false');
+      });
+    });
+
+    describe('caption style preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!jasmine.Spy} */
+      let setPreviewSpy;
+      /** @type {!jasmine.Spy} */
+      let clearPreviewSpy;
+
+      afterEach(() => {
+        // Tests that don't call createUIThroughAPI won't have the
+        // data-shaka-player-container attribute set, so cleanupUI() won't
+        // remove their videoContainer. Clean it up here in that case.
+        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+            videoContainer.parentElement) {
+          videoContainer.remove();
+        }
+      });
+
+      /**
+       * @param {!HTMLElement} menu
+       * @param {string} label
+       * @return {!HTMLElement}
+       */
+      function getStyleOption(menu, label) {
+        const buttons = Array.from(
+            menu.querySelectorAll('button[role="menuitemradio"]'));
+        const button = buttons.find((button) => {
+          const span = button.querySelector('span');
+          return span && span.textContent == label;
+        });
+        expect(button).not.toBe(undefined);
+        return /** @type {!HTMLElement} */(button);
+      }
+
+      /**
+       * @return {!shaka.extern.TextDisplayerConfiguration}
+       */
+      function latestPreviewConfig() {
+        const calls = setPreviewSpy.calls;
+        expect(calls.count()).toBeGreaterThan(0);
+        return /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+          calls.mostRecent().args[0]);
+      }
+
+      /**
+       * @param {?shaka.Player} player
+       */
+      function usePreviewTextDisplayer(player) {
+        expect(player).not.toBe(null);
+        const localPlayer = /** @type {!shaka.Player} */(player);
+        /** @type {?} */
+        const textDisplayer = {};
+        setPreviewSpy = textDisplayer.setTextStylePreview =
+            jasmine.createSpy('setTextStylePreview');
+        clearPreviewSpy = textDisplayer.clearTextStylePreview =
+            jasmine.createSpy('clearTextStylePreview');
+        spyOn(localPlayer, 'getTextDisplayer').and.returnValue(
+            /** @type {!shaka.extern.TextDisplayer} */(textDisplayer));
+      }
+
+      it('does not require player or displayer preview methods', () => {
+        const player = /** @type {?} */(new shaka.util.FakeEventTarget());
+        player.getConfiguration = () => {
+          return shaka.util.PlayerConfiguration.createDefault();
+        };
+        const localization = new shaka.ui.Localization('en');
+        shaka.ui.Locales.addTo(localization);
+        const preview = new shaka.ui.TextStylePreview(
+            /** @type {!shaka.Player} */(player), localization);
+
+        expect(() => {
+          preview.show();
+          preview.update({'fontScaleFactor': 2});
+          preview.reset();
+          preview.hide();
+        }).not.toThrow();
+
+        preview.release();
+      });
+
+      it('updates and reverts font size on hover', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.25);
+
+        const selectedOption = getStyleOption(menu, '150%');
+        selectedOption.click();
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        UiUtils.simulateEvent(selectedOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+
+        controls.hideSettingsMenus();
+      });
+
+      it('updates and reverts text position on focus', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-position',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const localization = controls.getLocalization();
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-position-button');
+        button.click();
+
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+
+        const topLeftLabel =
+            localization.resolve(shaka.ui.Locales.Ids.TOP_LEFT);
+        const topLeftOption = getStyleOption(menu, topLeftLabel);
+        topLeftOption.dispatchEvent(new Event('focus'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.TOP_LEFT);
+
+        topLeftOption.dispatchEvent(new Event('blur'));
+        expect(latestPreviewConfig().positionArea)
+            .toBe(shaka.config.PositionArea.DEFAULT);
+      });
+
+      it('keeps a committed text size as the preview baseline', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        player.configure('textDisplayer.fontScaleFactor', 1.25);
+        controls.showUI();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-text-positions');
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        const largerOption = getStyleOption(menu, '200%');
+        UiUtils.simulateEvent(largerOption, 'mouseenter');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        player.configure('textDisplayer.fontScaleFactor', 1.5);
+        expect(latestPreviewConfig().fontScaleFactor).toBe(2);
+
+        UiUtils.simulateEvent(largerOption, 'mouseleave');
+        expect(latestPreviewConfig().fontScaleFactor).toBe(1.5);
+      });
+
+      it('hides the preview when a context menu closes', async () => {
+        const config = {
+          controlPanelElements: [],
+          contextMenuElements: [
+            'captions-size',
+          ],
+          customContextMenu: true,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const controlsContainer = controls.getControlsContainer();
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+
+        const captionsSizeButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        captionsSizeButton.click();
+
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('hides the preview when the UI is reconfigured', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-size',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-size-button');
+        button.click();
+
+        ui.configure('showUIAlways', true);
+        expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('resolutions menu', () => {
+      /** @type {!HTMLElement} */
+      let resolutionsMenu;
+      /** @type {shaka.ui.Controls} */
+      let controls;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'overflow_menu',
+          ],
+          overflowMenuButtons: [
+            'quality',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+
+        const resolutionsMenus =
+            videoContainer.getElementsByClassName('shaka-resolutions');
+        expect(resolutionsMenus.length).toBe(1);
+        resolutionsMenu = /** @type {!HTMLElement} */ (resolutionsMenus[0]);
+      });
+
+      it('becomes visible if resolutionButton was clicked', () => {
+        let display = window.getComputedStyle(resolutionsMenu, null).display;
+        expect(display).toBe('none');
+
+        const resolutionButtons =
+            videoContainer.getElementsByClassName('shaka-resolution-button');
+        expect(resolutionButtons.length).toBe(1);
+        const resolutionButton = resolutionButtons[0];
+
+        resolutionButton.click();
+        display = resolutionsMenu.style.display;
+        expect(display).not.toBe('none');
+      });
+
+      it('clears the buffer when changing resolutions', async () => {
+        // Load fake content that has more than one quality level.
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+            variant.addVideo(2, (stream) => {
+              stream.size(640, 480);
+            });
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const selectVideoTrack = spyOn(player, 'selectVideoTrack');
+
+        // There should be at least one explicit quality button.
+        const qualityButton =
+            videoContainer.querySelectorAll('button.explicit-resolution')[0];
+        expect(qualityButton).toBeDefined();
+
+        // Clicking this should select a track and clear the buffer.
+        expect(selectVideoTrack).not.toHaveBeenCalled();
+        qualityButton.click();
+
+        // The second argument is "clearBuffer", and should be true.
+        expect(selectVideoTrack).toHaveBeenCalledWith(
+            jasmine.any(Object), true);
+      });
+
+      it('displays resolutions based on current stream', async () => {
+        // A manifest with different resolutions at different
+        // languages/channel-counts to test the current resolution list is
+        // filtered.
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.primary = true;
+            variant.language = 'en';
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+            variant.addAudio(3, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(4, (variant) => {
+            variant.language = 'en';
+            variant.addVideo(5, (stream) => {
+              stream.size(640, 480);
+            });
+            variant.addAudio(6, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(7, (variant) => {  // Duplicate with 4
+            variant.language = 'en';
+            variant.addVideo(8, (stream) => {
+              stream.size(640, 480);
+            });
+            variant.addAudio(9, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(10, (variant) => {
+            variant.language = 'en';
+            variant.addVideo(11, (stream) => {
+              stream.size(1280, 720);
+            });
+            variant.addAudio(12, (stream) => {
+              stream.channelsCount = 1;
+            });
+          });
+          manifest.addVariant(13, (variant) => {
+            variant.language = 'es';
+            variant.addVideo(14, (stream) => {
+              stream.size(960, 540);
+            });
+            variant.addAudio(15, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(16, (variant) => {
+            variant.language = 'fr';
+            variant.addVideo(17, (stream) => {
+              stream.size(256, 144);
+            });
+            variant.addAudio(18, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+        });
+        const getResolutions = () => {
+          const resolutionButtons = videoContainer.querySelectorAll(
+              'button.explicit-resolution > span');
+          return Array.from(resolutionButtons)
+              .map((btn) => btn.innerText)
+              .sort();
+        };
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+
+        const tracks = player.getVariantTracks();
+        const en1 =
+            tracks.find((t) => t.language == 'en' && t.channelsCount == 1);
+        const es = tracks.find((t) => t.language == 'es');
+
+        // There is 1 variant with English 1-channel.
+        goog.asserts.assert(en1, 'Unable to find tracks');
+        player.selectVariantTrack(en1, true);
+        await updateResolutionMenu();
+        expect(getResolutions()).toEqual(['720p']);
+
+        // There is 1 variant with Spanish 2-channel.
+        goog.asserts.assert(es, 'Unable to find tracks');
+        player.selectVariantTrack(es, true);
+        await updateResolutionMenu();
+        expect(getResolutions()).toEqual(['540p']);
+      });
+
+      it('uses customTrackLabel with "video" type to override resolution ' +
+          'labels', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate(
+            (manifest) => {
+              manifest.addVariant(0, (variant) => {
+                variant.addVideo(1, (stream) => {
+                  stream.size(320, 240);
+                });
+              });
+              manifest.addVariant(2, (variant) => {
+                variant.addVideo(3, (stream) => {
+                  stream.size(640, 480);
+                });
+              });
+            });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: (defaultLabel, track, type) => {
+            if (type !== 'video') {
+              return '';
+            }
+            if (track.height === 240) {
+              return 'Low';
+            }
+            if (track.height === 480) {
+              return 'High';
+            }
+            return '';
+          },
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['High', 'Low']);
+      });
+
+      it('falls back to default label when customTrackLabel returns ' +
+          'a falsy value for video tracks', async () => {
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.addVideo(3, (stream) => {
+              stream.size(640, 480);
+            });
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType,
+            () => new shaka.test.FakeManifestParser(manifest));
+
+        const labelSpy =
+            jasmine.createSpy('customTrackLabel').and.returnValue('');
+        const merged = Object.assign({}, controls.getConfig(), {
+          customTrackLabel: labelSpy,
+        });
+        controls.configure(
+            /** @type {!shaka.extern.UIConfiguration} */ (merged));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        await updateResolutionMenu();
+
+        expect(labelSpy).toHaveBeenCalledWith(
+            jasmine.any(String), jasmine.any(Object), 'video');
+        const labels = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span'))
+            .map((s) => s.textContent).sort();
+        expect(labels).toEqual(['240p', '480p']);
+      });
+
+      it('displays audio quality based on current stream', async () => {
+        const manifest =
+          shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(0, (variant) => {
+              variant.addAudio(0, (stream) => {
+                stream.roles = ['main'];
+              });
+              variant.bandwidth = 100000;
+            });
+            manifest.addVariant(1, (variant) => {
+              variant.addAudio(1);
+              variant.bandwidth = 2500000;
+            });
+          });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const qualityButtons = videoContainer.querySelectorAll(
+            'button.explicit-resolution > span');
+        const qualityOptions =
+            Array.from(qualityButtons).map((btn) => btn.innerText);
+
+        expect(qualityOptions).toEqual(['2.5 Mbps', '100 Kbps']);
+      });
+
+      /**
+       * Use internals to update the resolution menu.  Our fake manifest can
+       * cause problems with startup where the Player will get stuck using
+       * "deferred" switches, so we won't get events and the resolution menu
+       * won't update.
+       *
+       * @suppress {accessControls}
+       */
+      async function updateResolutionMenu() {
+        await Util.shortDelay();
+        // TODO(#2089): We should be able to stop once we find one, but since
+        // there are multiple ResolutionMenu objects, we need to update all of
+        // them.
+        let found = false;
+        for (const elem of controls.elements_) {
+          if (elem instanceof shaka.ui.OverflowMenu) {
+            for (const child of elem.children_) {
+              if (child instanceof shaka.ui.ResolutionSelection) {
+                child.updateSelection_();
+                found = true;
+              }
+            }
+          }
+        }
+        goog.asserts.assert(found, 'Unable to find resolution menu');
+      }
+
+      it('does not collapse resolutions across video languages',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // Two video-only variants can share a role (e.g. 'sign') and
+            // resolution but differ in language (e.g. multiple
+            // sign-language video tracks). They must not be collapsed into
+            // a single entry, and only the language of the active track
+            // should be listed.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(640, 480);
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                      stream.size(1280, 720);
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            player.configure('abr.enabled', false);
+
+            const videoTracks = player.getVideoTracks();
+            const dutch480 = videoTracks.find(
+                (t) => t.language == 'sgn-NL' && t.height == 480);
+            goog.asserts.assert(dutch480, 'Unable to find video track');
+            player.selectVideoTrack(dutch480, true);
+            await updateResolutionMenu();
+
+            const resolutionButtons = videoContainer.querySelectorAll(
+                'button.explicit-resolution > span');
+            const resolutions = Array.from(resolutionButtons)
+                .map((btn) => btn.innerText)
+                .sort();
+
+            // Only the Dutch sign-language resolutions should be listed;
+            // the American one at the same 480p must not be silently
+            // collapsed into it.
+            expect(resolutions).toEqual(['480p', '720p']);
+          });
+    });
+
+    describe('video type menu', () => {
+      /** @type {!HTMLElement} */
+      let videoTypeMenu;
+      /** @type {shaka.ui.Controls} */
+      let controls;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'overflow_menu',
+          ],
+          overflowMenuButtons: [
+            'video_type',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        // Force a known locale so the label assertions below are not at the
+        // mercy of the test environment's navigator.languages.
+        controls.getLocalization().changeLocale(['en']);
+
+        const videoTypeMenus =
+            videoContainer.getElementsByClassName('shaka-video-type');
+        expect(videoTypeMenus.length).toBe(1);
+        videoTypeMenu = /** @type {!HTMLElement} */ (videoTypeMenus[0]);
+      });
+
+      it('does not show a language when all video roles share it',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'en';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            expect(getVideoTypeLabels().sort()).toEqual(
+                ['Main', 'Sign language']);
+          });
+
+      it('shows only the language when every option shares the same role',
+          async () => {
+            // Regression test for
+            // https://github.com/shaka-project/shaka-player/issues/10198
+            // When every option has the same role (e.g. two sign-language
+            // video tracks), repeating that role on every button is
+            // redundant; the language alone is what disambiguates them.
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(2);
+            expect(labels.some((l) => l.startsWith('Sign language'))).toBe(
+                false);
+            // The two languages must not be conflated into an identical
+            // label.
+            expect(new Set(labels).size).toBe(2);
+          });
+
+      it('keeps the role label when languages differ across roles',
+          async () => {
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addVariant(0, (variant) => {
+                    variant.addVideo(1, (stream) => {
+                      stream.roles = ['main'];
+                      stream.language = 'en';
+                    });
+                  });
+                  manifest.addVariant(2, (variant) => {
+                    variant.addVideo(3, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-US';
+                    });
+                  });
+                  manifest.addVariant(4, (variant) => {
+                    variant.addVideo(5, (stream) => {
+                      stream.roles = ['sign'];
+                      stream.language = 'sgn-NL';
+                    });
+                  });
+                });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
+
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+            await updateVideoTypeMenu();
+
+            const labels = getVideoTypeLabels();
+            expect(labels.length).toBe(3);
+            expect(labels.filter((l) => l.startsWith('Main (')).length)
+                .toBe(1);
+            expect(
+                labels.filter((l) => l.startsWith('Sign language (')).length)
+                .toBe(2);
+            expect(new Set(labels).size).toBe(3);
+          });
+
+      function getVideoTypeLabels() {
+        return Array.from(videoTypeMenu.querySelectorAll(
+            'button:not(.shaka-back-to-overflow-button) > span'))
+            .map((s) => s.textContent);
+      }
+
+      /**
+       * @suppress {accessControls}
+       */
+      async function updateVideoTypeMenu() {
+        await Util.shortDelay();
+        let found = false;
+        for (const elem of controls.elements_) {
+          if (elem instanceof shaka.ui.OverflowMenu) {
+            for (const child of elem.children_) {
+              if (child instanceof shaka.ui.VideoTypeSelection) {
+                child.updateVideoRoles_();
+                found = true;
+              }
+            }
+          }
+        }
+        goog.asserts.assert(found, 'Unable to find video type menu');
+      }
+    });
+
+    describe('custom context menu', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let contextMenu;
+
+      beforeEach(async () => {
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'fakeElement',
+            'statistics',
+            'fakeElement',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+
+        controlsContainer = ui.getControls().getControlsContainer();
+
+        const contextMenus =
+        videoContainer.getElementsByClassName('shaka-context-menu');
+        expect(contextMenus.length).toBe(1);
+        contextMenu = /** @type {!HTMLElement} */
+            (contextMenus[0]);
+      });
+
+      it('responds to contextmenu event', () => {
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('hides on click event', () => {
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('builds internal elements', () => {
+        expect(contextMenu.childNodes.length).toBe(1);
+
+        const element = /** @type {!HTMLElement} */ (contextMenu.childNodes[0]);
+        expect(element.classList.contains('shaka-statistics-button'))
+            .toBe(true);
+      });
+    });
+
+    describe('custom context menu on touch devices', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let contextMenu;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'statistics',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+
+        const controls = ui.getControls();
+        controlsContainer = controls.getControlsContainer();
+        // onContainerTouch ignores touches until the media has a duration and
+        // only acts while the controls are showing (opaque).
+        Object.defineProperty(video, 'duration',
+            {value: 100, configurable: true});
+        controlsContainer.setAttribute('shown', 'true');
+
+        const contextMenus =
+            videoContainer.getElementsByClassName('shaka-context-menu');
+        expect(contextMenus.length).toBe(1);
+        contextMenu = /** @type {!HTMLElement} */ (contextMenus[0]);
+      });
+
+      afterEach(() => {
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('stays open when the long-press is released', () => {
+        // A long-press fires 'contextmenu' while the finger is down, then
+        // 'touchend' when it is released.  The menu must survive the release.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('closes on a subsequent tap', () => {
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'contextmenu');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        // A separate tap (its own touchstart + touchend) closes the menu.
+        UiUtils.simulateEvent(controlsContainer, 'touchstart');
+        UiUtils.simulateEvent(controlsContainer, 'touchend');
+        expect(contextMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+    });
+
+    describe('statistics context menu', () => {
+      /** @type {!HTMLElement} */
+      let statisticsButton;
+      /** @type {!HTMLElement} */
+      let statisticsContainer;
+
+      beforeEach(async () => {
+        const config = {
+          customContextMenu: true,
+          contextMenuElements: [
+            'statistics',
+          ],
+          statisticsList: Object.keys(new shaka.util.Stats().getBlob()),
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+
+        const statisticsButtons =
+        videoContainer.getElementsByClassName('shaka-statistics-button');
+        expect(statisticsButtons.length).toBe(1);
+        statisticsButton = /** @type {!HTMLElement} */
+            (statisticsButtons[0]);
+
+        const statisticsContainers =
+        videoContainer.getElementsByClassName('shaka-statistics-container');
+        expect(statisticsContainers.length).toBe(1);
+        statisticsContainer = /** @type {!HTMLElement} */
+            (statisticsContainers[0]);
+      });
+
+      it('appears and disappears on toggle', () => {
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(true);
+
+        statisticsButton.click();
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(false);
+
+        statisticsButton.click();
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(true);
+      });
+
+      it('displays all the available statistics', () => {
+        const skippedStats = ['stateHistory', 'switchHistory'];
+
+        /**
+         * Returns the stat node by label name.
+         * @param {string} name
+         * @return {?Node}
+         */
+        function getStatsElementByName(name) {
+          const nodes = statisticsContainer.childNodes;
+
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes.length >= 2 &&
+                node.childNodes[0].textContent.replace(':', '') == name) {
+              return node;
+            }
+          }
+
+          return null;
+        }
+
+        for (const statistic in new shaka.util.Stats().getBlob()) {
+          if (skippedStats.includes(statistic)) {
+            continue;
+          }
+
+          const node = getStatsElementByName(statistic);
+
+          expect(node).not.toBe(null);
+
+          const label = node.childNodes[0].textContent;
+          expect(label.replace(':', '')).toBe(statistic);
+
+          const value = node.childNodes[1].textContent;
+          expect(value).not.toBe('NaN');
+        }
+      });
+
+      it('is updated periodically', async () => {
+        // There is no guaranteed ordering, so fetch by the stat name.
+        function getStatsElementByName(name) {
+          const nodes = statisticsContainer.childNodes;
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes[0].textContent.includes(name)) {
+              return node;
+            }
+          }
+          return null;
+        }
+
+        function getStatsFromContainer() {
+          width = getStatsElementByName(
+              'width').childNodes[1].textContent.replace(' (px)', '');
+          height = getStatsElementByName(
+              'height').childNodes[1].textContent.replace(' (px)', '');
+          bufferingTime = getStatsElementByName(
+              'bufferingTime').childNodes[1].textContent.replace(' (s)', '');
+        }
+
+        /** @type {!string} */
+        let width;
+        /** @type {!string} */
+        let height;
+        /** @type {!string} */
+        let bufferingTime;
+        /** @type {!string} */
+        let lastBufferingTime;
+
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(/* id= */ 0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              // Keep this at 720p to pass max-height checks on Chromecast Hub.
+              stream.size(1280, 720);
+            });
+          });
+        });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        player.configure('streaming.segmentPrefetchLimit', 0);
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        // Placeholder statistics are available before toggle
+        getStatsFromContainer();
+        expect(width).toBe('NaN');
+        expect(height).toBe('NaN');
+        expect(bufferingTime).toBe('NaN');
+
+        // Statistics are displayed on toggle
+        statisticsButton.click();
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(width).toBe('1280');
+        expect(height).toBe('720');
+        expect(bufferingTime).toBeGreaterThanOrEqual(0.1);
+
+        // Statistics are updated over time
+        lastBufferingTime = bufferingTime;
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(bufferingTime).toBeGreaterThan(lastBufferingTime);
+
+        // Statistics stop updating when the container is hidden
+        statisticsButton.click();
+        lastBufferingTime = bufferingTime;
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(bufferingTime).toBe(lastBufferingTime);
+      });
+    });
+
+    describe('keyboard shortcuts and multi-player isolation', () => {
+      /** @type {!HTMLElement} */
+      let container1;
+      /** @type {!HTMLVideoElement} */
+      let video1;
+      /** @type {shaka.ui.Overlay} */
+      let ui1;
+      /** @type {shaka.ui.Controls} */
+      let controls1;
+      /** @type {shaka.Player} */
+      let player1;
+
+      /** @type {!HTMLElement} */
+      let container2;
+      /** @type {!HTMLVideoElement} */
+      let video2;
+      /** @type {shaka.ui.Overlay} */
+      let ui2;
+      /** @type {shaka.ui.Controls} */
+      let controls2;
+      /** @type {shaka.Player} */
+      let player2;
+
+      beforeEach(async () => {
+        container1 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container1);
+        video1 = shaka.test.UiUtils.createVideoElement();
+        container1.appendChild(video1);
+
+        container2 =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        document.body.appendChild(container2);
+        video2 = shaka.test.UiUtils.createVideoElement();
+        container2.appendChild(video2);
+
+        Object.defineProperty(video1, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+        Object.defineProperty(video2, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime1 = 0;
+        Object.defineProperty(video1, 'currentTime', {
+          get: () => currentTime1,
+          set: (val) => {
+            currentTime1 = val;
+          },
+          configurable: true,
+        });
+
+        let currentTime2 = 0;
+        Object.defineProperty(video2, 'currentTime', {
+          get: () => currentTime2,
+          set: (val) => {
+            currentTime2 = val;
+          },
+          configurable: true,
+        });
+
+        ui1 = await UiUtils.createUIThroughAPI(container1, video1);
+        controls1 = ui1.getControls();
+        player1 = controls1.getLocalPlayer();
+        spyOn(player1, 'getAssetUri').and.returnValue('fake-uri-1');
+        spyOn(player1, 'seekRange').and.returnValue({start: 0, end: 100});
+        controls1.seekTo(50, false);
+
+        ui2 = await UiUtils.createUIThroughAPI(container2, video2);
+        controls2 = ui2.getControls();
+        player2 = controls2.getLocalPlayer();
+        spyOn(player2, 'getAssetUri').and.returnValue('fake-uri-2');
+        spyOn(player2, 'seekRange').and.returnValue({start: 0, end: 100});
+        controls2.seekTo(50, false);
+      });
+
+      it('handles seekbar Space and Arrow keys with preventDefault', () => {
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const seekBar = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar).toBeTruthy();
+
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar));
+
+        const spaceEvent = createKeydownEvent(' ');
+        const spacePreventDefaultSpy =
+            spyOn(spaceEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(spaceEvent);
+
+        expect(playSpy).toHaveBeenCalledTimes(1);
+        expect(spacePreventDefaultSpy).toHaveBeenCalled();
+
+        controls1.seekTo(50, false);
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+        const arrowLeftPreventDefaultSpy =
+            spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
+        seekBar.dispatchEvent(arrowLeftEvent);
+
+        expect(video1.currentTime).toBe(45);
+        expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
+
+        controls1.seekTo(50, false);
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
+        seekBar.dispatchEvent(arrowRightEvent);
+
+        expect(video1.currentTime).toBe(55);
+      });
+
+      it('isolates fullscreen status and keys between players', () => {
+        // isFullScreenEnabled() only reads document.fullscreenElement when
+        // document fullscreen is available; without it the controls fall back
+        // to the video element and this test would measure the platform
+        // instead.  Tizen 3 also refuses to redefine the property at all.
+        if (!document.fullscreenEnabled) {
+          pending('This test requires fullscreen support, which is ' +
+              'unavailable.');
+        }
+
+        const originalFullscreenElement =
+            Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+
+        try {
+          Object.defineProperty(document, 'fullscreenElement', {
+            get: () => container1,
+            configurable: true,
+          });
+
+          expect(controls1.isFullScreenEnabled()).toBe(true);
+          expect(controls2.isFullScreenEnabled()).toBe(false);
+
+          const play1Spy =
+              spyOn(video1, 'play').and.returnValue(Promise.resolve());
+          const play2Spy =
+              spyOn(video2, 'play').and.returnValue(Promise.resolve());
+          const pause1Spy = spyOn(video1, 'pause');
+          const pause2Spy = spyOn(video2, 'pause');
+
+          controls1.seekTo(50, false);
+          controls2.seekTo(50, false);
+
+          const initialTime1 = video1.currentTime;
+          const initialTime2 = video2.currentTime;
+
+          const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+          window.dispatchEvent(arrowLeftEvent);
+
+          expect(video1.currentTime).toBe(45);
+          expect(video1.currentTime).not.toBe(initialTime1);
+          expect(video2.currentTime).toBe(initialTime2);
+
+          const spaceEvent = createKeydownEvent(' ');
+          window.dispatchEvent(spaceEvent);
+
+          expect(play1Spy).toHaveBeenCalledTimes(1);
+          expect(play2Spy).not.toHaveBeenCalled();
+          expect(pause1Spy).not.toHaveBeenCalled();
+          expect(pause2Spy).not.toHaveBeenCalled();
+          expect(video2.currentTime).toBe(initialTime2);
+        } finally {
+          if (originalFullscreenElement) {
+            Object.defineProperty(
+                document, 'fullscreenElement', originalFullscreenElement);
+          } else {
+            // @ts-ignore
+            delete document['fullscreenElement'];
+          }
+        }
+      });
+
+      it('does not leak seekbar focus events to other players', () => {
+        ui2.configure({enableKeyboardPlaybackControlsInWindow: true});
+
+        controls1.seekTo(50, false);
+        controls2.seekTo(50, false);
+
+        const initialTime1 = video1.currentTime;
+        const initialTime2 = video2.currentTime;
+
+        const seekBar1 = container1.querySelector('.shaka-seek-bar');
+        expect(seekBar1).toBeTruthy();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar1));
+
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
+        seekBar1.dispatchEvent(arrowRightEvent);
+
+        expect(video1.currentTime).toBe(55);
+        expect(video1.currentTime).not.toBe(initialTime1);
+        expect(video2.currentTime).toBe(initialTime2);
+      });
+
+      it('does not trigger shortcuts when typing in a form input', () => {
+        ui1.configure({enableKeyboardPlaybackControlsInWindow: true});
+
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const pauseSpy = spyOn(video1, 'pause');
+
+        controls1.seekTo(50, false);
+        const initialTime1 = video1.currentTime;
+
+        const input =
+        /** @type {!HTMLInputElement} */ (document.createElement('input'));
+        input.type = 'text';
+        document.body.appendChild(input);
+        focusForKeyboardTest(input);
+
+        const spaceEvent = createKeydownEvent(' ');
+        window.dispatchEvent(spaceEvent);
+
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
+        window.dispatchEvent(arrowLeftEvent);
+
+        expect(playSpy).not.toHaveBeenCalled();
+        expect(pauseSpy).not.toHaveBeenCalled();
+        expect(video1.currentTime).toBe(initialTime1);
+
+        document.body.removeChild(input);
+      });
+    });
+
+    describe('seek bar thumbnail preview', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLElement} */
+      let seekBar;
+      /** @type {!HTMLElement} */
+      let thumbnailContainer;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-seek-bar');
+        thumbnailContainer = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-player-ui-thumbnail-container');
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        focusForKeyboardTest(seekBar);
+      });
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(createKeydownEvent(key));
+      }
+
+      it('stays up while a seek key is held down', async () => {
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
+
+        pressKey('ArrowRight');
+        await Util.delay(0.1);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Holding the key down makes it repeat, which keeps the preview up
+        // past the timeout a single press would have hidden it at.
+        await Util.delay(0.6);
+        pressKey('ArrowRight');
+        await Util.delay(0.6);
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+
+        // Once the key is released it stops repeating and the preview goes
+        // away on its own.
+        await Util.delay(1.2);
+        expect(thumbnailContainer.style.visibility).toBe('hidden');
+      });
+
+      it('is not shown for keys that do not seek', async () => {
+        // 'x' is not bound to anything, so the playhead does not move.
+        pressKey('x');
+        await Util.delay(0.1);
+        expect(video.currentTime).toBe(50);
+        expect(thumbnailContainer.style.visibility).not.toBe('visible');
+      });
+    });
+
+    describe('keyboard during a seek bar drag', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLInputElement} */
+      let seekBar;
+      /** @type {boolean} */
+      let paused;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        // The element has no source, so drive its playback state by hand.
+        paused = true;
+        Object.defineProperty(video, 'paused', {
+          get: () => paused,
+          configurable: true,
+        });
+        spyOn(video, 'play').and.callFake(() => {
+          paused = false;
+        });
+        spyOn(video, 'pause').and.callFake(() => {
+          paused = true;
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = /** @type {!HTMLInputElement} */ (
+          UiUtils.getElementByClassName(videoContainer, 'shaka-seek-bar'));
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        // The bar is built disabled and is only enabled when the controls go
+        // from hidden to visible, which never happens here because they are
+        // already visible.  A disabled input cannot take focus.
+        seekBar.disabled = false;
+        seekBar.focus();
+      });
+
+      /**
+       * @param {number} fraction
+       * @return {number} the clientX for that point of the bar
+       */
+      function positionOfBar(fraction) {
+        const rect = seekBar.getBoundingClientRect();
+        return rect.left + (rect.width * fraction);
+      }
+
+      /**
+       * @param {string} type
+       * @param {number} clientX
+       * @param {!EventTarget=} target
+       */
+      function mouseEvent(type, clientX, target) {
+        (target || seekBar).dispatchEvent(new MouseEvent(type, {
+          clientX,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
+          key,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      it('seeks from where the drag left the bar', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+        expect(controls.isSeeking()).toBe(true);
+
+        pressKey('ArrowRight');
+
+        const keyboardSeekDistance =
+            controls.getConfig().keyboardSeekDistance;
+        expect(video.currentTime).toBe(dragTime + keyboardSeekDistance);
+        // The keyboard took the interaction over from the pointer.
+        expect(controls.isSeeking()).toBe(false);
+      });
+
+      it('is not undone when the drag ends', async () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+
+        pressKey('ArrowRight');
+        const timeAfterKey = video.currentTime;
+
+        // Moving and releasing the mouse somewhere else no longer drives the
+        // bar, so the keyboard seek stands.
+        mouseEvent('mousemove', positionOfBar(0.75), document);
+        mouseEvent('mouseup', positionOfBar(0.75), document);
+        await Util.delay(0.3);
+
+        expect(video.currentTime).toBe(timeAfterKey);
+      });
+
+      it('pauses when play/pause is pressed during a drag', async () => {
+        video.play();
+        expect(video.paused).toBe(false);
+
+        // Scrubbing pauses the video until the drag is over.
+        mouseEvent('mousedown', positionOfBar(0.25));
+        expect(video.paused).toBe(true);
+
+        pressKey(' ');
+
+        // The toggle is not swallowed by the resume at the end of the drag.
+        expect(controls.isSeeking()).toBe(false);
+        expect(video.paused).toBe(true);
+
+        mouseEvent('mouseup', positionOfBar(0.25), document);
+        await Util.delay(0.3);
+        expect(video.paused).toBe(true);
+      });
+
+      it('does not end the drag for unrelated shortcuts', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+
+        // The test video element is created muted.
+        expect(video.muted).toBe(true);
+        pressKey(controls.getConfig().shortcuts.mute);
+
+        expect(video.muted).toBe(false);
+        // Muting does not interrupt the drag.
+        expect(controls.isSeeking()).toBe(true);
+        expect(parseFloat(seekBar.value)).toBe(dragTime);
+      });
+    });
+  });
+
+
+  /**
+   * @param {!HTMLElement} container
+   * @suppress {visibility}
+   */
+  function checkBasicUIElements(container) {
+    const videos = container.getElementsByTagName('video');
+    expect(videos.length).not.toBe(0);
+
+    const overlay = /** @type {!shaka.ui.Overlay} */(videos[0]['ui']);
+    const config = overlay.getConfiguration();
+    if (config.showBufferingSpinner) {
+      UiUtils.confirmElementFound(container, 'shaka-spinner');
+    } else {
+      UiUtils.confirmElementMissing(container, 'shaka-spinner');
+    }
+
+    const deviceType = deviceDetected.getDeviceType();
+    if (deviceType == shaka.device.IDevice.DeviceType.CAST) {
+      UiUtils.confirmElementMissing(container, 'shaka-overflow-menu');
+    } else {
+      UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    }
+    UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
+  }
+});

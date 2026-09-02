@@ -1,0 +1,175 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* General utility mixins and classes with broad applicability. */
+
+/*
+ * CSS custom properties (variables) — replaces all former LESS @variables.
+ * Override any of these on a parent element to theme the player.
+ */
+:root {
+  /* Layout */
+  --shaka-controls-w: 98%;
+
+  /* Typography */
+  --shaka-font-family: roboto, sans-serif;
+  --shaka-font-color: white;
+  --shaka-font-color-secondary: #ccc;
+  --shaka-font-size: 14px;
+  --shaka-font-size-sm: 12px;
+
+  /* Backgrounds */
+  --shaka-bg: rgba(0, 0, 0, 50%);
+  --shaka-bg-hover: rgba(0, 0, 0, 75%);
+  --shaka-bg-90: rgba(0, 0, 0, 90%);
+  --shaka-bg-solid: black;
+  --shaka-bg-menu: rgba(28, 28, 28, 90%);
+
+  /* Content */
+  --shaka-title-size: 18px;
+
+  /* Badge mark */
+  --shaka-badge-color: #fff;
+  --shaka-badge-active: #f00;
+  --shaka-badge-size: 10px;
+
+  /* Tooltip / overflow-menu icon button size */
+  --shaka-icon-size: 48px;
+  --shaka-icon-size-sm: calc(var(--shaka-icon-size) / 2);
+  --shaka-icon-size-lg: calc(var(--shaka-icon-size) * 2 / 3);
+
+  /* Range / seek-bar pieces */
+  --shaka-thumb-color: white;
+  --shaka-track-color: white;
+  --shaka-thumb-size: 12px;
+  --shaka-track-h: 4px;
+  --shaka-touch-size: 40px;
+
+  /* Playback-rate menu */
+  --shaka-rate-border: rgba(255, 255, 255, 50%);
+  --shaka-rate-border-active: rgba(255, 255, 255, 85%);
+  --shaka-rate-bg-active: rgba(255, 255, 255, 10%);
+  --shaka-rate-slider: rgba(255, 255, 255, 25%);
+  --shaka-rate-preset-bg: rgba(255, 255, 255, 10%);
+  --shaka-rate-preset-hover: rgba(255, 255, 255, 18%);
+  --shaka-rate-preset-active: rgba(255, 255, 255, 20%);
+  --shaka-rate-preset-border: rgba(255, 255, 255, 70%);
+}
+
+/* Make a thing unselectable.  There are currently no cases where we make it
+ * selectable again. */
+.unselectable() {
+  user-select: none;
+}
+
+.hidden() {
+  display: none;
+}
+
+.shaka-hidden {
+  /* Make this override equally specific classes.
+   * If it's hidden, always hide it! */
+  display: none !important;
+}
+
+.fill-container() {
+  width: 100%;
+  height: 100%;
+}
+
+.center-children() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* For containers which host elements overlaying other things. */
+.overlay-parent() {
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for some children of this container to overlay the
+   * others using .overlay-child(). */
+  position: relative;
+
+  /* Make sure any top or left styles applied from outside don't move this from
+   * it's original position, now that it's relative to that original position.
+   * This is a defensive move that came out of intensive debugging on IE 11. */
+  top: 0;
+  left: 0;
+}
+
+/* For things which overlay other things. */
+.overlay-child() {
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for this child to overlay the other children of a
+   * .overlay-parent() object. */
+  position: absolute;
+
+  /* Fill the container by default. */
+  inset: 0;
+  margin: 0;
+  padding: 0;
+
+  .fill-container();
+}
+
+.absolute-position() {
+  /* When setting "position: absolute" it uses the left,right,top,bottom
+   * properties to determine the positioning.  We should set all these
+   * properties to ensure it is positioned properly on all platforms. */
+  position: absolute;
+  inset: 0;
+}
+
+/* For things that should not shrink inside a flex container.
+ * This will be used for all controls by default. */
+.unshrinkable() {
+  flex-shrink: 0;
+}
+
+/* Use this to override .unshrinkable() in particular cases that *should* shrink
+ * inside a flex container. */
+.shrinkable() {
+  flex-shrink: 1;
+}
+
+.show-when-controls-shown() {
+  /* Transparent unless explicitly made opaque through container attributes. */
+  opacity: 0;
+
+  /* When we show/hide this, do it gradually using cubic-bezier timing. */
+  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
+
+  /* Show controls when the container's "shown" or "casting" attributes are
+   * set. */
+  .shaka-controls-container[shown="true"] &,
+  .shaka-controls-container[casting="true"] & {
+    opacity: 1;
+  }
+}
+
+.hide-when-shaka-controls-disabled() {
+  .shaka-video-container:not([shaka-controls="true"]) & {
+    .hidden();
+  }
+}
+
+@media (forced-colors: active) {
+  .shaka-overflow-menu,
+  .shaka-settings-menu,
+  .shaka-context-menu {
+    border: 1px solid ButtonText;
+  }
+}

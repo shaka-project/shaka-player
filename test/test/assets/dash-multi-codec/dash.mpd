@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Generated with https://github.com/google/shaka-packager version v2.4.1-c731217-release-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT60S">
+  <Period id="0">
+    <AdaptationSet id="6" contentType="video" maxWidth="180" maxHeight="144" frameRate="12800/512" par="5:4">
+      <Representation id="12" bandwidth="162364" codecs="avc1.4d400c" mimeType="video/mp4" sar="1:1" width="180" height="144">
+        <BaseURL>video_144p_108k_h264.mp4</BaseURL>
+        <SegmentBase indexRange="860-1071" timescale="12800">
+          <Initialization range="0-859"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="8" contentType="audio" lang="en" subsegmentAlignment="true">
+      <Representation id="13" bandwidth="130803" codecs="mp4a.40.2" mimeType="audio/mp4" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <BaseURL>audio_en_2c_128k_aac.mp4</BaseURL>
+        <SegmentBase indexRange="786-1009" timescale="48000">
+          <Initialization range="0-785"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="10" contentType="audio" lang="es" subsegmentAlignment="true">
+      <Representation id="17" bandwidth="75654" codecs="opus" mimeType="audio/webm" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <BaseURL>audio_es_2c_64k_opus.webm</BaseURL>
+        <SegmentBase indexRange="326-584" timescale="48000">
+          <Initialization range="0-325"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

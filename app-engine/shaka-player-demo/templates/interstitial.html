@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+  Shaka Player Demo - Appspot Compatibility Interstitial
+  Copyright 2016 Google LLC
+  SPDX-License-Identifier: Apache-2.0
+
+  The hosted demo has moved to GitHub Pages.  This page reads the URL fragment
+  (which is never sent to the server), translates any outdated demo parameters
+  into the current format, and forwards the user to the new demo.  The server
+  injects {{ target }} with the correct destination for this host.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Shaka Player demo has moved</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://shaka-project.github.io">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+    <link rel="icon" href="https://shaka-project.github.io/shaka-player/demo/favicon.ico">
+    <style>
+      body {
+        font-family: Roboto, Arial, sans-serif;
+        background-color: #fff;
+        color: #000;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1.5;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        z-index: -1;
+        position: absolute;
+        inset: 0;
+        /* Larger height compensates for lack of cropping the square logo. */
+        background-size: min(170vh, 90vw);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(https://shaka-project.github.io/shaka-player/demo/app_logo_512.png);
+        opacity: 0.1;
+      }
+      .card {
+        box-sizing: border-box;
+        max-width: 32em;
+        margin: 16px;
+        padding: 16px;
+        border-radius: 2px;
+        background: white;
+        box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),
+                    0 3px 1px -2px rgba(0,0,0,.2),
+                    0 1px 5px 0 rgba(0,0,0,.12);
+      }
+      h1 { font-size: 24px; font-weight: 500; margin: 0 0 0.5em; }
+      p { margin: 0.75em 0; }
+      a { color: rgb(63, 81, 181); }
+      .small { color: #5f6368; font-size: 14px; margin-bottom: 0; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>The Shaka Player demo has moved</h1>
+      <p>
+        We no longer host the demo on App Engine.  Taking you to its new home on
+        GitHub Pages&hellip;
+      </p>
+      <p>
+        If you are not redirected automatically,
+        <a id="link" href="{{ target }}">click here to continue</a>.
+      </p>
+      <p class="small">
+        Please update your bookmarks.
+      </p>
+    </main>
+
+    <script>
+      // The base URL of the new demo, chosen server-side based on the host.
+      var TARGET = {{ target | tojson }};
+
+      // The DRM systems a bare "license=" parameter was historically applied to.
+      // Mirrors shakaDemo.Main.commonDrmSystems in demo/main.js.
+      var COMMON_DRM_SYSTEMS = [
+        'com.widevine.alpha',
+        'com.microsoft.playready',
+        'com.apple.fps',
+        'org.w3.clearkey',
+      ];
+
+      // Build the minimal JSON object the current demo expects for a loaded
+      // custom asset.  ShakaDemoAssetInfo.fromJSON starts from a blank asset and
+      // overlays only the keys present here, so we set just what the old flat
+      // parameters carried.  Maps (like licenseServers) serialize with a
+      // "__type__" marker, matching ShakaDemoAssetInfo.toJSON.
+      function buildAsset(manifestUri, adTagUri, license, drmSystem, certificate) {
+        var asset = {name: 'loaded asset', manifestUri: manifestUri};
+        if (license) {
+          var systems = drmSystem ? [drmSystem] : COMMON_DRM_SYSTEMS;
+          var servers = {__type__: 'map'};
+          for (var i = 0; i < systems.length; i++) {
+            servers[systems[i]] = license;
+          }
+          asset.licenseServers = servers;
+        }
+        if (certificate) {
+          asset.certificateUri = certificate;
+        }
+        if (adTagUri) {
+          asset.adTagUri = adTagUri;
+        }
+        return asset;
+      }
+
+      // Translate one ";"-separated parameter string (a hash or query fragment).
+      // The old "asset"/"license"/etc. family collapses into a single
+      // "assetBase64" parameter; every other parameter passes through verbatim,
+      // since the current demo still understands them.
+      function translate(raw) {
+        if (!raw) {
+          return '';
+        }
+        var parts = raw.split(';');
+        var out = [];
+        var manifestUri = null;
+        var adTagUri = null;
+        var license = null;
+        var drmSystem = null;
+        var certificate = null;
+        var sawOldAsset = false;
+        for (var i = 0; i < parts.length; i++) {
+          var decoded = decodeURIComponent(parts[i]);
+          var eq = decoded.indexOf('=');
+          var key = eq < 0 ? decoded : decoded.substring(0, eq);
+          var value = eq < 0 ? '' : decoded.substring(eq + 1);
+          switch (key) {
+            case 'asset': manifestUri = value; sawOldAsset = true; break;
+            case 'adTagUri': adTagUri = value; break;
+            case 'license': license = value; break;
+            case 'drmSystem': drmSystem = value; break;
+            case 'certificate': certificate = value; break;
+            default: out.push(parts[i]); break;
+          }
+        }
+        if (sawOldAsset && manifestUri) {
+          var asset = buildAsset(
+              manifestUri, adTagUri, license, drmSystem, certificate);
+          // The demo writes assetBase64 into the hash without URI-encoding, so
+          // we match that to keep the value byte-for-byte comparable.
+          out.push('assetBase64=' + window.btoa(JSON.stringify(asset)));
+        }
+        return out.join(';');
+      }
+
+      function computeDestination() {
+        var search = translate(window.location.search.replace(/^\?/, ''));
+        var hash = translate(window.location.hash.replace(/^#/, ''));
+        var url = TARGET;
+        if (search) {
+          url += '?' + search;
+        }
+        if (hash) {
+          url += '#' + hash;
+        }
+        return url;
+      }
+
+      var destination = computeDestination();
+      document.getElementById('link').href = destination;
+      // Give the user a beat to read the notice before forwarding.
+      window.setTimeout(function() {
+        window.location.replace(destination);
+      }, 2000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,327 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.shaka-sub-menu {
+  /* Where the menu appears. */
+  position: relative;
+
+  /* When displayed as a flex container, elements inside will flow in a
+   * vertical column. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* The overflow menu and all settings submenus.  These appear on top of all
+ * other controls (Z axis) when the overflow button is clicked. */
+.shaka-overflow-menu,
+.shaka-context-menu,
+.shaka-settings-menu {
+  /* It's okay to add a vertical scroll if there are too many items, but
+   * horizontal scrolling is not allowed. */
+  overflow: hidden auto;
+  scrollbar-color:
+    var(--shaka-font-color)
+    var(--shaka-bg);
+  scrollbar-width: thin;
+
+  /* Don't wrap text to the next line. */
+  white-space: nowrap;
+
+  /* Styles for the menu itself. */
+  background: var(--shaka-bg-menu);
+  border-radius: 12px;
+  max-height: 250px;
+  min-width: 190px;
+
+  /* Never wider than the video container: the percentage resolves against
+   * the controls container, and the 40px accounts for the ~15px edge
+   * insets applied by the positioning logic in menu_base.js plus this
+   * menu's own padding.  On wide screens this never binds and menus keep
+   * their natural content-sized width; on narrow or portrait screens the
+   * menu shrinks instead of getting cut off at the screen edge. */
+  max-width: calc(100% - 40px);
+  padding: 5px;
+
+  /* The menus fade out with the other controls. */
+  .show-when-controls-shown();
+
+  /* When displayed as a flex container, elements inside will flow in a
+   * vertical column. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  /* Where the menu appears. */
+  position: absolute;
+  z-index: 2;
+  bottom: calc(var(--shaka-icon-size) + 14px);
+
+  /* The buttons inside the menu. */
+  button {
+    font-size: var(--shaka-font-size);
+    background: transparent;
+    color: var(--shaka-font-color);
+    border: none;
+    border-radius: 12px;
+    min-height: 30px;
+    padding: 10px;
+
+    /* The button itself is a flex container, with children center-aligned. */
+    display: flex;
+    align-items: center;
+
+    /* When hovered, the button's background is highlighted. */
+    &:hover {
+      background: rgba(255, 255, 255, 10%);
+    }
+
+    /* The button is clickable, showing cursor pointer */
+    cursor: pointer;
+
+    /* The label inside button is also showing cursor pointer  */
+    label {
+      cursor: pointer;
+    }
+
+    .shaka-keyboard-navigation &:focus {
+      background: rgba(255, 255, 255, 10%);
+    }
+  }
+
+  /* These are the elements which contain the material design icons.
+   * TODO: Pull MD icon details out of JS. */
+  .shaka-ui-icon {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
+    padding-left: 0;
+    padding-right: 10px;
+
+    &.shaka-chosen-item {
+      order: -1;
+      line-height: 17px;
+      font-size: 18px;
+    }
+  }
+
+  // If the seekbar is missing, this is positioned lower.
+  &.shaka-low-position {
+    bottom: var(--shaka-icon-size);
+  }
+}
+
+/* The span elements inside the top-level overflow menu contain single lines
+ * of text, which are the button name and the current selection.  For example,
+ * a captions button might have "Captions" in one span (the button name), and
+ * "Farsi" in another (the current selection).
+ * These are displayed inside a .shaka-overflow-button-label grouping, to the
+ * right of MD icons. */
+.shaka-overflow-menu span {
+  text-align: left;
+}
+
+.shaka-overflow-button {
+  position: relative;
+}
+
+/* This contains span elements with single lines of text, and appears to the
+ * right of MD icons. */
+.shaka-overflow-button-label {
+  position: relative;
+
+  /* This is a flex container, whose children flow vertically. */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.shaka-overflow-button-label-inline {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: calc(100% - var(--shaka-icon-size-sm));
+  padding-right: calc(var(--shaka-icon-size-sm) + 8px);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--shaka-icon-size-sm);
+    height: var(--shaka-icon-size-sm);
+    background-color: var(--shaka-font-color);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+    mask-size: contain;
+  }
+}
+
+.shaka-simple-overflow-button-label-inline {
+  box-sizing: border-box;
+  flex-direction: row;
+  justify-content: space-between;
+  width: calc(100% - 50px);
+}
+
+/* This is the specific span element which shows the current selection from some
+ * submenu.  For example, it would contain the currently-selected subtitle
+ * language, the currently-selected resolution, etc. */
+.shaka-current-selection-span {
+  /* This is dimmer than the other span, which is the name of the submenu. */
+  font-size: var(--shaka-font-size-sm);
+  padding-left: 10px;
+}
+
+.shaka-current-auto-quality {
+  margin-left: 5px;
+  font-size: 11px;
+  color: var(--shaka-font-color-secondary);
+}
+
+.shaka-quality-mark,
+.shaka-current-quality-mark {
+  color: var(--shaka-badge-active);
+  margin-left: 2px !important;
+  font-size: var(--shaka-badge-size);
+  height: 17px;
+}
+
+.shaka-quality-mark {
+  line-height: 6px;
+}
+
+.shaka-overflow-quality-mark,
+.shaka-overflow-playback-rate-mark {
+  background: var(--shaka-badge-active);
+  color: var(--shaka-badge-color);
+  border-radius: 2px;
+  font-size: var(--shaka-badge-size);
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: none;
+  padding: 1px;
+  position: absolute;
+  right: 4px;
+  top: 10px;
+}
+
+/* The submenus have somewhat different margins inside them. */
+.shaka-settings-menu,
+.shaka-sub-menu {
+  span {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
+    margin-left: 28px;
+
+    &.shaka-chosen-item {
+      margin-left: 0;
+    }
+  }
+
+  .shaka-chapter-item {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .shaka-chapter-thumbnail {
+    width: 60px;
+    height: 34px;
+    overflow: hidden;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .shaka-chapter {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
+    margin-left: 10px;
+  }
+
+  .shaka-queue-item {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    height: auto;
+    min-height: 30px;
+    white-space: normal;
+
+    // Highlight the currently-playing entry.
+    &.shaka-queue-item-current {
+      background: rgba(255, 255, 255, 8%);
+      border-radius: 8px;
+    }
+  }
+
+  .shaka-queue-poster {
+    width: 60px;
+    height: 34px;
+    overflow: hidden;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+    background: rgba(255, 255, 255, 5%);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .shaka-queue-item-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shaka-queue-item-title {
+    margin-left: 0 !important;
+    // Multi-line: allow wrapping, no ellipsis.
+    white-space: normal;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
+    max-width: 200px;
+    text-align: left;
+  }
+
+  .shaka-queue-item-text .shaka-ui-icon.shaka-chosen-item {
+    order: 1;
+    flex-shrink: 0;
+    align-self: center;
+    margin-left: 6px;
+  }
+}
+
+/* This is a button within each submenu that takes you back to the main overflow
+ * menu. */
+.shaka-back-to-overflow-button {
+  border-bottom: 1px solid rgba(255, 255, 255, 20%) !important;
+  border-radius: 0 !important;
+  margin-bottom: 5px;
+
+  /* The label inside the button, which says something like "back". */
+  span {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
+    margin-left: 0;
+  }
+
+  /* The MD icon for the "back" arrow. */
+  .shaka-ui-icon {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
+    padding-right: 10px;
+    font-size: 18px !important;
+  }
+
+  &:hover {
+    background: transparent !important;
+  }
+}
