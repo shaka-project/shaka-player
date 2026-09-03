@@ -175,8 +175,9 @@ describe('MpegTsTransmuxer', () => {
     // 500 is not a multiple of 768, so most frames cross a PES boundary.
     const ts = makeTs(elementaryStream, 500);
 
-    const output = await transmuxer.transmux(
-        ts, stream, reference, 10, 'audio');
+    // This transmuxer produces a raw MPEG audio stream, not an MP4.
+    const output = /** @type {!Uint8Array} */ (await transmuxer.transmux(
+        ts, stream, reference, 10, 'audio'));
 
     // The output must be the elementary stream, unchanged.  Before this was
     // fixed, the frames that straddled a PES boundary were dropped and their
