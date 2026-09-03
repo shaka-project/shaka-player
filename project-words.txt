@@ -209,6 +209,7 @@ Clearkey
 Clearkeys
 Clutz
 codem
+cooldown
 cssnano
 hbbtv
 Conax
