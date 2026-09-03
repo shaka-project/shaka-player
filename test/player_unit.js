@@ -851,6 +851,160 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(keyStatusChanged).toHaveBeenCalled();
     });
+
+    describe('config drm.keepDrmEngineOnDetach', () => {
+      const otherManifestUri = 'fake-manifest-uri-2';
+
+      /** @type {!Array<!shaka.test.FakeDrmEngine>} */
+      let createdDrmEngines;
+
+      /** @return {shaka.extern.DrmInfo} */
+      function makeDrmInfo() {
+        return {
+          keySystem: 'com.example.fake',
+          encryptionScheme: 'cenc',
+          licenseServerUri: 'http://example.com',
+          persistentStateRequired: false,
+          distinctiveIdentifierRequired: false,
+          initData: null,
+          keyIds: null,
+          sessionType: 'temporary',
+          serverCertificate: null,
+          serverCertificateUri: '',
+          audioRobustness: '',
+          videoRobustness: '',
+        };
+      }
+
+      beforeEach(() => {
+        createdDrmEngines = [];
+        player.createDrmEngine = () => {
+          const engine = new shaka.test.FakeDrmEngine();
+          createdDrmEngines.push(engine);
+          return engine;
+        };
+      });
+
+      it('does not reuse the DrmEngine by default', async () => {
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+
+        await player.detach();
+        await player.attach(video);
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(createdDrmEngines.length).toBe(2);
+        expect(createdDrmEngines[0].destroy).toHaveBeenCalled();
+      });
+
+      it('reuses the kept DrmEngine when reloading the same asset',
+          async () => {
+            player.configure('drm.keepDrmEngineOnDetach', true);
+
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+            createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+
+            await player.detach();
+            await player.attach(video);
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+
+            // No second DrmEngine was created; the first one was reused.
+            expect(createdDrmEngines.length).toBe(1);
+            expect(createdDrmEngines[0].destroy).not.toHaveBeenCalled();
+            expect(createdDrmEngines[0].attach).toHaveBeenCalled();
+          });
+
+      it('does not reuse the DrmEngine for a different asset', async () => {
+        player.configure('drm.keepDrmEngineOnDetach', true);
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+
+        await player.detach();
+        await player.attach(video);
+        await player.load(otherManifestUri, 0, fakeMimeType);
+
+        expect(createdDrmEngines.length).toBe(2);
+        // Not reused, but not evicted yet either -- it's still sitting in
+        // the single kept-engine slot, in case the app returns to it.
+        expect(createdDrmEngines[0].destroy).not.toHaveBeenCalled();
+      });
+
+      it('evicts an unreused kept engine once superseded by a new one',
+          async () => {
+            player.configure('drm.keepDrmEngineOnDetach', true);
+
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+            createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+            await player.detach();
+
+            await player.attach(video);
+            await player.load(otherManifestUri, 0, fakeMimeType);
+            createdDrmEngines[1].setDrmInfo(makeDrmInfo());
+            // The second asset also negotiates DRM and wants the single
+            // kept slot, evicting the first (never reused) kept engine.
+            await player.detach();
+
+            expect(createdDrmEngines[0].destroy).toHaveBeenCalled();
+            expect(createdDrmEngines[1].destroy).not.toHaveBeenCalled();
+          });
+
+      it('does not keep a DrmEngine that never negotiated DRM', async () => {
+        player.configure('drm.keepDrmEngineOnDetach', true);
+
+        // Never call setDrmInfo() -- this simulates clear content.
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        await player.detach();
+        await player.attach(video);
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(createdDrmEngines.length).toBe(2);
+        expect(createdDrmEngines[0].destroy).toHaveBeenCalled();
+      });
+
+      it('survives an intervening load of unrelated clear content',
+          async () => {
+            player.configure('drm.keepDrmEngineOnDetach', true);
+
+            // Load the main, DRM-protected asset.
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+            createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+
+            // Detach, and load an unrelated clear asset (e.g. an
+            // interstitial ad), simulating another renderer briefly taking
+            // over the video element. Its DrmEngine never negotiates DRM.
+            await player.detach();
+            await player.attach(video);
+            await player.load(otherManifestUri, 0, fakeMimeType);
+            expect(createdDrmEngines.length).toBe(2);
+
+            // Detach from the clear content and return to the original
+            // asset.
+            await player.detach();
+            await player.attach(video);
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+
+            // No third DrmEngine was created; the original was reused.
+            // The clear content's own engine was torn down normally, and
+            // the original was never disturbed.
+            expect(createdDrmEngines.length).toBe(2);
+            expect(createdDrmEngines[0].destroy).not.toHaveBeenCalled();
+            expect(createdDrmEngines[1].destroy).toHaveBeenCalled();
+          });
+
+      it('destroys a kept DrmEngine on player destroy', async () => {
+        player.configure('drm.keepDrmEngineOnDetach', true);
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        createdDrmEngines[0].setDrmInfo(makeDrmInfo());
+
+        await player.detach();
+        await player.destroy();
+
+        expect(createdDrmEngines[0].destroy).toHaveBeenCalled();
+      });
+    });
   });  // describe('load/unload')
 
 

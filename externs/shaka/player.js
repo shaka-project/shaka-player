@@ -1301,6 +1301,7 @@ shaka.extern.PersistentSessionMetadata;
  *   persistentSessionOnlinePlayback: boolean,
  *   persistentSessionsMetadata:
  *       !Array<shaka.extern.PersistentSessionMetadata>,
+ *   keepDrmEngineOnDetach: boolean,
  *   advanced: Object<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:(shaka.extern.InitDataTransform|undefined),
  *   logLicenseExchange: boolean,
@@ -1345,6 +1346,15 @@ shaka.extern.PersistentSessionMetadata;
  *   Persistent sessions metadata to load before starting playback.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {boolean} keepDrmEngineOnDetach
+ *   True to keep the DrmEngine (MediaKeys and active sessions) alive across
+ *   <code>detach()</code>/<code>unload()</code> and reuse it on a later
+ *   <code>attach()</code>/<code>load()</code> of the same asset, instead of
+ *   negotiating a new one. Useful for temporarily handing the media element
+ *   to another renderer and resuming DRM'd playback without a new license
+ *   request. A different asset still negotiates DRM normally.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {Object<string, shaka.extern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
