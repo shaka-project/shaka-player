@@ -68,13 +68,13 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
         .toBe(shaka.config.MsfVersion.DRAFT_16);
   });
 
-  it('should fall back to draft-18 when no subprotocol is echoed', () => {
-    // Relays that accept the offered subprotocol without echoing it must not
-    // be downgraded; we keep our newest offer.
+  it('should not guess a draft when no subprotocol is echoed', () => {
+    // Relays are inconsistent about echoing the subprotocol they accepted, and
+    // the newest draft we offered is the wrong guess for every relay that is
+    // not on it. The transport asks again, one draft at a time, instead.
     const offered = shaka.msf.DialectRegistry.getForVersion(
         shaka.config.MsfVersion.AUTO);
-    expect(shaka.msf.DialectRegistry.select(offered, '').getName())
-        .toBe(shaka.config.MsfVersion.DRAFT_18);
+    expect(shaka.msf.DialectRegistry.select(offered, '')).toBeNull();
   });
 
   it('should offer every registered dialect for AUTO', () => {
@@ -133,15 +133,20 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
           .toBe('draft-16');
     });
 
-    it('should fall back to the newest offered when nothing is echoed', () => {
-      // Relays are inconsistent about echoing the subprotocol, and treating an
-      // empty echo as a failure would break otherwise working connections.
+    it('should report an ambiguous choice when nothing is echoed', () => {
       const offered = [
         fakeDialect('draft-99', 99),
         fakeDialect('draft-16', 16),
       ];
+      expect(shaka.msf.DialectRegistry.select(offered, '')).toBeNull();
+    });
+
+    it('should take a lone offer that the server did not echo', () => {
+      // A server that did not speak it would have rejected the handshake, so
+      // there is nothing to be ambiguous about.
+      const offered = [fakeDialect('draft-16', 16)];
       expect(shaka.msf.DialectRegistry.select(offered, '').getName())
-          .toBe('draft-99');
+          .toBe('draft-16');
     });
 
     it('should fall back when the server echoes something unoffered', () => {

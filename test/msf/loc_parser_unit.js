@@ -378,7 +378,7 @@ filterDescribe('LOCParser', isMSFSupported, () => {
       // AV1 OBUs are self-delimiting, so configOBUs is concatenated raw: a
       // 4-byte length prefix would be read as an OBU header and desynchronise
       // the temporal unit.
-      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const parser = locParser(FRAME, 'av01');
       const result = parser.parse(moqObject([
         {type: 0x0d, value: av1c()},
         {type: 0x10, value: 1000000},
@@ -388,7 +388,7 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     });
 
     it('leaves the payload alone when the av1C is truncated', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const parser = locParser(FRAME, 'av01');
       const result = parser.parse(moqObject([
         // The four fixed bytes alone carry no configOBUs.
         {type: 0x0d, value: av1c().subarray(0, 4)},
@@ -398,7 +398,7 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     });
 
     it('leaves the payload alone when the av1C marker is wrong', () => {
-      const parser = new shaka.msf.LOCParser(FRAME, 'av01');
+      const parser = locParser(FRAME, 'av01');
       const bad = av1c();
       bad[0] = 0x01; // marker cleared, version 1
       const result = parser.parse(moqObject([
