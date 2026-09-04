@@ -125,6 +125,100 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     });
   });
 
+  describe('catalog logging', () => {
+    /**
+     * processCatalog_ writes the presentation timeline, which start() would
+     * normally have created.
+     * @suppress {visibility}
+     */
+    function givenAStartedParser() {
+      parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
+    }
+
+    /**
+     * @param {msfCatalog.Catalog} catalog
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function processCatalog(catalog) {
+      return parser.processCatalog_(catalog);
+    }
+
+    /**
+     * @return {msfCatalog.Catalog}
+     */
+    function catalogWithTwoTracks() {
+      return /** @type {msfCatalog.Catalog} */ ({
+        version: 1,
+        tracks: [
+          {name: 'video_cmaf', packaging: 'cmaf', codec: 'avc3.4d401f',
+            isLive: true},
+          {name: 'video_locmaf', packaging: 'locmaf', codec: 'avc3.4d401f',
+            locmafVersion: '0.3', isLive: true},
+        ],
+      });
+    }
+
+    it('logs the catalog as it arrived, not as the preprocessor left it',
+        async () => {
+          // A console keeps a logged object by reference and renders it when
+          // it is expanded, so logging the catalog before and after an
+          // in-place preprocessor used to show the processed one twice. What
+          // reproduces that is inspecting the logged value afterwards, which
+          // is what expanding it in a console does.
+          const logged = [];
+          spyOn(shaka.log, 'info').and.callFake((...args) => {
+            logged.push(args);
+          });
+
+          config.msf.catalogPreprocessor = (catalog) => {
+            catalog.tracks = catalog.tracks.filter(
+                (track) => track.packaging == 'locmaf');
+          };
+          parser.configure(config);
+
+          givenAStartedParser();
+          const catalog = catalogWithTwoTracks();
+          await processCatalog(catalog);
+
+          const before = logged.find((args) => args[0] == 'MSF Catalog:');
+          const after = logged.find(
+              (args) => args[0] == 'MSF Catalog after preprocessor:');
+          expect(before).toBeDefined();
+          expect(after).toBeDefined();
+
+          expect(before[1].tracks.length).toBe(2);
+          expect(before[1].tracks.map((t) => t.name))
+              .toEqual(['video_cmaf', 'video_locmaf']);
+          expect(after[1].tracks.length).toBe(1);
+          // The two lines must not be the same object, or the first would
+          // change under the reader's feet.
+          expect(before[1]).not.toBe(after[1]);
+          expect(after[1]).toBe(catalog);
+        });
+
+    it('logs the catalog itself when no preprocessor is configured',
+        async () => {
+          // With nothing to mutate it, copying would be waste: a silenced
+          // shaka.log.info still evaluates its arguments.
+          const logged = [];
+          spyOn(shaka.log, 'info').and.callFake((...args) => {
+            logged.push(args);
+          });
+
+          givenAStartedParser();
+          const catalog = catalogWithTwoTracks();
+          await processCatalog(catalog);
+
+          const before = logged.find((args) => args[0] == 'MSF Catalog:');
+          expect(before).toBeDefined();
+          expect(before[1]).toBe(catalog);
+          expect(logged.some(
+              (args) => args[0] == 'MSF Catalog after preprocessor:'))
+              .toBe(false);
+        });
+  });
+
   it('fails when WebTransport is not available', async () => {
     let originalWebTransport = null;
     try {
