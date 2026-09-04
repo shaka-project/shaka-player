@@ -1477,7 +1477,6 @@ shaka.extern.xml.Node;
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object<string, string>,
  *   manifestPreprocessorTXml: function(!shaka.extern.xml.Node),
- *   sequenceMode: boolean,
  *   useStreamOnceInPeriodFlattening: boolean,
  *   enableFastSwitching: boolean
  * }}
@@ -1535,11 +1534,6 @@ shaka.extern.xml.Node;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {boolean} useStreamOnceInPeriodFlattening
  *   If period combiner is used, this option ensures every stream is used
  *   only once in period flattening. It speeds up underlying algorithm
@@ -1566,7 +1560,6 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreManifestProgramDateTimeForTypes: !Array<string>,
  *   mediaPlaylistFullMimeType: string,
  *   liveSegmentsDelay: number,
- *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   disableCodecGuessing: boolean,
  *   disableClosedCaptionsDetection: boolean,
@@ -1624,18 +1617,11 @@ shaka.extern.DashManifestConfiguration;
  *   This is the number of segments for this calculation.
  *   <br>
  *   Defaults to <code>3</code>.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in
- *   "sequence mode" (ignoring their internal timestamps).
- *   <br>
- *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
- *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
  * @property {boolean} ignoreManifestTimestampsInSegmentsMode
  *   If true, don't adjust the timestamp offset to account for manifest
  *   segment durations being out of sync with segment durations. In other
  *   words, assume that there are no gaps in the segments when appending
  *   to the SourceBuffer, even if the manifest and segment times disagree.
- *   Only applies when sequenceMode is <code>false</code>.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} disableCodecGuessing

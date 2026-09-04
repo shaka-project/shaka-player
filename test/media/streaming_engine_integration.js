@@ -628,7 +628,6 @@ describe('StreamingEngine', () => {
         textStreams: [],
         imageStreams: [],
         chapterStreams: [],
-        sequenceMode: false,
         ignoreManifestTimestampsInSegmentsMode: false,
         type: 'UNKNOWN',
         serviceDescription: null,

@@ -101,8 +101,9 @@ shaka.extern.StoredContent;
  * @property {(boolean|undefined)} isIncomplete
  *   If true, the content is still downloading.
  * @property {(boolean|undefined)} sequenceMode
- *   If true, we will append the media segments using sequence mode; that is to
- *   say, ignoring any timestamps inside the media files.
+ *   Unused.  Kept for compatibility with records created by older versions,
+ *   which stored whether the content was meant to be played in sequence mode.
+ *   Playback now always uses segments mode.
  * @property {(string|undefined)} type
  *   Indicates the type of the manifest. It can be <code>'HLS'</code> or
  *   <code>'DASH'</code>.
