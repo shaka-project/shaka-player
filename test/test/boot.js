@@ -267,6 +267,14 @@ window.quarantinedIt = (name, callback) => {
  *   a truthy value, the tests will run, falsy will skip the tests.
  * @param {function()} describeBody The body of the describe() block.  This
  *   function will call before/after/it functions to define tests.
+ *
+ * Only the test and before/after bodies are conditional.  The describe body
+ * itself always runs, on every platform, because that is what declares them.
+ * So a describe body that touches the very thing cond checks for (BigInt, say)
+ * throws on the platforms the suite exists to skip.  Such a throw is caught
+ * here and reported as one failing test, rather than being allowed to escape
+ * into Jasmine's declaration phase, where it aborts the entire run and leaves
+ * the globals below swapped out for every file loaded after this one.
  */
 window.filterDescribe = (describeName, cond, describeBody) => {
   describe(describeName, () => {
@@ -288,10 +296,20 @@ window.filterDescribe = (describeName, cond, describeBody) => {
       };
     }
 
-    describeBody();
-
-    for (const methodName in old) {
-      window[methodName] = old[methodName];
+    try {
+      describeBody();
+    } catch (error) { // eslint-disable-line no-restricted-syntax
+      // The tests declared before the throw are already registered, and are
+      // filtered like any other.  Give the throw itself the same treatment:
+      // a failure where the suite should have run, and a skip where it
+      // should not have.
+      window['it']('should declare its tests', () => {
+        throw error;
+      });
+    } finally {
+      for (const methodName in old) {
+        window[methodName] = old[methodName];
+      }
     }
   });
 };
