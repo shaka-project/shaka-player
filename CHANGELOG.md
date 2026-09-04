@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.1.22](https://github.com/shaka-project/shaka-player/compare/v5.1.21...v5.1.22) (2026-09-04)
+
+
+### Bug Fixes
+
+* **Ads:** Don't drop SVTA signaling of preloaded assets ([#10520](https://github.com/shaka-project/shaka-player/issues/10520)) ([dc05cc7](https://github.com/shaka-project/shaka-player/commit/dc05cc79bd815afe4f29e334b5d4a24750a484e3))
+* **Ads:** Report an ad that reaches its playout limit as complete ([#10521](https://github.com/shaka-project/shaka-player/issues/10521)) ([3e79a44](https://github.com/shaka-project/shaka-player/commit/3e79a4460425365951d70d69f2c8d18e40135910))
+* **device:** Ban changeType on Opera for macOS ([#10514](https://github.com/shaka-project/shaka-player/issues/10514)) ([075dbe3](https://github.com/shaka-project/shaka-player/commit/075dbe30ea66da4f1ab2ae41122fa76d5673beb5))
+* **offline:** Avoid DRM license removal failure ([#10510](https://github.com/shaka-project/shaka-player/issues/10510)) ([9950022](https://github.com/shaka-project/shaka-player/commit/99500228fb6c20d2b41c8c4813e06c0501793ae6))
+* **offline:** Avoid orphaned DRM sessions on removal failure ([#10511](https://github.com/shaka-project/shaka-player/issues/10511)) ([0390b07](https://github.com/shaka-project/shaka-player/commit/0390b0745f7dab34db557fdbe2046cd37713e16d))
+* Parse closed captions after transmuxing ([#10499](https://github.com/shaka-project/shaka-player/issues/10499)) ([5449953](https://github.com/shaka-project/shaka-player/commit/5449953791b58b209d173af0426c31b425887620))
+* Prevent run-ahead throttling from starving frame-sized segments ([#10496](https://github.com/shaka-project/shaka-player/issues/10496)) ([6493555](https://github.com/shaka-project/shaka-player/commit/649355511c090603f59a6158d0cd95010812d53c))
+* Reduce unnecessary error calls ([#10501](https://github.com/shaka-project/shaka-player/issues/10501)) ([a7c41c7](https://github.com/shaka-project/shaka-player/commit/a7c41c7cae3b38720918db6230981898b34ee837))
+* Release XHR handlers once the request is done ([#10506](https://github.com/shaka-project/shaka-player/issues/10506)) ([d26f7ab](https://github.com/shaka-project/shaka-player/commit/d26f7ab9c7291e03b9a7a9428083c321bed1259c))
+
 ## [5.1.21](https://github.com/shaka-project/shaka-player/compare/v5.1.20...v5.1.21) (2026-08-28)
 
 
