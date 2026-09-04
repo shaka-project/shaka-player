@@ -183,6 +183,7 @@ unregisters
 unstore
 unviewed
 varint
+varints
 vint
 vints
 xywh
@@ -256,6 +257,7 @@ abgr
 altmpd
 apic
 apos
+appendable
 appl
 arib
 assetid
@@ -279,6 +281,8 @@ cicp
 cmaf
 cmcd
 cmfa
+cmfc
+cmfs
 cmft
 cmfv
 cmsd
@@ -552,6 +556,7 @@ SQUEEZECURRENT
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
 gregoire
+locmaf
 moqt
 msf
 msfts
