@@ -1052,6 +1052,316 @@ describe('UI', () => {
       });
     });
 
+    describe('captions-style submenu', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!jasmine.Spy} */
+      let setPreviewSpy;
+      /** @type {!jasmine.Spy} */
+      let clearPreviewSpy;
+
+      afterEach(() => {
+        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+            videoContainer.parentElement) {
+          videoContainer.remove();
+        }
+      });
+
+      /**
+       * @param {?shaka.Player} p
+       */
+      function usePreviewTextDisplayer(p) {
+        expect(p).not.toBe(null);
+        const localPlayer = /** @type {!shaka.Player} */(p);
+        /** @type {?} */
+        const textDisplayer = {};
+        setPreviewSpy = textDisplayer.setTextStylePreview =
+            jasmine.createSpy('setTextStylePreview');
+        clearPreviewSpy = textDisplayer.clearTextStylePreview =
+            jasmine.createSpy('clearTextStylePreview');
+        spyOn(localPlayer, 'getTextDisplayer').and.returnValue(
+            /** @type {!shaka.extern.TextDisplayer} */(textDisplayer));
+      }
+
+      /**
+       * @param {!HTMLElement} menu
+       * @param {string} label
+       * @return {!HTMLElement}
+       */
+      function getRadioOption(menu, label) {
+        const buttons = Array.from(
+            menu.querySelectorAll('button[role="menuitemradio"]'));
+        const button = buttons.find((btn) => {
+          const span = btn.querySelector('span');
+          return span && span.textContent == label;
+        });
+        expect(button).not.toBe(undefined);
+        return /** @type {!HTMLElement} */(button);
+      }
+
+      it('creates submenu with root, size, and position pages', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-style',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const styleButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-button');
+        expect(styleButton).not.toBe(null);
+        styleButton.click();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-menu');
+        expect(menu).not.toBe(null);
+
+        // Root page should contain Size and Position buttons
+        const pageButtons = menu.querySelectorAll(
+            'button[role="menuitem"]');
+        expect(pageButtons.length).toBe(2);
+
+        const sizeNavBtn = /** @type {!HTMLButtonElement} */(pageButtons[0]);
+        const posNavBtn = /** @type {!HTMLButtonElement} */(pageButtons[1]);
+
+        expect(sizeNavBtn.getAttribute('aria-expanded')).toBe('false');
+        expect(posNavBtn.getAttribute('aria-expanded')).toBe('false');
+
+        // Navigate to Size page
+        sizeNavBtn.click();
+        expect(setPreviewSpy).toHaveBeenCalled();
+        expect(sizeNavBtn.getAttribute('aria-expanded')).toBe('true');
+        const sizeOption = getRadioOption(menu, '150%');
+        expect(sizeOption).not.toBe(null);
+
+        // Back button returns to root page and hides preview
+        const backBtn = UiUtils.getElementByClassName(
+            menu, 'shaka-back-to-overflow-button');
+        backBtn.click();
+        expect(clearPreviewSpy).toHaveBeenCalled();
+        expect(menu.classList.contains('shaka-hidden')).toBe(false);
+        expect(sizeNavBtn.getAttribute('aria-expanded')).toBe('false');
+
+        // Navigate to Position page
+        posNavBtn.click();
+        expect(setPreviewSpy).toHaveBeenCalled();
+        expect(posNavBtn.getAttribute('aria-expanded')).toBe('true');
+        const loc = controls.getLocalization();
+        const posOption = getRadioOption(
+            menu, loc.resolve(shaka.ui.Locales.Ids.TOP_CENTER));
+        expect(posOption).not.toBe(null);
+
+        // Selecting position applies configuration and hides preview
+        posOption.click();
+        expect(player.getConfiguration().textDisplayer.positionArea)
+            .toBe(shaka.config.PositionArea.TOP_CENTER);
+        expect(clearPreviewSpy).toHaveBeenCalled();
+      });
+
+      it('updates preview and applies font size', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-style',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const styleButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-button');
+        styleButton.click();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-menu');
+        const pageButtons = menu.querySelectorAll(
+            'button[role="menuitem"]');
+        const sizeNavBtn = /** @type {!HTMLButtonElement} */(pageButtons[0]);
+        sizeNavBtn.click();
+
+        const sizeOption = getRadioOption(menu, '200%');
+        expect(sizeOption).not.toBe(null);
+
+        // Hover over 200% option updates preview
+        setPreviewSpy.calls.reset();
+        sizeOption.dispatchEvent(new MouseEvent('mouseenter'));
+        expect(setPreviewSpy).toHaveBeenCalled();
+        const previewConfig = setPreviewSpy.calls.mostRecent().args[0];
+        expect(previewConfig.fontScaleFactor).toBe(2);
+
+        // Leave resets preview
+        setPreviewSpy.calls.reset();
+        sizeOption.dispatchEvent(new MouseEvent('mouseleave'));
+        expect(setPreviewSpy).toHaveBeenCalled();
+
+        // Clicking updates player font scale config
+        sizeOption.click();
+        expect(player.getConfiguration().textDisplayer.fontScaleFactor)
+            .toBe(2.0);
+        expect(clearPreviewSpy).toHaveBeenCalled();
+      });
+
+      it('works inside overflowMenuButtons and returns to overflow ' +
+          'menu on back', async () => {
+        const config = {
+          overflowMenuButtons: [
+            'captions-style',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getTextTracks').and.returnValue([
+          /** @type {shaka.extern.TextTrack} */({active: true}),
+        ]);
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const overflowBtn = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-overflow-menu-button');
+        expect(overflowBtn).not.toBe(null);
+        overflowBtn.click();
+
+        const overflowMenu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-overflow-menu');
+        expect(overflowMenu).not.toBe(null);
+        expect(overflowMenu.classList.contains('shaka-hidden')).toBe(false);
+
+        const styleButton = UiUtils.getElementByClassName(
+            overflowMenu, 'shaka-caption-style-button');
+        expect(styleButton).not.toBe(null);
+        const currentSpan = styleButton.querySelector(
+            '.shaka-current-selection-span');
+        expect(currentSpan.textContent).toContain('100%');
+        styleButton.click();
+
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-menu');
+        expect(menu).not.toBe(null);
+        expect(menu.classList.contains('shaka-hidden')).toBe(false);
+        expect(styleButton.classList.contains('shaka-hidden')).toBe(true);
+
+        // Enter Size page
+        const pageButtons = menu.querySelectorAll(
+            'button[role="menuitem"]');
+        const sizeNavBtn = /** @type {!HTMLButtonElement} */(pageButtons[0]);
+        sizeNavBtn.click();
+        expect(setPreviewSpy).toHaveBeenCalled();
+        expect(menu.classList.contains('shaka-hidden')).toBe(false);
+
+        // Back from Size page returns to CaptionStyle ROOT page without
+        // closing menu
+        const backBtn = UiUtils.getElementByClassName(
+            menu, 'shaka-back-to-overflow-button');
+        backBtn.click();
+        expect(clearPreviewSpy).toHaveBeenCalled();
+        expect(menu.classList.contains('shaka-hidden')).toBe(false);
+        expect(styleButton.classList.contains('shaka-hidden')).toBe(true);
+
+        // Back from ROOT page returns to overflow menu
+        backBtn.click();
+        expect(menu.classList.contains('shaka-hidden')).toBe(true);
+        expect(styleButton.classList.contains('shaka-hidden')).toBe(false);
+        expect(overflowMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('toggles visibility based on active text track presence', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-style',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+
+        // Stub text tracks with no active tracks
+        const tracksSpy = spyOn(player, 'getTextTracks').and.returnValue([
+          /** @type {shaka.extern.TextTrack} */({active: false}),
+        ]);
+        controls.showUI();
+
+        const styleButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-button');
+        expect(styleButton).not.toBe(null);
+        expect(styleButton.classList.contains('shaka-hidden')).toBe(true);
+
+        // When an active text track exists, the button becomes visible
+        tracksSpy.and.returnValue([
+          /** @type {shaka.extern.TextTrack} */({active: true}),
+        ]);
+        player.dispatchEvent(new shaka.util.FakeEvent('textchanged'));
+        expect(styleButton.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('works with captions-styles alias', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-styles',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        controls.showUI();
+
+        const styleButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-style-button');
+        expect(styleButton).not.toBe(null);
+      });
+
+      it('retains focus inside menu when scale factor is not in options',
+          async () => {
+            const config = {
+              controlPanelElements: [
+                'captions-style',
+              ],
+              captionsFontScaleFactors: [1, 2],
+              customContextMenu: false,
+            };
+            const ui = await UiUtils.createUIThroughAPI(
+                videoContainer, video, config);
+            controls = ui.getControls();
+            player = controls.getLocalPlayer();
+            player.configure('textDisplayer.fontScaleFactor', 1.25);
+            usePreviewTextDisplayer(player);
+            controls.showUI();
+
+            const styleButton = UiUtils.getElementByClassName(
+                videoContainer, 'shaka-caption-style-button');
+            styleButton.click();
+
+            const menu = UiUtils.getElementByClassName(
+                videoContainer, 'shaka-caption-style-menu');
+            const pageButtons = menu.querySelectorAll(
+                'button[role="menuitem"]');
+            const sizeNavBtn =
+            /** @type {!HTMLButtonElement} */(pageButtons[0]);
+            sizeNavBtn.click();
+
+            expect(menu.contains(document.activeElement)).toBe(true);
+            expect(document.activeElement).not.toBe(document.body);
+          });
+    });
+
     describe('resolutions menu', () => {
       /** @type {!HTMLElement} */
       let resolutionsMenu;

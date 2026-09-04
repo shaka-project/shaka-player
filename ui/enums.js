@@ -60,3 +60,6 @@ shaka.ui.Enums.MaterialDesignSVGIcons = {
 // Same icon as position for now; aliased to avoid duplicating the path.
 shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_SIZE'] =
     shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_POSITION'];
+
+shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_STYLE'] =
+    shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_POSITION'];

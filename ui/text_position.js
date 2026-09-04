@@ -14,6 +14,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.TextStyleMenu');
 goog.requireType('shaka.ui.Controls');
+goog.requireType('shaka.ui.Localization');
 
 
 /**
@@ -79,35 +80,48 @@ shaka.ui.TextPosition = class extends shaka.ui.TextStyleMenu {
   }
 
   /**
-   * @param {!shaka.config.PositionArea} position
+   * @param {shaka.config.PositionArea} position
+   * @param {shaka.ui.Localization} localization
+   * @return {string}
+   * @export
+   */
+  static getNameOfPosition(position, localization) {
+    if (!localization) {
+      return '';
+    }
+    const LocIds = shaka.ui.Locales.Ids;
+    switch (position) {
+      case shaka.config.PositionArea.DEFAULT:
+        return localization.resolve(LocIds.DEFAULT);
+      case shaka.config.PositionArea.TOP_LEFT:
+        return localization.resolve(LocIds.TOP_LEFT);
+      case shaka.config.PositionArea.TOP_CENTER:
+        return localization.resolve(LocIds.TOP_CENTER);
+      case shaka.config.PositionArea.TOP_RIGHT:
+        return localization.resolve(LocIds.TOP_RIGHT);
+      case shaka.config.PositionArea.CENTER_LEFT:
+        return localization.resolve(LocIds.CENTER_LEFT);
+      case shaka.config.PositionArea.CENTER:
+        return localization.resolve(LocIds.CENTER);
+      case shaka.config.PositionArea.CENTER_RIGHT:
+        return localization.resolve(LocIds.CENTER_RIGHT);
+      case shaka.config.PositionArea.BOTTOM_LEFT:
+        return localization.resolve(LocIds.BOTTOM_LEFT);
+      case shaka.config.PositionArea.BOTTOM_CENTER:
+        return localization.resolve(LocIds.BOTTOM_CENTER);
+      case shaka.config.PositionArea.BOTTOM_RIGHT:
+        return localization.resolve(LocIds.BOTTOM_RIGHT);
+    }
+    return '';
+  }
+
+  /**
+   * @param {shaka.config.PositionArea} position
    * @return {string}
    * @private
    */
   getNameOfPosition_(position) {
-    const LocIds = shaka.ui.Locales.Ids;
-    switch (position) {
-      case shaka.config.PositionArea.DEFAULT:
-        return this.localization.resolve(LocIds.DEFAULT);
-      case shaka.config.PositionArea.TOP_LEFT:
-        return this.localization.resolve(LocIds.TOP_LEFT);
-      case shaka.config.PositionArea.TOP_CENTER:
-        return this.localization.resolve(LocIds.TOP_CENTER);
-      case shaka.config.PositionArea.TOP_RIGHT:
-        return this.localization.resolve(LocIds.TOP_RIGHT);
-      case shaka.config.PositionArea.CENTER_LEFT:
-        return this.localization.resolve(LocIds.CENTER_LEFT);
-      case shaka.config.PositionArea.CENTER:
-        return this.localization.resolve(LocIds.CENTER);
-      case shaka.config.PositionArea.CENTER_RIGHT:
-        return this.localization.resolve(LocIds.CENTER_RIGHT);
-      case shaka.config.PositionArea.BOTTOM_LEFT:
-        return this.localization.resolve(LocIds.BOTTOM_LEFT);
-      case shaka.config.PositionArea.BOTTOM_CENTER:
-        return this.localization.resolve(LocIds.BOTTOM_CENTER);
-      case shaka.config.PositionArea.BOTTOM_RIGHT:
-        return this.localization.resolve(LocIds.BOTTOM_RIGHT);
-    }
-    return '';
+    return shaka.ui.TextPosition.getNameOfPosition(position, this.localization);
   }
 };
 

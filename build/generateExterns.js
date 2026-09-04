@@ -924,6 +924,11 @@ function main(args) {
     } else if (args[i] == '--namespace-typedef') {
       namespaceTypedefPath = args[i + 1];
       ++i;
+    } else if (args[i].startsWith('@')) {
+      const listFile = args[i].slice(1);
+      const lines = fs.readFileSync(listFile, 'utf8').split(/\r?\n/)
+          .map((line) => line.trim()).filter(Boolean);
+      inputPaths.push(...lines);
     } else {
       inputPaths.push(args[i]);
     }

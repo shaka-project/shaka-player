@@ -40,6 +40,7 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
           'unloading',
           'configurationchanged',
           'trackschanged',
+          'textchanged',
         ], () => {
           this.updateCurrentSelection_();
           this.checkAvailability();
