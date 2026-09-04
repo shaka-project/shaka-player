@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.16.48](https://github.com/shaka-project/shaka-player/compare/v4.16.47...v4.16.48) (2026-09-04)
+
+
+### Bug Fixes
+
+* **offline:** Avoid DRM license removal failure ([#10510](https://github.com/shaka-project/shaka-player/issues/10510)) ([35d2e26](https://github.com/shaka-project/shaka-player/commit/35d2e26c7f09a7428c5240a9467d779b9d9b0753))
+* **offline:** Avoid orphaned DRM sessions on removal failure ([#10511](https://github.com/shaka-project/shaka-player/issues/10511)) ([35f2c8b](https://github.com/shaka-project/shaka-player/commit/35f2c8bcfbdc4c1257094348e756da26814340f0))
+* Release XHR handlers once the request is done ([#10506](https://github.com/shaka-project/shaka-player/issues/10506)) ([aada411](https://github.com/shaka-project/shaka-player/commit/aada411e627b59cbd7f1a2cc92e2fcd01e21a9af))
+* **Transmuxer:** Fix infinite loop and dropped frames in MPEG audio ([#10529](https://github.com/shaka-project/shaka-player/issues/10529)) ([7699d16](https://github.com/shaka-project/shaka-player/commit/7699d16f7b6ef3734b41b85e55ea490f945e5f80))
+
 ## [4.16.47](https://github.com/shaka-project/shaka-player/compare/v4.16.46...v4.16.47) (2026-08-28)
 
 
