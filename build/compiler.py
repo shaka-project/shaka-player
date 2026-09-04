@@ -278,12 +278,16 @@ class ExternGenerator(object):
 
     extern_generator = _get_source_path('build/generateExterns.js')
 
-    cmd_line = ['node', extern_generator, '--output', self.output]
-    cmd_line += self.source_files
+    with shakaBuildHelpers.NamedTemporaryFile() as temp:
+      temp.write('\n'.join(self.source_files).encode('utf8'))
+      temp.close()
 
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('Externs generation failed')
-      return False
+      cmd_line = ['node', extern_generator, '--output', self.output,
+                  '@' + temp.name]
+
+      if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+        logging.error('Externs generation failed')
+        return False
 
     return True
 
@@ -313,12 +317,16 @@ class NamespaceExternGenerator(object):
 
     extern_generator = _get_source_path('build/generateExterns.js')
 
-    cmd_line = ['node', extern_generator, '--namespace-typedef', self.output]
-    cmd_line += self.source_files
+    with shakaBuildHelpers.NamedTemporaryFile() as temp:
+      temp.write('\n'.join(self.source_files).encode('utf8'))
+      temp.close()
 
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('Namespace typedef generation failed')
-      return False
+      cmd_line = ['node', extern_generator, '--namespace-typedef', self.output,
+                  '@' + temp.name]
+
+      if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+        logging.error('Namespace typedef generation failed')
+        return False
 
     return True
 
