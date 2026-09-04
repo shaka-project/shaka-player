@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.2.9](https://github.com/shaka-project/shaka-player/compare/v5.2.8...v5.2.9) (2026-09-04)
+
+
+### Bug Fixes
+
+* **Ads:** Don't drop SVTA signaling of preloaded assets ([#10520](https://github.com/shaka-project/shaka-player/issues/10520)) ([0659769](https://github.com/shaka-project/shaka-player/commit/06597698f37947937705461c52af0b2ec59406ce))
+* **Ads:** Report an ad that reaches its playout limit as complete ([#10521](https://github.com/shaka-project/shaka-player/issues/10521)) ([9422a89](https://github.com/shaka-project/shaka-player/commit/9422a89630abbf0970fffbf673262565700677b4))
+* **device:** Ban changeType on Opera for macOS ([#10514](https://github.com/shaka-project/shaka-player/issues/10514)) ([be3ec24](https://github.com/shaka-project/shaka-player/commit/be3ec242dd553a796cb2fbb9c014bdc67556dfd4))
+* **offline:** Avoid DRM license removal failure ([#10510](https://github.com/shaka-project/shaka-player/issues/10510)) ([3578859](https://github.com/shaka-project/shaka-player/commit/3578859c1d06283b821d08a221d35225846c9811))
+* **offline:** Avoid orphaned DRM sessions on removal failure ([#10511](https://github.com/shaka-project/shaka-player/issues/10511)) ([1ed2672](https://github.com/shaka-project/shaka-player/commit/1ed2672b7b1a533d805611f823e89887a91055ef))
+* Parse closed captions after transmuxing ([#10499](https://github.com/shaka-project/shaka-player/issues/10499)) ([098a559](https://github.com/shaka-project/shaka-player/commit/098a559218561cc65dfb3d8e3ab6d926925d6738))
+* Prevent run-ahead throttling from starving frame-sized segments ([#10496](https://github.com/shaka-project/shaka-player/issues/10496)) ([d248462](https://github.com/shaka-project/shaka-player/commit/d248462e36a2c560d3aa2bd60601bde87d2db33b))
+* Reduce unnecessary error calls ([#10501](https://github.com/shaka-project/shaka-player/issues/10501)) ([8a29e0d](https://github.com/shaka-project/shaka-player/commit/8a29e0dbacd503df83e457da36980fd32717b766))
+* Release XHR handlers once the request is done ([#10506](https://github.com/shaka-project/shaka-player/issues/10506)) ([36617a7](https://github.com/shaka-project/shaka-player/commit/36617a7a5338abd670bb06c1bb558c8439d3e544))
+* **Transmuxer:** Fix infinite loop and dropped frames in MPEG audio ([#10529](https://github.com/shaka-project/shaka-player/issues/10529)) ([a0a4c64](https://github.com/shaka-project/shaka-player/commit/a0a4c646e4ba7cd9a49600465c85326e288efcd2))
+
 ## [5.2.8](https://github.com/shaka-project/shaka-player/compare/v5.2.7...v5.2.8) (2026-08-28)
 
 
