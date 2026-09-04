@@ -2585,6 +2585,7 @@ shaka.extern.AccessibilityConfiguration;
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
  *   interstitialPreloadAheadTime: number,
+ *   interstitialCooldown: number,
  *   disablePlayedLinearAdSkip: boolean,
  *   disableTrackingForPlayedLinearAds: boolean,
  * }}
@@ -2646,6 +2647,13 @@ shaka.extern.AccessibilityConfiguration;
  *   Interstitial preload ahead time, in seconds.
  *   <br>
  *   Defaults to <code>10</code>.
+ * @property {number} interstitialCooldown
+ *   Cooldown period, in seconds, that starts after any SGAI interstitial ad
+ *   break finishes playing. While the cooldown is active, any snapback or the
+ *   next interstitial ad break that would otherwise play is skipped. Set to
+ *   <code>0</code> to disable the cooldown.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @property {boolean} disablePlayedLinearAdSkip
  *   If true, disables automatic skipping of already-played linear ads.
  *   Normally, played linear ads are force-skipped on replay. When this flag
