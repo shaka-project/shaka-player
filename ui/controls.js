@@ -1340,6 +1340,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    // While the seek bar is being dragged, the presentation is paused for
+    // scrubbing and would be resumed when the drag ends, which would swallow
+    // this toggle.  End the drag first, so the toggle applies to the state the
+    // user is left with.
+    if (this.seekBar_) {
+      this.seekBar_.endMouseInteraction();
+    }
+
     if (this.presentationIsPaused()) {
       // If we are at the end, go back to the beginning.
       if (this.player_.isEnded()) {
@@ -2531,6 +2539,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!videoTrack || !videoTrack.frameRate) {
       return;
     }
+    // Take over from a seek bar drag before pausing, since ending that drag
+    // would otherwise resume playback right after.
+    if (this.seekBar_) {
+      this.seekBar_.endMouseInteraction();
+    }
     if (!this.video_.paused) {
       this.video_.pause();
     }
@@ -2553,6 +2566,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   seek_(currentTime, fastSeek = false) {
     goog.asserts.assert(
         this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
+    // If the user is dragging the seek bar, this seek takes over from that
+    // drag.  Otherwise the drag would keep the bar frozen where the pointer
+    // is and undo this seek when the button is released.
+    this.seekBar_?.endMouseInteraction();
     if (fastSeek && 'fastSeek' in this.video_) {
       this.video_.fastSeek(currentTime);
     } else {

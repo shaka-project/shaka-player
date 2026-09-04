@@ -2595,6 +2595,7 @@ shaka.extern.AccessibilityConfiguration;
  *   disableTrackingEvents: boolean,
  *   disableSnapback: boolean,
  *   interstitialPreloadAheadTime: number,
+ *   interstitialCooldown: number,
  *   disablePlayedLinearAdSkip: boolean,
  *   disableTrackingForPlayedLinearAds: boolean,
  * }}
@@ -2656,6 +2657,13 @@ shaka.extern.AccessibilityConfiguration;
  *   Interstitial preload ahead time, in seconds.
  *   <br>
  *   Defaults to <code>10</code>.
+ * @property {number} interstitialCooldown
+ *   Cooldown period, in seconds, that starts after any SGAI interstitial ad
+ *   break finishes playing. While the cooldown is active, any snapback or the
+ *   next interstitial ad break that would otherwise play is skipped. Set to
+ *   <code>0</code> to disable the cooldown.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @property {boolean} disablePlayedLinearAdSkip
  *   If true, disables automatic skipping of already-played linear ads.
  *   Normally, played linear ads are force-skipped on replay. When this flag
@@ -3394,7 +3402,8 @@ shaka.extern.PlayerConfiguration;
  * @typedef {{
  *   preloadNextUrlWindow: number,
  *   preloadPrevItem: boolean,
- *   repeatMode: shaka.config.RepeatMode
+ *   repeatMode: shaka.config.RepeatMode,
+ *   autoPlayNext: boolean,
  * }}
  *
  * @description
@@ -3412,6 +3421,14 @@ shaka.extern.PlayerConfiguration;
  *   Controls behavior of the queue when all items have been played.
  *   <br>
  *   Defaults to {@link shaka.config.RepeatMode#OFF}.
+ * @property {boolean} autoPlayNext
+ *   If <code>true</code>, the queue advances to the next item when the current
+ *   one ends, and the next item is preloaded as configured by
+ *   <code>preloadNextUrlWindow</code>.  If <code>false</code>, playback stops
+ *   at the end of the current item and nothing is preloaded.  This is
+ *   independent of <code>repeatMode</code>, which only controls repetition.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.QueueConfiguration;

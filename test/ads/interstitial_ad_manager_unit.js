@@ -3110,6 +3110,100 @@ describe('Interstitial Ad manager', () => {
     }
   });
 
+  /** @suppress {visibility} */
+  describe('interstitialCooldown', () => {
+    /** @param {number} cooldown */
+    function configureCooldown(cooldown) {
+      const config = shaka.util.PlayerConfiguration.createDefault().ads;
+      // We always support multiple video elements so that we can properly
+      // control timing in unit tests.
+      config.supportsMultipleMediaElements = true;
+      config.interstitialCooldown = cooldown;
+      interstitialAdManager.configure(config);
+    }
+
+    /** @return {shaka.extern.HLSMetadata} */
+    function prerollMetadata() {
+      return {
+        type: 'com.apple.quicktime.HLS',
+        startTime: 0,
+        endTime: null,
+        values: [
+          {
+            key: 'ID',
+            data: 'PREROLL',
+          },
+          {
+            key: 'CUE',
+            data: 'PRE',
+          },
+          {
+            key: 'X-ASSET-URI',
+            data: 'http://foo.bar/test.m3u8',
+          },
+          {
+            key: 'X-RESTRICT',
+            data: 'SKIP,JUMP',
+          },
+        ],
+      };
+    }
+
+    it('skips an interstitial while within the cooldown window', async () => {
+      configureCooldown(60);
+      await interstitialAdManager.addMetadata(prerollMetadata());
+
+      // Pretend an ad break just finished, so the cooldown window is active.
+      interstitialAdManager.lastAdCompleteTime_ = Date.now();
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+
+      expect(onEventSpy).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-break-started'}));
+      expect(onEventSpy).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-started'}));
+    });
+
+    it('plays an interstitial after the cooldown expires', async () => {
+      configureCooldown(60);
+      await interstitialAdManager.addMetadata(prerollMetadata());
+
+      // Pretend an ad break finished longer ago than the cooldown window.
+      interstitialAdManager.lastAdCompleteTime_ = Date.now() - 61 * 1000;
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-break-started'}));
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-started'}));
+    });
+
+    it('does not skip when the cooldown is disabled', async () => {
+      configureCooldown(0);
+      await interstitialAdManager.addMetadata(prerollMetadata());
+
+      // Even with a recent ad break, a zero cooldown must not suppress ads.
+      interstitialAdManager.lastAdCompleteTime_ = Date.now();
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-break-started'}));
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-started'}));
+    });
+  });
+
   it('don\'t dispatch cue points changed if it is an overlay', async () => {
     /** @type {!shaka.extern.AdInterstitial} */
     const interstitial = {

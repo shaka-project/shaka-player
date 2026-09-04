@@ -56,10 +56,15 @@ shaka.extern.MsfPackaging = class {
    * time the stream's segment index is created, so a track that is unsubscribed
    * and resubscribed starts from a clean segmenter.
    *
+   * @param {shaka.extern.MsfCodec=} codec The negotiated draft's primitive
+   *   codec. A packaging whose objects carry MoQT-encoded fields -- Object
+   *   Properties, for one -- needs it, because that encoding changed between
+   *   draft-16 and draft-18 and the object bytes alone do not say which one
+   *   they are in. Packagings that read no such field ignore it.
    * @return {!shaka.extern.MsfSegmenter}
    * @exportDoc
    */
-  createSegmenter() {}
+  createSegmenter(codec) {}
 };
 
 
