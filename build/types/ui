@@ -5,6 +5,7 @@
 +../../ui/statistics_button_base.js
 +../../ui/audio_language_selection.js
 +../../ui/autoplay_button.js
++../../ui/caption_style.js
 +../../ui/content_title.js
 +../../ui/externs/ui.js
 +../../ui/externs/watermark.js

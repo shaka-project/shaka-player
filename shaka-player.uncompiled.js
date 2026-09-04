@@ -103,6 +103,7 @@ goog.require('shaka.ui.AudioLanguageSelection');
 goog.require('shaka.ui.AutoPlayNextButton');
 goog.require('shaka.ui.AdInfo');
 goog.require('shaka.ui.AdStatisticsButton');
+goog.require('shaka.ui.CaptionStyle');
 goog.require('shaka.ui.CastButton');
 goog.require('shaka.ui.ChapterSelection');
 goog.require('shaka.ui.ContentTitle');
