@@ -5160,7 +5160,15 @@ describe('StreamingEngine', () => {
      * @return {!Promise}
      */
     async function startNearBoundary(secondVideoMimeType = MIME_AVC) {
-      const streams = [audioStream, videoStream];
+      const audio = /** @type {!shaka.extern.Stream} */(audioStream);
+      const videoStreamForTest =
+          /** @type {!shaka.extern.Stream} */(videoStream);
+      videoStreamForTest.fullMimeTypes = new Set([
+        MIME_AVC,
+        MIME_HEVC,
+        MIME_AVC_WEBM,
+      ]);
+      const streams = [audio, videoStreamForTest];
       await Promise.all(streams.map((stream) => stream.createSegmentIndex()));
 
       for (const stream of streams) {
@@ -5171,9 +5179,13 @@ describe('StreamingEngine', () => {
             reference.initSegmentReference.boundaryEnd =
                 reference.appendWindowEnd;
             if (stream.type === ContentType.VIDEO) {
-              reference.initSegmentReference.mimeType =
+              const fullMimeType =
                   reference.startTime < BOUNDARY_TIME ?
                     MIME_AVC : secondVideoMimeType;
+              reference.initSegmentReference.mimeType = fullMimeType;
+              reference.mimeType =
+                  shaka.util.MimeUtils.getBasicType(fullMimeType);
+              reference.codecs = shaka.util.MimeUtils.getCodecs(fullMimeType);
             } else {
               reference.initSegmentReference.mimeType =
                   'audio/mp4; codecs="mp4a.40.2"';
@@ -5249,6 +5261,8 @@ describe('StreamingEngine', () => {
       it('resets after a boundary seek with clamped presentation time',
           async () => {
             await startNearBoundary();
+            expect(mediaSourceEngine.segments[ContentType.VIDEO][2])
+                .toBe(false);
             video.currentTime = BOUNDARY_TIME - 0.5;
             video.on['timeupdate']();
             jasmine.clock().tick(500);
@@ -5290,6 +5304,8 @@ describe('StreamingEngine', () => {
 
     describe('crossing a boundary with KEEP', () => {
       beforeEach(() => {
+        spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+            .and.returnValue(false);
         createStreamingEngine(/* config= */ undefined, video);
       });
 
