@@ -2219,11 +2219,7 @@ describe('UI', () => {
         // get it out of the range it is built with.
         controls.seekTo(50, false);
 
-        // The bar is built disabled and is only enabled when the controls go
-        // from hidden to visible, which never happens here because they are
-        // already visible.  A disabled input cannot take focus.
-        seekBar.disabled = false;
-        seekBar.focus();
+        focusForKeyboardTest(seekBar);
       });
 
       /**
@@ -2250,11 +2246,7 @@ describe('UI', () => {
 
       /** @param {string} key */
       function pressKey(key) {
-        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
-          key,
-          bubbles: true,
-          cancelable: true,
-        }));
+        seekBar.dispatchEvent(createKeydownEvent(key));
       }
 
       it('seeks from where the drag left the bar', () => {

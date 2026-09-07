@@ -21,6 +21,8 @@ describe('Mp4CeaParser', () => {
       '/base/test/test/assets/cea608-interleaved-trun-segment.mp4';
   const ceaInterleavedTrunSegmentUri =
       '/base/test/test/assets/cea-interleaved-trun-segment.mp4';
+  const av1ceaInitSegmentUri = '/base/test/test/assets/av1-cea-init.mp4';
+  const av1ceaSegmentUri = '/base/test/test/assets/av1-cea-segment.mp4';
 
   const Util = shaka.test.Util;
 
@@ -44,6 +46,10 @@ describe('Mp4CeaParser', () => {
   let cea608InterleavedTrunSegment;
   /** @type {!ArrayBuffer} */
   let ceaInterleavedTrunSegment;
+  /** @type {!ArrayBuffer} */
+  let av1ceaInitSegment;
+  /** @type {!ArrayBuffer} */
+  let av1ceaSegment;
 
   beforeAll(async () => {
     [
@@ -57,6 +63,8 @@ describe('Mp4CeaParser', () => {
       cea608TrackSegment,
       cea608InterleavedTrunSegment,
       ceaInterleavedTrunSegment,
+      av1ceaInitSegment,
+      av1ceaSegment,
     ] = await Promise.all([
       shaka.test.Util.fetch(ceaInitSegmentUri),
       shaka.test.Util.fetch(ceaSegmentUri),
@@ -68,6 +76,8 @@ describe('Mp4CeaParser', () => {
       shaka.test.Util.fetch(cea608TrackSegmentUri),
       shaka.test.Util.fetch(cea608InterleavedTrunSegmentUri),
       shaka.test.Util.fetch(ceaInterleavedTrunSegmentUri),
+      shaka.test.Util.fetch(av1ceaInitSegmentUri),
+      shaka.test.Util.fetch(av1ceaSegmentUri),
     ]);
   });
 
@@ -99,6 +109,33 @@ describe('Mp4CeaParser', () => {
     const ceaPackets = ceaParser.parse(h265ceaSegment);
     expect(ceaPackets).toBeDefined();
     expect(ceaPackets.length).toBe(60);
+  });
+
+  it('parses cea data from an av1 mp4 stream', () => {
+    // AV1 has no NAL units: the cc_data() that AVC/HEVC carry in an SEI
+    // message rides in a metadata_itu_t_t35 OBU instead, under the same
+    // T.35/GA94 header. The payload handed to the decoder is therefore the
+    // same as in the SEI case.
+    const ceaParser = new shaka.cea.Mp4CeaParser();
+
+    const expectedPacket = new Uint8Array([
+      0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
+      0xc2, 0xff, 0xfc, 0x94, 0x2c, 0xfc, 0x94, 0x2f,
+      0xff, 0x80,
+    ]);
+
+    ceaParser.init(av1ceaInitSegment);
+    const ceaPackets = ceaParser.parse(av1ceaSegment);
+    // The fixture has three samples: two carry a caption OBU and the third
+    // has none. The second sample also carries a metadata OBU of another
+    // type, which must be ignored rather than parsed as captions.
+    expect(ceaPackets.length).toBe(2);
+    expect(ceaPackets[0].packet).toEqual(expectedPacket);
+    expect(ceaPackets[0].format).toBe(
+        shaka.media.ClosedCaptionParser.CaptionPacketFormat.SEI);
+    expect(ceaPackets[0].pts).toBe(0);
+    // The second caption belongs to the next frame, one sample duration later.
+    expect(ceaPackets[1].pts).toBe(3000 / 90000);
   });
 
   it('parses cea data from a segment with multiple trun boxes', () => {
