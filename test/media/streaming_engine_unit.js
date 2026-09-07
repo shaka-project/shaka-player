@@ -5140,7 +5140,7 @@ describe('StreamingEngine', () => {
     const BOUNDARY_TIME = 20;
     const MIME_AVC = 'video/mp4; codecs="avc1.42E01E"';
     const MIME_HEVC = 'video/mp4; codecs="hvc1.1.6.L93.B0"';
-    const MIME_AVC_WEBM = 'video/webm; codecs="avc1.42E01E"';
+    const MIME_AVC_TS = 'video/mp2t; codecs="avc1.42E01E"';
 
     /** @type {!shaka.test.FakeVideo} */
     let video;
@@ -5162,11 +5162,11 @@ describe('StreamingEngine', () => {
     async function startNearBoundary(secondVideoMimeType = MIME_AVC) {
       const audio = /** @type {!shaka.extern.Stream} */(audioStream);
       const videoStreamForTest =
-          /** @type {!shaka.extern.Stream} */(videoStream);
+      /** @type {!shaka.extern.Stream} */(videoStream);
+      const mimeTypeAfterBoundary = secondVideoMimeType || MIME_AVC;
       videoStreamForTest.fullMimeTypes = new Set([
         MIME_AVC,
-        MIME_HEVC,
-        MIME_AVC_WEBM,
+        mimeTypeAfterBoundary,
       ]);
       const streams = [audio, videoStreamForTest];
       await Promise.all(streams.map((stream) => stream.createSegmentIndex()));
@@ -5181,7 +5181,7 @@ describe('StreamingEngine', () => {
             if (stream.type === ContentType.VIDEO) {
               const fullMimeType =
                   reference.startTime < BOUNDARY_TIME ?
-                    MIME_AVC : (secondVideoMimeType || MIME_AVC);
+                    MIME_AVC : mimeTypeAfterBoundary;
               reference.initSegmentReference.mimeType = fullMimeType;
               reference.mimeType =
                   shaka.util.MimeUtils.getBasicType(fullMimeType);
@@ -5331,7 +5331,7 @@ describe('StreamingEngine', () => {
       });
 
       it('resets MediaSource for a different container', async () => {
-        await startNearBoundary(MIME_AVC_WEBM);
+        await startNearBoundary(MIME_AVC_TS);
         expect(mediaSourceEngine.segments[ContentType.VIDEO][2]).toBe(false);
 
         presentationTimeInSeconds = BOUNDARY_TIME + 5;
