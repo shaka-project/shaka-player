@@ -5181,7 +5181,7 @@ describe('StreamingEngine', () => {
             if (stream.type === ContentType.VIDEO) {
               const fullMimeType =
                   reference.startTime < BOUNDARY_TIME ?
-                    MIME_AVC : secondVideoMimeType;
+                    MIME_AVC : (secondVideoMimeType || MIME_AVC);
               reference.initSegmentReference.mimeType = fullMimeType;
               reference.mimeType =
                   shaka.util.MimeUtils.getBasicType(fullMimeType);
