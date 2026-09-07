@@ -451,6 +451,54 @@ describe('Playhead', () => {
     expect(video.currentTime).toBe(42);
   });
 
+  it('does not enforce the live window during a MediaSource reset', () => {
+    const onMediaSourceResetEnd = jasmine.createSpy(
+        'onMediaSourceResetEnd');
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.paused = false;
+    video.currentTime = 40;
+    timeline.isLive.and.returnValue(true);
+    timeline.isDynamic.and.returnValue(true);
+    timeline.getDuration.and.returnValue(Infinity);
+    timeline.getSeekRangeStart.and.returnValue(20);
+    timeline.getSeekRangeEnd.and.returnValue(60);
+
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 40,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent),
+        /* getPlaybackRate= */ undefined,
+        /* getSkipRanges= */ undefined,
+        Util.spyFunc(onMediaSourceResetEnd));
+    playhead.ready();
+    video.on['seeking']();
+    const seekCallsBeforeReset = onSeek.calls.count();
+
+    playhead.notifyOfMediaSourceReset(40);
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.currentTime = 0;
+    video.seeking = true;
+    video.on['seeking']();
+
+    jasmine.clock().tick(500);
+
+    expect(video.currentTime).toBe(0);
+    expect(playhead.getTime()).toBe(40);
+    expect(onSeek.calls.count()).toBe(seekCallsBeforeReset);
+
+    video.currentTime = 40;
+    playhead.notifyOfMediaSourceResetEnd();
+    expect(onMediaSourceResetEnd).not.toHaveBeenCalled();
+    video.on['seeking']();
+
+    expect(onSeek.calls.count()).toBe(seekCallsBeforeReset + 1);
+    expect(onMediaSourceResetEnd).toHaveBeenCalledTimes(1);
+    expect(playhead.getTime()).toBe(40);
+  });
+
   it('clamps playhead after seeking for live', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 

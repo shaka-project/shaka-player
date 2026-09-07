@@ -5276,6 +5276,40 @@ describe('StreamingEngine', () => {
             expect(mediaSourceEngine.segments[ContentType.VIDEO][2]).toBe(true);
           });
 
+      it('ignores currentTime restoration after the boundary reset',
+          async () => {
+            await startNearBoundary();
+            video.currentTime = BOUNDARY_TIME - 0.5;
+            video.on['timeupdate']();
+            jasmine.clock().tick(500);
+
+            // The first event belongs to the boundary seek and starts the
+            // reset when StreamingEngine reaches the next reference.
+            streamingEngine.seeked();
+            await Util.fakeEventLoop(5);
+            expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+
+            // Restoring currentTime after replacing MediaSource produces a
+            // second event while presentation time may still be clamped.
+            mediaSourceEngine.isBuffered.and.returnValue(false);
+            video.currentTime = BOUNDARY_TIME + 0.1;
+            streamingEngine.seeked();
+            await Util.fakeEventLoop(5);
+
+            expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+            expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+            expectSingleBoundaryEvent();
+
+            // Once restoration has been delivered, later user seeks use the
+            // normal unbuffered-seek path again.
+            streamingEngine.notifyOfMediaSourceResetEnd();
+            presentationTimeInSeconds = 35;
+            video.currentTime = presentationTimeInSeconds;
+            streamingEngine.seeked();
+            expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.VIDEO);
+          });
+
       it('clears buffers when a user seek follows a boundary seek',
           async () => {
             await startNearBoundary();

@@ -129,6 +129,10 @@ describe('MediaSourceEngine', () => {
 
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
+  /** @type {!jasmine.Spy} */
+  let onMediaSourceReset;
+  /** @type {!jasmine.Spy} */
+  let onMediaSourceResetEnd;
 
   beforeAll(() => {
     // Since this is not an integration test, we don't want MediaSourceEngine to
@@ -249,6 +253,8 @@ describe('MediaSourceEngine', () => {
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
+    onMediaSourceReset = jasmine.createSpy('onMediaSourceReset');
+    onMediaSourceResetEnd = jasmine.createSpy('onMediaSourceResetEnd');
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     // FakeTransmuxer is not in the worker bundle; prevent worker creation so
     // transmux calls fall back to the main-thread inner transmuxer.
@@ -265,6 +271,8 @@ describe('MediaSourceEngine', () => {
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,
+          onMediaSourceReset: Util.spyFunc(onMediaSourceReset),
+          onMediaSourceResetEnd: Util.spyFunc(onMediaSourceResetEnd),
         },
         config);
     mediaSourceEngine.getCaptionParser = () => {
@@ -1563,6 +1571,33 @@ describe('MediaSourceEngine', () => {
       mockMediaSource.addSourceBuffer.calls.reset();
       await resetMSE(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
+    });
+
+    it('should notify while restoring currentTime', async () => {
+      /** @type {?function()} */
+      let onLoadedMetadata = null;
+      mockVideo.addEventListener.and.callFake((eventName, callback) => {
+        if (eventName == 'loadedmetadata') {
+          onLoadedMetadata = callback;
+        }
+      });
+      mockVideo.currentTime = 42;
+
+      await mediaSourceEngine.init(initObject, false);
+      await resetMSE(initObject);
+
+      expect(onMediaSourceReset).toHaveBeenCalledOnceWith(42);
+      expect(onMediaSourceResetEnd).not.toHaveBeenCalled();
+      expect(onLoadedMetadata).not.toBe(null);
+      if (!onLoadedMetadata) {
+        return;
+      }
+
+      mockVideo.currentTime = 0;
+      onLoadedMetadata();
+
+      expect(mockVideo.currentTime).toBe(42);
+      expect(onMediaSourceResetEnd).toHaveBeenCalledTimes(1);
     });
 
     it('should preserve autoplay and paused state', async () => {
