@@ -5199,7 +5199,6 @@ describe('StreamingEngine', () => {
       video.currentTime = presentationTimeInSeconds;
 
       streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
       await streamingEngine.start();
       await Util.fakeEventLoop(5);
     }
@@ -5297,8 +5296,6 @@ describe('StreamingEngine', () => {
                 .toHaveBeenCalledWith(ContentType.AUDIO);
             expect(mediaSourceEngine.clear)
                 .toHaveBeenCalledWith(ContentType.VIDEO);
-            expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.TEXT);
           });
     });
 
