@@ -5170,92 +5170,159 @@ describe('StreamingEngine', () => {
         });
       });
 
-  describe('discardReferenceByBoundary_', () => {
-    const MIME_AVC = 'video/mp4; codecs="avc1.42E01E"';
-    const MIME_HEVC = 'video/mp4; codecs="hvc1.1.6.L93.B0"';
-    const MIME_AVC_WEBM = 'video/webm; codecs="avc1.42E01E"';
-
+  describe('cross-boundary handling', () => {
     beforeEach(() => {
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
     });
 
-    function makeInitRef(mimeType, boundaryEnd) {
-      const ref = new shaka.media.InitSegmentReference(
-          () => ['init.mp4'], 0, null);
-      ref.mimeType = mimeType;
-      ref.boundaryEnd = boundaryEnd;
-      return ref;
-    }
+    describe('crossing a boundary', () => {
+      beforeEach(() => {
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().streaming;
+        config.crossBoundaryStrategy =
+            shaka.config.CrossBoundaryStrategy.RESET;
+        createStreamingEngine(config);
+      });
 
-    function makeMediaState(lastInitRef) {
-      return {
-        type: ContentType.VIDEO,
-        stream: {id: 1},
-        lastInitSegmentReference: lastInitRef,
-        seeked: false,
-      };
-    }
+      it('uses media time when presentation time is clamped', () => {
+        const boundaryEnd = 20;
+        const lastInitRef = new shaka.media.InitSegmentReference(
+            () => ['init.mp4'], 0, null);
+        lastInitRef.boundaryEnd = boundaryEnd;
 
-    function makeSegmentRef(initRef) {
-      return new shaka.media.SegmentReference(
-          0, 10, () => ['seg.mp4'], 0, null, initRef, 0, 0, 10);
-    }
+        const engine = /** @type {?} */(streamingEngine);
+        engine.mediaStates_.set(ContentType.VIDEO, {
+          type: ContentType.VIDEO,
+          stream: {id: 1},
+          lastInitSegmentReference: lastInitRef,
+        });
 
-    it('returns false when KEEP strategy and codec are identical', () => {
-      const lastInitRef = makeInitRef(MIME_AVC, 0);
-      const initRef = makeInitRef(MIME_AVC, 10);
-      const mediaState = makeMediaState(lastInitRef);
-      const segRef = makeSegmentRef(initRef);
+        // Simulate a presentation time clamped outside the scheduling window
+        // while the media element itself is already close to the boundary.
+        presentationTimeInSeconds = boundaryEnd - 2;
+        engine.playerInterface_.video = new shaka.test.FakeVideo(
+            boundaryEnd - 0.5);
+        const tickAfter = spyOn(engine.crossBoundaryTimer_, 'tickAfter')
+            .and.callThrough();
 
-      const result = (/** @type {?} */(streamingEngine))[
-          'discardReferenceByBoundary_'](mediaState, segRef);
+        engine.forwardTimeForCrossBoundary_();
 
-      expect(result).toBe(false);
+        expect(tickAfter).toHaveBeenCalledWith(0.5);
+        jasmine.clock().tick(499);
+        expect(engine.playerInterface_.video.currentTime)
+            .toBe(boundaryEnd - 0.5);
+
+        jasmine.clock().tick(1);
+        expect(engine.playerInterface_.video.currentTime).toBeCloseTo(
+            boundaryEnd + 0.1);
+      });
+
+      it('recognizes a boundary seek when presentation time is clamped', () => {
+        const boundaryTime = 20.1;
+        const engine = /** @type {?} */(streamingEngine);
+        engine.playerInterface_.video = new shaka.test.FakeVideo();
+        engine.boundaryTime_ = boundaryTime;
+        engine.crossBoundaryTimer_.tickNow();
+
+        // The media element reached the requested boundary time, while the
+        // presentation time remains clamped behind it.
+        presentationTimeInSeconds = boundaryTime - 2;
+        streamingEngine.seeked();
+
+        expect(engine.playerInterface_.video.currentTime).toBe(boundaryTime);
+        expect(engine.crossBoundaryResetPending_).toBe(true);
+      });
     });
 
-    it('returns true when KEEP strategy and codecs differ', () => {
-      const lastInitRef = makeInitRef(MIME_AVC, 0);
-      const initRef = makeInitRef(MIME_HEVC, 10);
-      const mediaState = makeMediaState(lastInitRef);
-      const segRef = makeSegmentRef(initRef);
+    describe('references beyond the current boundary', () => {
+      const MIME_AVC = 'video/mp4; codecs="avc1.42E01E"';
+      const MIME_HEVC = 'video/mp4; codecs="hvc1.1.6.L93.B0"';
+      const MIME_AVC_WEBM = 'video/webm; codecs="avc1.42E01E"';
 
-      const result = (/** @type {?} */(streamingEngine))[
-          'discardReferenceByBoundary_'](mediaState, segRef);
+      beforeEach(() => {
+        createStreamingEngine();
+      });
 
-      expect(result).toBe(true);
-    });
+      function makeInitRef(mimeType, boundaryEnd) {
+        const ref = new shaka.media.InitSegmentReference(
+            () => ['init.mp4'], 0, null);
+        ref.mimeType = mimeType;
+        ref.boundaryEnd = boundaryEnd;
+        return ref;
+      }
 
-    it('returns true when KEEP strategy and container differs', () => {
-      const lastInitRef = makeInitRef(MIME_AVC, 0);
-      const initRef = makeInitRef(MIME_AVC_WEBM, 10);
-      const mediaState = makeMediaState(lastInitRef);
-      const segRef = makeSegmentRef(initRef);
+      function makeMediaState(lastInitRef) {
+        return {
+          type: ContentType.VIDEO,
+          stream: {id: 1},
+          lastInitSegmentReference: lastInitRef,
+          seeked: false,
+        };
+      }
 
-      const result = (/** @type {?} */(streamingEngine))[
-          'discardReferenceByBoundary_'](mediaState, segRef);
+      function makeSegmentRef(initRef) {
+        return new shaka.media.SegmentReference(
+            0, 10, () => ['seg.mp4'], 0, null, initRef, 0, 0, 10);
+      }
 
-      expect(result).toBe(true);
-    });
+      it('keeps references with the same codec and container', () => {
+        const lastInitRef = makeInitRef(MIME_AVC, 0);
+        const initRef = makeInitRef(MIME_AVC, 10);
+        const mediaState = makeMediaState(lastInitRef);
+        const segRef = makeSegmentRef(initRef);
+        const engine = /** @type {?} */(streamingEngine);
 
-    it('still resets an incompatible boundary after an internal seek', () => {
-      const lastInitRef = makeInitRef(MIME_AVC, 0);
-      const initRef = makeInitRef(MIME_HEVC, 10);
-      const mediaState = makeMediaState(lastInitRef);
-      const segRef = makeSegmentRef(initRef);
-      const engine = /** @type {?} */(streamingEngine);
-      const resetSpy = spyOn(engine, 'resetMediaSource')
-          .and.returnValue(Promise.resolve());
+        const result =
+            engine.discardReferenceByBoundary_(mediaState, segRef);
 
-      engine.mediaStates_.set(ContentType.VIDEO, mediaState);
-      engine.boundaryTime_ = 10.1;
-      engine.crossBoundaryTimer_.tickNow();
+        expect(result).toBe(false);
+      });
 
-      const result = engine.discardReferenceByBoundary_(mediaState, segRef);
+      it('discards references with a different codec', () => {
+        const lastInitRef = makeInitRef(MIME_AVC, 0);
+        const initRef = makeInitRef(MIME_HEVC, 10);
+        const mediaState = makeMediaState(lastInitRef);
+        const segRef = makeSegmentRef(initRef);
+        const engine = /** @type {?} */(streamingEngine);
 
-      expect(result).toBe(true);
-      expect(resetSpy).toHaveBeenCalledWith(true);
+        const result =
+            engine.discardReferenceByBoundary_(mediaState, segRef);
+
+        expect(result).toBe(true);
+      });
+
+      it('discards references with a different container', () => {
+        const lastInitRef = makeInitRef(MIME_AVC, 0);
+        const initRef = makeInitRef(MIME_AVC_WEBM, 10);
+        const mediaState = makeMediaState(lastInitRef);
+        const segRef = makeSegmentRef(initRef);
+        const engine = /** @type {?} */(streamingEngine);
+
+        const result =
+            engine.discardReferenceByBoundary_(mediaState, segRef);
+
+        expect(result).toBe(true);
+      });
+
+      it('resets MediaSource after an automatic incompatible crossing', () => {
+        const lastInitRef = makeInitRef(MIME_AVC, 0);
+        const initRef = makeInitRef(MIME_HEVC, 10);
+        const mediaState = makeMediaState(lastInitRef);
+        const segRef = makeSegmentRef(initRef);
+        const engine = /** @type {?} */(streamingEngine);
+        const resetSpy = spyOn(engine, 'resetMediaSource')
+            .and.returnValue(Promise.resolve());
+
+        engine.mediaStates_.set(ContentType.VIDEO, mediaState);
+        engine.boundaryTime_ = 10.1;
+        engine.crossBoundaryTimer_.tickNow();
+
+        const result = engine.discardReferenceByBoundary_(mediaState, segRef);
+
+        expect(result).toBe(true);
+        expect(resetSpy).toHaveBeenCalledWith(true);
+      });
     });
   });
 });
