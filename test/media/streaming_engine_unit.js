@@ -5292,7 +5292,14 @@ describe('StreamingEngine', () => {
             // Restoring currentTime after replacing MediaSource produces a
             // second event while presentation time may still be clamped.
             mediaSourceEngine.isBuffered.and.returnValue(false);
+            streamingEngine.notifyOfMediaSourceReset(BOUNDARY_TIME + 0.1);
+            video.currentTime = 0;
+            video.readyState = 0;
+            streamingEngine.seeked();
             video.currentTime = BOUNDARY_TIME + 0.1;
+            video.readyState = HTMLMediaElement.HAVE_METADATA;
+            video.seeking = true;
+            streamingEngine.notifyOfMediaSourceResetEnd();
             streamingEngine.seeked();
             await Util.fakeEventLoop(5);
 
@@ -5304,6 +5311,9 @@ describe('StreamingEngine', () => {
             // normal unbuffered-seek path again.
             // Even a subsequent seek to the same target must no longer be
             // classified as part of the completed crossing.
+            video.seeking = false;
+            video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+            video.on['seeked']();
             streamingEngine.seeked();
             expect(mediaSourceEngine.clear)
                 .toHaveBeenCalledWith(ContentType.VIDEO);
