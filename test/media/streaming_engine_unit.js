@@ -5302,9 +5302,8 @@ describe('StreamingEngine', () => {
 
             // Once restoration has been delivered, later user seeks use the
             // normal unbuffered-seek path again.
-            streamingEngine.notifyOfMediaSourceResetEnd();
-            presentationTimeInSeconds = 35;
-            video.currentTime = presentationTimeInSeconds;
+            // Even a subsequent seek to the same target must no longer be
+            // classified as part of the completed crossing.
             streamingEngine.seeked();
             expect(mediaSourceEngine.clear)
                 .toHaveBeenCalledWith(ContentType.VIDEO);

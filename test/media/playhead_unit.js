@@ -452,8 +452,6 @@ describe('Playhead', () => {
   });
 
   it('does not enforce the live window during a MediaSource reset', () => {
-    const onMediaSourceResetEnd = jasmine.createSpy(
-        'onMediaSourceResetEnd');
     video.readyState = HTMLMediaElement.HAVE_METADATA;
     video.paused = false;
     video.currentTime = 40;
@@ -469,10 +467,7 @@ describe('Playhead', () => {
         config,
         /* startTime= */ 40,
         Util.spyFunc(onSeek),
-        Util.spyFunc(onEvent),
-        /* getPlaybackRate= */ undefined,
-        /* getSkipRanges= */ undefined,
-        Util.spyFunc(onMediaSourceResetEnd));
+        Util.spyFunc(onEvent));
     playhead.ready();
     video.on['seeking']();
     const seekCallsBeforeReset = onSeek.calls.count();
@@ -491,12 +486,13 @@ describe('Playhead', () => {
 
     video.currentTime = 40;
     playhead.notifyOfMediaSourceResetEnd();
-    expect(onMediaSourceResetEnd).not.toHaveBeenCalled();
+    expect(onSeek.calls.count()).toBe(seekCallsBeforeReset);
     video.on['seeking']();
 
     expect(onSeek.calls.count()).toBe(seekCallsBeforeReset + 1);
-    expect(onMediaSourceResetEnd).toHaveBeenCalledTimes(1);
     expect(playhead.getTime()).toBe(40);
+    video.currentTime = 41;
+    expect(playhead.getTime()).toBe(41);
   });
 
   it('clamps playhead after seeking for live', () => {
