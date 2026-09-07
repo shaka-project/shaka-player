@@ -210,7 +210,6 @@ filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {
       sessionIds: [sessionId],
       drmInfo: null,
       appMetadata: {},
-      sequenceMode: false,
     };
 
     return manifest;
