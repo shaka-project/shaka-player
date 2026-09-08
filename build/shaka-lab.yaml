@@ -249,7 +249,6 @@ EdgeLinux:
 
 ChromeAndroid:
   # Device has failed in the lab and needs to be replaced.
-  disabled: true
   browser: chrome
   os: Android
   extra_configs:
