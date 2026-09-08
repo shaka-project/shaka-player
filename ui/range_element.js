@@ -85,11 +85,20 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.controls, 'hidingui', () => {
       this.showingUITimer_.stop();
+      // Disabling the element while it has focus moves the focus to the body,
+      // and the keyboard controls go with it, since they only act while
+      // something inside the player is focused.  The user would be left unable
+      // to seek with the keyboard until they used the mouse again.  Keep it
+      // enabled and disable it when it loses focus instead; interactions while
+      // the controls are hidden are prevented by the isOpaque() checks below.
+      if (document.activeElement == this.bar) {
+        return;
+      }
       this.bar.disabled = true;
     });
 
     this.eventManager.listen(this.bar, 'mousedown', (e) => {
-      if (!this.bar.disabled) {
+      if (!this.bar.disabled && this.controls.isOpaque()) {
         // Prevent native range update to use getValueFromPosition()
         // consistently with the hover preview.
         e.preventDefault();
@@ -130,7 +139,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     if (navigator.maxTouchPoints > 0) {
       this.eventManager.listen(this.bar, 'touchstart', (e) => {
-        if (!this.bar.disabled) {
+        if (!this.bar.disabled && this.controls.isOpaque()) {
           // See the comment in the mousedown handler above.
           this.endFakeChangeTimer_.stop();
           this.isChanging_ = true;
@@ -179,6 +188,11 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.isChanging_ = false;
         this.isMouseChanging_ = false;
         this.onChangeEnd();
+      }
+      if (!this.controls.isOpaque()) {
+        // The controls were hidden while this element had focus, so disabling
+        // it was put off until now.  See the 'hidingui' handler above.
+        this.bar.disabled = true;
       }
     });
 

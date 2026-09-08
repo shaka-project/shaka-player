@@ -2310,6 +2310,57 @@ describe('UI', () => {
         expect(controls.isSeeking()).toBe(true);
         expect(parseFloat(seekBar.value)).toBe(dragTime);
       });
+
+      describe('when the controls hide', () => {
+        /** @param {boolean} opaque */
+        function hideControls(opaque) {
+          spyOn(controls, 'isOpaque').and.returnValue(opaque);
+          controls.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+        }
+
+        it('keeps the focused seek bar usable', () => {
+          expect(document.activeElement).toBe(seekBar);
+
+          hideControls(/* opaque= */ false);
+
+          // Disabling the bar here would move the focus to the body, and the
+          // keyboard controls only act while the player has the focus.
+          expect(seekBar.disabled).toBe(false);
+          expect(document.activeElement).toBe(seekBar);
+
+          const before = video.currentTime;
+          pressKey('ArrowRight');
+          expect(video.currentTime)
+              .toBe(before + controls.getConfig().keyboardSeekDistance);
+        });
+
+        it('disables the seek bar once it loses the focus', () => {
+          hideControls(/* opaque= */ false);
+          expect(seekBar.disabled).toBe(false);
+
+          seekBar.blur();
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('disables a seek bar that is not focused', () => {
+          seekBar.blur();
+
+          hideControls(/* opaque= */ false);
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('ignores a drag started while the controls are hidden', () => {
+          seekBar.blur();
+          hideControls(/* opaque= */ false);
+          seekBar.disabled = false;
+
+          mouseEvent('mousedown', positionOfBar(0.25));
+
+          expect(controls.isSeeking()).toBe(false);
+        });
+      });
     });
   });
 
