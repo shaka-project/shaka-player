@@ -531,6 +531,10 @@ shakaDemo.Config = class {
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Interstitial cooldown',
+            'ads.interstitialCooldown',
+            /* canBeDecimal= */ true,
             /* canBeZero= */ true);
   }
 
@@ -692,11 +696,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ true,
             /* canBeUnset= */ true)
-        .addCustomTextInput_('Prefetch audio languages', (input) => {
-          shakaDemoMain.configure(
-              'streaming.prefetchAudioLanguages',
-              input.value.split(',').filter(Boolean));
-        })
+        .addArrayStringInput_('Prefetch audio languages',
+            'streaming.prefetchAudioLanguages')
         .addBoolInput_('Disable Audio Prefetch',
             'streaming.disableAudioPrefetch')
         .addBoolInput_('Disable Text Prefetch',

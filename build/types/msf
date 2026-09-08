@@ -29,4 +29,5 @@
 +../../lib/msf/drafts/draft18/messages.js
 +../../lib/msf/drafts/draft18/session.js
 
++../../lib/transmuxer/av1.js
 +../../lib/transmuxer/loc_transmuxer.js

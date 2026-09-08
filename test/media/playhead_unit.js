@@ -750,9 +750,12 @@ describe('Playhead', () => {
   });  // does not clamp playhead if setLiveSeekableRange is used
 
   it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
-    if (!deviceDetected.seekDelay()) {
-      pending('No seeking slow platform');
-    }
+    // Only Chromecast on Fuchsia reports a seek delay, so waiting for a
+    // platform that has one meant this never ran anywhere, in CI or the lab.
+    // Nothing here needs a slow device: the video element and the clock are
+    // both fakes, and the delay is only read back through the device.
+    spyOn(deviceDetected, 'seekDelay').and.returnValue(3);
+
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);

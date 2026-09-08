@@ -83,6 +83,7 @@ goog.require('shaka.transmuxer.AacTransmuxer');
 goog.require('shaka.transmuxer.Ac3');
 goog.require('shaka.transmuxer.Ac3Transmuxer');
 goog.require('shaka.transmuxer.ADTS');
+goog.require('shaka.transmuxer.AV1');
 goog.require('shaka.transmuxer.Ec3');
 goog.require('shaka.transmuxer.Ec3Transmuxer');
 goog.require('shaka.transmuxer.H264');

@@ -3226,6 +3226,35 @@ describe('Player', () => {
       }));
     });
 
+    it('chooses the first available configured text language at start',
+        async () => {
+          player.configure({
+            preferredText: [
+              {
+                language: 'fi',
+                role: '',
+                format: '',
+                forced: false,
+              },
+              {
+                language: 'en',
+                role: 'commentary',
+                format: '',
+                forced: false,
+              },
+            ],
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          // The first preference is not available, so the second one is used.
+          expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+            id: 52,
+            language: 'en',
+            roles: ['commentary'],
+          }));
+        });
+
     it('chooses a variant with preferred audio label', async () => {
       expect(getActiveVariantTrack().label).toBe(null);
 
