@@ -265,6 +265,37 @@ describe('UI', () => {
     }
 
     /**
+     * Takes the focus away from |element| for a keyboard test.
+     *
+     * blur() only does something when the element really has the focus, which
+     * is not the case when focusForKeyboardTest() had to fake it, and some
+     * browsers put off focus events while their window is in the background.
+     * Drop the override and deliver the event by hand when the platform does
+     * not, so that the test measures the blur handling and not the platform.
+     *
+     * @param {!HTMLElement} element
+     */
+    function blurForKeyboardTest(element) {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+
+      let blurred = false;
+      const listener = () => {
+        blurred = true;
+      };
+      element.addEventListener('blur', listener);
+      element.blur();
+      element.removeEventListener('blur', listener);
+
+      if (!blurred) {
+        element.dispatchEvent(new Event('blur'));
+      }
+    }
+
+    /**
      * Creates a keydown event for |key|.
      *
      * Not every platform honors the "key" member of the init dictionary: on
@@ -2338,13 +2369,13 @@ describe('UI', () => {
           hideControls(/* opaque= */ false);
           expect(seekBar.disabled).toBe(false);
 
-          seekBar.blur();
+          blurForKeyboardTest(seekBar);
 
           expect(seekBar.disabled).toBe(true);
         });
 
         it('disables a seek bar that is not focused', () => {
-          seekBar.blur();
+          blurForKeyboardTest(seekBar);
 
           hideControls(/* opaque= */ false);
 
@@ -2352,7 +2383,7 @@ describe('UI', () => {
         });
 
         it('ignores a drag started while the controls are hidden', () => {
-          seekBar.blur();
+          blurForKeyboardTest(seekBar);
           hideControls(/* opaque= */ false);
           seekBar.disabled = false;
 
