@@ -7119,6 +7119,35 @@ describe('HlsParser', () => {
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
     });
 
+    it('supports legacy X-CUE for interstitials', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",',
+        'X-ASSET-URI="fake",X-CUE="PRE,ONCE"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).toHaveBeenCalledOnceWith(
+          'com.apple.hls.interstitial', 5, null, [
+            jasmine.objectContaining({key: 'ID', data: '1'}),
+            jasmine.objectContaining({
+              key: 'X-ASSET-URI',
+              data: 'test:/fake',
+            }),
+            jasmine.objectContaining({key: 'X-CUE', data: 'PRE,ONCE'}),
+          ]);
+    });
+
     it('supports 1970-01-01T00:00:00.000Z', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',
