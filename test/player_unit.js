@@ -601,12 +601,12 @@ describe('Player', () => {
         expect(forceSwitch).toBeFalsy();
         expect(fromAdaptation).toBeFalsy();
       });
-      
+
       /** @suppress {accessControls} */
       function clearAbrManager() {
         player.abrManager_ = null;
       }
-      
+
       it('does nothing when the AbrManager does not exist yet', async () => {
         multiVariantManifest();
 
