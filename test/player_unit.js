@@ -601,7 +601,12 @@ describe('Player', () => {
         expect(forceSwitch).toBeFalsy();
         expect(fromAdaptation).toBeFalsy();
       });
-
+      
+      /** @suppress {accessControls} */
+      function clearAbrManager() {
+        player.abrManager_ = null;
+      }
+      
       it('does nothing when the AbrManager does not exist yet', async () => {
         multiVariantManifest();
 
@@ -612,7 +617,7 @@ describe('Player', () => {
 
         // The parser can ask to disable a stream during load(), before the
         // AbrManager has been created.
-        player.abrManager_ = null;
+        clearAbrManager();
 
         expect(player.disableStream(videoStream, disableTimeInSeconds))
             .toBe(false);
