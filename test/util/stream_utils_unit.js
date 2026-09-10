@@ -135,7 +135,8 @@ describe('StreamUtils', () => {
       expect(chosen[0].roles.length).toBe(0); // Pick a stream with no role.
     });
 
-    it('ignores no-role streams if there is a preferred role', () => {
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/9993
+    it('chooses nothing if the preferred role is not present', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -154,8 +155,7 @@ describe('StreamUtils', () => {
           manifest.textStreams,
           'en',
           'main', false); // A role that is not present.
-      expect(chosen.length).toBe(1);
-      expect(chosen[0].roles.length).toBe(1); // Pick a stream with a role.
+      expect(chosen.length).toBe(0);
     });
 
     it('chooses only one role, even if none is preferred', () => {
@@ -241,6 +241,96 @@ describe('StreamUtils', () => {
           expect(chosen[0].primary).toBe(false);
           expect(chosen[1].primary).toBe(false);
         });
+  });
+
+  describe('filterStreamsByTextPreferences', () => {
+    beforeEach(() => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addTextStream(1, (stream) => {
+          stream.language = 'en';
+        });
+        manifest.addTextStream(2, (stream) => {
+          stream.language = 'es';
+        });
+      });
+    });
+
+    it('uses the first preference that matches', () => {
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, [
+            {language: 'fi', role: '', format: '', forced: false},
+            {language: 'es', role: '', format: '', forced: false},
+          ]);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.textStreams[1]);
+    });
+
+    it('supports preferences without role and forced', () => {
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, [
+            /** @type {shaka.extern.TextPreference} */ ({language: 'en'}),
+          ]);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.textStreams[0]);
+    });
+
+    it('skips preferences without a language', () => {
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, [
+            {language: '', role: 'caption', format: '', forced: false},
+            {language: 'en', role: '', format: '', forced: false},
+          ]);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.textStreams[0]);
+    });
+
+    it('returns nothing when no preference matches', () => {
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, [
+            {language: 'fi', role: '', format: '', forced: false},
+          ]);
+      expect(chosen.length).toBe(0);
+    });
+
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/9993
+    it('returns nothing when the language matches but the role does not',
+        () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addTextStream(1, (stream) => {
+              stream.language = 'sv';
+              stream.roles = ['caption'];
+            });
+          });
+
+          const chosen = StreamUtils.filterStreamsByTextPreferences(
+              manifest.textStreams, [
+                {language: 'sv', role: 'main', format: '', forced: false},
+              ]);
+          expect(chosen.length).toBe(0);
+        });
+
+    it('falls back to the next preference if a role does not match', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addTextStream(1, (stream) => {
+          stream.language = 'sv';
+          stream.roles = ['caption'];
+        });
+      });
+
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, [
+            {language: 'sv', role: 'main', format: '', forced: false},
+            {language: 'sv', role: '', format: '', forced: false},
+          ]);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.textStreams[0]);
+    });
+
+    it('returns nothing without preferences', () => {
+      const chosen = StreamUtils.filterStreamsByTextPreferences(
+          manifest.textStreams, []);
+      expect(chosen.length).toBe(0);
+    });
   });
 
   describe('getDecodingInfosForVariants', () => {

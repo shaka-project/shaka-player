@@ -531,6 +531,10 @@ shakaDemo.Config = class {
         .addNumberInput_('Interstitial preload ahead time',
             'ads.interstitialPreloadAheadTime',
             /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_('Interstitial cooldown',
+            'ads.interstitialCooldown',
+            /* canBeDecimal= */ true,
             /* canBeZero= */ true);
   }
 
@@ -554,7 +558,9 @@ shakaDemo.Config = class {
         .addSelectInput_('Repeat mode',
             'queue.repeatMode',
             repeatModeOptions,
-            repeatModeOptionNames);
+            repeatModeOptionNames)
+        .addBoolInput_('Auto play next item',
+            'queue.autoPlayNext');
   }
 
   /** @private */
@@ -690,11 +696,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ true,
             /* canBeUnset= */ true)
-        .addCustomTextInput_('Prefetch audio languages', (input) => {
-          shakaDemoMain.configure(
-              'streaming.prefetchAudioLanguages',
-              input.value.split(',').filter(Boolean));
-        })
+        .addArrayStringInput_('Prefetch audio languages',
+            'streaming.prefetchAudioLanguages')
         .addBoolInput_('Disable Audio Prefetch',
             'streaming.disableAudioPrefetch')
         .addBoolInput_('Disable Text Prefetch',
@@ -1246,6 +1249,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addUINumberInput_('Playback Rate Slider Max',
             'playbackRateSliderMax',
+            /* canBeDecimal= */ true)
+        .addUINumberInput_('Playback Rate Slider Step',
+            'playbackRateSliderStep',
             /* canBeDecimal= */ true)
         .addUIArrayNumberInput_('Fast Forward Rates', 'fastForwardRates')
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')

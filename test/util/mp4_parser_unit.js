@@ -304,6 +304,19 @@ describe('Mp4Parser', () => {
       expect(box3).toHaveBeenCalled();
     });
 
+    it('does not loop forever on a 64-bit largesize of 0', () => {
+      // A largesize of 0 is invalid; it must not drive the read head
+      // backwards, which used to hang the parser.  See #10542.
+      const badBox = new Uint8Array([
+        0x00, 0x00, 0x00, 0x01, // size == 1, so a largesize follows
+        0x6D, 0x6F, 0x6F, 0x66, // type 'moof' (undefined in this parser)
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, // largesize == 0
+      ]);
+
+      expect(() => new shaka.util.Mp4Parser().parse(badBox)).not.toThrow();
+    });
+
     it('skips undefined top level boxes', () => {
       // By leaving a single box undefined, it should not interfere
       // with the other boxes (on the same level) from being read.

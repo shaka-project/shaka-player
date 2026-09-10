@@ -663,6 +663,43 @@ describe('Playhead', () => {
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for VOD
 
+  it('redirects a seek that lands in a skip range to its end', () => {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.buffered =
+        createFakeBuffered([{start: 0, end: 10}, {start: 30, end: 55}]);
+
+    timeline.isLive.and.returnValue(false);
+    timeline.getSeekRangeStart.and.returnValue(0);
+    timeline.getSafeSeekRangeStart.and.returnValue(0);
+    timeline.getSeekRangeEnd.and.returnValue(60);
+    timeline.getDuration.and.returnValue(60);
+
+    // Skip [10,30): a seek into the hole is redirected to 30, where content
+    // resumes.  The playhead pulls the ranges via the getter.
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 0,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent),
+        /* getPlaybackRate= */ undefined,
+        () => [{start: 10, end: 30}]);
+
+    setMockDate(10);
+    video.currentTime = 20;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(30);
+    expect(playhead.getTime()).toBe(30);
+
+    // A seek outside any range is left alone.
+    onSeek.calls.reset();
+    setMockDate(20);
+    video.currentTime = 35;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(35);
+  });
+
   it('does not clamp playhead if setLiveSeekableRange is used', () => {
     // This indicates support for setLiveSeekableRange, in which case we trust
     // MediaSource to handle seek range corrections and Playhead does nothing.
@@ -713,9 +750,12 @@ describe('Playhead', () => {
   });  // does not clamp playhead if setLiveSeekableRange is used
 
   it('doesn\'t repeatedly re-seek in seeking slow platforms', () => {
-    if (!deviceDetected.seekDelay()) {
-      pending('No seeking slow platform');
-    }
+    // Only Chromecast on Fuchsia reports a seek delay, so waiting for a
+    // platform that has one meant this never ran anywhere, in CI or the lab.
+    // Nothing here needs a slow device: the video element and the clock are
+    // both fakes, and the delay is only read back through the device.
+    spyOn(deviceDetected, 'seekDelay').and.returnValue(3);
+
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);

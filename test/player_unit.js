@@ -281,6 +281,41 @@ describe('Player', () => {
     });
   });
 
+  describe('skip ranges', () => {
+    // Player owns the manifest stream-type guard; add/remove/buffered behavior
+    // lives in SkipRangeController and is covered by its own tests.
+    const unsupportedWarning =
+        'addSkipRange() supports segments mode, VOD only; ignoring';
+
+    it('accepts a range on segments-mode VOD content', async () => {
+      manifest.sequenceMode = false;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(true);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range in sequence mode', async () => {
+      manifest.sequenceMode = true;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range on live content', async () => {
+      manifest.sequenceMode = false;
+      spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+  });
+
   describe('load/unload', () => {
     /** @type {!jasmine.Spy} */
     let checkError;
@@ -3190,6 +3225,35 @@ describe('Player', () => {
         roles: ['commentary'],
       }));
     });
+
+    it('chooses the first available configured text language at start',
+        async () => {
+          player.configure({
+            preferredText: [
+              {
+                language: 'fi',
+                role: '',
+                format: '',
+                forced: false,
+              },
+              {
+                language: 'en',
+                role: 'commentary',
+                format: '',
+                forced: false,
+              },
+            ],
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          // The first preference is not available, so the second one is used.
+          expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+            id: 52,
+            language: 'en',
+            roles: ['commentary'],
+          }));
+        });
 
     it('chooses a variant with preferred audio label', async () => {
       expect(getActiveVariantTrack().label).toBe(null);

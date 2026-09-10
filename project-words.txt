@@ -129,6 +129,7 @@ displayer
 displayers
 ewma
 externed
+extradata
 gendep
 gendeps
 golomb
@@ -163,6 +164,7 @@ statelessly
 stringifiers
 styleable
 syncsafe
+syncword
 testcheckstamp
 textproto
 transmux
@@ -180,6 +182,7 @@ unpadding
 unregisters
 unstore
 unviewed
+varint
 vint
 vints
 xywh
@@ -206,6 +209,7 @@ Clearkey
 Clearkeys
 Clutz
 codem
+cooldown
 cssnano
 hbbtv
 Conax
@@ -249,21 +253,24 @@ aach
 aacl
 aacp
 abgr
+altmpd
 apic
-appl
 apos
+appl
 arib
 assetid
 atsc
-avcc
 audiodescription
+avcc
 bipred
+bitdepth
 bmff
 bsid
 buffersource
 cabac
 cbcs
 cdat
+cdef
 cdna
 cehx
 cenc
@@ -286,7 +293,6 @@ cwip
 demuxer
 dfxp
 dinf
-dualmono
 dops
 dovi
 downmixing
@@ -298,6 +304,7 @@ dtsh
 dtsx
 dtsz
 dtvcc
+dualmono
 dvav
 dvcc
 dvhe
@@ -327,8 +334,10 @@ imagetype
 imsa
 imsc
 inband
+interintra
 isom
 isrc
+itut
 keyids
 keysystem
 latm
@@ -357,6 +366,7 @@ mksa
 monoscopic
 moof
 moov
+mpdpatch
 mpegts
 mpegurl
 mspr
@@ -373,6 +383,7 @@ nalu
 nalus
 nclx
 notsmooth
+obus
 packetized
 pasp
 payl
@@ -391,14 +402,15 @@ radl
 rbsp
 regionanchor
 rltb
-samplerate
 saio
 saiz
+samplerate
 sbgp
 schi
 schm
 scte
 sdtp
+segs
 senc
 sepiff
 sgpd
@@ -426,15 +438,16 @@ subcues
 subframes
 subt
 subviewer
+superres
 talb
 tblr
 tbpm
 tbrl
-tdrc
-tenc
 tcmp
 tcom
 tcop
+tdrc
+tenc
 tfdt
 tfhd
 tfrf
@@ -462,10 +475,11 @@ txxx
 tyer
 udta
 ufid
+unalignable
 unskippable
-mpdpatch
 urlparam
 uslt
+uvlc
 valu
 vdms
 vexu
@@ -487,7 +501,6 @@ wvtt
 wxxx
 xlink
 xsdate
-altmpd
 xyzx
 
 # vr
@@ -538,8 +551,10 @@ SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
+gregoire
 moqt
 msf
+msfts
 QUIC
 WEBTRANSPORT
 

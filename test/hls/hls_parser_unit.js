@@ -885,6 +885,8 @@ describe('HlsParser', () => {
   });
 
   it('parses audio+video variant with closed captions', async () => {
+    const basicInfoSpy = spyOn(
+        shaka.media.SegmentUtils, 'getBasicInfoFromMp4').and.callThrough();
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",CHANNELS="2",',
@@ -922,6 +924,140 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(basicInfoSpy).not.toHaveBeenCalled();
+  });
+
+  describe('detects embedded closed captions', () => {
+    /** @type {!jasmine.Spy} */
+    let getInfoSpy;
+
+    /**
+     * @param {?shaka.media.InitSegmentReference=} candidateInit
+     * @return {!Array<!shaka.media.SegmentReference>}
+     */
+    function makeReferences(candidateInit = null) {
+      const init = new shaka.media.InitSegmentReference(
+          () => ['test:/init.mp4'], 0, null);
+      return Array.from({length: 5}, (_, i) =>
+        new shaka.media.SegmentReference(
+            i, i + 1, () => [`test:/segment-${i}.mp4`], 0, null,
+            i == 2 && candidateInit ? candidateInit : init, 0, 0, Infinity));
+    }
+
+    /**
+     * @param {!Array<!Map<string, string>>} captionResults
+     * @param {boolean=} isLive
+     * @param {?shaka.media.InitSegmentReference=} candidateInit
+     * @return {!Promise<shaka.extern.BasicInfo>}
+     */
+    async function probeSegments(
+        captionResults, isLive = false, candidateInit = null) {
+      const privateParser = /** @type {?} */ (parser);
+      if (isLive) {
+        spyOn(parser, 'isLive_').and.returnValue(true);
+      }
+      getInfoSpy = spyOn(parser, 'getInfoFromSegment_').and.callFake(
+          (segment, segmentIndex) => {
+            const data = new Uint8Array([segmentIndex]);
+            return Promise.resolve({mimeType: 'video/mp4', data});
+          });
+      spyOn(
+          shaka.media.SegmentUtils, 'getBasicInfoFromMp4').and.callFake(() => {
+        const basicInfo =
+            shaka.media.SegmentUtils.getBasicInfoFromMimeType(
+                'video/mp4; codecs="avc1"');
+        basicInfo.closedCaptions = captionResults.shift() || new Map();
+        return basicInfo;
+      });
+
+      const basicInfo = await privateParser.getBasicInfoFromSegments_(
+          makeReferences(candidateInit), /* probeClosedCaptions= */ true);
+      expect(getInfoSpy).toHaveBeenCalled();
+      return basicInfo;
+    }
+
+    it('stops when the first segment has caption data', async () => {
+      const basicInfo = await probeSegments([
+        new Map([['CC1', 'CC1']]),
+      ]);
+
+      expect(basicInfo.closedCaptions).toEqual(new Map([['CC1', 'CC1']]));
+      expect(shaka.media.SegmentUtils.getBasicInfoFromMp4)
+          .toHaveBeenCalledTimes(1);
+    });
+
+    it('detects caption data in a later segment', async () => {
+      const basicInfo = await probeSegments([
+        new Map(),
+        new Map([['CC1', 'CC1']]),
+      ], /* isLive= */ true);
+
+      expect(basicInfo.closedCaptions).toEqual(new Map([['CC1', 'CC1']]));
+      expect(shaka.media.SegmentUtils.getBasicInfoFromMp4)
+          .toHaveBeenCalledTimes(2);
+      expect(getInfoSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('fetches a different init segment for a candidate', async () => {
+      const candidateInit = new shaka.media.InitSegmentReference(
+          () => ['test:/candidate-init.mp4'], 0, null);
+      const basicInfo = await probeSegments([
+        new Map(),
+        new Map([['CC1', 'CC1']]),
+      ], /* isLive= */ false, candidateInit);
+
+      expect(basicInfo.closedCaptions).toEqual(new Map([['CC1', 'CC1']]));
+      expect(getInfoSpy).toHaveBeenCalledTimes(4);
+      expect(getInfoSpy).toHaveBeenCalledWith(candidateInit, 0);
+    });
+
+    it('limits probes when no sampled segment has caption data', async () => {
+      const basicInfo = await probeSegments([
+        new Map(),
+        new Map(),
+        new Map(),
+      ]);
+
+      expect(basicInfo.closedCaptions.size).toBe(0);
+      expect(shaka.media.SegmentUtils.getBasicInfoFromMp4)
+          .toHaveBeenCalledTimes(3);
+      expect(getInfoSpy).toHaveBeenCalledTimes(4);
+    });
+
+    it('propagates detected captions to sibling video renditions', () => {
+      const closedCaptions = new Map([['CC1', 'CC1']]);
+      const detectedVideo = {closedCaptions};
+      const siblingVideo = {closedCaptions: null};
+      const privateParser = /** @type {?} */ (parser);
+      privateParser.manifest_ = /** @type {?} */ ({
+        variants: [
+          {video: detectedVideo},
+          {video: siblingVideo},
+        ],
+      });
+
+      privateParser.propagateDetectedClosedCaptions_();
+
+      expect(siblingVideo.closedCaptions).toEqual(closedCaptions);
+      expect(siblingVideo.closedCaptions).not.toBe(closedCaptions);
+    });
+
+    it('does not propagate captions declared by manifest groups', () => {
+      const closedCaptions = new Map([['CC1', 'en']]);
+      const siblingVideo = {closedCaptions: null};
+      const privateParser = /** @type {?} */ (parser);
+      privateParser.manifest_ = /** @type {?} */ ({
+        variants: [
+          {video: {closedCaptions}},
+          {video: siblingVideo},
+        ],
+      });
+      privateParser.groupIdToClosedCaptionsMap_.set('captions', closedCaptions);
+
+      privateParser.propagateDetectedClosedCaptions_();
+
+      expect(siblingVideo.closedCaptions).toBeNull();
+    });
   });
 
   it('parses audio+video variant with global closed captions', async () => {
@@ -6981,6 +7117,35 @@ describe('HlsParser', () => {
       ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
+    });
+
+    it('supports legacy X-CUE for interstitials', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",',
+        'X-ASSET-URI="fake",X-CUE="PRE,ONCE"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).toHaveBeenCalledOnceWith(
+          'com.apple.hls.interstitial', 5, null, [
+            jasmine.objectContaining({key: 'ID', data: '1'}),
+            jasmine.objectContaining({
+              key: 'X-ASSET-URI',
+              data: 'test:/fake',
+            }),
+            jasmine.objectContaining({key: 'X-CUE', data: 'PRE,ONCE'}),
+          ]);
     });
 
     it('supports 1970-01-01T00:00:00.000Z', async () => {

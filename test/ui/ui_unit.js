@@ -230,6 +230,107 @@ describe('UI', () => {
     /** @type {!HTMLVideoElement} */
     let video;
 
+    /** @type {boolean} */
+    let activeElementIsForced = false;
+
+    /**
+     * Gives |element| the focus for a keyboard test.
+     *
+     * Not every platform lets a test move the focus: a Chromecast leaves the
+     * seek bar unfocused, which would make these tests measure the platform
+     * instead of the keyboard handling they are meant to cover.  Fall back on
+     * overriding document.activeElement, which is all the code under test
+     * reads, and restore it after the test.
+     *
+     * @param {!HTMLElement} element
+     */
+    function focusForKeyboardTest(element) {
+      // A disabled input cannot take focus.  The seek bar is built disabled
+      // and is only enabled when the controls go from hidden to visible,
+      // which does not always happen before a test runs.
+      const input = /** @type {!HTMLInputElement} */ (element);
+      if (input.disabled) {
+        input.disabled = false;
+      }
+
+      element.focus();
+
+      if (document.activeElement != element) {
+        Object.defineProperty(document, 'activeElement', {
+          get: () => element,
+          configurable: true,
+        });
+        activeElementIsForced = true;
+      }
+    }
+
+    /**
+     * Takes the focus away from |element| for a keyboard test.
+     *
+     * blur() only does something when the element really has the focus, which
+     * is not the case when focusForKeyboardTest() had to fake it, and some
+     * browsers put off focus events while their window is in the background.
+     * Drop the override and deliver the event by hand when the platform does
+     * not, so that the test measures the blur handling and not the platform.
+     *
+     * @param {!HTMLElement} element
+     */
+    function blurForKeyboardTest(element) {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+
+      let blurred = false;
+      const listener = () => {
+        blurred = true;
+      };
+      element.addEventListener('blur', listener);
+      element.blur();
+      element.removeEventListener('blur', listener);
+
+      if (!blurred) {
+        element.dispatchEvent(new Event('blur'));
+      }
+    }
+
+    /**
+     * Creates a keydown event for |key|.
+     *
+     * Not every platform honors the "key" member of the init dictionary: on
+     * Tizen 3 the constructor accepts it but leaves event.key undefined, so
+     * the code under test throws instead of running the shortcut.  Force the
+     * property in that case, which is all the code under test reads.
+     *
+     * @param {string} key
+     * @return {!KeyboardEvent}
+     */
+    function createKeydownEvent(key) {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      if (event.key != key) {
+        Object.defineProperty(event, 'key', {
+          get: () => key,
+          configurable: true,
+        });
+      }
+
+      return event;
+    }
+
+    afterEach(() => {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+    });
+
     beforeEach(() => {
       videoContainer =
         /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -548,6 +649,92 @@ describe('UI', () => {
         for (const icon of icons) {
           expect(icon.getAttribute('aria-hidden')).toBe('true');
         }
+      });
+    });
+
+    describe('autoplay button', () => {
+      /** @type {!HTMLElement} */
+      let autoPlayButton;
+      /** @type {shaka.extern.IQueueManager} */
+      let queueManager;
+
+      /**
+       * @param {string} manifestUri
+       * @return {shaka.extern.QueueItem}
+       */
+      function queueItem(manifestUri) {
+        return {
+          manifestUri,
+          preloadManager: null,
+          startTime: null,
+          mimeType: null,
+          config: null,
+          extraText: null,
+          extraThumbnail: null,
+          extraChapter: null,
+          metadata: null,
+        };
+      }
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'autoplay',
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+        queueManager = player.getQueueManager();
+
+        // The click handler ignores clicks while the controls are hidden.
+        const container = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container');
+        container.setAttribute('shown', 'true');
+
+        autoPlayButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-autoplay-button');
+      });
+
+      it('is hidden until the queue has a next item', () => {
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:0')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(true);
+
+        queueManager.insertItems([queueItem('fake:1')]);
+        expect(autoPlayButton.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('toggles the config on click', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(false);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+
+        autoPlayButton.click();
+
+        expect(player.getConfiguration().queue.autoPlayNext).toBe(true);
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('true');
+      });
+
+      it('reflects a config change made elsewhere', () => {
+        queueManager.insertItems(
+            [queueItem('fake:0'), queueItem('fake:1')]);
+
+        player.configure('queue.autoPlayNext', false);
+
+        expect(autoPlayButton.getAttribute('aria-pressed')).toBe('false');
+      });
+
+      it('is accessible', () => {
+        expect(autoPlayButton.hasAttribute('aria-label')).toBe(true);
       });
     });
 
@@ -1795,13 +1982,9 @@ describe('UI', () => {
         const seekBar = container1.querySelector('.shaka-seek-bar');
         expect(seekBar).toBeTruthy();
 
-        /** @type {!HTMLElement} */ (seekBar).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar));
 
-        const spaceEvent = new KeyboardEvent('keydown', {
-          key: ' ',
-          bubbles: true,
-          cancelable: true,
-        });
+        const spaceEvent = createKeydownEvent(' ');
         const spacePreventDefaultSpy =
             spyOn(spaceEvent, 'preventDefault').and.callThrough();
         seekBar.dispatchEvent(spaceEvent);
@@ -1810,11 +1993,7 @@ describe('UI', () => {
         expect(spacePreventDefaultSpy).toHaveBeenCalled();
 
         controls1.seekTo(50, false);
-        const arrowLeftEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowLeft',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
         const arrowLeftPreventDefaultSpy =
             spyOn(arrowLeftEvent, 'preventDefault').and.callThrough();
         seekBar.dispatchEvent(arrowLeftEvent);
@@ -1823,17 +2002,22 @@ describe('UI', () => {
         expect(arrowLeftPreventDefaultSpy).toHaveBeenCalled();
 
         controls1.seekTo(50, false);
-        const arrowRightEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowRight',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
         seekBar.dispatchEvent(arrowRightEvent);
 
         expect(video1.currentTime).toBe(55);
       });
 
       it('isolates fullscreen status and keys between players', () => {
+        // isFullScreenEnabled() only reads document.fullscreenElement when
+        // document fullscreen is available; without it the controls fall back
+        // to the video element and this test would measure the platform
+        // instead.  Tizen 3 also refuses to redefine the property at all.
+        if (!document.fullscreenEnabled) {
+          pending('This test requires fullscreen support, which is ' +
+              'unavailable.');
+        }
+
         const originalFullscreenElement =
             Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
 
@@ -1859,22 +2043,14 @@ describe('UI', () => {
           const initialTime1 = video1.currentTime;
           const initialTime2 = video2.currentTime;
 
-          const arrowLeftEvent = new KeyboardEvent('keydown', {
-            key: 'ArrowLeft',
-            bubbles: true,
-            cancelable: true,
-          });
+          const arrowLeftEvent = createKeydownEvent('ArrowLeft');
           window.dispatchEvent(arrowLeftEvent);
 
           expect(video1.currentTime).toBe(45);
           expect(video1.currentTime).not.toBe(initialTime1);
           expect(video2.currentTime).toBe(initialTime2);
 
-          const spaceEvent = new KeyboardEvent('keydown', {
-            key: ' ',
-            bubbles: true,
-            cancelable: true,
-          });
+          const spaceEvent = createKeydownEvent(' ');
           window.dispatchEvent(spaceEvent);
 
           expect(play1Spy).toHaveBeenCalledTimes(1);
@@ -1904,13 +2080,9 @@ describe('UI', () => {
 
         const seekBar1 = container1.querySelector('.shaka-seek-bar');
         expect(seekBar1).toBeTruthy();
-        /** @type {!HTMLElement} */ (seekBar1).focus();
+        focusForKeyboardTest(/** @type {!HTMLElement} */ (seekBar1));
 
-        const arrowRightEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowRight',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowRightEvent = createKeydownEvent('ArrowRight');
         seekBar1.dispatchEvent(arrowRightEvent);
 
         expect(video1.currentTime).toBe(55);
@@ -1932,20 +2104,12 @@ describe('UI', () => {
         /** @type {!HTMLInputElement} */ (document.createElement('input'));
         input.type = 'text';
         document.body.appendChild(input);
-        input.focus();
+        focusForKeyboardTest(input);
 
-        const spaceEvent = new KeyboardEvent('keydown', {
-          key: ' ',
-          bubbles: true,
-          cancelable: true,
-        });
+        const spaceEvent = createKeydownEvent(' ');
         window.dispatchEvent(spaceEvent);
 
-        const arrowLeftEvent = new KeyboardEvent('keydown', {
-          key: 'ArrowLeft',
-          bubbles: true,
-          cancelable: true,
-        });
+        const arrowLeftEvent = createKeydownEvent('ArrowLeft');
         window.dispatchEvent(arrowLeftEvent);
 
         expect(playSpy).not.toHaveBeenCalled();
@@ -1997,20 +2161,12 @@ describe('UI', () => {
         // get it out of the range it is built with.
         controls.seekTo(50, false);
 
-        // The bar is built disabled and is only enabled when the controls go
-        // from hidden to visible, which never happens here because they are
-        // already visible.  A disabled input cannot take focus.
-        /** @type {!HTMLInputElement} */ (seekBar).disabled = false;
-        seekBar.focus();
+        focusForKeyboardTest(seekBar);
       });
 
       /** @param {string} key */
       function pressKey(key) {
-        seekBar.dispatchEvent(new KeyboardEvent('keydown', {
-          key,
-          bubbles: true,
-          cancelable: true,
-        }));
+        seekBar.dispatchEvent(createKeydownEvent(key));
       }
 
       it('stays up while a seek key is held down', async () => {
@@ -2039,6 +2195,202 @@ describe('UI', () => {
         await Util.delay(0.1);
         expect(video.currentTime).toBe(50);
         expect(thumbnailContainer.style.visibility).not.toBe('visible');
+      });
+    });
+
+    describe('keyboard during a seek bar drag', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLInputElement} */
+      let seekBar;
+      /** @type {boolean} */
+      let paused;
+
+      beforeEach(async () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        // The element has no source, so drive its playback state by hand.
+        paused = true;
+        Object.defineProperty(video, 'paused', {
+          get: () => paused,
+          configurable: true,
+        });
+        spyOn(video, 'play').and.callFake(() => {
+          paused = false;
+        });
+        spyOn(video, 'pause').and.callFake(() => {
+          paused = true;
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+
+        seekBar = /** @type {!HTMLInputElement} */ (
+          UiUtils.getElementByClassName(videoContainer, 'shaka-seek-bar'));
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(50, false);
+
+        focusForKeyboardTest(seekBar);
+      });
+
+      /**
+       * @param {number} fraction
+       * @return {number} the clientX for that point of the bar
+       */
+      function positionOfBar(fraction) {
+        const rect = seekBar.getBoundingClientRect();
+        return rect.left + (rect.width * fraction);
+      }
+
+      /**
+       * @param {string} type
+       * @param {number} clientX
+       * @param {!EventTarget=} target
+       */
+      function mouseEvent(type, clientX, target) {
+        (target || seekBar).dispatchEvent(new MouseEvent(type, {
+          clientX,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      /** @param {string} key */
+      function pressKey(key) {
+        seekBar.dispatchEvent(createKeydownEvent(key));
+      }
+
+      it('seeks from where the drag left the bar', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+        expect(controls.isSeeking()).toBe(true);
+
+        pressKey('ArrowRight');
+
+        const keyboardSeekDistance =
+            controls.getConfig().keyboardSeekDistance;
+        expect(video.currentTime).toBe(dragTime + keyboardSeekDistance);
+        // The keyboard took the interaction over from the pointer.
+        expect(controls.isSeeking()).toBe(false);
+      });
+
+      it('is not undone when the drag ends', async () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+
+        pressKey('ArrowRight');
+        const timeAfterKey = video.currentTime;
+
+        // Moving and releasing the mouse somewhere else no longer drives the
+        // bar, so the keyboard seek stands.
+        mouseEvent('mousemove', positionOfBar(0.75), document);
+        mouseEvent('mouseup', positionOfBar(0.75), document);
+        await Util.delay(0.3);
+
+        expect(video.currentTime).toBe(timeAfterKey);
+      });
+
+      it('pauses when play/pause is pressed during a drag', async () => {
+        video.play();
+        expect(video.paused).toBe(false);
+
+        // Scrubbing pauses the video until the drag is over.
+        mouseEvent('mousedown', positionOfBar(0.25));
+        expect(video.paused).toBe(true);
+
+        pressKey(' ');
+
+        // The toggle is not swallowed by the resume at the end of the drag.
+        expect(controls.isSeeking()).toBe(false);
+        expect(video.paused).toBe(true);
+
+        mouseEvent('mouseup', positionOfBar(0.25), document);
+        await Util.delay(0.3);
+        expect(video.paused).toBe(true);
+      });
+
+      it('does not end the drag for unrelated shortcuts', () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+
+        // The test video element is created muted.
+        expect(video.muted).toBe(true);
+        pressKey(controls.getConfig().shortcuts.mute);
+
+        expect(video.muted).toBe(false);
+        // Muting does not interrupt the drag.
+        expect(controls.isSeeking()).toBe(true);
+        expect(parseFloat(seekBar.value)).toBe(dragTime);
+      });
+
+      describe('when the controls hide', () => {
+        /** @param {boolean} opaque */
+        function hideControls(opaque) {
+          spyOn(controls, 'isOpaque').and.returnValue(opaque);
+          controls.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+        }
+
+        it('keeps the focused seek bar usable', () => {
+          expect(document.activeElement).toBe(seekBar);
+
+          hideControls(/* opaque= */ false);
+
+          // Disabling the bar here would move the focus to the body, and the
+          // keyboard controls only act while the player has the focus.
+          expect(seekBar.disabled).toBe(false);
+          expect(document.activeElement).toBe(seekBar);
+
+          const before = video.currentTime;
+          pressKey('ArrowRight');
+          expect(video.currentTime)
+              .toBe(before + controls.getConfig().keyboardSeekDistance);
+        });
+
+        it('disables the seek bar once it loses the focus', () => {
+          hideControls(/* opaque= */ false);
+          expect(seekBar.disabled).toBe(false);
+
+          blurForKeyboardTest(seekBar);
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('disables a seek bar that is not focused', () => {
+          blurForKeyboardTest(seekBar);
+
+          hideControls(/* opaque= */ false);
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('ignores a drag started while the controls are hidden', () => {
+          blurForKeyboardTest(seekBar);
+          hideControls(/* opaque= */ false);
+          seekBar.disabled = false;
+
+          mouseEvent('mousedown', positionOfBar(0.25));
+
+          expect(controls.isSeeking()).toBe(false);
+        });
       });
     });
   });

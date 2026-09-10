@@ -94,6 +94,21 @@ queueManager.configure({
 
 The default mode is `OFF`.
 
+Note that `repeatMode` only controls what happens at the end of the queue: with
+`OFF`, playback still advances from one item to the next.  To stop after the
+current item while keeping the queue populated, turn off `autoPlayNext`:
+
+```js
+queueManager.configure({
+  autoPlayNext: false,
+});
+```
+
+With `autoPlayNext` set to `false`, the queue neither advances on `complete` nor
+preloads the next item, so no manifest, segment or licence request is wasted.
+It defaults to `true`.  The UI exposes it as the `'autoplay'` element, a switch
+in the control panel.
+
 
 #### Preloading Adjacent Items
 

@@ -49,7 +49,7 @@ shaka.test.CannedIDB = class {
 
       // For each store, dump the store parameters and data.
       const dumpOperations = [];
-      for (const storeName of db.objectStoreNames) {
+      for (const storeName of Array.from(db.objectStoreNames)) {
         dumpOperations.push(this.dumpStore_(db, storeName, savedDatabase));
       }
       await Promise.all(dumpOperations);
@@ -266,7 +266,7 @@ shaka.test.CannedIDB = class {
 
         // We will ignore existing stores, so first make a map of them.
         const existingStoreMap = {};
-        for (const storeName of db.objectStoreNames) {
+        for (const storeName of Array.from(db.objectStoreNames)) {
           existingStoreMap[storeName] = true;
         }
 

@@ -29,7 +29,7 @@ runs:
         DEMO_VERSION="$(cat demo-version)-uncompiled"
         sed \
             -i lib/player.js \
-            -e "s/\(shaka.Player.version\) = .*/\1 = '$DEMO_VERSION';/"
+            -e "/x-release-please-version/s@'v[^']*' + '-uncompiled'@'$DEMO_VERSION'@"
         rm demo-version
 
     - name: Backup demo node modules

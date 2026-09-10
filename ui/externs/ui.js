@@ -306,6 +306,7 @@ shaka.extern.UITrackLabelCallback;
  *   playbackRates: !Array<number>,
  *   playbackRateSliderMin: number,
  *   playbackRateSliderMax: number,
+ *   playbackRateSliderStep: number,
  *   fastForwardRates: !Array<number>,
  *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
@@ -392,6 +393,10 @@ shaka.extern.UITrackLabelCallback;
  *   button to the playback-rate menu.
  *   <br>
  *   Defaults to <code>3</code>.
+ * @property {number} playbackRateSliderStep
+ *   Step size used for playback rate slider interaction and the +/- buttons
+ *   <br>
+ *   Defaults to <code>0.05</code>.
  * @property {!Array<number>} fastForwardRates
  *   The ordered list of rates for fast forward selection.
  *   <br>
@@ -892,6 +897,12 @@ shaka.extern.IUIRangeElement = class {
 
   /** @param {number} value */
   changeTo(value) {}
+
+  /**
+   * Ends an in-progress mouse interaction, if there is one, so that other
+   * controls can take over from a drag that is still in progress.
+   */
+  endMouseInteraction() {}
 };
 
 /**
