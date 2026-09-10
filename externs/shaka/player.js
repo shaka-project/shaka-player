@@ -452,7 +452,7 @@ shaka.extern.Track;
  * read-only as changing any values does not have any effect.
  *
  * @property {(number|undefined)} id
- *   The unique ID of the track, if available.
+ *   The unique ID of the track, if available. Only available for src=.
  * @property {boolean} active
  *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
