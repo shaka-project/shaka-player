@@ -233,6 +233,24 @@ describe('DataViewReader', () => {
       });
     });
 
+    it('detects when skipping negative bytes', () => {
+      runTest(() => {
+        bigEndianReader.skip(-1);
+      });
+    });
+
+    it('detects when reading negative bytes', () => {
+      runTest(() => {
+        bigEndianReader.readBytes(-1, /* clone= */ false);
+      });
+    });
+
+    it('detects when rewinding negative bytes', () => {
+      runTest(() => {
+        bigEndianReader.rewind(-1);
+      });
+    });
+
     function runTest(test) {
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

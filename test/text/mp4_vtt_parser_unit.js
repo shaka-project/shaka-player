@@ -224,6 +224,41 @@ describe('Mp4VttParser', () => {
         .toThrow(error);
   });
 
+  it('rejects media segment with payload box smaller than 8 bytes', () => {
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
+        shaka.util.Error.Code.INVALID_MP4_VTT));
+
+    const parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+
+    // Corrupt a valid media segment by setting payload box size to 0.
+    const corruptedSegment = new Uint8Array(vttSegment);
+    for (let i = 0; i < corruptedSegment.length - 4; i++) {
+      if (corruptedSegment[i] === 0x76 && // 'v'
+          corruptedSegment[i + 1] === 0x74 && // 't'
+          corruptedSegment[i + 2] === 0x74 && // 't'
+          corruptedSegment[i + 3] === 0x63) { // 'c'
+        corruptedSegment[i - 4] = 0;
+        corruptedSegment[i - 3] = 0;
+        corruptedSegment[i - 2] = 0;
+        corruptedSegment[i - 1] = 0;
+        break;
+      }
+    }
+
+    expect(() => parser.parseMedia(corruptedSegment, time, null, []))
+        .toThrow(error);
+  });
+
   function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
     expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
   }
