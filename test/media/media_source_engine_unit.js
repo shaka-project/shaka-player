@@ -1073,6 +1073,89 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    it('resyncs when a segment lands at the wrong buffered position',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+          videoSourceBuffer.mode = 'sequence';
+
+          await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+          spyOn(mediaSourceEngine, 'resync').and.callThrough();
+
+          // Simulates a segment that collapses onto the previous one.
+          videoSourceBuffer.buffered =
+              createFakeBuffered([{start: 0, end: 10}]);
+          videoSourceBuffer.appendBuffer.and.callFake(() => {
+            videoSourceBuffer.buffered =
+                createFakeBuffered([{start: 0, end: 10.05}]);
+          });
+
+          const reference = dummyReference(10, 20);
+          const p = mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, buffer, reference, fakeStream,
+              /* hasClosedCaptions= */ false);
+          videoSourceBuffer.updateend();
+          await p;
+
+          expect(mediaSourceEngine.resync)
+              .toHaveBeenCalledWith(ContentType.VIDEO, 20);
+          expect(videoSourceBuffer.timestampOffset).toBe(20);
+        });
+
+    it('does not resync when the segment lands at the expected position',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+          videoSourceBuffer.mode = 'sequence';
+
+          await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+          spyOn(mediaSourceEngine, 'resync').and.callThrough();
+
+          videoSourceBuffer.buffered =
+              createFakeBuffered([{start: 0, end: 10}]);
+          videoSourceBuffer.appendBuffer.and.callFake(() => {
+            videoSourceBuffer.buffered =
+                createFakeBuffered([{start: 0, end: 20}]);
+          });
+
+          const reference = dummyReference(10, 20);
+          const p = mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, buffer, reference, fakeStream,
+              /* hasClosedCaptions= */ false);
+          videoSourceBuffer.updateend();
+          await p;
+
+          expect(mediaSourceEngine.resync).not.toHaveBeenCalled();
+        });
+
+    it('resyncs even when nothing was buffered before this append',
+        async () => {
+          const initObject = new Map();
+          initObject.set(ContentType.VIDEO, fakeVideoStream);
+          videoSourceBuffer.mode = 'sequence';
+
+          await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+          spyOn(mediaSourceEngine, 'resync').and.callThrough();
+
+          // No previously buffered range for this track (e.g. right after a
+          // discontinuity reset) - the check must not depend on one.
+          videoSourceBuffer.buffered = createFakeBuffered([]);
+          videoSourceBuffer.appendBuffer.and.callFake(() => {
+            videoSourceBuffer.buffered =
+                createFakeBuffered([{start: 0, end: 10.05}]);
+          });
+
+          const reference = dummyReference(10, 20);
+          const p = mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, buffer, reference, fakeStream,
+              /* hasClosedCaptions= */ false);
+          videoSourceBuffer.updateend();
+          await p;
+
+          expect(mediaSourceEngine.resync)
+              .toHaveBeenCalledWith(ContentType.VIDEO, 20);
+        });
   });
 
   describe('remove', () => {
