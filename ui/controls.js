@@ -319,6 +319,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Suppress timer-based updates if the controls are hidden.
       if (this.isOpaque()) {
         this.updateTimeAndSeekRange_();
+        // The bottom controls can change height while they are shown.
+        this.computeShakaTextContainerSize_();
       }
     });
 
@@ -1991,14 +1993,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.recentMouseMovement_ ||
         keyboardNavigationMode ||
         this.isHovered_()) {
-      // Make sure the state is up-to-date before showing it.
-      this.updateTimeAndSeekRange_();
-
+      // Only refresh when the controls actually become visible. While they
+      // are shown, timeAndSeekRangeTimer_ is what keeps them up-to-date;
+      // repeating that here would run it on every mouse move.
       if (this.controlsContainer_.getAttribute('shown') == null) {
+        this.updateTimeAndSeekRange_();
         this.controlsContainer_.setAttribute('shown', 'true');
         this.dispatchVisibilityEvent_();
+        this.computeShakaTextContainerSize_();
       }
-      this.computeShakaTextContainerSize_();
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);

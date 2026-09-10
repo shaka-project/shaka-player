@@ -101,6 +101,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.resizeObserver_ = null;
 
     /**
+     * True if the browser supports clamp(), which lets us position the
+     * thumbnail container without measuring it. Our legacy build still
+     * targets browsers that do not.
+     *
+     * @private {boolean}
+     */
+    this.canClampInCss_ = !!(window.CSS && window.CSS.supports &&
+        window.CSS.supports('transform',
+            'translateX(clamp(0px, calc(0px - 50%), calc(0px - 100%)))'));
+
+    /**
      * When user is scrubbing the seek bar - we should pause the video - see
      * https://github.com/google/shaka-player/pull/2898#issuecomment-705229215
      * but will conditionally pause or play the video after scrubbing
@@ -729,11 +740,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * width, so this differs from a naive (value / range) * width mapping.
    *
    * @param {number} value
+   * @param {DOMRect=} barRect The bounding rect of the bar, when the caller
+   *   has already measured it.
    * @return {?number} The pixel offset, or null if the bar has no size.
    * @private
    */
-  getThumbCenterPixel_(value) {
-    const rect = this.bar.getBoundingClientRect();
+  getThumbCenterPixel_(value, barRect) {
+    const rect = barRect || this.bar.getBoundingClientRect();
     const barMin = parseFloat(this.bar.min);
     const barMax = parseFloat(this.bar.max);
     if (rect.width <= 0 || barMax <= barMin) {
@@ -769,7 +782,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       if (chapter.startTime < barMin || chapter.startTime > barMax) {
         continue;
       }
-      const pixelCenter = this.getThumbCenterPixel_(chapter.startTime);
+      const pixelCenter = this.getThumbCenterPixel_(chapter.startTime, rect);
       if (pixelCenter == null) {
         return value;
       }
@@ -801,6 +814,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (value < 0) {
       value = 0;
     }
+    // Read the layout before writing to the DOM below. Measuring afterwards
+    // would force a synchronous layout on every pointer move.
+    const barWidth = this.bar.offsetWidth;
     let isAdValue = false;
     if (this.adCuePoints_.length) {
       isAdValue = this.adCuePoints_.some((cuePoint) => {
@@ -844,14 +860,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailImageContainer_.style.display = showImage ? '' : 'none';
     this.thumbnailContainer_.classList.toggle('time-only', !showImage);
 
-    // Measure at a known offset: the width of the box hugging the time
-    // depends on the space left to the right of it, and the container is
-    // still positioned for the previous value at this point.
+    // Anchor to the left edge: the width of the box hugging the time depends
+    // on the space left to the right of it, so this keeps that width stable
+    // wherever the pointer is.
     this.thumbnailContainer_.style.left = '0';
-    const width = this.thumbnailContainer_.clientWidth;
-    const leftPosition = Math.min(this.bar.offsetWidth - width,
-        Math.max(0, pixelPosition - (width / 2)));
-    this.thumbnailContainer_.style.left = leftPosition + 'px';
+    if (this.canClampInCss_) {
+      // Percentages in a translation resolve against the element's own width,
+      // so the browser centers and clamps without us measuring anything.
+      this.thumbnailContainer_.style.transform = 'translateX(clamp(0px, ' +
+          'calc(' + pixelPosition + 'px - 50%), ' +
+          'calc(' + barWidth + 'px - 100%)))';
+    } else {
+      const width = this.thumbnailContainer_.clientWidth;
+      const leftPosition = Math.min(barWidth - width,
+          Math.max(0, pixelPosition - (width / 2)));
+      this.thumbnailContainer_.style.left = leftPosition + 'px';
+    }
     this.thumbnailContainer_.style.visibility = 'visible';
 
     if (!showImage) {
@@ -866,7 +890,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       if (videoTrack && videoTrack.width && videoTrack.height) {
         aspectRatio = videoTrack.width / videoTrack.height;
       }
-      const height = Math.floor(width / aspectRatio);
+      const height =
+          Math.floor(this.thumbnailContainer_.clientWidth / aspectRatio);
       this.thumbnailImageContainer_.style.height = height + 'px';
     }
 
