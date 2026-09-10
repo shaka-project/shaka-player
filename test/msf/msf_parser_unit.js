@@ -51,6 +51,75 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     parser.configure(config);
   });
 
+  describe('a session the server hangs up on', () => {
+    /** @type {?} */
+    let realTransport;
+
+    beforeEach(() => {
+      // A namespace in the configuration is what sends the parser straight to
+      // the catalog subscription instead of waiting for an announcement.
+      config.msf.namespaces = ['msf', 'clear'];
+      parser.configure(config);
+      realTransport = shaka.msf['MSFTransport'];
+    });
+
+    afterEach(() => {
+      shaka.msf['MSFTransport'] = realTransport;
+    });
+
+    /**
+     * A transport whose session ends with the given reason while the catalog
+     * subscription is still waiting for an answer, which is what a server
+     * that rejects something the client sent looks like from here.
+     *
+     * @param {string} reason
+     */
+    function transportThatEnds(reason) {
+      shaka.msf['MSFTransport'] = class {
+        /** @return {!Promise} */
+        connect() {
+          return Promise.resolve({});
+        }
+
+        /**
+         * The subscription dies with the session, but its WebTransport error
+         * says nothing about why; the session's reason does.
+         *
+         * @return {!Promise}
+         */
+        subscribeTrack() {
+          return new Promise(() => {});
+        }
+
+        /** @return {!Promise<string>} */
+        waitForSessionEnd() {
+          return Promise.resolve(reason);
+        }
+
+        /** */
+        configure() {}
+
+        /** */
+        release() {}
+      };
+    }
+
+    it('reports why the session ended instead of a catalog timeout',
+        async () => {
+          const reason = 'WebTransportError: Connection lost.';
+          transportThatEnds(reason);
+
+          const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.MSF_CONNECTION_CLOSED,
+              reason));
+
+          await expectAsync(parser.start('moqt://relay.example/live',
+              playerInterface)).toBeRejectedWith(expected);
+        });
+  });
+
   describe('accessibility descriptors', () => {
     /**
      * @param {!Array<!Object>} accessibility
