@@ -432,6 +432,7 @@ shaka.extern.Track;
 
 /**
  * @typedef {{
+ *   id: (number|undefined),
  *   active: boolean,
  *   language: string,
  *   label: ?string,
@@ -450,6 +451,8 @@ shaka.extern.Track;
  * An object describing a audio track.  This object should be treated as
  * read-only as changing any values does not have any effect.
  *
+ * @property {(number|undefined)} id
+ *   The unique ID of the track, if available.
  * @property {boolean} active
  *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
