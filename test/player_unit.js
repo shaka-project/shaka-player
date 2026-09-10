@@ -3302,7 +3302,9 @@ describe('Player', () => {
         kind: 'main',
         enabled: false,
       };
-      video.audioTracks = [trackEn1, trackEn2, trackEs];
+      video.audioTracks =
+          /** @type {!AudioTrackList} */ (/** @type {?} */ (
+            [trackEn1, trackEn2, trackEs]));
     });
 
     it('getAudioTracks assigns unique id and matches native tracks', () => {
