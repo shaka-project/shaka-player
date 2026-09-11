@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.2.10](https://github.com/shaka-project/shaka-player/compare/v5.2.9...v5.2.10) (2026-09-11)
+
+
+### Bug Fixes
+
+* **Ads:** Do not report a resume for an ad's first playout ([#10566](https://github.com/shaka-project/shaka-player/issues/10566)) ([c217ec3](https://github.com/shaka-project/shaka-player/commit/c217ec32b67323cb0b3fb9a091f0f0e4aabcc9dc)), closes [#10562](https://github.com/shaka-project/shaka-player/issues/10562)
+* **Ads:** Report the last ad of a pod as complete ([#10546](https://github.com/shaka-project/shaka-player/issues/10546)) ([9742fc3](https://github.com/shaka-project/shaka-player/commit/9742fc34ffe8ceae3db05d8259ab96e6f7a48736)), closes [#10545](https://github.com/shaka-project/shaka-player/issues/10545)
+* **Demo:** Persist array config values in the URL hash ([#10539](https://github.com/shaka-project/shaka-player/issues/10539)) ([4fb25e2](https://github.com/shaka-project/shaka-player/commit/4fb25e2fb8424c29f555461f52e7e7af24852e57))
+* Don't fall back to another role when the preferred text role is unmatched ([#10549](https://github.com/shaka-project/shaka-player/issues/10549)) ([c44678d](https://github.com/shaka-project/shaka-player/commit/c44678dcc6c4c557d465851312c49260d96e1f5f)), closes [#9993](https://github.com/shaka-project/shaka-player/issues/9993)
+* **HLS:** Support legacy X-CUE for interstitials ([#10558](https://github.com/shaka-project/shaka-player/issues/10558)) ([a968cf5](https://github.com/shaka-project/shaka-player/commit/a968cf5dac2d47b27b83136469c19251cdc576b9))
+* **HLS:** synchronize HTML5 audio track selection in src= mode (fixes [#10551](https://github.com/shaka-project/shaka-player/issues/10551)) ([#10568](https://github.com/shaka-project/shaka-player/issues/10568)) ([139d6b1](https://github.com/shaka-project/shaka-player/commit/139d6b1a0b9f54d644dd5cf1184054f5bc0eac9b))
+* **Mp4Parser:** Don't hang on a 64-bit largesize of 0 ([#10548](https://github.com/shaka-project/shaka-player/issues/10548)) ([79b6129](https://github.com/shaka-project/shaka-player/commit/79b6129e29782bf0499caac3cddacc040de4b1c7)), closes [#10542](https://github.com/shaka-project/shaka-player/issues/10542)
+* Prevent infinite loop on zero-length WVTT payload box ([#10565](https://github.com/shaka-project/shaka-player/issues/10565)) ([af1b276](https://github.com/shaka-project/shaka-player/commit/af1b276eb1b2d2d500315a376c74f98e2ec5bbd4)), closes [#10561](https://github.com/shaka-project/shaka-player/issues/10561)
+* Try every preferredText entry when choosing the text track ([#10547](https://github.com/shaka-project/shaka-player/issues/10547)) ([6c4695c](https://github.com/shaka-project/shaka-player/commit/6c4695c41403dda1a353fdb24af62122194c0841)), closes [#10544](https://github.com/shaka-project/shaka-player/issues/10544)
+
 ## [5.2.9](https://github.com/shaka-project/shaka-player/compare/v5.2.8...v5.2.9) (2026-09-04)
 
 
