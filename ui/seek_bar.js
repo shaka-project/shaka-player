@@ -75,7 +75,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           newCurrentTime -= 0.001;
         }
       }
+      const wasEnded = this.video.ended;
       this.video.currentTime = newCurrentTime;
+      if (wasEnded && !this.wasPlaying_) {
+        // Enforce pause if we sought from ended state while paused, avoiding
+        // platform auto-play quirks (e.g. Samsung Tizen).
+        this.video.pause();
+      }
       this.controls.hideContextMenus();
       this.controls.hideSettingsMenus();
       this.update();
@@ -347,7 +353,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart(fromTouchEvent = false) {
-    this.wasPlaying_ = !this.video.paused;
+    this.wasPlaying_ = !this.video.paused && !this.video.ended;
     this.controls.setSeeking(true);
     this.video.pause();
     this.isMoving_ = fromTouchEvent;
@@ -409,6 +415,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       // shortcut ends the interaction, which rejects this promise.  That is not
       // an error we need to report.
       this.video.play();
+    } else {
+      this.video.pause();
     }
 
     if (this.isMoving_) {

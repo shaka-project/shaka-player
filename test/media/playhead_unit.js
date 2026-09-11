@@ -1557,4 +1557,31 @@ describe('Playhead', () => {
       return HTMLMediaElement.HAVE_METADATA;
     }
   });  // gap jumping
+
+  describe('PlayheadMover', () => {
+    it('enforces pause when moving playhead from ended state while paused',
+        () => {
+          const mover = new shaka.media.VideoWrapper.PlayheadMover(
+              /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+              /* maxAttempts= */ 10);
+          video.ended = true;
+          video.paused = true;
+          mover.moveTo(10);
+          expect(video.currentTime).toBe(10);
+          expect(video.pause).toHaveBeenCalled();
+          mover.release();
+        });
+
+    it('does not enforce pause when moving playhead while not ended', () => {
+      const mover = new shaka.media.VideoWrapper.PlayheadMover(
+          /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+          /* maxAttempts= */ 10);
+      video.ended = false;
+      video.paused = true;
+      mover.moveTo(10);
+      expect(video.currentTime).toBe(10);
+      expect(video.pause).not.toHaveBeenCalled();
+      mover.release();
+    });
+  });
 });
