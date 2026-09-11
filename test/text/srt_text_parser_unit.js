@@ -218,6 +218,212 @@ describe('SrtTextParser', () => {
         });
   });
 
+  it('supports Aegisub middle and top alignments', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: 'Middle-left',
+            line: 50,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
+            textAlign: 'left',
+          },
+          {
+            startTime: 20,
+            endTime: 30,
+            payload: 'Middle-center',
+            line: 50,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
+            textAlign: 'center',
+          },
+          {
+            startTime: 30,
+            endTime: 40,
+            payload: 'Middle-right',
+            line: 50,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
+            textAlign: 'right',
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: 'Top-center',
+            line: 0,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
+            textAlign: 'center',
+          },
+        ],
+        '1\n' +
+        '00:00:10,000 --> 00:00:20,000\n' +
+        '{\\an4}Middle-left\n\n' +
+        '2\n' +
+        '00:00:20,000 --> 00:00:30,000\n' +
+        '{\\an5}Middle-center\n\n' +
+        '3\n' +
+        '00:00:30,000 --> 00:00:40,000\n' +
+        '{\\an6}Middle-right\n\n' +
+        '4\n' +
+        '00:00:40,000 --> 00:00:50,000\n' +
+        '{\\an8}Top-center\n',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
+  it('supports legacy SSA alignments', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: 'SSA bottom-left',
+            line: -1,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
+            textAlign: 'left',
+          },
+          {
+            startTime: 20,
+            endTime: 30,
+            payload: 'SSA top-center',
+            line: 0,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
+            textAlign: 'center',
+          },
+          {
+            startTime: 30,
+            endTime: 40,
+            payload: 'SSA middle-center',
+            line: 50,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
+            textAlign: 'center',
+          },
+        ],
+        '1\n' +
+        '00:00:10,000 --> 00:00:20,000\n' +
+        '{\\a1}SSA bottom-left\n\n' +
+        '2\n' +
+        '00:00:20,000 --> 00:00:30,000\n' +
+        '{\\a6}SSA top-center\n\n' +
+        '3\n' +
+        '00:00:30,000 --> 00:00:40,000\n' +
+        '{\\a10}SSA middle-center\n',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
+  it('supports Aegisub inline styles and multi-attribute fonts', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Aegisub bold',
+                fontWeight: Cue.fontWeight.BOLD,
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: ' regular',
+              },
+            ],
+          },
+          {
+            startTime: 20,
+            endTime: 30,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 30,
+                payload: 'Aegisub italic',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
+          },
+          {
+            startTime: 30,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 30,
+                endTime: 40,
+                payload: 'Aegisub underline',
+                textDecoration: [Cue.textDecoration.UNDERLINE],
+              },
+            ],
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Multi-attr font',
+                color: 'red',
+              },
+            ],
+          },
+        ],
+        '1\n' +
+        '00:00:10,000 --> 00:00:20,000\n' +
+        '{\\b1}Aegisub bold{\\b0} regular\n\n' +
+        '2\n' +
+        '00:00:20,000 --> 00:00:30,000\n' +
+        '{\\i1}Aegisub italic{\\i0}\n\n' +
+        '3\n' +
+        '00:00:30,000 --> 00:00:40,000\n' +
+        '{\\u1}Aegisub underline{\\u0}\n\n' +
+        '4\n' +
+        '00:00:40,000 --> 00:00:50,000\n' +
+        '<font face="Arial" color="red" size="2">Multi-attr font</font>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
+  it('supports single-digit hour timestamps, BOM, and blank lines', () => {
+    verifyHelper(
+        [
+          {startTime: 3620, endTime: 3640, payload: 'Hour padded'},
+          {startTime: 20, endTime: 30, payload: 'Whitespace trimmed'},
+        ],
+        '\uFEFF1\n' +
+        '1:00:20,000 --> 1:00:40,000\n' +
+        'Hour padded\n \n' +
+        '2\n' +
+        '00:20,000 --> 00:30,000\n' +
+        'Whitespace trimmed\n',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
