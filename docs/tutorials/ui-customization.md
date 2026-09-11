@@ -84,6 +84,9 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a button that controls the style (size and position)
+  of the captions. The button is visible only if the content has at least one
+  text track.
 * skip_next: adds a button to skip to next element in the queue. The button
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
@@ -134,6 +137,9 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a button that controls the style (size and position)
+  of the captions. The button is visible only if the content has at least one
+  text track.
 * queue: adds a button that opens a menu listing all items in the playback queue.
   Each item displays its title and, if available, a poster thumbnail. The currently
   playing item is highlighted with a checkmark. The button is visible only if there
