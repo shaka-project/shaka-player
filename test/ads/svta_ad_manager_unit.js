@@ -618,5 +618,41 @@ describe('SVTA Ad manager', () => {
       expect(eventTypes().filter(
           (t) => t == shaka.ads.Utils.AD_PAUSED).length).toBe(1);
     });
+
+    it('completes when playback pauses near the end of the tracking window',
+        async () => {
+          await addSimpleTracking();
+          overrideVideoProperty('currentTime', 4.8);
+
+          video.dispatchEvent(new Event('pause'));
+
+          const types = eventTypes();
+          expect(types).toContain(shaka.ads.Utils.AD_COMPLETE);
+          expect(types).not.toContain(shaka.ads.Utils.AD_SKIPPED);
+        });
+
+    it('completes on teardown when tracking reached near the end', async () => {
+      await addSimpleTracking();
+      overrideVideoProperty('currentTime', 4.8);
+
+      video.dispatchEvent(new Event('timeupdate'));
+      svtaAdManager.stop();
+
+      const types = eventTypes();
+      expect(types).toContain(shaka.ads.Utils.AD_COMPLETE);
+      expect(types).not.toContain(shaka.ads.Utils.AD_SKIPPED);
+    });
+
+    it('reports skip on teardown if ad was aborted early', async () => {
+      await addSimpleTracking();
+      overrideVideoProperty('currentTime', 2.0);
+
+      video.dispatchEvent(new Event('timeupdate'));
+      svtaAdManager.stop();
+
+      const types = eventTypes();
+      expect(types).not.toContain(shaka.ads.Utils.AD_COMPLETE);
+      expect(types).toContain(shaka.ads.Utils.AD_SKIPPED);
+    });
   });
 });

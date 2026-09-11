@@ -65,4 +65,22 @@ describe('PlayheadObserverManager', () => {
 
     expect(pollSpy).toHaveBeenCalledWith(10, true);
   });
+
+  it('polls with the duration when playback pauses near the end', () => {
+    video.currentTime = 19.8;
+    video.duration = 20;
+
+    video.on['pause']();
+
+    expect(pollSpy).toHaveBeenCalledWith(20, false);
+  });
+
+  it('does not poll with duration when playback pauses mid-stream', () => {
+    video.currentTime = 10;
+    video.duration = 20;
+
+    video.on['pause']();
+
+    expect(pollSpy).not.toHaveBeenCalled();
+  });
 });
