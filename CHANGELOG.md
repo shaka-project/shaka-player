@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.16.49](https://github.com/shaka-project/shaka-player/compare/v4.16.48...v4.16.49) (2026-09-11)
+
+
+### Bug Fixes
+
+* **Mp4Parser:** Don't hang on a 64-bit largesize of 0 ([#10548](https://github.com/shaka-project/shaka-player/issues/10548)) ([ad545b4](https://github.com/shaka-project/shaka-player/commit/ad545b4293156a781becc0e766461bb48f35713c)), closes [#10542](https://github.com/shaka-project/shaka-player/issues/10542)
+* Prevent infinite loop on zero-length WVTT payload box ([#10565](https://github.com/shaka-project/shaka-player/issues/10565)) ([24394ee](https://github.com/shaka-project/shaka-player/commit/24394ee4c70dc121888efe2263e520d55f4c928e)), closes [#10561](https://github.com/shaka-project/shaka-player/issues/10561)
+
 ## [4.16.48](https://github.com/shaka-project/shaka-player/compare/v4.16.47...v4.16.48) (2026-09-04)
 
 
