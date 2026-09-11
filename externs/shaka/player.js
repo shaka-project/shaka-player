@@ -1728,6 +1728,14 @@ shaka.extern.HlsManifestConfiguration;
  *   Called immediately after the CMSF/MSF catalog has been parsed.
  *   Provides a way for applications to perform efficient preprocessing of the
  *   catalog.
+ *   <br>
+ *   Dropping tracks is one use. A catalog may offer one rendition more than
+ *   once, packaged differently -- CMSF publishers commonly offer every
+ *   rendition as both a <code>cmaf</code> and a <code>locmaf</code> track
+ *   sharing one initialization-data entry. Those are one stream described
+ *   twice, and exposing both doubles the variant list with pairs identical in
+ *   resolution and bitrate. Which one to keep is the application's call, and
+ *   is made by splicing <code>catalog.tracks</code> here.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;

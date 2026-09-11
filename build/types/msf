@@ -4,9 +4,11 @@
 +../../lib/msf/dialect_registry.js
 +../../lib/msf/i_control_stream.js
 +../../lib/msf/loc_parser.js
++../../lib/msf/locmaf_parser.js
 +../../lib/msf/packaging/registry.js
 +../../lib/msf/packaging/cmaf.js
 +../../lib/msf/packaging/loc.js
++../../lib/msf/packaging/locmaf.js
 +../../lib/msf/packaging/m2ts.js
 +../../lib/msf/msf_classes.js
 +../../lib/msf/msf_control_stream.js

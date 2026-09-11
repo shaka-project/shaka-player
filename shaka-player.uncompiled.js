@@ -38,6 +38,7 @@ goog.require('shaka.msf.draft16.Dialect');
 goog.require('shaka.msf.draft18.Dialect');
 goog.require('shaka.msf.packaging.Cmaf');
 goog.require('shaka.msf.packaging.Loc');
+goog.require('shaka.msf.packaging.Locmaf');
 goog.require('shaka.msf.packaging.M2ts');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpFetchPlugin');
