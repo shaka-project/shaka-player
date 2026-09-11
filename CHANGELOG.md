@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.1.23](https://github.com/shaka-project/shaka-player/compare/v5.1.22...v5.1.23) (2026-09-11)
+
+
+### Bug Fixes
+
+* **Ads:** Do not report a resume for an ad's first playout ([#10566](https://github.com/shaka-project/shaka-player/issues/10566)) ([cdf5768](https://github.com/shaka-project/shaka-player/commit/cdf5768eb63492236c15f81f634fd6e94e886b67)), closes [#10562](https://github.com/shaka-project/shaka-player/issues/10562)
+* **Ads:** Report the last ad of a pod as complete ([#10546](https://github.com/shaka-project/shaka-player/issues/10546)) ([2d88976](https://github.com/shaka-project/shaka-player/commit/2d889762c36bbc0c83b0b4539eb18b4cb79ae283)), closes [#10545](https://github.com/shaka-project/shaka-player/issues/10545)
+* Don't fall back to another role when the preferred text role is unmatched ([#10549](https://github.com/shaka-project/shaka-player/issues/10549)) ([4e6c657](https://github.com/shaka-project/shaka-player/commit/4e6c657674e8c686920d50380cb56ec419124c30)), closes [#9993](https://github.com/shaka-project/shaka-player/issues/9993)
+* **HLS:** synchronize HTML5 audio track selection in src= mode (fixes [#10551](https://github.com/shaka-project/shaka-player/issues/10551)) ([#10568](https://github.com/shaka-project/shaka-player/issues/10568)) ([2b29584](https://github.com/shaka-project/shaka-player/commit/2b295843ea558a5d280df1be007a43b8fbcc6fe1))
+* **Mp4Parser:** Don't hang on a 64-bit largesize of 0 ([#10548](https://github.com/shaka-project/shaka-player/issues/10548)) ([f1bc5ca](https://github.com/shaka-project/shaka-player/commit/f1bc5caf431ac669de05cf2d822298c835cd4989)), closes [#10542](https://github.com/shaka-project/shaka-player/issues/10542)
+* Prevent infinite loop on zero-length WVTT payload box ([#10565](https://github.com/shaka-project/shaka-player/issues/10565)) ([4fc6e72](https://github.com/shaka-project/shaka-player/commit/4fc6e722b2159c53155c3845933f05940ae10aa5)), closes [#10561](https://github.com/shaka-project/shaka-player/issues/10561)
+* Try every preferredText entry when choosing the text track ([#10547](https://github.com/shaka-project/shaka-player/issues/10547)) ([be9172d](https://github.com/shaka-project/shaka-player/commit/be9172df33f6e6ca04b650a57c2b9434f13dcfd8)), closes [#10544](https://github.com/shaka-project/shaka-player/issues/10544)
+
 ## [5.1.22](https://github.com/shaka-project/shaka-player/compare/v5.1.21...v5.1.22) (2026-09-04)
 
 
