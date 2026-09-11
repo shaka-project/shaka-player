@@ -88,7 +88,7 @@ describe('Playhead', () => {
   let timeline;
   /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {!shaka.media.Playhead} */
+  /** @type {?shaka.media.Playhead} */
   let playhead;
   /** @type {shaka.extern.StreamingConfiguration} */
   let config;
