@@ -3240,6 +3240,68 @@ describe('Player', () => {
     });
   });  // describe('tracks')
 
+  describe('HTML5 audio tracks in src= mode', () => {
+    let trackEn1;
+    let trackEn2;
+    let trackEs;
+
+    beforeEach(() => {
+      trackEn1 = {
+        id: '',
+        label: 'Stereo',
+        language: 'en',
+        kind: 'main',
+        enabled: true,
+      };
+      trackEn2 = {
+        id: '',
+        label: 'Surround 5.1',
+        language: 'en',
+        kind: 'main',
+        enabled: false,
+      };
+      trackEs = {
+        id: '',
+        label: 'Spanish',
+        language: 'es',
+        kind: 'main',
+        enabled: false,
+      };
+      video.audioTracks = /** @type {?} */ ([trackEn1, trackEn2, trackEs]);
+    });
+
+    it('getAudioTracks assigns unique id and matches native tracks', () => {
+      const tracks = player.getAudioTracks();
+      expect(tracks.length).toBe(3);
+      expect(tracks[0].id).toBeDefined();
+      expect(tracks[1].id).toBeDefined();
+      expect(tracks[0].id).not.toBe(tracks[1].id);
+      expect(tracks[0].active).toBe(true);
+      expect(tracks[1].active).toBe(false);
+    });
+
+    it('selectAudioTrack disables other tracks when id is empty string', () => {
+      const tracks = player.getAudioTracks();
+      expect(trackEn1.enabled).toBe(true);
+      expect(trackEs.enabled).toBe(false);
+
+      player.selectAudioTrack(tracks[2]);
+
+      expect(trackEs.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEn2.enabled).toBe(false);
+    });
+
+    it('selectAudioTrack distinguishes tracks with same language by id', () => {
+      const tracks = player.getAudioTracks();
+      player.selectAudioTrack(tracks[1]);
+
+      expect(trackEn2.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEs.enabled).toBe(false);
+    });
+  });
+
   describe('languages', () => {
     it('chooses the first as default', async () => {
       await runTest(['en', 'es'], 'pt', 0);
