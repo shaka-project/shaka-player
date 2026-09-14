@@ -578,6 +578,23 @@ describe('MpdUtils', () => {
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
+    it('tags xlink requests with the XLINK advanced request type', async () => {
+      const baseXMLString = inBaseContainer(
+          '<AdaptationSet xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      const xlinkXMLString =
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>';
+      const desiredXMLString = inBaseContainer(
+          '<AdaptationSet variable="1"><Contents /></AdaptationSet>');
+
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
+      await testSucceeds(baseXMLString, desiredXMLString, 1);
+
+      const context = fakeNetEngine.request.calls.mostRecent().args[2];
+      expect(context).toEqual(jasmine.objectContaining({
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.XLINK,
+      }));
+    });
+
     it('preserves non-xlink attributes', async () => {
       const baseXMLString = inBaseContainer(
           '<AdaptationSet otherVariable="q" xlink:href="https://xlink1" ' +
@@ -982,6 +999,26 @@ describe('MpdUtils', () => {
       ].join('\n');
     }
 
+    it('tags imported MPD requests with the LINKED_MPD advanced request type',
+        async () => {
+          const listMpdXml = [
+            '<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static"',
+            '    mediaPresentationDuration="PT10S">',
+            '  <Period id="ad" duration="PT10S">',
+            '    <ImportedMPD>https://example.com/ad/manifest.mpd</ImportedMPD>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          await processLinkedPeriods(listMpdXml);
+
+          expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+          const context = fakeNetEngine.request.calls.mostRecent().args[2];
+          expect(context).toEqual(jasmine.objectContaining({
+            type: shaka.net.NetworkingEngine.AdvancedRequestType.LINKED_MPD,
+          }));
+        });
+
     it('removes the ImportedMPD element after resolution', async () => {
       const period = await getPeriod(singlePeriodMpd());
       const TXml = shaka.util.TXml;
@@ -1047,7 +1084,10 @@ describe('MpdUtils', () => {
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.MANIFEST,
           jasmine.objectContaining(
-              {uris: ['https://example.com/ad/manifest.mpd']}));
+              {uris: ['https://example.com/ad/manifest.mpd']}),
+          jasmine.objectContaining({
+            type: shaka.net.NetworkingEngine.AdvancedRequestType.LINKED_MPD,
+          }));
     });
 
     it('resolves relative ImportedMPD href against the base URI', async () => {
