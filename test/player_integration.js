@@ -1449,6 +1449,55 @@ describe('Player', () => {
     });
   });
 
+  describe('IAMF', () => {
+    const iamfMimeType = 'audio/mp4; codecs="iamf.000.000.Opus"';
+
+    /**
+     * Loads the given asset and plays a second of it, then returns the audio
+     * track that was selected.
+     *
+     * @param {string} uri
+     * @return {!Promise<shaka.extern.AudioTrack>}
+     */
+    async function loadAndPlay(uri) {
+      await player.load(uri);
+      await video.play();
+      await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 1);
+
+      const audioTracks = player.getAudioTracks();
+      expect(audioTracks.length).toBe(1);
+      return audioTracks[0];
+    }
+
+    beforeEach(() => {
+      if (!window.MediaSource ||
+          !window.MediaSource.isTypeSupported(iamfMimeType)) {
+        pending('IAMF is not supported by this platform.');
+      }
+    });
+
+    it('plays DASH content', async () => {
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/dash.mpd');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
+      expect(track.channelsCount).toBe(2);
+    });
+
+    it('plays HLS content from a master playlist', async () => {
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/master.m3u8');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
+    });
+
+    it('plays HLS content from a media playlist', async () => {
+      // A media playlist has no CODECS attribute, so the codec is read out of
+      // the init segment instead.
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/media.m3u8');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
+    });
+  });
+
   describe('buffer gap', () => {
     // Regression test for issue #6339.
     it('skip initial buffer gap', async () => {
