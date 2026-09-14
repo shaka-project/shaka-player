@@ -4908,6 +4908,92 @@ describe('Player', () => {
     });
   });
 
+  describe('CMCD manifest parameters', () => {
+    /** @type {shaka.extern.ClientDataReporting} */
+    let reporting;
+
+    beforeEach(() => {
+      reporting = {
+        schemeIdUri: 'urn:mpeg:dash:cta-5004:2023',
+        serviceLocations: null,
+        adaptationSets: null,
+        serviceLocationBaseUris: [],
+        cmcdParameters: {
+          version: 1,
+          mode: 'query',
+          includeInRequests: ['segment'],
+          keys: ['sid', 'cid'],
+          contentId: 'cid-1',
+          sessionId: null,
+        },
+      };
+    });
+
+    /**
+     * @return {!shaka.util.CmcdManager}
+     * @suppress {accessControls}
+     */
+    function getCmcdManager() {
+      return /** @type {!shaka.util.CmcdManager} */ (player.cmcdManager_);
+    }
+
+    /**
+     * @param {?shaka.extern.ClientDataReporting} clientDataReporting
+     * @return {shaka.extern.ServiceDescription}
+     */
+    function describeWith(clientDataReporting) {
+      return {
+        targetLatency: null,
+        maxLatency: null,
+        minLatency: null,
+        maxPlaybackRate: null,
+        minPlaybackRate: null,
+        clientDataReporting: clientDataReporting,
+      };
+    }
+
+    it('forwards manifest parameters to the CMCD manager on load',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('forwards null when the manifest has no description', async () => {
+      const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+          .and.callThrough();
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(spy).toHaveBeenCalledWith(null);
+    });
+
+    it('forwards manifest parameters again when the manifest updates',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          spy.calls.reset();
+
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('clears manifest parameters on unload', async () => {
+      manifest.serviceDescription = describeWith(reporting);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      await player.unload();
+      expect(/** @type {?} */ (getCmcdManager()).manifestParams_).toBeNull();
+    });
+  });
+
   describe('language methods', () => {
     beforeEach(() => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
