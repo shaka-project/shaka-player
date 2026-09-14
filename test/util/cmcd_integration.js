@@ -887,8 +887,13 @@ describe('CmcdManager integration', () => {
       attachRecorder({waitTimeout: REQUEST_TIMEOUT});
 
       await player.load(DASH_CMCD_STREAM);
-      const reports = await recorder.waitForSegments({count: 4});
-      expect(reports.length).toBeGreaterThan(0);
+      const reports = await recorder.waitForSegments(
+          {count: 4, rejectOnTimeout: false});
+      // A slow browser may deliver fewer than 4 within the timeout; the
+      // assertions below only need the first report to exist.
+      expect(reports.length)
+          .withContext('expected at least one segment report')
+          .toBeGreaterThanOrEqual(1);
 
       // The first decorated request is the SegmentBase index (SIDX)
       // byte-range fetch, which carries no stream and so no object type.

@@ -4986,6 +4986,27 @@ describe('Player', () => {
           expect(spy).toHaveBeenCalledWith(reporting);
         });
 
+    it('ignores manifest updates from a preload that is not attached',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).not.toHaveBeenCalled();
+
+          await preloadManager.destroy();
+        });
+
     it('clears manifest parameters on unload', async () => {
       manifest.serviceDescription = describeWith(reporting);
       await player.load(fakeManifestUri, 0, fakeMimeType);

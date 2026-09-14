@@ -4,17 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// ServiceDescriptionParser is not yet required by DashParser (that lands in
-// a later task), so it is not part of the main app dependency graph.
-// Require it explicitly to load it in the test bundle.
-goog.require('shaka.dash.ServiceDescriptionParser');
-
 describe('ServiceDescriptionParser', () => {
-  // Not aliased to a local const: unlike the rest of this file's
-  // dependencies, this class is loaded by the explicit goog.require above
-  // rather than the main app dependency graph, so it is not guaranteed to
-  // be defined yet when this describe body runs. Looking it up at call
-  // time (inside parse(), which only ever runs from an it()) is safe.
+  // The parser class is not aliased to a local const: it is looked up at
+  // call time inside parse(), which only ever runs from an it(), so the
+  // order in which this file and the app dependency graph are evaluated
+  // does not matter.
   const TXml = shaka.util.TXml;
   const MANIFEST_BASE_URIS = ['https://example.com/dash/manifest.mpd'];
 
@@ -315,7 +309,8 @@ describe('ServiceDescriptionParser', () => {
       ]);
 
       const withLocation = parse([
-        '<Location serviceLocation="mpd-b">https://b.example.com/x.mpd</Location>',
+        '<Location serviceLocation="mpd-b">' +
+            'https://b.example.com/x.mpd</Location>',
         '<ServiceDescription id="1">',
         `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
         '    <CMCDParameters keys="br"/>',
@@ -324,6 +319,24 @@ describe('ServiceDescriptionParser', () => {
       ]);
       expect(withLocation.clientDataReporting.serviceLocationBaseUris)
           .toEqual([
+            {serviceLocation: 'mpd-b', uri: 'https://b.example.com/x.mpd'},
+          ]);
+    });
+
+    it('resolves BaseURL and Location service locations together', () => {
+      const description = parse([
+        '<BaseURL serviceLocation="cdn-a">https://a.example.com/</BaseURL>',
+        '<Location serviceLocation="mpd-b">' +
+            'https://b.example.com/x.mpd</Location>',
+        '<ServiceDescription id="1">',
+        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '    <CMCDParameters keys="br"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+      ]);
+      expect(description.clientDataReporting.serviceLocationBaseUris)
+          .toEqual([
+            {serviceLocation: 'cdn-a', uri: 'https://a.example.com/'},
             {serviceLocation: 'mpd-b', uri: 'https://b.example.com/x.mpd'},
           ]);
     });

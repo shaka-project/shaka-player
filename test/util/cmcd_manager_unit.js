@@ -570,6 +570,52 @@ describe('CmcdManager', () => {
           expect(cmcdQueryOf(r)).toContain('msd=');
         });
 
+    it('rebuilds on the app configuration when a refresh drops the ' +
+        'parameters', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {
+        contentId: 'app', includeKeys: ['cid', 'ot'],
+      });
+      manager.setManifestParameters(createManifestParams({
+        contentId: 'mpd', keys: ['cid', 'ot'],
+      }));
+      const fromManifest = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, fromManifest, createSegmentContext());
+      expect(cmcdQueryOf(fromManifest)).toContain('cid="mpd"');
+
+      manager.setManifestParameters(null);
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      const fromApp = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, fromApp, createSegmentContext());
+      expect(cmcdQueryOf(fromApp)).toContain('cid="app"');
+    });
+
+    it('stops reporting when a refresh drops the parameters and the app ' +
+        'is disabled', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      manager.setManifestParameters(null);
+      expect(priv(manager)['reporter_']).toBeNull();
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(r.uris[0]).not.toContain('CMCD=');
+    });
+
+    it('leaves the reporter off when applyParametersFromManifest is false',
+        () => {
+          const player = createMockPlayer();
+          const {manager} = createManager(player, {
+            enabled: false, applyParametersFromManifest: false,
+          });
+          manager.setManifestParameters(
+              createManifestParams({contentId: 'mpd'}));
+          expect(priv(manager)['reporter_']).toBeNull();
+        });
+
     it('reset() clears manifest parameters', () => {
       const player = createMockPlayer();
       const {manager} = createManager(player, {enabled: false});
@@ -661,7 +707,26 @@ describe('CmcdManager', () => {
           ctx({type: AdvancedRequestType.LINKED_MPD}))).toBe(true);
     });
 
-    it('learns sf from undecorated manifest requests', () => {
+    it('maps certificate and key requests to the license token', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      expect(decorated(manager, RequestType.SERVER_CERTIFICATE)).toBe(true);
+      expect(decorated(manager, RequestType.KEY)).toBe(true);
+
+      const {manager: segmentsOnly} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(decorated(segmentsOnly, RequestType.SERVER_CERTIFICATE))
+          .toBe(false);
+      expect(decorated(segmentsOnly, RequestType.KEY)).toBe(false);
+    });
+
+    it('never decorates request types CMCD has no mapping for', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      expect(decorated(manager, RequestType.APP)).toBe(false);
+    });
+
+    it('learns sf and st from undecorated manifest requests', () => {
       const {manager} = createManager(createMockPlayer(),
           {includeInRequests: ['segment']});
       expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
@@ -669,6 +734,7 @@ describe('CmcdManager', () => {
       manager.applyRequestData(
           RequestType.SEGMENT, r, createSegmentContext());
       expect(cmcdQueryOf(r)).toContain('sf=d');
+      expect(cmcdQueryOf(r)).toContain('st=' + cml.cmcd.CmcdStreamType.VOD);
     });
 
     it('learns sf before a reporter exists', () => {
@@ -839,6 +905,20 @@ describe('CmcdManager', () => {
           segmentContextInGroup('6_preselection_1'))).toBe(true);
       expect(decoratedUri(manager, uri, RequestType.SEGMENT,
           segmentContextInGroup(null))).toBe(false);
+    });
+
+    it('intersects the service location and adaptation set filters', () => {
+      const manager = managerWithFilters({
+        serviceLocations: ['beta'], adaptationSets: ['6'],
+      });
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('6'))).toBe(true);
+      // Listed location, unlisted adaptation set.
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('8'))).toBe(false);
+      // Listed adaptation set, unlisted location.
+      expect(decoratedUri(manager, 'https://cdn1.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('6'))).toBe(false);
     });
 
     it('applies the adaptation set filter only to requests with a stream',
