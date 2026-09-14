@@ -559,8 +559,8 @@ describe('SegmentUtils', () => {
       width: null,
       // An IA Sample Entry always signals 0 channels and a 0 sample rate, and
       // parsers must ignore both.
-      channelCount: null,
-      sampleRate: null,
+      channelCount: 0,
+      sampleRate: 0,
       closedCaptions: new Map(),
       videoRange: null,
       colorGamut: null,
