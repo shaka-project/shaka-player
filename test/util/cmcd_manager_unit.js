@@ -708,6 +708,106 @@ describe('CmcdManager', () => {
     });
   });
 
+  describe('manifest filters', () => {
+    const BASE_URIS = [
+      {serviceLocation: 'alpha', uri: 'https://cdn1.example.com/'},
+      {serviceLocation: 'beta', uri: 'https://cdn2.example.com/'},
+      {serviceLocation: 'beta-hd', uri: 'https://cdn2.example.com/hd/'},
+    ];
+
+    /**
+     * @param {!Object} reportingOverrides
+     * @return {!shaka.util.CmcdManager}
+     */
+    function managerWithFilters(reportingOverrides) {
+      const {manager} = createManager(createMockPlayer(), {enabled: false});
+      manager.setManifestParameters(createManifestParams(
+          {includeInRequests: ['*']},
+          Object.assign({serviceLocationBaseUris: BASE_URIS},
+              reportingOverrides)));
+      return manager;
+    }
+
+    /**
+     * @param {!shaka.util.CmcdManager} manager
+     * @param {string} uri
+     * @param {!shaka.net.NetworkingEngine.RequestType} type
+     * @param {shaka.extern.RequestContext=} context
+     * @return {boolean}
+     */
+    function decoratedUri(manager, uri, type, context) {
+      const r = createRequest(uri);
+      manager.applyRequestData(type, r, context);
+      return r.uris[0].includes('CMCD=');
+    }
+
+    /**
+     * @param {?string} groupId
+     * @return {shaka.extern.RequestContext}
+     */
+    function segmentContextInGroup(groupId) {
+      const context = createSegmentContext();
+      context.stream.groupId = groupId;
+      return context;
+    }
+
+    it('only decorates requests to the listed service locations', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+      expect(decoratedUri(manager, 'https://cdn1.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('uses the longest matching prefix', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta-hd']});
+      expect(decoratedUri(manager, 'https://cdn2.example.com/hd/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+      expect(decoratedUri(manager, 'https://cdn2.example.com/sd/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('skips requests whose service location is unknown', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://other.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('lets steering requests bypass the service location filter', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://steering.example.com/dcsm',
+          RequestType.CONTENT_STEERING)).toBe(true);
+    });
+
+    it('does not filter by service location when the list is absent', () => {
+      const manager = managerWithFilters({serviceLocations: null});
+      expect(decoratedUri(manager, 'https://other.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+    });
+
+    it('only decorates listed adaptation sets', () => {
+      const manager = managerWithFilters({adaptationSets: ['6']});
+      const uri = 'https://cdn2.example.com/seg.mp4';
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('6'))).toBe(true);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('8'))).toBe(false);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('6_preselection_1'))).toBe(true);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup(null))).toBe(false);
+    });
+
+    it('applies the adaptation set filter only to requests with a stream',
+        () => {
+          const manager = managerWithFilters({adaptationSets: ['6']});
+          expect(decoratedUri(manager, 'https://cdn2.example.com/x.mpd',
+              RequestType.MANIFEST,
+              /** @type {shaka.extern.RequestContext} */ (
+                {type: AdvancedRequestType.MPD}))).toBe(true);
+        });
+  });
+
   // ── Configuration translation ──
 
   describe('toReporterConfig_', () => {
