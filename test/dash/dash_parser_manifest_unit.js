@@ -5070,7 +5070,11 @@ describe('DashParser Manifest', () => {
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.MANIFEST,
               jasmine.objectContaining(
-                  {uris: ['https://imported/manifest.mpd']}));
+                  {uris: ['https://imported/manifest.mpd']}),
+              jasmine.objectContaining({
+                type: shaka.net.NetworkingEngine.AdvancedRequestType
+                    .LINKED_MPD,
+              }));
         });
 
         it('two linked periods produce correct total duration', async () => {
