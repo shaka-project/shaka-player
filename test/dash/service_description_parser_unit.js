@@ -84,6 +84,29 @@ describe('ServiceDescriptionParser', () => {
     expect(description).toBeNull();
   });
 
+  it('applies a description scoped to DVB low latency', () => {
+    const description = parse([
+      '<ServiceDescription id="1">',
+      '  <Scope schemeIdUri="urn:dvb:dash:lowlatency:scope:2019"/>',
+      '  <Latency target="1250"/>',
+      '  <PlaybackRate max="1.10" min="0.95"/>',
+      '</ServiceDescription>',
+    ]);
+    expect(description.targetLatency).toBe(1.25);
+    expect(description.maxPlaybackRate).toBe(1.1);
+  });
+
+  it('applies a description with a recognized and an unknown scope', () => {
+    const description = parse([
+      '<ServiceDescription id="1">',
+      '  <Scope schemeIdUri="urn:example:some-client-scope"/>',
+      '  <Scope schemeIdUri="urn:dvb:dash:lowlatency:scope:2019"/>',
+      '  <Latency target="1250"/>',
+      '</ServiceDescription>',
+    ]);
+    expect(description.targetLatency).toBe(1.25);
+  });
+
   it('takes latency from the first unscoped description', () => {
     const description = parse([
       '<ServiceDescription id="1">',
