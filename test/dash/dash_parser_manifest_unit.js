@@ -1431,6 +1431,53 @@ describe('DashParser Manifest', () => {
     expect(variant.audio.groupId).toBe('3');
   });
 
+  it('parses IAMF audio', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4" lang="en"',
+      '        codecs="iamf.000.000.Opus">',
+      '      <AudioChannelConfiguration schemeIdUri=',
+      '          "urn:mpeg:dash:23003:3:audio_channel_configuration:2011"',
+      '          value="6" />',
+      '      <Representation bandwidth="100">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4" lang="es"',
+      '        codecs="iamf.001.000.mp4a.40.2">',
+      '      <Representation bandwidth="100">',
+      '        <SegmentTemplate media="3.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('https://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(2);
+
+    const english = manifest.variants.find((v) => v.language == 'en');
+    goog.asserts.assert(english && english.audio, 'Missing English variant');
+    expect(english.audio.mimeType).toBe('audio/mp4');
+    expect(english.audio.codecs).toBe('iamf.000.000.Opus');
+    expect(english.audio.channelsCount).toBe(6);
+
+    const spanish = manifest.variants.find((v) => v.language == 'es');
+    goog.asserts.assert(spanish && spanish.audio, 'Missing Spanish variant');
+    expect(spanish.audio.type).toBe(shaka.util.ManifestParserUtils
+        .ContentType.AUDIO);
+    expect(spanish.audio.codecs).toBe('iamf.001.000.mp4a.40.2');
+  });
+
   it('sets contentType to text for embedded text mime types', async () => {
     // One MIME type for embedded TTML, one for embedded WebVTT.
     // One MIME type specified on AdaptationSet, on one Representation.

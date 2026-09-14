@@ -450,6 +450,45 @@ describe('MediaSourceEngine', () => {
     expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
   });
 
+  it('buffers MP4 IAMF audio', async () => {
+    const codecs = 'iamf.000.000.Opus';
+    const fullMimeType = shaka.util.MimeUtils.getFullType('audio/mp4', codecs);
+    if (!shaka.media.Capabilities.isTypeSupported(fullMimeType)) {
+      pending('IAMF is not supported by this platform.');
+    }
+
+    const [initSegment, segment] = await Promise.all([
+      Util.fetch('/base/test/test/assets/audio-iamf/init.mp4'),
+      Util.fetch('/base/test/test/assets/audio-iamf/segment-1.mp4'),
+    ]);
+
+    const initObject = new Map();
+    initObject.set(ContentType.AUDIO, getFakeStream({
+      mimeType: 'audio/mp4',
+      codecs: codecs,
+    }));
+    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.setDuration(presentationDuration);
+
+    await mediaSourceEngine.appendBuffer(ContentType.AUDIO, initSegment,
+        /* reference= */ null, fakeStream, /* hasClosedCaptions= */ false);
+    expect(buffered(ContentType.AUDIO, 0)).toBe(0);
+
+    const reference = new shaka.media.SegmentReference(
+        /* startTime= */ 0, /* endTime= */ 1,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+    await mediaSourceEngine.appendBuffer(ContentType.AUDIO, segment,
+        reference, fakeStream, /* hasClosedCaptions= */ false);
+    // The segment holds a bit over a second of audio.
+    expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(1.01, 1);
+  });
+
   it('buffers MP4 video and audio', async () => {
     const initObject = new Map();
     initObject.set(ContentType.AUDIO, getFakeStream(metadata.audio));
