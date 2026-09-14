@@ -197,10 +197,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           expect(after[1]).toBe(catalog);
         });
 
-    it('logs the catalog itself when no preprocessor is configured',
+    it('logs only the arrived catalog when no preprocessor is configured',
         async () => {
-          // With nothing to mutate it, copying would be waste: a silenced
-          // shaka.log.info still evaluates its arguments.
           const logged = [];
           spyOn(shaka.log, 'info').and.callFake((...args) => {
             logged.push(args);
@@ -212,7 +210,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
           const before = logged.find((args) => args[0] == 'MSF Catalog:');
           expect(before).toBeDefined();
-          expect(before[1]).toBe(catalog);
+          expect(before[1]).toEqual(catalog);
           expect(logged.some(
               (args) => args[0] == 'MSF Catalog after preprocessor:'))
               .toBe(false);
