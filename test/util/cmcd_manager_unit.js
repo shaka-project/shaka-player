@@ -642,6 +642,20 @@ describe('CmcdManager', () => {
       expect(cmcdQueryOf(r)).toContain('sf=d');
     });
 
+    it('learns sf before a reporter exists', () => {
+      const {manager} = createManager(createMockPlayer(), {enabled: false});
+      const manifestRequest = createRequest('https://test.com/manifest.mpd');
+      manager.applyRequestData(
+          RequestType.MANIFEST, manifestRequest, mpdContext);
+      expect(manifestRequest.uris[0]).not.toContain('CMCD=');
+      manager.setManifestParameters(createManifestParams({
+        version: 2, keys: ['sf', 'ot', 'sid', 'cid'],
+      }));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
+    });
+
     it('decorates everything with "*", including steering and callbacks',
         () => {
           const {manager} = createManager(createMockPlayer(),

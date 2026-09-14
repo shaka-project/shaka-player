@@ -4992,6 +4992,59 @@ describe('Player', () => {
       await player.unload();
       expect(/** @type {?} */ (getCmcdManager()).manifestParams_).toBeNull();
     });
+
+    it('forwards manifest parameters before the initial segment index is ' +
+        'created', async () => {
+      // With a single variant, the PreloadManager creates the initial
+      // variant's segment index while parsing, before the manifest promise
+      // resolves. That is the fetch (a SegmentBase index range, in the real
+      // world) that must already carry the manifest's CMCD parameters.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+          variant.addVideo(2);
+        });
+      });
+      manifest.serviceDescription = describeWith(reporting);
+      /** @type {!Array<string>} */
+      const order = [];
+      spyOn(getCmcdManager(), 'setManifestParameters').and.callFake(() => {
+        order.push('cmcd');
+      });
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (stream) {
+            // Generated streams come with a segment index already in place,
+            // which would skip createSegmentIndex() entirely.
+            const segmentIndex = stream.segmentIndex;
+            stream.segmentIndex = null;
+            stream.createSegmentIndex = () => {
+              order.push('index');
+              stream.segmentIndex = segmentIndex;
+              return Promise.resolve();
+            };
+          }
+        }
+      }
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(order[0]).toBe('cmcd');
+      expect(order).toContain('index');
+    });
+
+    it('does not forward manifest parameters for a background preload',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+          expect(spy).not.toHaveBeenCalled();
+
+          await player.load(preloadManager);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
   });
 
   describe('language methods', () => {
