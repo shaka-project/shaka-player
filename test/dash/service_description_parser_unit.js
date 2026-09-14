@@ -99,4 +99,205 @@ describe('ServiceDescriptionParser', () => {
     ]);
     expect(description.targetLatency).toBe(2);
   });
+
+  describe('ClientDataReporting', () => {
+    const SCHEME = 'urn:mpeg:dash:cta-5004:2023';
+
+    /**
+     * @param {!Array<string>} reportingLines
+     * @return {?shaka.extern.ClientDataReporting}
+     */
+    function parseReporting(reportingLines) {
+      const description = parse([
+        '<BaseURL serviceLocation="alpha">https://cdn1.example.com/</BaseURL>',
+        '<BaseURL serviceLocation="beta">media/</BaseURL>',
+        '<BaseURL>https://cdn3.example.com/</BaseURL>',
+        '<ServiceDescription id="1">',
+        ...reportingLines,
+        '</ServiceDescription>',
+      ]);
+      return description ? description.clientDataReporting : null;
+    }
+
+    /**
+     * @param {string} attributes CMCDParameters attributes.
+     * @return {shaka.extern.CmcdParameters}
+     */
+    function parseParameters(attributes) {
+      const reporting = parseReporting([
+        `<ClientDataReporting schemeIdUri="${SCHEME}">`,
+        `  <CMCDParameters ${attributes}/>`,
+        '</ClientDataReporting>',
+      ]);
+      goog.asserts.assert(reporting, 'reporting must parse');
+      goog.asserts.assert(
+          reporting.cmcdParameters, 'cmcdParameters must parse');
+      return reporting.cmcdParameters;
+    }
+
+    it('parses every attribute', () => {
+      const reporting = parseReporting([
+        `<ClientDataReporting schemeIdUri="${SCHEME}"`,
+        '    serviceLocations="beta gamma" adaptationSets="1 2">',
+        '  <CMCDParameters version="2" mode="header"',
+        '      includeInRequests="segment mpd steering"',
+        '      keys="br bl cid sid v" contentID="movie-42"',
+        '      sessionID="session-7"/>',
+        '</ClientDataReporting>',
+      ]);
+      expect(reporting.schemeIdUri).toBe(SCHEME);
+      expect(reporting.serviceLocations).toEqual(['beta', 'gamma']);
+      expect(reporting.adaptationSets).toEqual(['1', '2']);
+      expect(reporting.cmcdParameters).toEqual({
+        version: 2,
+        mode: 'header',
+        includeInRequests: ['segment', 'mpd', 'steering'],
+        keys: ['br', 'bl', 'cid', 'sid', 'v'],
+        contentId: 'movie-42',
+        sessionId: 'session-7',
+      });
+    });
+
+    it('applies the spec defaults for absent attributes', () => {
+      const reporting = parseReporting([
+        `<ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '  <CMCDParameters keys="br"/>',
+        '</ClientDataReporting>',
+      ]);
+      expect(reporting.serviceLocations).toBeNull();
+      expect(reporting.adaptationSets).toBeNull();
+      expect(reporting.cmcdParameters).toEqual({
+        version: 1,
+        mode: 'query',
+        includeInRequests: ['segment'],
+        keys: ['br'],
+        contentId: null,
+        sessionId: null,
+      });
+    });
+
+    it('clamps unsupported versions and recovers from invalid ones', () => {
+      expect(parseParameters('version="3" keys="br"').version).toBe(2);
+      expect(parseParameters('version="abc" keys="br"').version).toBe(1);
+      expect(parseParameters('version="0" keys="br"').version).toBe(1);
+    });
+
+    it('falls back to query mode on an unknown mode', () => {
+      expect(parseParameters('mode="json" keys="br"').mode).toBe('query');
+      expect(parseParameters('mode="header" keys="br"').mode).toBe('header');
+    });
+
+    it('drops URN and unknown includeInRequests tokens', () => {
+      const params = parseParameters(
+          'includeInRequests="segment urn:example:foo bogus *" keys="br"');
+      expect(params.includeInRequests).toEqual(['segment', '*']);
+      const empty = parseParameters(
+          'includeInRequests="urn:example:foo" keys="br"');
+      expect(empty.includeInRequests).toEqual([]);
+    });
+
+    it('keeps keys verbatim and reports absent keys as null', () => {
+      expect(parseParameters('keys="br  foo-bar bogus"').keys)
+          .toEqual(['br', 'foo-bar', 'bogus']);
+      expect(parseParameters('version="1"').keys).toBeNull();
+    });
+
+    it('ignores contentID and sessionID outside 1..64 characters', () => {
+      const long = 'x'.repeat(65);
+      const max = 'y'.repeat(64);
+      const params = parseParameters(
+          `keys="cid sid" contentID="${long}" sessionID="${max}"`);
+      expect(params.contentId).toBeNull();
+      expect(params.sessionId).toBe(max);
+      expect(parseParameters('keys="cid" contentID=""').contentId).toBeNull();
+    });
+
+    it('accepts the scheme on CMCDParameters', () => {
+      const reporting = parseReporting([
+        '<ClientDataReporting>',
+        `  <CMCDParameters schemeIdUri="${SCHEME}" keys="br"/>`,
+        '</ClientDataReporting>',
+      ]);
+      expect(reporting.schemeIdUri).toBe(SCHEME);
+      expect(reporting.cmcdParameters.keys).toEqual(['br']);
+    });
+
+    it('ignores the dash.js urn:dashif:cta-5004:2025 alias', () => {
+      const description = parse([
+        '<ServiceDescription id="1">',
+        '  <ClientDataReporting schemeIdUri="urn:dashif:cta-5004:2025">',
+        '    <CMCDParameters keys="br"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+      ]);
+      expect(description).toBeNull();
+    });
+
+    it('ignores ClientDataReporting with an unsupported scheme', () => {
+      const description = parse([
+        '<ServiceDescription id="1">',
+        '  <ClientDataReporting schemeIdUri="urn:example:other-reporting">',
+        '    <CMCDParameters keys="br"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+      ]);
+      expect(description).toBeNull();
+    });
+
+    it('returns a reporting element without CMCDParameters as null params',
+        () => {
+          const reporting = parseReporting([
+            `<ClientDataReporting schemeIdUri="${SCHEME}"`,
+            '    serviceLocations="beta"/>',
+          ]);
+          expect(reporting.serviceLocations).toEqual(['beta']);
+          expect(reporting.cmcdParameters).toBeNull();
+        });
+
+    it('combines latency and CMCD from different descriptions', () => {
+      const description = parse([
+        '<ServiceDescription id="1">',
+        '  <Latency target="2000"/>',
+        '</ServiceDescription>',
+        '<ServiceDescription id="2">',
+        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '    <CMCDParameters keys="br" contentID="second"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+        '<ServiceDescription id="3">',
+        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '    <CMCDParameters keys="br" contentID="third"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+      ]);
+      expect(description.targetLatency).toBe(2);
+      expect(description.clientDataReporting.cmcdParameters.contentId)
+          .toBe('second');
+    });
+
+    it('resolves serviceLocationBaseUris from BaseURL and Location', () => {
+      const reporting = parseReporting([
+        `<ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '  <CMCDParameters keys="br"/>',
+        '</ClientDataReporting>',
+      ]);
+      expect(reporting.serviceLocationBaseUris).toEqual([
+        {serviceLocation: 'alpha', uri: 'https://cdn1.example.com/'},
+        {serviceLocation: 'beta', uri: 'https://example.com/dash/media/'},
+      ]);
+
+      const withLocation = parse([
+        '<Location serviceLocation="mpd-b">https://b.example.com/x.mpd</Location>',
+        '<ServiceDescription id="1">',
+        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
+        '    <CMCDParameters keys="br"/>',
+        '  </ClientDataReporting>',
+        '</ServiceDescription>',
+      ]);
+      expect(withLocation.clientDataReporting.serviceLocationBaseUris)
+          .toEqual([
+            {serviceLocation: 'mpd-b', uri: 'https://b.example.com/x.mpd'},
+          ]);
+    });
+  });
 });
