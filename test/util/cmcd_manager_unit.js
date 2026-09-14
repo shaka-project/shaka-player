@@ -1275,9 +1275,9 @@ describe('CmcdManager', () => {
     });
 
     it('keeps the request timestamp for undecorated segments', () => {
-      // Response reporting is ungated by design: a segment that
-      // includeInRequests keeps out of request decoration still reports
-      // its response, and that report needs the request's start time.
+      // Response reporting is not gated by includeInRequests: a segment
+      // kept out of request decoration still reports its response, and
+      // that report needs the request's start time.
       const player = createMockPlayer();
       const {manager} = createManager(player, Object.assign(
           createResponseConfig(), {includeInRequests: ['mpd']}));
