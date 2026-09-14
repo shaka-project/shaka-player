@@ -3146,6 +3146,61 @@ describe('DashParser Manifest', () => {
       expect(manifest.serviceDescription.minLatency).toBeUndefined();
       expect(manifest.serviceDescription.minPlaybackRate).toBe(0.95);
     });
+
+    it('with ClientDataReporting CMCD parameters', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S" type="dynamic"',
+        '     availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <BaseURL serviceLocation="beta">https://cdn2.example.com/</BaseURL>',
+        '  <ServiceDescription id="0">',
+        '    <ClientDataReporting schemeIdUri="urn:mpeg:dash:cta-5004:2023"',
+        '        serviceLocations="beta">',
+        '      <CMCDParameters mode="header" keys="br bl cid"',
+        '          contentID="c-1"/>',
+        '    </ClientDataReporting>',
+        '  </ServiceDescription>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', source);
+
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const reporting = manifest.serviceDescription.clientDataReporting;
+      expect(reporting.serviceLocations).toEqual(['beta']);
+      expect(reporting.serviceLocationBaseUris).toEqual([
+        {serviceLocation: 'beta', uri: 'https://cdn2.example.com/'},
+      ]);
+      expect(reporting.cmcdParameters.mode).toBe('header');
+      expect(reporting.cmcdParameters.keys).toEqual(['br', 'bl', 'cid']);
+      expect(reporting.cmcdParameters.contentId).toBe('c-1');
+      expect(manifest.serviceDescription.targetLatency).toBeUndefined();
+    });
+
+    it('ignores descriptions scoped to service-description events',
+        async () => {
+          const source = [
+            '<MPD minBufferTime="PT75S" type="dynamic"',
+            '     availabilityStartTime="1970-01-01T00:00:00Z">',
+            '  <ServiceDescription id="1250">',
+            '    <Scope schemeIdUri=',
+            '        "urn:mpeg:dash:event:service-description:2024"/>',
+            '    <Latency target="1250"/>',
+            '    <ClientDataReporting',
+            '        schemeIdUri="urn:mpeg:dash:cta-5004:2023">',
+            '      <CMCDParameters keys="br"/>',
+            '    </ClientDataReporting>',
+            '  </ServiceDescription>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo', source);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('https://foo', playerInterface);
+          expect(manifest.serviceDescription).toBeNull();
+        });
   });
 
   it('parses urn:mpeg:dash:chaining:2016', async () => {
