@@ -89,8 +89,10 @@ describe('CmcdManager', () => {
       rtpSafetyFactor: 5,
       useHeaders: false,
       includeKeys: [],
+      includeInRequests: [],
       version: 2,
       eventTargets: [],
+      applyParametersFromManifest: true,
     }, overrides);
   }
 
@@ -141,6 +143,14 @@ describe('CmcdManager', () => {
       }),
     });
   }
+
+  describe('default configuration', () => {
+    it('applies manifest parameters and uses the legacy request set', () => {
+      const cmcd = shaka.util.PlayerConfiguration.createDefault().cmcd;
+      expect(cmcd.applyParametersFromManifest).toBe(true);
+      expect(cmcd.includeInRequests).toEqual([]);
+    });
+  });
 
   // ── Public API back-compat re-exports ──
 

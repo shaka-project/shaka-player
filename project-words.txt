@@ -155,6 +155,7 @@ nonprefixed
 overlayed
 playhead
 preflighted
+preflights
 preloaders
 prio
 programinformation
@@ -464,6 +465,7 @@ udta
 ufid
 unskippable
 mpdpatch
+mpdlink
 urlparam
 uslt
 valu

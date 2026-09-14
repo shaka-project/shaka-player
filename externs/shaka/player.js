@@ -2917,8 +2917,10 @@ shaka.extern.CmcdTarget;
  *   contentId: string,
  *   rtpSafetyFactor: number,
  *   includeKeys: !Array<string>,
+ *   includeInRequests: !Array<string>,
  *   version: number,
- *   eventTargets: ?Array<shaka.extern.CmcdTarget>
+ *   eventTargets: ?Array<shaka.extern.CmcdTarget>,
+ *   applyParametersFromManifest: boolean
  * }}
  *
  * @description
@@ -2957,6 +2959,32 @@ shaka.extern.CmcdTarget;
  *   will be included.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {!Array<string>} includeInRequests
+ *   Request types that carry CMCD data, using the ISO/IEC 23009-1 Table I.4
+ *   vocabulary: <code>'segment'</code>, <code>'init'</code>,
+ *   <code>'mpd'</code>, <code>'mpdpatch'</code>, <code>'xlink'</code>,
+ *   <code>'mpdlink'</code>, <code>'steering'</code>,
+ *   <code>'callback'</code>, or <code>'*'</code> for every request shaka can
+ *   decorate (including license, key, certificate and timing requests).
+ *   <code>'segment'</code> also covers initialization segments.
+ *   <br>
+ *   Defaults to <code>[]</code>, which keeps the historical set: manifests,
+ *   media and initialization segments, sidecar text, license, key,
+ *   certificate and timing requests.
+ * @property {boolean} applyParametersFromManifest
+ *   If <code>true</code>, CMCD parameters signaled by the manifest (DASH
+ *   <code>ServiceDescription/ClientDataReporting/CMCDParameters</code>,
+ *   ISO/IEC 23009-1:2026 Annex K) enable CMCD reporting for that
+ *   presentation and override <code>version</code>,
+ *   <code>useHeaders</code>, <code>includeKeys</code>,
+ *   <code>includeInRequests</code>, <code>contentId</code> and
+ *   <code>sessionId</code>. Attributes the manifest omits take the spec
+ *   defaults (version 1, query mode, segment requests only). Header mode
+ *   requested by a manifest triggers CORS preflights, so CDNs listed in
+ *   <code>serviceLocations</code> must allow the <code>CMCD-*</code>
+ *   headers. Set to <code>false</code> to ignore manifest signaling.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @property {number} version
  *   The CMCD version.
  *   CMCD version 1 is fully supported. CMCD version 2 is an unfinished,
