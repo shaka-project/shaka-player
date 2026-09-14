@@ -465,6 +465,16 @@ describe('CmcdManager', () => {
           ['br', 'com.example-custom', 'sid']);
     });
 
+    it('keeps the app keys when no manifest key is supported', () => {
+      // 'ltc' and 'msd' are v2-only keys, so under the manifest's version 1
+      // nothing survives filtering. An empty list would expand to every v1
+      // key in toReporterConfig_, the opposite of what Table K.8 asks for.
+      const config = createConfig({includeKeys: ['br']});
+      const params = createManifestParams({version: 1, keys: ['ltc', 'msd']});
+      const effective = resolve(config, params, null);
+      expect(effective.includeKeys).toEqual(['br']);
+    });
+
     it('starts a reporter from manifest parameters when the app disabled ' +
         'CMCD', () => {
       const player = createMockPlayer();

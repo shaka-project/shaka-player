@@ -225,6 +225,11 @@ describe('ServiceDescriptionParser', () => {
       expect(parseParameters('version="1"').keys).toBeNull();
     });
 
+    it('treats an empty keys list as an absent attribute', () => {
+      expect(parseParameters('keys=""').keys).toBeNull();
+      expect(parseParameters('keys="   "').keys).toBeNull();
+    });
+
     it('ignores contentID and sessionID outside 1..64 characters', () => {
       const long = 'x'.repeat(65);
       const max = 'y'.repeat(64);
