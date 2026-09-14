@@ -557,5 +557,66 @@ describe('SVTA Ad manager', () => {
       expect(eventTypes()).toContain(shaka.ads.Utils.AD_COMPLETE);
       expect(eventTypes()).not.toContain(shaka.ads.Utils.AD_SKIPPED);
     });
+
+    /**
+     * @return {!Promise}
+     */
+    async function addSimpleTracking() {
+      const metadata = {
+        type: 'urn:svta:advertising-wg:ad-creative-signaling',
+        startTime: 0,
+        endTime: 5,
+        values: [
+          {
+            key: 'X-AD-CREATIVE-SIGNALING',
+            data: window.btoa(JSON.stringify(creativeSignalingSimple)),
+          },
+        ],
+      };
+      await svtaAdManager.addMetadata(metadata);
+    }
+
+    /** @return {!Array<string>} */
+    function eventTypes() {
+      return onEventSpy.calls.allArgs().map((args) => args[0].type);
+    }
+
+    // An interstitial starts a fresh playout, so 'play' fires as the tracking
+    // window opens. That is not a resume; it is already covered by the
+    // impression and start beacons.
+    // https://github.com/shaka-project/shaka-player/issues/10562
+    it('does not report a resume without a preceding pause', async () => {
+      await addSimpleTracking();
+
+      video.dispatchEvent(new Event('play'));
+
+      expect(eventTypes()).not.toContain(shaka.ads.Utils.AD_RESUMED);
+    });
+
+    it('reports a resume after a pause', async () => {
+      await addSimpleTracking();
+
+      video.dispatchEvent(new Event('play'));
+      video.dispatchEvent(new Event('pause'));
+      video.dispatchEvent(new Event('play'));
+
+      const types = eventTypes();
+      expect(types.filter((t) => t == shaka.ads.Utils.AD_PAUSED).length)
+          .toBe(1);
+      expect(types.filter((t) => t == shaka.ads.Utils.AD_RESUMED).length)
+          .toBe(1);
+      expect(types.indexOf(shaka.ads.Utils.AD_PAUSED))
+          .toBeLessThan(types.indexOf(shaka.ads.Utils.AD_RESUMED));
+    });
+
+    it('ignores repeated pause events', async () => {
+      await addSimpleTracking();
+
+      video.dispatchEvent(new Event('pause'));
+      video.dispatchEvent(new Event('pause'));
+
+      expect(eventTypes().filter(
+          (t) => t == shaka.ads.Utils.AD_PAUSED).length).toBe(1);
+    });
   });
 });
