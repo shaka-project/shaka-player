@@ -25,6 +25,10 @@ describe('CmcdManager integration', () => {
   const TEST_STREAM =
       window.location.origin +
       '/base/test/test/assets/hls-ts-h264/prog_index.m3u8';
+  // DASH asset carrying a ServiceDescription/ClientDataReporting element
+  // (ISO/IEC 23009-1:2026 Annex K) that enables CMCD from the MPD.
+  const DASH_CMCD_STREAM =
+      window.location.origin + '/base/test/test/assets/dash-cmcd/dash.mpd';
   const SESSION_ID = 'integration-test-session';
   const CONTENT_ID = 'integration-test-content';
   // Non-routable placeholder. CmcdReportRecorder.attach({eventTargetUrls})
@@ -870,6 +874,86 @@ describe('CmcdManager integration', () => {
           .withContext(
               'No segment should have sta=p when play() was never called')
           .toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Group 7: Manifest-signaled parameters (DASH ClientDataReporting)
+  // ---------------------------------------------------------------------------
+
+  describe('Manifest parameters', () => {
+    it('enables CMCD from the MPD when the app left it disabled', async () => {
+      player.configure({cmcd: {enabled: false}});
+      attachRecorder({waitTimeout: REQUEST_TIMEOUT});
+
+      await player.load(DASH_CMCD_STREAM);
+      const reports = await recorder.waitForSegments({count: 4});
+      expect(reports.length).toBeGreaterThan(0);
+
+      // The first decorated request is the SegmentBase index (SIDX)
+      // byte-range fetch, which carries no stream and so no object type.
+      const decoded = decodeCmcdFromReport(reports[0]);
+      expect(decoded['cid']).toBe('dash-cmcd-content');
+      expect(decoded['v']).toBe(2);
+      expect(decoded['sid']).toBeDefined();
+      // Not in the MPD key list.
+      expect(decoded['mtp']).toBeUndefined();
+      expect(decoded['bl']).toBeUndefined();
+
+      // `ot` is in the MPD key list, so the init and media segment reports
+      // that follow the index fetch must carry it.
+      const objectTypes = reports
+          .map((r) => decodeCmcdFromReport(r)['ot'])
+          .filter((ot) => ot !== undefined);
+      expect(objectTypes.length)
+          .withContext('expected an object type on a segment report')
+          .toBeGreaterThan(0);
+
+      // includeInRequests="segment": the MPD request is not decorated.
+      const manifests = recorder.getReports().filter(
+          (r) => r.type === cml.cmcd.CMCD_RECORDED_REQUEST_TYPE_MANIFEST);
+      expect(manifests.length).toBe(0);
+    });
+
+    it('ignores the MPD when applyParametersFromManifest is false',
+        async () => {
+          player.configure({
+            cmcd: {enabled: false, applyParametersFromManifest: false},
+          });
+          attachRecorder({waitTimeout: REQUEST_TIMEOUT});
+
+          await player.load(DASH_CMCD_STREAM);
+          await video.play();
+          await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+          // Segments were fetched (the playhead moved) but none carried
+          // CMCD, so the recorder captured nothing.
+          expect(recorder.getReports().length).toBe(0);
+        });
+
+    it('lets MPD parameters override the app configuration', async () => {
+      player.configure({
+        cmcd: {
+          enabled: true,
+          version: 1,
+          useHeaders: true,
+          contentId: 'app-content',
+          sessionId: SESSION_ID,
+        },
+      });
+      attachRecorder({waitTimeout: REQUEST_TIMEOUT});
+
+      await player.load(DASH_CMCD_STREAM);
+      const reports = await recorder.waitForSegments({count: 1});
+      const report = reports[0];
+      // MPD mode="query" wins over useHeaders.
+      expect(report.reportingMode).toBe(cml.cmcd.CmcdRecordedReportMode.QUERY);
+
+      const decoded = decodeCmcdFromReport(report);
+      // MPD contentID and version win; the MPD has no sessionID, so the app
+      // value is kept.
+      expect(decoded['cid']).toBe('dash-cmcd-content');
+      expect(decoded['v']).toBe(2);
+      expect(decoded['sid']).toBe(SESSION_ID);
     });
   });
 });
