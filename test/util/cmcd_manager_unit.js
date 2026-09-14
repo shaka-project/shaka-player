@@ -96,6 +96,37 @@ describe('CmcdManager', () => {
     }, overrides);
   }
 
+  /**
+   * @param {!Object=} cmcdOverrides Overrides for the CMCDParameters part.
+   * @param {!Object=} reportingOverrides Overrides for the reporting part.
+   * @return {shaka.extern.ClientDataReporting}
+   */
+  function createManifestParams(cmcdOverrides = {}, reportingOverrides = {}) {
+    const cmcdParameters = Object.assign({
+      version: 1,
+      mode: 'query',
+      includeInRequests: ['segment'],
+      keys: null,
+      contentId: null,
+      sessionId: null,
+    }, cmcdOverrides);
+    return /** @type {shaka.extern.ClientDataReporting} */ (Object.assign({
+      schemeIdUri: 'urn:mpeg:dash:cta-5004:2023',
+      serviceLocations: null,
+      adaptationSets: null,
+      serviceLocationBaseUris: [],
+      cmcdParameters: cmcdParameters,
+    }, reportingOverrides));
+  }
+
+  /**
+   * @param {!shaka.extern.Request} request
+   * @return {string} The decoded CMCD query dictionary, or '' when absent.
+   */
+  function cmcdQueryOf(request) {
+    return new URL(request.uris[0]).searchParams.get('CMCD') || '';
+  }
+
   function createManager(player, configOverrides = {}, attach = true) {
     const config = createConfig(configOverrides);
     const manager = new CmcdManager(
@@ -251,11 +282,10 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
     });
 
-    it('rebuilt reporter re-learns sf after a material config change', () => {
-      // The manifest path only pushes sf into the reporter when it
-      // differs from the cached sf_. The configure() teardown must clear
-      // session-scoped state (via reset()) so a rebuilt reporter is not
-      // starved of sf by the previous session's cache.
+    it('rebuilt reporter keeps the learned sf', () => {
+      // The manifest request that teaches sf has already happened when a
+      // rebuild occurs (for example when manifest parameters arrive), so the
+      // rebuilt reporter must be re-taught the cached value.
       const player = createMockPlayer();
       const {manager, config} = createManager(player);
       const manifestContext = /** @type {shaka.extern.RequestContext} */ (
@@ -263,12 +293,9 @@ describe('CmcdManager', () => {
       manager.applyRequestData(
           RequestType.MANIFEST, createRequest(), manifestContext);
       manager.configure(Object.assign({}, config, {contentId: 'changed'}));
-      const newReporter = priv(manager)['reporter_'];
-      spyOn(newReporter, 'update');
-      manager.applyRequestData(
-          RequestType.MANIFEST, createRequest(), manifestContext);
-      expect(newReporter.update).toHaveBeenCalledWith(
-          jasmine.objectContaining({sf: StreamingFormat.DASH}));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
     });
 
     it('reset stops the reporter and clears state', () => {
@@ -351,6 +378,178 @@ describe('CmcdManager', () => {
       video.dispatchEvent(new shaka.util.FakeEvent('pause'));
       expect(priv(manager)['reporter_'].update).toHaveBeenCalledWith(
           {sta: PlayerState.PAUSED});
+    });
+  });
+
+  // ── Manifest-signaled parameters ──
+
+  describe('manifest parameters', () => {
+    const resolve = CmcdManager.resolveEffectiveConfig;
+
+    it('uses the application configuration when the manifest says nothing',
+        () => {
+          const config = createConfig({
+            version: 2, useHeaders: true, includeKeys: ['br'],
+            includeInRequests: ['mpd'],
+          });
+          const effective = resolve(config, null, 'generated');
+          expect(effective.enabled).toBe(true);
+          expect(effective.version).toBe(2);
+          expect(effective.useHeaders).toBe(true);
+          expect(effective.includeKeys).toEqual(['br']);
+          expect(effective.includeInRequests).toEqual(['mpd']);
+          expect(effective.sessionId).toBe(config.sessionId);
+          expect(effective.contentId).toBe('testing');
+          expect(effective.fromManifest).toBe(false);
+        });
+
+    it('lets manifest parameters override the overlapping fields', () => {
+      const config = createConfig({
+        version: 2, useHeaders: true, includeKeys: ['br'],
+        contentId: 'app', sessionId: 'app-session',
+      });
+      const params = createManifestParams({
+        version: 1, mode: 'query', keys: ['bl', 'cid'],
+        contentId: 'mpd', sessionId: 'mpd-session',
+        includeInRequests: ['segment', 'mpd'],
+      });
+      const effective = resolve(config, params, null);
+      expect(effective.enabled).toBe(true);
+      expect(effective.version).toBe(1);
+      expect(effective.useHeaders).toBe(false);
+      expect(effective.includeKeys).toEqual(['bl', 'cid']);
+      expect(effective.contentId).toBe('mpd');
+      expect(effective.sessionId).toBe('mpd-session');
+      expect(effective.includeInRequests).toEqual(['segment', 'mpd']);
+      expect(effective.rtpSafetyFactor).toBe(config.rtpSafetyFactor);
+      expect(effective.eventTargets).toBe(config.eventTargets);
+      expect(effective.fromManifest).toBe(true);
+    });
+
+    it('falls back to app values for absent manifest ids and keys', () => {
+      const config = createConfig({
+        includeKeys: ['br'], contentId: 'app', sessionId: 'app-session',
+      });
+      const effective = resolve(config, createManifestParams(), null);
+      expect(effective.includeKeys).toEqual(['br']);
+      expect(effective.contentId).toBe('app');
+      expect(effective.sessionId).toBe('app-session');
+    });
+
+    it('enables CMCD when the manifest carries parameters', () => {
+      const effective = resolve(
+          createConfig({enabled: false}), createManifestParams(), 'generated');
+      expect(effective.enabled).toBe(true);
+      expect(effective.sessionId).toBe(
+          '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3');
+    });
+
+    it('ignores the manifest when applyParametersFromManifest is false',
+        () => {
+          const config = createConfig({
+            enabled: false, applyParametersFromManifest: false,
+          });
+          const effective = resolve(
+              config, createManifestParams({contentId: 'mpd'}), null);
+          expect(effective.enabled).toBe(false);
+          expect(effective.contentId).toBe('testing');
+          expect(effective.fromManifest).toBe(false);
+        });
+
+    it('drops manifest keys the player does not support', () => {
+      const params = createManifestParams({
+        version: 1, keys: ['br', 'bogus', 'com.example-custom', 'sid'],
+      });
+      const effective = resolve(createConfig(), params, null);
+      expect(effective.includeKeys).toEqual(
+          ['br', 'com.example-custom', 'sid']);
+    });
+
+    it('starts a reporter from manifest parameters when the app disabled ' +
+        'CMCD', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      expect(priv(manager)['reporter_']).toBeNull();
+      manager.setManifestParameters(
+          createManifestParams({keys: ['sid', 'cid', 'ot'], contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('cid="mpd"');
+    });
+
+    it('rebuilds only when the effective configuration changes', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      const first = priv(manager)['reporter_'];
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      const second = priv(manager)['reporter_'];
+      expect(second).not.toBe(first);
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).toBe(second);
+    });
+
+    it('keeps the generated session id across rebuilds and drops it on ' +
+        'reset', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {sessionId: ''});
+      const sid = priv(manager)['effective_'].sessionId;
+      expect(sid).toBeTruthy();
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['effective_'].sessionId).toBe(sid);
+      manager.reset();
+      manager.onLoad();
+      expect(priv(manager)['effective_'].sessionId).toBeTruthy();
+      expect(priv(manager)['effective_'].sessionId).not.toBe(sid);
+    });
+
+    it('re-teaches sf and sta to a rebuilt reporter', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(
+          player, {includeKeys: ['sf', 'sta', 'ot']});
+      manager.applyRequestData(RequestType.MANIFEST, createRequest(),
+          /** @type {shaka.extern.RequestContext} */ (
+            {type: AdvancedRequestType.MPD}));
+      priv(manager)['video_'].dispatchEvent(
+          new shaka.util.FakeEvent('playing'));
+      manager.setManifestParameters(createManifestParams({
+        version: 2, contentId: 'mpd', keys: ['sf', 'sta', 'ot', 'cid'],
+      }));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      const cmcd = cmcdQueryOf(r);
+      expect(cmcd).toContain('sf=d');
+      expect(cmcd).toContain('sta=p');
+    });
+
+    it('keeps the start time of load across a rebuild so msd still fires',
+        () => {
+          // A live MPD refresh can deliver material CMCD parameters after
+          // setStartTimeOfLoad() but before the first 'playing' event.
+          // startTimeOfLoad_ is session-scoped, so the rebuild must not
+          // clear it or msd is lost for the whole session.
+          const player = createMockPlayer();
+          const {manager} = createManager(player);
+          const video = priv(manager)['video_'];
+          manager.setStartTimeOfLoad(Date.now() - 200);
+          manager.setManifestParameters(
+              createManifestParams({version: 2, contentId: 'mpd'}));
+          video.dispatchEvent(new shaka.util.FakeEvent('playing'));
+          const r = createRequest();
+          manager.applyRequestData(
+              RequestType.SEGMENT, r, createSegmentContext());
+          expect(cmcdQueryOf(r)).toContain('msd=');
+        });
+
+    it('reset() clears manifest parameters', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      manager.setManifestParameters(createManifestParams());
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      manager.reset();
+      manager.onLoad();
+      expect(priv(manager)['manifestParams_']).toBeNull();
+      expect(priv(manager)['reporter_']).toBeNull();
     });
   });
 
@@ -443,13 +642,11 @@ describe('CmcdManager', () => {
       expect(cfg.eventTargets[0].url).toBe('https://collector/cmcd');
     });
 
-    it('auto-generates a sessionId when not provided', () => {
+    it('auto-generates a sessionId without mutating the app config', () => {
       const player = createMockPlayer();
-      const {manager} = createManager(player);
-      const cfg = createConfig({sessionId: ''});
-      const reporterCfg = priv(manager)['toReporterConfig_'](cfg);
-      expect(reporterCfg.sid).toBeTruthy();
-      expect(cfg.sessionId).toBe(/** @type {string} */ (reporterCfg.sid));
+      const {manager, config} = createManager(player, {sessionId: ''});
+      expect(priv(manager)['effective_'].sessionId).toBeTruthy();
+      expect(config.sessionId).toBe('');
     });
   });
 
