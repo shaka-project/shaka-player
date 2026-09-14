@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IAMF audio extracted from Chromium's iamf_alternating_sine_waves_stereo.mp4
+     test file (https://source.chromium.org/chromium/chromium/src/+/main:media/test/data/). -->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" profiles="urn:mpeg:dash:profile:isoff-live:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT3.0135S">
+  <Period id="0">
+    <AdaptationSet id="0" contentType="audio" startWithSAP="1" segmentAlignment="true">
+      <Representation id="0" bandwidth="128000" codecs="iamf.000.000.Opus" mimeType="audio/mp4" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <SegmentTemplate timescale="48000" initialization="init.mp4" media="segment-$Number$.mp4" startNumber="1">
+          <SegmentTimeline>
+            <S t="0" d="48648"/>
+            <S t="48648" d="48000" r="1"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

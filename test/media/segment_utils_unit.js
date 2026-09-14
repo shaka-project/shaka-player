@@ -39,6 +39,9 @@ describe('SegmentUtils', () => {
   const cea608TrackSegmentUri =
       '/base/test/test/assets/cea608-track-segment.mp4';
 
+  const iamfInitSegmentUri = '/base/test/test/assets/audio-iamf/init.mp4';
+  const iamfSegmentUri = '/base/test/test/assets/audio-iamf/segment-1.mp4';
+
   /** @type {!ArrayBuffer} */
   let videoInitSegment;
   /** @type {!ArrayBuffer} */
@@ -76,6 +79,10 @@ describe('SegmentUtils', () => {
   /** @type {!ArrayBuffer} */
   let initFairPlay;
   /** @type {!ArrayBuffer} */
+  let iamfInitSegment;
+  /** @type {!ArrayBuffer} */
+  let iamfSegment;
+  /** @type {!ArrayBuffer} */
   let cea608TrackInitSegment;
   /** @type {!ArrayBuffer} */
   let cea608TrackSegment;
@@ -102,6 +109,8 @@ describe('SegmentUtils', () => {
       initFairPlay,
       cea608TrackInitSegment,
       cea608TrackSegment,
+      iamfInitSegment,
+      iamfSegment,
     ] = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
@@ -123,6 +132,8 @@ describe('SegmentUtils', () => {
       shaka.test.Util.fetch(initFairPlayUri),
       shaka.test.Util.fetch(cea608TrackInitSegmentUri),
       shaka.test.Util.fetch(cea608TrackSegmentUri),
+      shaka.test.Util.fetch(iamfInitSegmentUri),
+      shaka.test.Util.fetch(iamfSegmentUri),
     ]);
   });
 
@@ -533,6 +544,40 @@ describe('SegmentUtils', () => {
     };
     expect(basicInfo).toEqual(expected);
     expect(basicInfo.frameRate).toBeCloseTo(23.976, 2);
+  });
+
+  it('getBasicInfoFromMp4 with IAMF audio', async () => {
+    const expected = {
+      type: 'audio',
+      mimeType: 'audio/mp4',
+      // The profiles come from the IA Sequence Header OBU and the fourth
+      // element from the codec_id of the Codec Config OBU, both of which live
+      // in the iacb box of the IA Sample Entry.
+      codecs: 'iamf.000.000.Opus',
+      language: 'und',
+      height: null,
+      width: null,
+      // An IA Sample Entry always signals 0 channels and a 0 sample rate, and
+      // parsers must ignore both.
+      channelCount: null,
+      sampleRate: null,
+      closedCaptions: new Map(),
+      videoRange: null,
+      colorGamut: null,
+      frameRate: null,
+      timescale: 48000,
+      drmInfos: [],
+    };
+
+    let basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        iamfInitSegment, null, false);
+    expect(basicInfo).toEqual(expected);
+
+    // The same must hold when a media segment is probed along with its init
+    // segment, which is what the HLS parser does for media playlists.
+    basicInfo = await shaka.media.SegmentUtils.getBasicInfoFromMp4(
+        iamfInitSegment, iamfSegment, false);
+    expect(basicInfo).toEqual(expected);
   });
 
   it('getBasicInfoFromTs', () => {
