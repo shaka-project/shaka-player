@@ -553,6 +553,161 @@ describe('CmcdManager', () => {
     });
   });
 
+  describe('includeInRequests', () => {
+    /**
+     * @param {!Object} fields
+     * @return {shaka.extern.RequestContext}
+     */
+    function ctx(fields) {
+      return /** @type {shaka.extern.RequestContext} */ (fields);
+    }
+
+    /**
+     * @param {!shaka.util.CmcdManager} manager
+     * @param {!shaka.net.NetworkingEngine.RequestType} type
+     * @param {shaka.extern.RequestContext=} context
+     * @return {boolean} Whether CMCD was attached.
+     */
+    function decorated(manager, type, context) {
+      const r = createRequest('https://test.com/resource');
+      manager.applyRequestData(type, r, context);
+      return r.uris[0].includes('CMCD=');
+    }
+
+    const mpdContext = ctx({type: AdvancedRequestType.MPD});
+
+    it('uses the legacy set when the list is empty', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.XLINK}))).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.LINKED_MPD}))).toBe(true);
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(true);
+      expect(decorated(manager, RequestType.TIMING)).toBe(true);
+      expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(false);
+      expect(decorated(manager, RequestType.EVENT_CALLBACK)).toBe(false);
+    });
+
+    it('honors an explicit list', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment', 'steering']});
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(false);
+      expect(decorated(manager, RequestType.TIMING)).toBe(false);
+    });
+
+    it('treats segment as covering init segments and init as init only',
+        () => {
+          const initContext = ctx(Object.assign(createSegmentContext(),
+              {type: AdvancedRequestType.INIT_SEGMENT}));
+          const {manager} = createManager(createMockPlayer(),
+              {includeInRequests: ['segment']});
+          expect(decorated(manager, RequestType.SEGMENT, initContext))
+              .toBe(true);
+
+          const {manager: initOnly} = createManager(createMockPlayer(),
+              {includeInRequests: ['init']});
+          expect(decorated(initOnly, RequestType.SEGMENT, initContext))
+              .toBe(true);
+          expect(decorated(initOnly, RequestType.SEGMENT,
+              createSegmentContext())).toBe(false);
+        });
+
+    it('distinguishes mpd, mpdpatch, xlink and mpdlink', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['mpdpatch', 'mpdlink']});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.MPD_PATCH}))).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.XLINK}))).toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.LINKED_MPD}))).toBe(true);
+    });
+
+    it('learns sf from undecorated manifest requests', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      const r = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
+    });
+
+    it('decorates everything with "*", including steering and callbacks',
+        () => {
+          const {manager} = createManager(createMockPlayer(),
+              {includeInRequests: ['*']});
+          expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(true);
+          expect(decorated(manager, RequestType.EVENT_CALLBACK)).toBe(true);
+          expect(decorated(manager, RequestType.LICENSE)).toBe(true);
+          expect(decorated(manager, RequestType.MANIFEST, mpdContext))
+              .toBe(true);
+        });
+
+    it('sends ot=o on steering and callback requests', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      spyOn(priv(manager)['reporter_'], 'createRequestReport')
+          .and.callThrough();
+      for (const type of [
+        RequestType.CONTENT_STEERING, RequestType.EVENT_CALLBACK,
+      ]) {
+        manager.applyRequestData(type, createRequest());
+        const data = /** @type {!Object} */ (
+          priv(manager)['reporter_'].createRequestReport.calls
+              .mostRecent().args[1]);
+        expect(data.ot).toBe(ObjectType.OTHER);
+      }
+    });
+
+    it('applies manifest includeInRequests over the app list', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      manager.setManifestParameters(
+          createManifestParams({includeInRequests: ['segment']}));
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(false);
+    });
+
+    it('decorates nothing when the manifest list is empty', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      manager.setManifestParameters(
+          createManifestParams({includeInRequests: []}));
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+    });
+
+    it('gates sidecar text and src= URIs on the segment token', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['mpd']});
+      expect(manager.appendSrcData('https://test.com/a.mp4', 'video/mp4'))
+          .toBe('https://test.com/a.mp4');
+      expect(manager.appendTextTrackData('https://test.com/a.vtt'))
+          .toBe('https://test.com/a.vtt');
+      const r = createRequest('https://test.com/a.vtt');
+      manager.applyTextData(r);
+      expect(r.uris[0]).toBe('https://test.com/a.vtt');
+
+      const {manager: withSegments} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(withSegments.appendSrcData('https://test.com/a.mp4', 'video/mp4'))
+          .toContain('CMCD=');
+    });
+  });
+
   // ── Configuration translation ──
 
   describe('toReporterConfig_', () => {
