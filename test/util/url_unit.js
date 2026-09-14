@@ -318,6 +318,33 @@ describe('URL', () => {
       expect(shaka.util.URL.getScheme(''))
           .toBe('');
     });
+
+    it('returns scheme for javascript: URI', () => {
+      // eslint-disable-next-line no-script-url
+      expect(shaka.util.URL.getScheme('javascript:alert(1)'))
+          .toBe('javascript');
+    });
+
+    it('returns lower-case scheme for upper-case input', () => {
+      // eslint-disable-next-line no-script-url
+      expect(shaka.util.URL.getScheme('JAVASCRIPT:alert(1)'))
+          .toBe('javascript');
+    });
+
+    it('ignores a leading space before the scheme', () => {
+      expect(shaka.util.URL.getScheme(' javascript:alert(1)'))
+          .toBe('javascript');
+    });
+
+    it('ignores a leading newline before the scheme', () => {
+      expect(shaka.util.URL.getScheme('\njavascript:alert(1)'))
+          .toBe('javascript');
+    });
+
+    it('ignores whitespace inside the scheme', () => {
+      expect(shaka.util.URL.getScheme('jav\tascript:alert(1)'))
+          .toBe('javascript');
+    });
   });
 
   describe('applyUrlParams', () => {
