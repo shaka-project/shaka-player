@@ -5031,6 +5031,37 @@ describe('Player', () => {
       expect(order).toContain('index');
     });
 
+    it('does not forward manifest parameters from a destroyed preload',
+        async () => {
+          // A preload manager can be attached and then destroyed while its
+          // parser is still running; its manifest never plays, so it must
+          // not reconfigure the live CMCD reporter.
+          manifest.serviceDescription = describeWith(reporting);
+          /** @type {function()} */
+          let releaseParser;
+          const parserBlocker = new Promise((resolve) => {
+            releaseParser = resolve;
+          });
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            const parser = new shaka.test.FakeManifestParser(manifest);
+            parser.start.and.callFake(async (uri, playerInterface) => {
+              parser.playerInterface = playerInterface;
+              await parserBlocker;
+              return manifest;
+            });
+            return parser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          preloadManager.setEventHandoffTarget(player);
+          await preloadManager.destroy();
+          releaseParser();
+          await shaka.test.Util.shortDelay();
+          expect(spy).not.toHaveBeenCalled();
+        });
+
     it('does not forward manifest parameters for a background preload',
         async () => {
           manifest.serviceDescription = describeWith(reporting);

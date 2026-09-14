@@ -499,6 +499,25 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_']).toBe(second);
     });
 
+    it('does not rebuild when only includeInRequests changes', () => {
+      // includeInRequests is evaluated outside the reporter, so a change
+      // must not cost the reporter's request timestamps and CML counters.
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      const reporter = priv(manager)['reporter_'];
+      expect(reporter).not.toBeNull();
+      manager.setManifestParameters(createManifestParams({
+        contentId: 'mpd', includeInRequests: ['segment', 'mpd'],
+      }));
+      expect(priv(manager)['reporter_']).toBe(reporter);
+      const r = createRequest('https://test.com/x.mpd');
+      manager.applyRequestData(RequestType.MANIFEST, r,
+          /** @type {shaka.extern.RequestContext} */ (
+            {type: AdvancedRequestType.MPD}));
+      expect(r.uris[0]).toContain('CMCD=');
+    });
+
     it('keeps the generated session id across rebuilds and drops it on ' +
         'reset', () => {
       const player = createMockPlayer();
@@ -1173,6 +1192,33 @@ describe('CmcdManager', () => {
       expect(data.rc).toBe(200);
       expect(data.ttlb).toBe(50);
       expect(data.url).toBe('https://test/seg.mp4');
+    });
+
+    it('keeps the request timestamp for undecorated segments', () => {
+      // Response reporting is ungated by design: a segment that
+      // includeInRequests keeps out of request decoration still reports
+      // its response, and that report needs the request's start time.
+      const player = createMockPlayer();
+      const {manager} = createManager(player, Object.assign(
+          createResponseConfig(), {includeInRequests: ['mpd']}));
+      spyOn(priv(manager)['reporter_'], 'recordResponseReceived');
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r,
+          createSegmentContext('video'));
+      expect(r.uris[0]).not.toContain('CMCD=');
+      manager.applyResponseData(RequestType.SEGMENT,
+          /** @type {shaka.extern.Response} */ ({
+            status: 200,
+            uri: 'https://test/seg.mp4',
+            originalUri: 'https://test/seg.mp4',
+            originalRequest: r,
+            timeMs: 50,
+            headers: {},
+          }));
+      const data = /** @type {!Object} */ (
+        priv(manager)['reporter_'].recordResponseReceived.calls
+            .mostRecent().args[1]);
+      expect(data.ts).toEqual(jasmine.any(Number));
     });
 
     it('only fires for SEGMENT responses', () => {
