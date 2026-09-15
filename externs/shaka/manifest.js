@@ -203,7 +203,6 @@ shaka.extern.CmcdParameters;
  */
 shaka.extern.ServiceLocationBaseUri;
 
-/* eslint-disable @stylistic/max-len */
 /**
  * @typedef {{
  *   schemeIdUri: string,
@@ -225,14 +224,14 @@ shaka.extern.ServiceLocationBaseUri;
  * @property {?Array<string>} adaptationSets
  *   AdaptationSet ids for which reporting is enabled, or <code>null</code>
  *   for all of them.
- * @property {!Array<shaka.extern.ServiceLocationBaseUri>} serviceLocationBaseUris
+ * @property {!Array<shaka.extern.ServiceLocationBaseUri>
+ *           } serviceLocationBaseUris
  *   Resolved manifest-level base URIs per service location, used to decide
  *   which service location a request belongs to.
  * @property {?shaka.extern.CmcdParameters} cmcdParameters
  *   The CMCD parameters, or <code>null</code> when the element carried none.
  * @exportDoc
  */
-/* eslint-enable @stylistic/max-len */
 shaka.extern.ClientDataReporting;
 
 /**
