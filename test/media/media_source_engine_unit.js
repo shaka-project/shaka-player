@@ -125,6 +125,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let requiresEC3InitSegments;
   /** @type {!jasmine.Spy} */
+  let requiresTimestampOffsetFudgeSpy;
+  /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
@@ -216,6 +218,9 @@ describe('MediaSourceEngine', () => {
 
     requiresEC3InitSegments = spyOn(deviceDetected,
         'requiresEC3InitSegments').and.returnValue(false);
+
+    requiresTimestampOffsetFudgeSpy = spyOn(deviceDetected,
+        'requiresTimestampOffsetFudge').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
         .and.callFake((stream, data) => data + 100);
@@ -1099,7 +1104,7 @@ describe('MediaSourceEngine', () => {
             return {timestamp: mediaStart + reference.startTime, metadata: []};
           });
 
-      const expectedOffset = -mediaStart + 0.001;
+      const expectedOffset = -mediaStart;
 
       /** @param {number} startTime */
       const appendSegment = async (startTime) => {
@@ -1113,7 +1118,6 @@ describe('MediaSourceEngine', () => {
 
       await appendSegment(0);
 
-      // The offset written to the SourceBuffer carries the Edge workaround.
       expect(videoSourceBuffer.timestampOffset).toBeCloseTo(expectedOffset, 6);
       videoSourceBuffer.abort.calls.reset();
 
@@ -1126,6 +1130,46 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.abort).not.toHaveBeenCalled();
       expect(videoSourceBuffer.timestampOffset).toBeCloseTo(expectedOffset, 6);
+    });
+
+    // Chromium, Gecko and WebKit have all been measured to place the first
+    // frame exactly on appendWindowStart for a negative timestampOffset, so
+    // the fudge from https://github.com/shaka-project/shaka-player/issues/1281
+    // only runs where the device asks for it.  See the matching integration
+    // test, which verifies the measurement against a real SourceBuffer.
+    /**
+     * @param {boolean} requiresFudge
+     * @return {!Promise<number>}
+     */
+    const appendWithNegativeOffset = async (requiresFudge) => {
+      requiresTimestampOffsetFudgeSpy.and.returnValue(requiresFudge);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+          shaka.media.ManifestParser.HLS);
+
+      const mediaStart = 92703.440178;
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({timestamp: mediaStart, metadata: []});
+
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, dummyReference(0, 10), fakeStream,
+          /* hasClosedCaptions= */ false);
+      videoSourceBuffer.updateend();
+      await append;
+
+      return videoSourceBuffer.timestampOffset;
+    };
+
+    it('does not fudge a negative offset by default', async () => {
+      const offset = await appendWithNegativeOffset(false);
+      expect(offset).toBeCloseTo(-92703.440178, 6);
+    });
+
+    it('fudges a negative offset when the device requires it', async () => {
+      const offset = await appendWithNegativeOffset(true);
+      expect(offset).toBeCloseTo(-92703.440178 + 0.001, 6);
     });
   });
 
