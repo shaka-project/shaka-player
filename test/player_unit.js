@@ -2823,6 +2823,96 @@ describe('Player', () => {
       expect(variant.id).toBe(newTrack.id);
     });
 
+    it('returns video tracks across different audio groups matching active ' +
+        'audio attributes', async () => {
+      const perGroupManifest = shaka.test.ManifestGenerator.generate(
+          (manifest) => {
+            manifest.addVariant(201, (variant) => {
+              variant.bandwidth = 464000;
+              variant.language = 'est';
+              variant.addVideo(1, (stream) => {
+                stream.originalId = 'video-360';
+                stream.bandwidth = 400000;
+                stream.width = 640;
+                stream.height = 360;
+              });
+              variant.addAudio(11, (stream) => {
+                stream.originalId = 'audio-est-64';
+                stream.groupId = 'g360';
+                stream.bandwidth = 64000;
+                stream.language = 'est';
+                stream.label = 'Estonian';
+              });
+            });
+            manifest.addVariant(202, (variant) => {
+              variant.bandwidth = 464000;
+              variant.language = 'rus';
+              variant.addExistingStream(1); // video 360
+              variant.addAudio(12, (stream) => {
+                stream.originalId = 'audio-rus-64';
+                stream.groupId = 'g360';
+                stream.bandwidth = 64000;
+                stream.language = 'rus';
+                stream.label = 'Russian';
+              });
+            });
+            manifest.addVariant(203, (variant) => {
+              variant.bandwidth = 1328000;
+              variant.language = 'est';
+              variant.addVideo(2, (stream) => {
+                stream.originalId = 'video-720';
+                stream.bandwidth = 1200000;
+                stream.width = 1280;
+                stream.height = 720;
+              });
+              variant.addAudio(13, (stream) => {
+                stream.originalId = 'audio-est-128';
+                stream.groupId = 'g720';
+                stream.bandwidth = 128000;
+                stream.language = 'est';
+                stream.label = 'Estonian';
+              });
+            });
+            manifest.addVariant(204, (variant) => {
+              variant.bandwidth = 1328000;
+              variant.language = 'rus';
+              variant.addExistingStream(2); // video 720
+              variant.addAudio(14, (stream) => {
+                stream.originalId = 'audio-rus-128';
+                stream.groupId = 'g720';
+                stream.bandwidth = 128000;
+                stream.language = 'rus';
+                stream.label = 'Russian';
+              });
+            });
+          });
+
+      manifest = perGroupManifest;
+
+      player.configure({
+        preferredAudio: [{language: 'est'}],
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      const videoTracks = player.getVideoTracks();
+      expect(videoTracks.length).toBe(2);
+      const heights = videoTracks.map((t) => t.height).sort((a, b) => a - b);
+      expect(heights).toEqual([360, 720]);
+
+      const activeTrack = videoTracks.find((t) => t.active);
+      expect(activeTrack).not.toBeNull();
+      expect(activeTrack.height).toBe(360);
+
+      const track720 = videoTracks.find((t) => t.height === 720);
+      goog.asserts.assert(track720, 'track720 must exist');
+      player.selectVideoTrack(track720);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const selectedVariant =
+          streamingEngine.switchVariant.calls.mostRecent().args[0];
+      expect(selectedVariant.id).toBe(203);
+    });
+
     it('switching audio doesn\'t change selected text track', () => {
       player.configure({
         preferredText: [
