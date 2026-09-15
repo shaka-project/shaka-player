@@ -3225,6 +3225,48 @@ describe('DashParser Manifest', () => {
       expect(manifest.serviceDescription.targetLatency).toBeUndefined();
     });
 
+    it('resolves relative Location and BaseURL service locations once',
+        async () => {
+          // Location resolves against the manifest URI and BaseURL against
+          // the updated manifest location, exactly like the request URIs
+          // this parser builds, so the CMCD service-location filter can
+          // match requests by prefix.
+          const source = [
+            '<MPD minBufferTime="PT75S" type="dynamic"',
+            '     availabilityStartTime="1970-01-01T00:00:00Z">',
+            '  <Location serviceLocation="mpd-next">',
+            '    next/manifest.mpd',
+            '  </Location>',
+            '  <BaseURL serviceLocation="cdn">media/</BaseURL>',
+            '  <ServiceDescription id="0">',
+            '    <ClientDataReporting',
+            '        schemeIdUri="urn:mpeg:dash:cta-5004:2023"',
+            '        serviceLocations="mpd-next cdn">',
+            '      <CMCDParameters keys="br"/>',
+            '    </ClientDataReporting>',
+            '  </ServiceDescription>',
+            '</MPD>',
+          ].join('\n');
+
+          const manifestUri = 'https://example.com/dash/manifest.mpd';
+          fakeNetEngine.setResponseText(manifestUri, source);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start(manifestUri, playerInterface);
+
+          const reporting = manifest.serviceDescription.clientDataReporting;
+          expect(reporting.serviceLocationBaseUris).toEqual([
+            {
+              serviceLocation: 'mpd-next',
+              uri: 'https://example.com/dash/next/manifest.mpd',
+            },
+            {
+              serviceLocation: 'cdn',
+              uri: 'https://example.com/dash/next/media/',
+            },
+          ]);
+        });
+
     it('ignores descriptions scoped to service-description events',
         async () => {
           const source = [

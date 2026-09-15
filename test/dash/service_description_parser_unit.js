@@ -10,7 +10,18 @@ describe('ServiceDescriptionParser', () => {
   // order in which this file and the app dependency graph are evaluated
   // does not matter.
   const TXml = shaka.util.TXml;
-  const MANIFEST_BASE_URIS = ['https://example.com/dash/manifest.mpd'];
+
+  /**
+   * What DashParser hands the parser: the MPD-level BaseURL and Location
+   * elements that carry a serviceLocation, already resolved to absolute
+   * URIs the same way DashParser resolves request URIs.
+   *
+   * @type {!Array<shaka.extern.ServiceLocationBaseUri>}
+   */
+  const SERVICE_LOCATION_BASE_URIS = [
+    {serviceLocation: 'alpha', uri: 'https://cdn1.example.com/'},
+    {serviceLocation: 'beta', uri: 'https://example.com/dash/media/'},
+  ];
 
   /**
    * @param {!Array<string>} lines MPD children.
@@ -33,7 +44,7 @@ describe('ServiceDescriptionParser', () => {
    */
   function parse(lines) {
     return shaka.dash.ServiceDescriptionParser.parse(
-        makeMpd(lines), MANIFEST_BASE_URIS);
+        makeMpd(lines), SERVICE_LOCATION_BASE_URIS);
   }
 
   it('returns null when there is no ServiceDescription', () => {
@@ -126,9 +137,6 @@ describe('ServiceDescriptionParser', () => {
      */
     function parseReporting(reportingLines) {
       const description = parse([
-        '<BaseURL serviceLocation="alpha">https://cdn1.example.com/</BaseURL>',
-        '<BaseURL serviceLocation="beta">media/</BaseURL>',
-        '<BaseURL>https://cdn3.example.com/</BaseURL>',
         '<ServiceDescription id="1">',
         ...reportingLines,
         '</ServiceDescription>',
@@ -297,48 +305,18 @@ describe('ServiceDescriptionParser', () => {
           .toBe('second');
     });
 
-    it('resolves serviceLocationBaseUris from BaseURL and Location', () => {
+    it('attaches the caller-resolved serviceLocationBaseUris unchanged', () => {
+      // BaseURL and Location elements in the MPD itself are not read here:
+      // DashParser resolves them (Location against the manifest URI, BaseURL
+      // against the updated manifest location) and passes the result in, so
+      // relative values are never resolved a second time.
       const reporting = parseReporting([
         `<ClientDataReporting schemeIdUri="${SCHEME}">`,
         '  <CMCDParameters keys="br"/>',
         '</ClientDataReporting>',
       ]);
-      expect(reporting.serviceLocationBaseUris).toEqual([
-        {serviceLocation: 'alpha', uri: 'https://cdn1.example.com/'},
-        {serviceLocation: 'beta', uri: 'https://example.com/dash/media/'},
-      ]);
-
-      const withLocation = parse([
-        '<Location serviceLocation="mpd-b">' +
-            'https://b.example.com/x.mpd</Location>',
-        '<ServiceDescription id="1">',
-        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
-        '    <CMCDParameters keys="br"/>',
-        '  </ClientDataReporting>',
-        '</ServiceDescription>',
-      ]);
-      expect(withLocation.clientDataReporting.serviceLocationBaseUris)
-          .toEqual([
-            {serviceLocation: 'mpd-b', uri: 'https://b.example.com/x.mpd'},
-          ]);
-    });
-
-    it('resolves BaseURL and Location service locations together', () => {
-      const description = parse([
-        '<BaseURL serviceLocation="cdn-a">https://a.example.com/</BaseURL>',
-        '<Location serviceLocation="mpd-b">' +
-            'https://b.example.com/x.mpd</Location>',
-        '<ServiceDescription id="1">',
-        `  <ClientDataReporting schemeIdUri="${SCHEME}">`,
-        '    <CMCDParameters keys="br"/>',
-        '  </ClientDataReporting>',
-        '</ServiceDescription>',
-      ]);
-      expect(description.clientDataReporting.serviceLocationBaseUris)
-          .toEqual([
-            {serviceLocation: 'cdn-a', uri: 'https://a.example.com/'},
-            {serviceLocation: 'mpd-b', uri: 'https://b.example.com/x.mpd'},
-          ]);
+      expect(reporting.serviceLocationBaseUris)
+          .toEqual(SERVICE_LOCATION_BASE_URIS);
     });
   });
 });
