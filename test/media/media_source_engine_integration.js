@@ -1138,4 +1138,119 @@ describe('MediaSourceEngine', () => {
       expect(emsgInfo).toEqual(emsgObj);
     });
   });
+
+  // The 0.001 fudge that MediaSourceEngine applies to negative timestamp
+  // offsets (https://github.com/shaka-project/shaka-player/issues/1281) is now
+  // gated on shaka.device.IDevice.requiresTimestampOffsetFudge(), which is only
+  // true for legacy Edge.  This test measures the underlying browser behaviour
+  // so we find out if a platform ever needs to be added back to that list: it
+  // puts the first frame of a segment exactly on appendWindowStart via a
+  // negative timestampOffset and checks that MSE keeps it.
+  //
+  // If this fails, the browser is rounding the offset down and dropping the
+  // first GOP, and its device needs to override requiresTimestampOffsetFudge().
+  describe('negative timestampOffset', () => {
+    const initSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+    const segmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
+    // The offset of the 32-bit baseMediaDecodeTime inside the segment's tfdt.
+    const tfdtValueOffset = 0x38 + 12;
+    const timescale = 12288;
+    const mimeType = 'video/mp4; codecs="avc1.42c01e"';
+
+    /** @type {!ArrayBuffer} */
+    let initSegment;
+    /** @type {!ArrayBuffer} */
+    let segment;
+
+    beforeAll(async () => {
+      initSegment = await shaka.test.Util.fetch(initSegmentUri);
+      segment = await shaka.test.Util.fetch(segmentUri);
+    });
+
+    /**
+     * Rewrites the segment's baseMediaDecodeTime, so we can place its first
+     * frame at media timestamps that are not exactly representable as doubles,
+     * like the large 90kHz-derived values seen in live HLS.
+     *
+     * @param {number} baseMediaDecodeTime
+     * @return {!Uint8Array}
+     */
+    function withBaseMediaDecodeTime(baseMediaDecodeTime) {
+      const copy = new Uint8Array(segment.byteLength);
+      copy.set(shaka.util.BufferUtils.toUint8(segment));
+      shaka.util.BufferUtils.toDataView(copy)
+          .setUint32(tfdtValueOffset, baseMediaDecodeTime);
+      return copy;
+    }
+
+    it('keeps the first frame at the append window boundary', async () => {
+      // Use a dedicated element, so we don't disturb the MediaSourceEngine
+      // that the outer beforeEach attached to the shared one.
+      const probeVideo = shaka.test.UiUtils.createVideoElement();
+      document.body.appendChild(probeVideo);
+
+      /** @type {!MediaSource} */
+      const ms = new MediaSource();
+      probeVideo.src = URL.createObjectURL(ms);
+      await new Promise((resolve) => {
+        ms.addEventListener('sourceopen', resolve, {once: true});
+      });
+      ms.duration = 1e6;
+      const sourceBuffer = ms.addSourceBuffer(mimeType);
+
+      /**
+       * @param {!BufferSource} data
+       * @return {!Promise}
+       */
+      const append = (data) => new Promise((resolve, reject) => {
+        sourceBuffer.addEventListener('updateend', resolve, {once: true});
+        sourceBuffer.addEventListener('error', reject, {once: true});
+        sourceBuffer.appendBuffer(data);
+      });
+
+      /** @return {!Promise} */
+      const clear = () => new Promise((resolve) => {
+        sourceBuffer.addEventListener('updateend', resolve, {once: true});
+        sourceBuffer.remove(0, Infinity);
+      });
+
+      await append(initSegment);
+
+      // A spread of base media decode times, from the asset's own value up to
+      // the top of the 32-bit tfdt range.  The large ones are where a double
+      // loses enough precision for a naive conversion to land below zero.
+      const baseMediaDecodeTimes = [
+        491520, 491521, 491522, 491523, 491527, 491531,
+        1000001, 3000007, 12345677, 99999991,
+        1234567891, 2147483647, 3000000001, 4294967291,
+      ];
+
+      // Each case has to run in turn, since they share one SourceBuffer.
+      /* eslint-disable no-await-in-loop */
+      for (const baseMediaDecodeTime of baseMediaDecodeTimes) {
+        await clear();
+        sourceBuffer.abort();
+        // abort() resets these, so restore them before each case.
+        sourceBuffer.timestampOffset = 0;
+        sourceBuffer.appendWindowStart = 0;
+        sourceBuffer.appendWindowEnd = Infinity;
+
+        // appendWindowStart stays at its default of 0, so the first frame of
+        // the segment lands exactly on the boundary.
+        sourceBuffer.timestampOffset = -(baseMediaDecodeTime / timescale);
+        await append(withBaseMediaDecodeTime(baseMediaDecodeTime));
+
+        // The whole segment is one buffered range starting at 0.  If the first
+        // keyframe had been dropped, the range would start at the next one,
+        // several seconds in.
+        expect(sourceBuffer.buffered.length)
+            .withContext('tfdt ' + baseMediaDecodeTime).toBe(1);
+        expect(sourceBuffer.buffered.start(0))
+            .withContext('tfdt ' + baseMediaDecodeTime).toBeLessThan(0.001);
+      }
+      /* eslint-enable no-await-in-loop */
+
+      document.body.removeChild(probeVideo);
+    });
+  });
 });
