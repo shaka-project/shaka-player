@@ -102,6 +102,7 @@ msfCatalog.Accessibility;
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
  *   codec: (string|undefined),
+ *   locmafVersion: (string|undefined),
  *   mimeType: (string|undefined),
  *   framerate: (number|undefined),
  *   timescale: (number|undefined),
