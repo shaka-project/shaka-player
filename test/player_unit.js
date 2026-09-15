@@ -602,6 +602,27 @@ describe('Player', () => {
         expect(fromAdaptation).toBeFalsy();
       });
 
+      /** @suppress {accessControls} */
+      function clearAbrManager() {
+        player.abrManager_ = null;
+      }
+
+      it('does nothing when the AbrManager does not exist yet', async () => {
+        multiVariantManifest();
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const variant = manifest.variants[0];
+        const videoStream = /** @type {shaka.extern.Stream} */ (variant.video);
+
+        // The parser can ask to disable a stream during load(), before the
+        // AbrManager has been created.
+        clearAbrManager();
+
+        expect(player.disableStream(videoStream, disableTimeInSeconds))
+            .toBe(false);
+      });
+
       describe('does not disable stream if there not alternate stream', () => {
         it('single audio multiple videos', async () => {
           manifest = shaka.test.ManifestGenerator.generate((manifest) => {
