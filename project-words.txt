@@ -157,6 +157,7 @@ nonprefixed
 overlayed
 playhead
 preflighted
+preflights
 preloaders
 prio
 programinformation
@@ -481,6 +482,7 @@ udta
 ufid
 unalignable
 unskippable
+mpdlink
 urlparam
 uslt
 uvlc
@@ -532,6 +534,7 @@ dashif
 fontdownload
 isobmff
 isoff
+lowlatency
 querypart
 startnumber
 Xlinks

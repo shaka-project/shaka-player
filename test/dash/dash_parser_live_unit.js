@@ -51,6 +51,54 @@ describe('DashParser Live', () => {
     Date.now = oldNow;
   });
 
+  describe('ServiceDescription refresh', () => {
+    /**
+     * @param {!Array<string>} mpdChildren
+     * @return {string}
+     */
+    function makeLiveText(mpdChildren) {
+      return [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        ...mpdChildren,
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '            duration="2"/>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+    }
+
+    it('re-parses ServiceDescription on manifest refresh', async () => {
+      const withoutReporting = makeLiveText([]);
+      const withReporting = makeLiveText([
+        '  <ServiceDescription id="0">',
+        '    <ClientDataReporting schemeIdUri="urn:mpeg:dash:cta-5004:2023">',
+        '      <CMCDParameters keys="br" contentID="refreshed"/>',
+        '    </ClientDataReporting>',
+        '  </ServiceDescription>',
+      ]);
+
+      fakeNetEngine.setResponseText('dummy://foo', withoutReporting);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.serviceDescription).toBeNull();
+
+      fakeNetEngine.setResponseText('dummy://foo', withReporting);
+      await updateManifest();
+      const reporting = manifest.serviceDescription.clientDataReporting;
+      expect(reporting.cmcdParameters.contentId).toBe('refreshed');
+
+      fakeNetEngine.setResponseText('dummy://foo', withoutReporting);
+      await updateManifest();
+      expect(manifest.serviceDescription).toBeNull();
+    });
+  });
+
   /**
    * Trigger a manifest update.
    * @suppress {accessControls}
