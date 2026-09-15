@@ -2941,8 +2941,12 @@ shaka.extern.CmcdTarget;
  *   Maximum length is 64 characters. It is RECOMMENDED to conform to the UUID
  *   specification.
  *   <br>
- *   By default the sessionId is automatically generated on each
- *   <code>load()</code> call.
+ *   Defaults to <code>''</code>. When empty, a random session id is
+ *   generated for each playback session, that is, for each
+ *   <code>load()</code> call. The generated id is not written back into the
+ *   configuration, so <code>getConfiguration().cmcd.sessionId</code> stays
+ *   empty. A <code>sessionID</code> signaled by the manifest overrides both
+ *   the configured and the generated id.
  * @property {string} contentId
  *   A unique string identifying the current content. Maximum length is 64
  *   characters. This value is consistent across multiple different sessions and
@@ -2971,20 +2975,6 @@ shaka.extern.CmcdTarget;
  *   Defaults to <code>[]</code>, which keeps the historical set: manifests,
  *   media and initialization segments, sidecar text, license, key,
  *   certificate and timing requests.
- * @property {boolean} applyParametersFromManifest
- *   If <code>true</code>, CMCD parameters signaled by the manifest (DASH
- *   <code>ServiceDescription/ClientDataReporting/CMCDParameters</code>,
- *   ISO/IEC 23009-1:2026 Annex K) enable CMCD reporting for that
- *   presentation and override <code>version</code>,
- *   <code>useHeaders</code>, <code>includeKeys</code>,
- *   <code>includeInRequests</code>, <code>contentId</code> and
- *   <code>sessionId</code>. Attributes the manifest omits take the spec
- *   defaults (version 1, query mode, segment requests only). Header mode
- *   requested by a manifest triggers CORS preflights, so CDNs listed in
- *   <code>serviceLocations</code> must allow the <code>CMCD-*</code>
- *   headers. Set to <code>false</code> to ignore manifest signaling.
- *   <br>
- *   Defaults to <code>true</code>.
  * @property {number} version
  *   The CMCD version.
  *   CMCD version 1 is fully supported. CMCD version 2 is an unfinished,
@@ -3000,6 +2990,20 @@ shaka.extern.CmcdTarget;
  *   (e.g., <code>'ps'</code>, <code>'rr'</code>) for the configured
  *   <code>events</code>.
  *   <br>
+ * @property {boolean} applyParametersFromManifest
+ *   If <code>true</code>, CMCD parameters signaled by the manifest (DASH
+ *   <code>ServiceDescription/ClientDataReporting/CMCDParameters</code>,
+ *   ISO/IEC 23009-1:2026 Annex K) enable CMCD reporting for that
+ *   presentation and override <code>version</code>,
+ *   <code>useHeaders</code>, <code>includeKeys</code>,
+ *   <code>includeInRequests</code>, <code>contentId</code> and
+ *   <code>sessionId</code>. Attributes the manifest omits take the spec
+ *   defaults (version 1, query mode, segment requests only). Header mode
+ *   requested by a manifest triggers CORS preflights, so CDNs listed in
+ *   <code>serviceLocations</code> must allow the <code>CMCD-*</code>
+ *   headers. Set to <code>false</code> to ignore manifest signaling.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;
