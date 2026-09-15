@@ -17,6 +17,7 @@ bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
+channelcount
 chaptersupdated
 clearlead
 configurationchanged
@@ -328,6 +329,7 @@ ftyp
 hdcp
 hdlr
 hvcc
+iacb
 iamf
 ilst
 imagetype
@@ -335,6 +337,7 @@ imsa
 imsc
 inband
 interintra
+ipcm
 isom
 isrc
 itut
@@ -436,6 +439,7 @@ stts
 styp
 subcues
 subframes
+substreams
 subt
 subviewer
 superres
