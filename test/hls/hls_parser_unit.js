@@ -15,6 +15,8 @@ describe('HlsParser', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
   const videoTsSegmentUri = '/base/test/test/assets/video.ts';
+  const iamfInitSegmentUri = '/base/test/test/assets/audio-iamf/init.mp4';
+  const iamfSegmentUri = '/base/test/test/assets/audio-iamf/segment-1.mp4';
 
   const vttText = [
     'WEBVTT\n',
@@ -46,6 +48,10 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let tsSegmentData;
   /** @type {!Uint8Array} */
+  let iamfInitSegmentData;
+  /** @type {!Uint8Array} */
+  let iamfSegmentData;
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
   let aesKey;
@@ -64,6 +70,8 @@ describe('HlsParser', () => {
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(videoTsSegmentUri),
+      shaka.test.Util.fetch(iamfInitSegmentUri),
+      shaka.test.Util.fetch(iamfSegmentUri),
     ]);
     initSegmentData = responses[0];
     segmentData = responses[1];
@@ -72,6 +80,8 @@ describe('HlsParser', () => {
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     tsSegmentData = responses[2];
+    iamfInitSegmentData = responses[3];
+    iamfSegmentData = responses[4];
 
     aesKey = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -948,7 +958,7 @@ describe('HlsParser', () => {
      * @param {!Array<!Map<string, string>>} captionResults
      * @param {boolean=} isLive
      * @param {?shaka.media.InitSegmentReference=} candidateInit
-     * @return {!Promise<shaka.media.SegmentUtils.BasicInfo>}
+     * @return {!Promise<shaka.extern.BasicInfo>}
      */
     async function probeSegments(
         captionResults, isLive = false, candidateInit = null) {
@@ -6304,6 +6314,91 @@ describe('HlsParser', () => {
     expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
   });
 
+  it('detects IAMF audio from a master playlist', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="6",SAMPLE-RATE="48000",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,iamf.000.000.Opus",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.bandwidth = 200;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.frameRate = 60;
+          stream.mime('video/mp4', 'avc1');
+          stream.size(960, 540);
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.originalLanguage = 'eng';
+          stream.channelsCount = 6;
+          stream.audioSamplingRate = 48000;
+          stream.mime('audio/mp4', 'iamf.000.000.Opus');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+  });
+
+  it('detects IAMF audio from a media playlist', async () => {
+    // A media playlist carries no CODECS attribute, so the codec has to be
+    // read out of the init segment.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'iamf.000.000.Opus');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/media', media)
+        .setResponseValue('test:/init.mp4', iamfInitSegmentData)
+        .setResponseValue('test:/main.mp4', iamfSegmentData);
+
+    const actual = await parser.start('test:/media', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+  });
+
   it('throw error when no segments', async () => {
     const media = [
       '#EXTM3U\n',
@@ -7117,6 +7212,35 @@ describe('HlsParser', () => {
       ];
       expect(onMetadataSpy).toHaveBeenCalledTimes(1);
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
+    });
+
+    it('supports legacy X-CUE for interstitials', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",',
+        'X-ASSET-URI="fake",X-CUE="PRE,ONCE"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).toHaveBeenCalledOnceWith(
+          'com.apple.hls.interstitial', 5, null, [
+            jasmine.objectContaining({key: 'ID', data: '1'}),
+            jasmine.objectContaining({
+              key: 'X-ASSET-URI',
+              data: 'test:/fake',
+            }),
+            jasmine.objectContaining({key: 'X-CUE', data: 'PRE,ONCE'}),
+          ]);
     });
 
     it('supports 1970-01-01T00:00:00.000Z', async () => {

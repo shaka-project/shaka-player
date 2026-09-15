@@ -133,6 +133,12 @@ describe('MediaCapabilities', () => {
     it('should check MediaKeySystem when keySystemConfiguration is present',
         async () => {
           const mockResult = {mockKeySystemAccess: 'mockKeySystemAccess'};
+          // Pin the device type, so that the codec check does not go through
+          // the Cast path, whose canDisplayType() would reject this
+          // configuration on a real Cast device before we get to the DRM
+          // check this test is about.
+          spyOn(deviceDetected, 'getDeviceType').and
+              .returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
           spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
           const requestKeySystemAccessSpy =
           spyOn(window['navigator'],
@@ -167,6 +173,9 @@ describe('MediaCapabilities', () => {
     it('should read previously requested codec/key system ' +
         'combinations from cache', async () => {
       const mockResult = {mockKeySystemAccess: 'mockKeySystemAccess'};
+      // See the note on the device type in the test above.
+      spyOn(deviceDetected, 'getDeviceType').and
+          .returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
       spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
       const requestKeySystemAccessSpy =
           spyOn(window['navigator'],

@@ -135,6 +135,10 @@ filterDescribe('Storage', storageSupport, () => {
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player();
+      // The test scheme deliberately keeps license servers out of the manifest,
+      // so they have to come from the player config.  Storage reads that config
+      // from the player, so this has to happen before Storage is constructed.
+      shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
       storage = new shaka.offline.Storage(player);
     });
 
@@ -148,10 +152,7 @@ filterDescribe('Storage', storageSupport, () => {
     // content.
     // See issue #2218.
 
-    // Quarantined due to http://crbug.com/1019298 where a load cannot happen
-    // immediately after a remove.  This can sometimes be fixed with a delay,
-    // but it is extremely flaky, so these are disabled until the bug is fixed.
-    quarantinedIt('removes persistent license', async () => {
+    it('removes persistent license', async () => {
       const testSchemeMimeType = 'application/x-test-manifest';
 
       // PART 1 - Download and store content that has a persistent license
@@ -182,10 +183,11 @@ filterDescribe('Storage', storageSupport, () => {
 
       // PART 4 - Check that the licenses were removed.
       const p = withDrm(player, manifest, (drm) => {
-        return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-          const notFoundSession = await loadOfflineSession(drm, session);
-          expect(notFoundSession).toBeFalsy();
-        }));
+        // Loading a session that is gone still hands back a MediaKeySession;
+        // what says the license was removed is the error that comes with it,
+        // which withDrm() re-throws once the action is done.
+        return Promise.all(manifest.offlineSessionIds.map(
+            (session) => loadOfflineSession(drm, session)));
       });
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -194,7 +196,7 @@ filterDescribe('Storage', storageSupport, () => {
       await expectAsync(p).toBeRejectedWith(expected);
     });
 
-    quarantinedIt('defers removing licenses on error', async () => {
+    it('defers removing licenses on error', async () => {
       const testSchemeMimeType = 'application/x-test-manifest';
 
       // PART 1 - Download and store content that has a persistent license
@@ -239,10 +241,11 @@ filterDescribe('Storage', storageSupport, () => {
 
       // PART 6 - Check that the licenses were removed.
       const p = withDrm(player, manifest, (drm) => {
-        return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-          const notFoundSession = await loadOfflineSession(drm, session);
-          expect(notFoundSession).toBeFalsy();
-        }));
+        // Loading a session that is gone still hands back a MediaKeySession;
+        // what says the license was removed is the error that comes with it,
+        // which withDrm() re-throws once the action is done.
+        return Promise.all(manifest.offlineSessionIds.map(
+            (session) => loadOfflineSession(drm, session)));
       });
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

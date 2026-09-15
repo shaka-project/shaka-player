@@ -279,7 +279,12 @@ describe('StreamingEngine', () => {
       getKeySystem: () => '',
     };
     streamingEngine = new shaka.media.StreamingEngine(
-        /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
+        /** @type {shaka.extern.Manifest} */(manifest), playerInterface,
+        new shaka.media.SkipRangeController({
+          requestUpdate: () => {},
+          getPlaybackRate: () => video.playbackRate,
+          isRegionBuffered: (start, end) => false,
+        }));
     streamingEngine.configure(config);
   }
 

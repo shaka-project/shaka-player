@@ -97,6 +97,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   buildUI_() {
+    const config = this.controls.getConfig();
+
     // Slider section
     const sliderSection = shaka.util.Dom.createHTMLElement('div');
     sliderSection.classList.add('shaka-playback-rate-slider-section');
@@ -128,7 +130,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
         /* barClassNames= */ ['shaka-playback-rate-slider'],
         /* enableWheel= */ true);
 
-    this.rateSlider_.setStep(shaka.ui.PlaybackRateSelection.SLIDER_STEP);
+    this.rateSlider_.setStep(config.playbackRateSliderStep);
 
     this.rateSlider_.onChange = () => {
       this.applyRate_(this.rateSlider_.getValue());
@@ -147,10 +149,10 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
     // Step-button listeners.
     this.eventManager.listen(this.decreaseButton_, 'click', () => {
-      this.stepRate_(-shaka.ui.PlaybackRateSelection.SLIDER_STEP);
+      this.stepRate_(-this.controls.getConfig().playbackRateSliderStep);
     });
     this.eventManager.listen(this.increaseButton_, 'click', () => {
-      this.stepRate_(shaka.ui.PlaybackRateSelection.SLIDER_STEP);
+      this.stepRate_(this.controls.getConfig().playbackRateSliderStep);
     });
 
     // Preset pill buttons (horizontal)
@@ -189,7 +191,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /**
-   * Steps the playback rate by `delta`, snapped to SLIDER_STEP and clamped to
+   * Steps the playback rate by `delta`, snapped to
+   * `config.playbackRateSliderStep` and clamped to
    * the configured [playbackRateSliderMin, playbackRateSliderMax] range.
    *
    * Snapping the current rate to the step grid before adding delta ensures that
@@ -204,7 +207,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     const config = this.controls.getConfig();
     const min = config.playbackRateSliderMin;
     const max = config.playbackRateSliderMax;
-    const step = shaka.ui.PlaybackRateSelection.SLIDER_STEP;
+    const step = config.playbackRateSliderStep;
 
     const current = this.player.getPlaybackRate();
     // Snap current rate to the nearest step grid point, then apply delta.
@@ -281,6 +284,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       this.playbackRateMark_.textContent = rate + 'x';
     }
     this.updateColors_();
+    this.updateStep_();
   }
 
   /**
@@ -322,14 +326,13 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     this.rateSlider_.setBackground(
         'linear-gradient(' + gradient.join(',') + ')');
   }
+
+  /** @private */
+  updateStep_() {
+    const config = this.controls.getConfig();
+    this.rateSlider_.setStep(config.playbackRateSliderStep);
+  }
 };
-
-
-/**
- * Step size used for slider interaction and the +/- buttons.
- * @const {number}
- */
-shaka.ui.PlaybackRateSelection.SLIDER_STEP = 0.05;
 
 
 /**

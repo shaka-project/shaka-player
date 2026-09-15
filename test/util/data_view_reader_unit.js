@@ -233,6 +233,30 @@ describe('DataViewReader', () => {
       });
     });
 
+    it('detects when skipping a negative number of bytes', () => {
+      bigEndianReader.skip(4);
+      runTest(() => {
+        bigEndianReader.skip(-1);
+      });
+      expect(bigEndianReader.getPosition()).toBe(4);
+    });
+
+    it('detects when rewinding past the start', () => {
+      bigEndianReader.skip(4);
+      runTest(() => {
+        bigEndianReader.rewind(5);
+      });
+      expect(bigEndianReader.getPosition()).toBe(4);
+    });
+
+    it('detects when rewinding a negative number of bytes', () => {
+      bigEndianReader.skip(4);
+      runTest(() => {
+        bigEndianReader.rewind(-1);
+      });
+      expect(bigEndianReader.getPosition()).toBe(4);
+    });
+
     function runTest(test) {
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

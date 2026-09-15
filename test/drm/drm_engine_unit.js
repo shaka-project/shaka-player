@@ -2624,6 +2624,23 @@ describe('DrmEngine', () => {
           .toBeRejectedWith(expected);
     });
 
+    it('is rejected when the session cannot be loaded', async () => {
+      // A CDM can refuse to load a persistent session, as one does when it was
+      // persisted under different robustness levels.  Reporting success would
+      // let the caller drop its record of a session the CDM still holds.
+      session1.load.and.returnValue(
+          Promise.reject(new Error('Operation aborted')));
+      onErrorSpy.and.stub();
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
+          'Failed to load session for removal: abc'));
+      await expectAsync(drmEngine.removeSession('abc'))
+          .toBeRejectedWith(expected);
+      expect(session1.remove).not.toHaveBeenCalled();
+    });
+
     // Regression test for #3534
     it('does not remove the same session again on destroy', async () => {
       updatePromise.resolve();

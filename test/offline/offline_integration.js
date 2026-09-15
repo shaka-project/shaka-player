@@ -85,12 +85,6 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Widevine persistent licenses are not supported');
           return;
         }
-        if (deviceDetected.getDeviceType() ===
-            shaka.device.IDevice.DeviceType.MOBILE) {
-          pending('Skipping offline DRM tests on Android - crbug.com/1108158');
-          return;
-        }
-
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
         storage.configure('offline.usePersistentLicense', true);
@@ -122,12 +116,6 @@ filterDescribe('Offline', supportsStorage, () => {
           pending('Widevine and PlayReady are not supported');
           return;
         }
-        if (deviceDetected.getDeviceType() ===
-            shaka.device.IDevice.DeviceType.MOBILE) {
-          pending('Skipping offline DRM tests on Android - crbug.com/1108158');
-          return;
-        }
-
         if (deviceDetected.getDeviceName() === 'Xbox') {
           // This skip dates from when the content used Axinom's license
           // server, which refused an Xbox One because its security level is

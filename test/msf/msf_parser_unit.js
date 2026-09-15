@@ -51,6 +51,80 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     parser.configure(config);
   });
 
+  describe('accessibility descriptors', () => {
+    /**
+     * @param {!Array<!Object>} accessibility
+     * @return {msfCatalog.Track}
+     */
+    function videoTrack(accessibility) {
+      return /** @type {msfCatalog.Track} */ ({
+        name: 'video0',
+        packaging: 'loc',
+        codec: 'avc3.4d401f',
+        role: 'video',
+        framerate: 25,
+        width: 1280,
+        height: 720,
+        isLive: true,
+        accessibility,
+      });
+    }
+
+    /**
+     * @param {msfCatalog.Track} track
+     * @return {Map<string, string>}
+     * @suppress {visibility}
+     */
+    function closedCaptionsOf(track) {
+      parser.processTrack_(track, new Map(), new Map());
+      const streams = parser.videoStreams_;
+      return streams.length ? streams[0].closedCaptions : null;
+    }
+
+    it('reads CEA-608 captions from the scheme field', () => {
+      // draft-ietf-moq-msf-01 5.2.44 names the field 'scheme'.  Reading the
+      // DASH spelling 'schemeIdUri'/'schemeId' instead left this map empty
+      // for every conforming catalog, so embedded captions were advertised
+      // by the publisher and never exposed by the player.
+      const captions = closedCaptionsOf(videoTrack([{
+        scheme: 'urn:scte:dash:cc:cea-608:2015',
+        value: 'CC1=eng',
+      }]));
+
+      expect(captions).not.toBeNull();
+      expect(captions.get('CC1')).toBe('en');
+    });
+
+    it('reads CEA-708 captions from the scheme field', () => {
+      const captions = closedCaptionsOf(videoTrack([{
+        scheme: 'urn:scte:dash:cc:cea-708:2015',
+        value: '1=lang:eng',
+      }]));
+
+      expect(captions).not.toBeNull();
+      expect(captions.size).toBe(1);
+    });
+
+    it('ignores an unknown scheme', () => {
+      const captions = closedCaptionsOf(videoTrack([{
+        scheme: 'urn:example:something-else',
+        value: 'CC1=eng',
+      }]));
+
+      expect(captions).not.toBeNull();
+      expect(captions.size).toBe(0);
+    });
+
+    it('tolerates a track with no accessibility at all', () => {
+      const track = videoTrack([]);
+      delete track['accessibility'];
+
+      const captions = closedCaptionsOf(track);
+      expect(captions).not.toBeNull();
+      expect(captions.size).toBe(0);
+    });
+  });
+
   it('fails when WebTransport is not available', async () => {
     let originalWebTransport = null;
     try {

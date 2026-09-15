@@ -281,6 +281,41 @@ describe('Player', () => {
     });
   });
 
+  describe('skip ranges', () => {
+    // Player owns the manifest stream-type guard; add/remove/buffered behavior
+    // lives in SkipRangeController and is covered by its own tests.
+    const unsupportedWarning =
+        'addSkipRange() supports segments mode, VOD only; ignoring';
+
+    it('accepts a range on segments-mode VOD content', async () => {
+      manifest.sequenceMode = false;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(true);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range in sequence mode', async () => {
+      manifest.sequenceMode = true;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+
+    it('ignores a range on live content', async () => {
+      manifest.sequenceMode = false;
+      spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      logWarnSpy.calls.reset();
+
+      expect(player.addSkipRange(10, 30)).toBe(false);
+      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+    });
+  });
+
   describe('load/unload', () => {
     /** @type {!jasmine.Spy} */
     let checkError;
@@ -3191,6 +3226,35 @@ describe('Player', () => {
       }));
     });
 
+    it('chooses the first available configured text language at start',
+        async () => {
+          player.configure({
+            preferredText: [
+              {
+                language: 'fi',
+                role: '',
+                format: '',
+                forced: false,
+              },
+              {
+                language: 'en',
+                role: 'commentary',
+                format: '',
+                forced: false,
+              },
+            ],
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          // The first preference is not available, so the second one is used.
+          expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+            id: 52,
+            language: 'en',
+            roles: ['commentary'],
+          }));
+        });
+
     it('chooses a variant with preferred audio label', async () => {
       expect(getActiveVariantTrack().label).toBe(null);
 
@@ -3210,6 +3274,68 @@ describe('Player', () => {
       expect(getActiveVariantTrack().label).toBe('es-label');
     });
   });  // describe('tracks')
+
+  describe('HTML5 audio tracks in src= mode', () => {
+    let trackEn1;
+    let trackEn2;
+    let trackEs;
+
+    beforeEach(() => {
+      trackEn1 = {
+        id: '',
+        label: 'Stereo',
+        language: 'en',
+        kind: 'main',
+        enabled: true,
+      };
+      trackEn2 = {
+        id: '',
+        label: 'Surround 5.1',
+        language: 'en',
+        kind: 'main',
+        enabled: false,
+      };
+      trackEs = {
+        id: '',
+        label: 'Spanish',
+        language: 'es',
+        kind: 'main',
+        enabled: false,
+      };
+      video.audioTracks = /** @type {?} */ ([trackEn1, trackEn2, trackEs]);
+    });
+
+    it('getAudioTracks assigns unique id and matches native tracks', () => {
+      const tracks = player.getAudioTracks();
+      expect(tracks.length).toBe(3);
+      expect(tracks[0].id).toBeDefined();
+      expect(tracks[1].id).toBeDefined();
+      expect(tracks[0].id).not.toBe(tracks[1].id);
+      expect(tracks[0].active).toBe(true);
+      expect(tracks[1].active).toBe(false);
+    });
+
+    it('selectAudioTrack disables other tracks when id is empty string', () => {
+      const tracks = player.getAudioTracks();
+      expect(trackEn1.enabled).toBe(true);
+      expect(trackEs.enabled).toBe(false);
+
+      player.selectAudioTrack(tracks[2]);
+
+      expect(trackEs.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEn2.enabled).toBe(false);
+    });
+
+    it('selectAudioTrack distinguishes tracks with same language by id', () => {
+      const tracks = player.getAudioTracks();
+      player.selectAudioTrack(tracks[1]);
+
+      expect(trackEn2.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEs.enabled).toBe(false);
+    });
+  });
 
   describe('languages', () => {
     it('chooses the first as default', async () => {
