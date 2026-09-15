@@ -19,6 +19,9 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
 
     const webTransport = /** @type {!WebTransport} */ (/** @type {?} */ ({
       incomingUnidirectionalStreams: {getReader: () => ({read: never})},
+      // The session watches this to know when the peer has gone away, so it
+      // must stay pending for the length of a test.
+      closed: never(),
       close: () => {},
     }));
     const controlStream = /** @type {!shaka.msf.IControlStream} */ (

@@ -46,6 +46,9 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       incomingUnidirectionalStreams: {getReader: () => ({read: never})},
       createBidirectionalStream: () =>
         Promise.resolve(fakeBidirectionalStream()),
+      // The session watches this to know when the peer has gone away, so it
+      // must stay pending for the length of a test.
+      closed: never(),
       close: () => {},
     }));
 
