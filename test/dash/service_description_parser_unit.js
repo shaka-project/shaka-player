@@ -79,6 +79,19 @@ describe('ServiceDescriptionParser', () => {
     expect(description.minPlaybackRate).toBeUndefined();
   });
 
+  it('skips latency attributes that do not parse', () => {
+    const description = parse([
+      '<ServiceDescription id="0">',
+      '  <Latency target="soon" max="4000"/>',
+      '  <PlaybackRate max="fast" min="0.95"/>',
+      '</ServiceDescription>',
+    ]);
+    expect(description.targetLatency).toBeUndefined();
+    expect(description.maxLatency).toBe(4);
+    expect(description.maxPlaybackRate).toBeUndefined();
+    expect(description.minPlaybackRate).toBe(0.95);
+  });
+
   it('ignores a ServiceDescription that carries a Scope', () => {
     const description = parse([
       '<ServiceDescription id="1250">',
@@ -230,6 +243,14 @@ describe('ServiceDescriptionParser', () => {
     it('treats an empty keys list as an absent attribute', () => {
       expect(parseParameters('keys=""').keys).toBeNull();
       expect(parseParameters('keys="   "').keys).toBeNull();
+    });
+
+    it('applies the spec defaults for empty attributes', () => {
+      const params = parseParameters(
+          'version="" mode="" includeInRequests="" keys="br"');
+      expect(params.version).toBe(1);
+      expect(params.mode).toBe('query');
+      expect(params.includeInRequests).toEqual(['segment']);
     });
 
     it('ignores contentID and sessionID outside 1..64 characters', () => {
