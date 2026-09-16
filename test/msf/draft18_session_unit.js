@@ -14,6 +14,8 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
   let written;
   /** @type {!ReadableStreamDefaultController} */
   let responses;
+  /** @type {{aborted: boolean, cancelled: boolean}} */
+  let requestStream;
 
   /**
    * A bidirectional stream whose write side records bytes and whose read side
@@ -26,10 +28,16 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       write: (chunk) => {
         written.push(chunk);
       },
+      abort: () => {
+        requestStream.aborted = true;
+      },
     });
     const readable = new ReadableStream({
       start: (controller) => {
         responses = controller;
+      },
+      cancel: () => {
+        requestStream.cancelled = true;
       },
     });
     return {writable, readable};
@@ -37,6 +45,7 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
   beforeEach(() => {
     written = [];
+    requestStream = {aborted: false, cancelled: false};
 
     // The session listens on this for its lifetime, so it must never resolve
     // or the listen loop spins.
@@ -164,5 +173,45 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
           expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(true);
         });
+  });
+
+  describe('unsubscribe', () => {
+    /**
+     * @return {!Promise<bigint>}
+     */
+    async function subscribeAndAck() {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk());
+      return subscribed;
+    }
+
+    it('tears down the request stream', async () => {
+      // Draft-17 removed UNSUBSCRIBE: the request stream IS the subscription,
+      // so dropping our callbacks is not a withdrawal. Left open, the
+      // publisher keeps sending objects for the whole session.
+      const alias = await subscribeAndAck();
+      await session.unsubscribe(alias);
+
+      expect(requestStream.aborted).toBe(true);
+      expect(requestStream.cancelled).toBe(true);
+    });
+
+    it('closes the track so late objects are dropped without waiting',
+        async () => {
+          // deliver_ retries an unknown alias for half a second before giving
+          // up, on the theory that the SUBSCRIBE_OK has not landed yet. A
+          // track we withdrew from is not that case.
+          const alias = await subscribeAndAck();
+          await session.unsubscribe(alias);
+
+          const trackInfo = registryOf().getTrackInfoFromAlias(alias);
+          expect(trackInfo.closed).toBe(true);
+          expect(trackInfo.callbacks.length).toBe(0);
+        });
+
+    it('rejects an alias it never knew', () => {
+      expect(() => session.unsubscribe(BigInt(99))).toThrow();
+    });
   });
 });
