@@ -113,6 +113,29 @@ filterDescribe('shaka.msf.draft18.MessageWriter', isMSFSupported, () => {
         0x00, // parameter count
       ]);
     });
+
+    it('should default the range to the object at {0, 0}', () => {
+      // The range is an inclusive pair of absolute Locations, so this asks for
+      // one Object, not for the whole track.
+      writer.marshalFetch({
+        requestId: BigInt(2),
+        namespace: ['ns'],
+        trackName: 'a',
+        startLocation: undefined,
+        endLocation: undefined,
+        params: [],
+      });
+
+      expectMessage([0x16], [
+        0x02,
+        0x01,
+        0x01, 0x02, 0x6e, 0x73,
+        0x01, 0x61,
+        0x00, 0x00, // start location {0, 0}
+        0x00, 0x00, // end location {0, 0}
+        0x00,
+      ]);
+    });
   });
 
   describe('marshalRequestOk', () => {

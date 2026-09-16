@@ -28,6 +28,8 @@
 +../../lib/msf/drafts/draft18/dialect.js
 +../../lib/msf/drafts/draft18/messages.js
 +../../lib/msf/drafts/draft18/session.js
++../../lib/msf/drafts/draft20/dialect.js
++../../lib/msf/drafts/draft20/messages.js
 
 +../../lib/transmuxer/av1.js
 +../../lib/transmuxer/loc_transmuxer.js
