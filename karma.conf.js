@@ -305,6 +305,7 @@ module.exports = (config) => {
       // eslint-disable-next-line @stylistic/max-len
       {pattern: 'test/test/assets/hls-ts-audio-muxed-in-video/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-av1/*', included: false},
       {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
