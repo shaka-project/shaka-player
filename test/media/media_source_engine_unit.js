@@ -127,6 +127,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let requiresTimestampOffsetFudgeSpy;
   /** @type {!jasmine.Spy} */
+  let requiresPipelineFlushSpy;
+  /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
@@ -221,6 +223,9 @@ describe('MediaSourceEngine', () => {
 
     requiresTimestampOffsetFudgeSpy = spyOn(deviceDetected,
         'requiresTimestampOffsetFudge').and.returnValue(false);
+
+    requiresPipelineFlushSpy = spyOn(deviceDetected,
+        'requiresPipelineFlush').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
         .and.callFake((stream, data) => data + 100);
@@ -1408,6 +1413,48 @@ describe('MediaSourceEngine', () => {
           /* streamsByType= */ new Map());
       expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
       expect(mockTextEngine.setAppendWindow).toHaveBeenCalledWith(0, 20);
+    });
+  });
+
+  describe('flush', () => {
+    beforeEach(async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, false);
+    });
+
+    it('does not nudge the playhead by default', async () => {
+      const originalTime = 10;
+      mockVideo.currentTime = originalTime;
+
+      await mediaSourceEngine.flush(ContentType.VIDEO);
+
+      expect(mockVideo.currentTime).toBe(originalTime);
+    });
+
+    it('nudges the playhead when the device requires it', async () => {
+      requiresPipelineFlushSpy.and.returnValue(true);
+
+      const originalTime = 10;
+      mockVideo.currentTime = originalTime;
+
+      await mediaSourceEngine.flush(ContentType.VIDEO);
+
+      expect(mockVideo.currentTime).toBeLessThan(originalTime);
+    });
+
+    it('does nothing for text', async () => {
+      requiresPipelineFlushSpy.and.returnValue(true);
+
+      const originalTime = 10;
+      mockVideo.currentTime = originalTime;
+
+      await mediaSourceEngine.flush(ContentType.TEXT);
+
+      expect(mockVideo.currentTime).toBe(originalTime);
     });
   });
 
