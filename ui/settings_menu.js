@@ -132,7 +132,11 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     this.backButton = shaka.util.Dom.createButton();
     this.backButton.classList.add('shaka-back-to-overflow-button');
     this.menu.appendChild(this.backButton);
-    this.eventManager.listen(this.backButton, 'click', () => {
+    this.eventManager.listen(this.backButton, 'click', (event) => {
+      if (this.onBackButtonClick(event)) {
+        event.stopPropagation();
+        return;
+      }
       this.controls.hideSettingsMenus();
       this.backButton.focus();
     });
@@ -251,6 +255,18 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
 
   /** @protected */
   onMenuClose() {}
+
+  /**
+   * Called when the back button is clicked. If this method returns true,
+   * the default action of closing the menu is prevented.
+   *
+   * @param {!Event} event
+   * @return {boolean}
+   * @protected
+   */
+  onBackButtonClick(event) {
+    return false;
+  }
 
   /** @override */
   adjustCustomStyle() {
