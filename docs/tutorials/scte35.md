@@ -15,8 +15,13 @@ player.addEventListener('scte35added', (event) => {
   // A message was discovered, possibly well before its presentation time.
   console.log(event.detail);
 });
-player.addEventListener('scte35', (event) => {
+player.addEventListener('scte35enter', (event) => {
   // Playback reached the message's presentation time.
+  console.log(event.detail);
+});
+player.addEventListener('scte35exit', (event) => {
+  // Playback left it.  A message with no duration is entered and left in the
+  // same poll.
   console.log(event.detail);
 });
 
@@ -41,9 +46,10 @@ messages: an `IN` is reported at the end of the date range it closes, not at
 the `OUT` time. A message discovered through more than one transport is
 reported once per transport; use `source` to tell them apart.
 
-Seeking across a message does not emit `scte35`. Replaying after seeking back
-can emit it again. Playback notifications use the playhead observer's polling
-resolution; they are not frame-accurate splice operations.
+Seeking across a message emits neither `scte35enter` nor `scte35exit`.
+Replaying after seeking back can emit them again. Playback notifications use
+the playhead observer's polling resolution; they are not frame-accurate splice
+operations.
 
 ## Formats
 
