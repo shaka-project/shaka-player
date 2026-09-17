@@ -93,6 +93,7 @@ describe('Demo', () => {
           .add('drm.preferredKeySystems')
           .add('manifest.msf.namespaces')
           .add('cmcd.eventTargets')
+          .add('cmcd.includeInRequests')
           .add('streaming.prefetchAudioLanguages');
       // We determine whether a config option has been made or not by looking at
       // which config values have been queried (via the fake main object's
@@ -210,7 +211,8 @@ describe('Demo', () => {
           .add('preferredAudio')
           .add('preferredVideo')
           .add('preferredText')
-          .add('cmcd.eventTargets');
+          .add('cmcd.eventTargets')
+          .add('cmcd.includeInRequests');
 
       /**
        * @param {!Object} section
