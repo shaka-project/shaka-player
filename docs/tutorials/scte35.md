@@ -73,15 +73,3 @@ skipped rather than reported, and never fails playback.
 DASH `emsg` must be declared in the MPD unless
 `mediaSource.dispatchAllEmsgBoxes` is enabled. For HLS, enable
 `mediaSource.dispatchAllEmsgBoxes` to receive SCTE-35 `emsg`.
-
-## Lifecycle
-
-Messages are retained while they are within the accessible presentation window,
-including messages still in the future. Preloading owns the timeline until it
-is transferred to playback; destroying an abandoned preload or unloading
-playback releases its messages.
-
-Manifest parser plugins call the `onScte35Event` callback with a
-`shaka.extern.Scte35Event`, having already resolved their transport's clock to
-player presentation time. Native HLS playback through `src=` does not expose
-playlist attributes through this API.
