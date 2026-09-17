@@ -1794,6 +1794,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    // Browsers may consume Escape to exit fullscreen without a key event.
+    // Handle the transition as well so an open menu cannot lose its focus.
+    let wasFullscreen = this.isFullScreenEnabled();
+    this.eventManager_.listen(document, 'fullscreenchange', () => {
+      const isFullscreen = this.isFullScreenEnabled();
+      if (wasFullscreen && !isFullscreen) {
+        this.closeSettingsMenusAndRestoreFocus_();
+      }
+      wasFullscreen = isFullscreen;
+    });
+
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
 
@@ -2698,37 +2709,45 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // If escape key was pressed, close any open settings menus.
     if (event.key == 'Escape') {
-      const activeElement = this.videoContainer_.ownerDocument.activeElement;
-      const focusIsInMenu = activeElement && this.menus_.some(
-          (menu) => !menu.classList.contains('shaka-hidden') &&
-                    menu.contains(activeElement));
-      this.hideSettingsMenusTimer_.tickNow();
-      if (focusIsInMenu && this.settingsMenuOpener_ &&
-          !this.settingsMenuOpener_.closest('.shaka-hidden') &&
-          this.settingsMenuOpener_.getClientRects().length) {
-        this.settingsMenuOpener_.setAttribute('aria-expanded', 'false');
-        this.settingsMenuOpener_.focus();
-      }
+      this.closeSettingsMenusAndRestoreFocus_();
     }
 
-    if (anySettingsMenusAreOpen && event.key == 'Tab') {
-      // If Tab key or Shift+Tab keys are pressed when navigating through
-      // an overflow settings menu, keep the focus to loop inside the
-      // overflow menu.
-      this.keepFocusInMenu_(event);
+    if (event.key == 'Tab') {
+      // An active menu has its own tab cycle, even in fullscreen.
+      if (anySettingsMenusAreOpen && this.keepFocusInMenu_(event)) {
+        return;
+      }
+      const fullscreenElement =
+          this.videoContainer_.ownerDocument.fullscreenElement;
+      if (fullscreenElement && this.isFullScreenEnabled()) {
+        this.keepFocusInContainer_(event, fullscreenElement,
+            /* recoverOutsideFocus= */ true);
+      }
     }
   }
 
   /**
-   * When the user is using keyboard to navigate inside the overflow settings
-   * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
-   * backward), make sure it's focused only on the elements of the overflow
-   * panel.
-   *
-   * This is called by onWindowKeyDown_() function, when there's a settings
-   * overflow menu open, and the Tab key / Shift+Tab keys are pressed.
-   *
+   * Closes settings menus and restores focus to their root opening button.
+   * @private
+   */
+  closeSettingsMenusAndRestoreFocus_() {
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
+    const focusIsInMenu = activeElement && this.menus_.some(
+        (menu) => !menu.classList.contains('shaka-hidden') &&
+                  menu.contains(activeElement));
+    this.hideSettingsMenusTimer_.tickNow();
+    if (focusIsInMenu && this.settingsMenuOpener_ &&
+        !this.settingsMenuOpener_.closest('.shaka-hidden') &&
+        this.settingsMenuOpener_.getClientRects().length) {
+      this.settingsMenuOpener_.setAttribute('aria-expanded', 'false');
+      this.settingsMenuOpener_.focus();
+    }
+  }
+
+  /**
+   * Keeps keyboard focus within the open menu containing the active element.
    * @param {!Event} event
+   * @return {boolean} Whether the focus is inside an open settings menu.
    * @private
    */
   keepFocusInMenu_(event) {
@@ -2742,13 +2761,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       settingsMenu = settingsMenu.parentElement;
     }
     if (!settingsMenu || settingsMenu.classList.contains('shaka-hidden')) {
-      return;
+      return false;
     }
+    this.keepFocusInContainer_(event, settingsMenu);
+    return true;
+  }
 
+  /**
+   * Loops Tab navigation at a container's first and last visible control.
+   * @param {!Event} event
+   * @param {!Element} container
+   * @param {boolean=} recoverOutsideFocus
+   * @private
+   */
+  keepFocusInContainer_(event, container, recoverOutsideFocus = false) {
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
     // Some menus put their controls inside non-focusable containers.  Include
     // their descendants, excluding hidden or disabled controls and controls
     // with a negative tabIndex.
-    const children = Array.from(settingsMenu.querySelectorAll(
+    const children = Array.from(container.querySelectorAll(
         'button, input, select, textarea, a[href], [tabindex]'));
     const shownChildren = children.filter((child) => {
       const element = /** @type {!HTMLElement} */ (child);
@@ -2763,6 +2794,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const firstShownChild = /** @type {!HTMLElement} */ (shownChildren[0]);
     const lastShownChild =
     /** @type {!HTMLElement} */ (shownChildren[shownChildren.length - 1]);
+    if (recoverOutsideFocus &&
+        !shownChildren.some((child) => child == activeElement)) {
+      event.preventDefault();
+      if (this.pressedKeys_.has('Shift')) {
+        lastShownChild.focus();
+      } else {
+        firstShownChild.focus();
+      }
+      return;
+    }
     if (this.pressedKeys_.has('Shift')) {
       if (activeElement == firstShownChild) {
         event.preventDefault();

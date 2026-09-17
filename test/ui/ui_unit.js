@@ -688,6 +688,131 @@ describe('UI', () => {
       }
     });
 
+    describe('fullscreen keyboard navigation', () => {
+      let originalFullscreenElement;
+      /** @type {?Element} */
+      let fullscreenElement;
+      /** @type {!HTMLElement} */
+      let first;
+      /** @type {!HTMLElement} */
+      let last;
+      /** @type {!HTMLElement} */
+      let menu;
+
+      beforeEach(async () => {
+        if (!document.fullscreenEnabled) {
+          pending('This test requires document fullscreen support.');
+        }
+        originalFullscreenElement =
+            Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+        fullscreenElement = null;
+        Object.defineProperty(document, 'fullscreenElement', {
+          get: () => fullscreenElement,
+          configurable: true,
+        });
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, {
+              controlPanelElements: ['play_pause', 'overflow_menu'],
+              overflowMenuButtons: ['playback_rate'],
+              addSeekBar: false,
+              customContextMenu: false,
+            });
+        player = ui.getControls().getLocalPlayer();
+        first = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-play-button'));
+        last = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-overflow-menu-button'));
+        menu = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-playback-rates'));
+        fullscreenElement = videoContainer;
+        document.dispatchEvent(new Event('fullscreenchange'));
+      });
+
+      afterEach(() => {
+        if (originalFullscreenElement) {
+          Object.defineProperty(document, 'fullscreenElement',
+              originalFullscreenElement);
+        } else {
+          delete document['fullscreenElement'];
+        }
+      });
+
+      for (const backwards of [false, true]) {
+        it(backwards ? 'wraps Shift+Tab inside fullscreen' :
+          'wraps Tab inside fullscreen', () => {
+          const source = backwards ? first : last;
+          const target = backwards ? last : first;
+          const focus = spyOn(target, 'focus').and.callThrough();
+          focusForKeyboardTest(source);
+          if (backwards) {
+            source.dispatchEvent(createKeydownEvent('Shift'));
+          }
+          const event = createKeydownEvent('Tab');
+          source.dispatchEvent(event);
+          expect(event.defaultPrevented).toBe(true);
+          expect(focus).toHaveBeenCalled();
+        });
+      }
+
+      it('keeps the submenu tab cycle in fullscreen', () => {
+        last.click();
+        const rate = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-playbackrate-button'));
+        rate.click();
+        const back = /** @type {!HTMLElement} */ (
+          menu.querySelector('.shaka-back-to-overflow-button'));
+        const end = /** @type {!HTMLElement} */ (
+          menu.querySelector('.shaka-playback-rate-presets').lastElementChild);
+        focusForKeyboardTest(end);
+        const focus = spyOn(back, 'focus').and.callThrough();
+        const event = createKeydownEvent('Tab');
+        end.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(focus).toHaveBeenCalled();
+      });
+
+      it('does not trap Tab after leaving fullscreen', () => {
+        fullscreenElement = null;
+        document.dispatchEvent(new Event('fullscreenchange'));
+        focusForKeyboardTest(last);
+        const event = createKeydownEvent('Tab');
+        last.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(false);
+      });
+
+      it('recovers focus from outside fullscreen', () => {
+        focusForKeyboardTest(document.body);
+        const focus = spyOn(first, 'focus').and.callThrough();
+        const event = createKeydownEvent('Tab');
+        window.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(focus).toHaveBeenCalled();
+      });
+
+      for (const browserExit of [false, true]) {
+        it(browserExit ? 'restores focus when the browser exits fullscreen' :
+          'restores menu focus on Escape in fullscreen', () => {
+          last.click();
+          const rate = /** @type {!HTMLElement} */ (
+            videoContainer.querySelector('.shaka-playbackrate-button'));
+          rate.click();
+          const chosen = /** @type {!HTMLElement} */ (
+            menu.querySelector('button[aria-checked="true"]'));
+          focusForKeyboardTest(chosen);
+          const focus = spyOn(last, 'focus').and.callThrough();
+          if (browserExit) {
+            fullscreenElement = null;
+            document.dispatchEvent(new Event('fullscreenchange'));
+          } else {
+            chosen.dispatchEvent(createKeydownEvent('Escape'));
+          }
+          expect(menu.classList.contains('shaka-hidden')).toBe(true);
+          expect(last.getAttribute('aria-expanded')).toBe('false');
+          expect(focus).toHaveBeenCalledTimes(1);
+        });
+      }
+    });
+
     describe('overflow menu', () => {
       /** @type {!HTMLElement} */
       let overflowMenu;
