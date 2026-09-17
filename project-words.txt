@@ -629,7 +629,3 @@ WHATWG
 
 # banned words
 !timmer
-
-CUEI
-UPID
-UPIDs

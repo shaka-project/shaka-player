@@ -6,91 +6,44 @@
 
 /**
  * @typedef {{
- *   tag: number,
- *   ptsTime: ?number,
- *   ptsOffset: ?number,
- * }}
- * @exportDoc
- */
-shaka.extern.Scte35Component;
-
-/**
- * A normalized splice command.  PTS and durations are in 90 kHz ticks, not
- * player presentation time.  Null means the field is absent.
- * @typedef {{
- *   type: number,
- *   spliceEventId: ?number,
- *   cancel: boolean,
- *   outOfNetwork: ?boolean,
- *   immediate: boolean,
- *   ptsTime: ?number,
- *   breakDuration: ?number,
- *   autoReturn: ?boolean,
- *   uniqueProgramId: ?number,
- *   availNum: ?number,
- *   availsExpected: ?number,
- *   components: !Array<shaka.extern.Scte35Component>,
- * }}
- * @exportDoc
- */
-shaka.extern.Scte35Command;
-
-/**
- * A normalized segmentation descriptor.  Duration and component offsets are
- * in 90 kHz ticks.  Unknown descriptors remain available in the original data.
- * @typedef {{
- *   segmentationEventId: number,
- *   cancel: boolean,
- *   duration: ?number,
- *   typeId: ?number,
- *   upidType: ?number,
- *   upid: ?string,
- *   segmentNum: ?number,
- *   segmentsExpected: ?number,
- *   subSegmentNum: ?number,
- *   subSegmentsExpected: ?number,
- *   deliveryNotRestricted: boolean,
- *   webDeliveryAllowed: ?boolean,
- *   noRegionalBlackout: ?boolean,
- *   archiveAllowed: ?boolean,
- *   deviceRestrictions: ?number,
- *   components: !Array<shaka.extern.Scte35Component>,
- * }}
- * @exportDoc
- */
-shaka.extern.Scte35SegmentationDescriptor;
-
-/**
- * Identifies an occurrence in its transport.  Transport IDs are independent
- * of splice and segmentation event IDs.
- * @typedef {{source: string, id: string, scope: string, schemeIdUri: string}}
- * @exportDoc
- */
-shaka.extern.Scte35Origin;
-
-/**
- * A SCTE-35 message on the player's presentation timeline.  startTime is in
- * seconds.  duration describes the transport's confirmed duration, if known;
- * plannedDuration is only an estimate.  Neither makes this message an ad.
- * kind is 'out', 'in', or 'cmd' for HLS, and 'message' otherwise.
- * status is 'parsed', 'unsupported', or 'invalid'.  Unsupported and invalid
- * messages retain their original data for applications to inspect.
- * data contains a complete binary section; xml contains the original XML.
- * upid values in descriptors are hexadecimal byte strings.
- * @typedef {{
+ *   schemeIdUri: string,
  *   startTime: number,
- *   duration: ?number,
- *   plannedDuration: ?number,
+ *   endTime: number,
+ *   id: string,
+ *   source: string,
  *   kind: string,
- *   origins: !Array<shaka.extern.Scte35Origin>,
  *   data: ?Uint8Array,
- *   rawData: ?string,
- *   xml: ?shaka.extern.xml.Node,
- *   status: string,
- *   ptsAdjustment: ?number,
- *   command: ?shaka.extern.Scte35Command,
- *   segmentationDescriptors: !Array<shaka.extern.Scte35SegmentationDescriptor>,
+ *   node: ?shaka.extern.xml.Node
  * }}
+ *
+ * @description
+ * A SCTE-35 message placed on the presentation timeline.
+ *
+ * The player does not interpret the message.  It normalizes where the message
+ * came from and when it applies, and hands the payload to the application
+ * untouched, so that applications can decode only the parts they need.
+ *
+ * @property {string} schemeIdUri
+ *   The SCTE-35 scheme the transport used to carry the message.
+ * @property {number} startTime
+ *   The presentation time (in seconds) the message applies to.
+ * @property {number} endTime
+ *   The presentation time (in seconds) the message stops applying.  Equal to
+ *   startTime when the transport does not signal a duration.
+ * @property {string} id
+ *   The transport's identifier for this message.  It is independent of the
+ *   splice and segmentation event IDs inside the payload.
+ * @property {string} source
+ *   Where the message was found: 'dash', 'hls' or 'emsg'.
+ * @property {string} kind
+ *   'out', 'in' or 'cmd' for HLS, matching the attribute that carried the
+ *   payload.  The empty string for other sources.
+ * @property {?Uint8Array} data
+ *   The complete binary splice_info_section, decoded from base64 or
+ *   hexadecimal when the transport used those.  Null when the message is
+ *   only available as XML.
+ * @property {?shaka.extern.xml.Node} node
+ *   The original XML, for XML-native messages.  Null otherwise.
  * @exportDoc
  */
 shaka.extern.Scte35Event;

@@ -977,7 +977,7 @@ describe('MediaSourceEngine', () => {
 
     describe('SCTE-35', () => {
       for (const version of [0, 1]) {
-        it('normalizes registered emsg version ' + version, () => {
+        it('reports registered emsg version ' + version, () => {
           const stream =
               shaka.test.StreamingEngineUtil.createMockVideoStream(1);
           stream.emsgSchemeIdUris = ['urn:scte:scte35:2013:bin'];
@@ -989,8 +989,8 @@ describe('MediaSourceEngine', () => {
           const message =
               shaka.util.Scte35.fromEmsg(onEmsg.calls.argsFor(0)[0]);
           expect(message.startTime).toBe(10);
-          expect(message.status).toBe('parsed');
-          expect(message.command.spliceEventId).toBe(1234);
+          expect(message.source).toBe('emsg');
+          expect(message.data).toEqual(shaka.test.Scte35.section());
         });
       }
 

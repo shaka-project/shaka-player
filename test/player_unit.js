@@ -864,25 +864,19 @@ describe('Player', () => {
           fakeMimeType, () => parser);
     });
 
-    it('exposes discovery, updates and isolated snapshots', async () => {
+    it('exposes discovered messages until unload', async () => {
       const added = jasmine.createSpy('added');
-      const updated = jasmine.createSpy('updated');
       player.addEventListener('scte35added', Util.spyFunc(added));
-      player.addEventListener('scte35updated', Util.spyFunc(updated));
       expect(player.getAllScte35Events()).toEqual([]);
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const event = shaka.test.Scte35.event();
-      event.origins[0].source = 'hls';
-      event.duration = null;
       parser.playerInterface.onScte35Event(event);
       expect(added).toHaveBeenCalledTimes(1);
-      const snapshot = player.getAllScte35Events()[0];
-      snapshot.data.fill(0);
-      snapshot.command.spliceEventId = 0;
-      expect(player.getAllScte35Events()[0].command.spliceEventId).toBe(1234);
-      event.duration = 60;
-      parser.playerInterface.onScte35Event(event);
-      expect(updated).toHaveBeenCalledTimes(1);
+      expect(added.calls.argsFor(0)[0]['detail']).toBe(event);
+      expect(player.getAllScte35Events()).toEqual([event]);
+      // The same message from a repeated manifest update is not re-reported.
+      parser.playerInterface.onScte35Event(shaka.test.Scte35.event());
+      expect(added).toHaveBeenCalledTimes(1);
       await player.unload(false);
       expect(player.getAllScte35Events()).toEqual([]);
     });
@@ -894,8 +888,7 @@ describe('Player', () => {
           await preload.waitForFinish();
           const added = jasmine.createSpy('added');
           preload.addEventListener('scte35added', Util.spyFunc(added));
-          parser.playerInterface.onScte35Event(
-              shaka.test.Scte35.event());
+          parser.playerInterface.onScte35Event(shaka.test.Scte35.event());
           expect(added).toHaveBeenCalledTimes(1);
           await player.load(preload);
           expect(player.getAllScte35Events().length).toBe(1);
@@ -903,11 +896,10 @@ describe('Player', () => {
           const abandoned = await player.preload(
               fakeManifestUri, 0, fakeMimeType);
           await abandoned.waitForFinish();
-          parser.playerInterface.onScte35Event(
-              shaka.test.Scte35.event());
+          parser.playerInterface.onScte35Event(shaka.test.Scte35.event());
           const timeline = abandoned.getScte35Timeline();
           await abandoned.destroy();
-          expect(Array.from(timeline.events())).toEqual([]);
+          expect(Array.from(timeline.regions())).toEqual([]);
         });
 
     it('routes emsg into both dedicated and generic timelines',

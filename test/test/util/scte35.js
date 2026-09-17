@@ -4,50 +4,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/** SCTE-35 sections with valid MPEG CRCs and their equivalent XML. */
+/** SCTE-35 fixtures shared by the parser and player tests. */
 shaka.test.Scte35 = class {
-  /** @return {!Uint8Array} */
-  static insert() {
+  /** @return {!Uint8Array} A splice_info_section carrying a splice insert. */
+  static section() {
     return shaka.util.Uint8ArrayUtils.fromHex(
         'fc30250001ffffffff00fff01405000004d27feffffffffffefe005265c0' +
         '0001010100001a63a8ea');
   }
 
-  /** @return {!Uint8Array} */
-  static signal() {
-    return shaka.util.Uint8ArrayUtils.fromHex(
-        'fc302c00000000000000fff00506fe000dbba0001602144355454900000001' +
-        '7fff00005265c00000300101a3d61725');
+  /** @return {string} */
+  static base64() {
+    return shaka.util.Uint8ArrayUtils.toStandardBase64(
+        shaka.test.Scte35.section());
   }
 
   /** @return {string} */
-  static insertXml() {
-    return '<s:SpliceInfoSection ptsAdjustment="8589934591">' +
-        '<s:SpliceInsert spliceEventId="1234" outOfNetworkIndicator="true" ' +
-        'uniqueProgramId="1" availNum="1" availsExpected="1">' +
-        '<s:Program><s:SpliceTime ptsTime="8589934590"/></s:Program>' +
-        '<s:BreakDuration autoReturn="true" duration="5400000"/>' +
-        '</s:SpliceInsert></s:SpliceInfoSection>';
-  }
-
-  /** @return {string} */
-  static signalXml() {
-    return '<SpliceInfoSection ptsAdjustment="0">' +
-        '<TimeSignal><SpliceTime ptsTime="900000"/></TimeSignal>' +
-        '<SegmentationDescriptor segmentationEventId="1" ' +
-        'segmentationDuration="5400000" segmentationTypeId="48" ' +
-        'segmentNum="1" segmentsExpected="1">' +
-        '<SegmentationUpid type="0"/>' +
-        '</SegmentationDescriptor></SpliceInfoSection>';
+  static hex() {
+    return '0x' + shaka.util.Uint8ArrayUtils.toHex(
+        shaka.test.Scte35.section());
   }
 
   /**
-   * @param {string=} xml
+   * @param {string=} xml Contents of the <Event> element.
    * @param {string=} scheme
    * @return {shaka.extern.TimelineRegionInfo}
    */
-  static region(xml = shaka.test.Scte35.insertXml(),
-      scheme = 'urn:scte:scte35:2013:xml') {
+  static region(xml = '<s:Signal><s:Binary>' + shaka.test.Scte35.base64() +
+      '</s:Binary></s:Signal>', scheme = 'urn:scte:scte35:2014:xml+bin') {
     return {
       schemeIdUri: scheme, value: '', id: '1', timescale: 1,
       startTime: 10, endTime: 70,
@@ -60,7 +44,7 @@ shaka.test.Scte35 = class {
    * @param {!Uint8Array=} data
    * @return {shaka.extern.EmsgInfo}
    */
-  static emsg(data = shaka.test.Scte35.insert()) {
+  static emsg(data = shaka.test.Scte35.section()) {
     return {
       schemeIdUri: 'urn:scte:scte35:2013:bin', value: '', id: 1,
       startTime: 10, endTime: 70, timescale: 1,
@@ -83,7 +67,7 @@ shaka.test.Scte35 = class {
   static emsgBox(version, time) {
     const scheme = shaka.util.BufferUtils.toUint8(
         shaka.util.StringUtils.toUTF8('urn:scte:scte35:2013:bin\0\0'));
-    const data = shaka.test.Scte35.insert();
+    const data = shaka.test.Scte35.section();
     const size = 12 + scheme.length + (version == 0 ? 16 : 20) + data.length;
     const box = new Uint8Array(size);
     const view = shaka.util.BufferUtils.toDataView(box);
