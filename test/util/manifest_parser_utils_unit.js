@@ -73,6 +73,35 @@ describe('ManifestParserUtils', () => {
           'audio', ['dtsz']);
       expect(result).toBeNull();
     });
+
+    it('recognizes IAMF audio codecs', () => {
+      // The fourth element of an IAMF codecs parameter string is the codecs
+      // parameter string of the underlying audio substreams.
+      const codecs = [
+        'iamf.000.000.Opus',
+        'iamf.000.000.mp4a.40.2',
+        'iamf.000.000.fLaC',
+        'iamf.000.000.ipcm',
+        'iamf.001.000.Opus',
+        'iamf.255.255.Opus',
+      ];
+      for (const codec of codecs) {
+        expect(ManifestParserUtils.guessCodecsSafe('audio', [codec]))
+            .toBe(codec);
+      }
+    });
+
+    it('returns IAMF from a mixed codec list', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'audio', ['avc1.42E01E', 'iamf.000.000.Opus']);
+      expect(result).toBe('iamf.000.000.Opus');
+    });
+
+    it('does not match IAMF codecs as video', () => {
+      const result = ManifestParserUtils.guessCodecsSafe(
+          'video', ['iamf.000.000.Opus']);
+      expect(result).toBeNull();
+    });
   });
 
   // Shorthand so expected values read as cleanly as the real output.

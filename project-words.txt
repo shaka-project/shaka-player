@@ -17,6 +17,7 @@ bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
+channelcount
 chaptersupdated
 clearlead
 configurationchanged
@@ -156,6 +157,7 @@ nonprefixed
 overlayed
 playhead
 preflighted
+preflights
 preloaders
 prio
 programinformation
@@ -183,6 +185,7 @@ unregisters
 unstore
 unviewed
 varint
+varints
 vint
 vints
 xywh
@@ -256,6 +259,7 @@ abgr
 altmpd
 apic
 apos
+appendable
 appl
 arib
 assetid
@@ -279,6 +283,8 @@ cicp
 cmaf
 cmcd
 cmfa
+cmfc
+cmfs
 cmft
 cmfv
 cmsd
@@ -328,6 +334,7 @@ ftyp
 hdcp
 hdlr
 hvcc
+iacb
 iamf
 ilst
 imagetype
@@ -335,6 +342,7 @@ imsa
 imsc
 inband
 interintra
+ipcm
 isom
 isrc
 itut
@@ -436,6 +444,7 @@ stts
 styp
 subcues
 subframes
+substreams
 subt
 subviewer
 superres
@@ -477,6 +486,7 @@ udta
 ufid
 unalignable
 unskippable
+mpdlink
 urlparam
 uslt
 uvlc
@@ -528,6 +538,7 @@ dashif
 fontdownload
 isobmff
 isoff
+lowlatency
 querypart
 startnumber
 Xlinks
@@ -552,6 +563,7 @@ SQUEEZECURRENT
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
 gregoire
+locmaf
 moqt
 msf
 msfts
