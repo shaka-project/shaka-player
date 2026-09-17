@@ -730,6 +730,109 @@ describe('PeriodCombiner', () => {
     expect(textStreams.every((s) => s.roles.length === 1)).toBe(true);
   });
 
+  // Regression test: a track labelled "caption" in one period and "subtitle"
+  // in the next was stranded on a dummy stream, stopping text silently.
+  it('Combines text streams whose kind changes across periods', async () => {
+    const videoStreams = [makeVideoStream(1280)];
+    const audioStreams = [makeAudioStream('en', /* channels= */ 2)];
+    const imageStreams = [];
+
+    const caption = makeTextStream('en');
+    caption.kind = 'caption';
+    caption.originalId = 'en-caption';
+
+    const subtitle = makeTextStream('en');
+    subtitle.kind = 'subtitle';
+    subtitle.roles = ['subtitle'];
+    subtitle.originalId = 'en-subtitle';
+
+    /** @type {!Array<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          caption,
+        ],
+        imageStreams,
+      },
+      {
+        id: '2',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          subtitle,
+        ],
+        imageStreams,
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const textStreams = combiner.getTextStreams();
+    expect(textStreams.length).toBe(1);
+
+    // We can use the originalId field to see what the track is composed of.
+    // Both periods are represented, so no period was filled with a dummy.
+    expect(textStreams[0].originalId).toBe('en-caption,en-subtitle');
+  });
+
+  it('Prefers text streams of a matching kind', async () => {
+    const videoStreams = [makeVideoStream(1280)];
+    const audioStreams = [makeAudioStream('en', /* channels= */ 2)];
+    const imageStreams = [];
+
+    /**
+     * @param {string} kind
+     * @param {string} role
+     * @param {string} originalId
+     * @return {shaka.extern.Stream}
+     */
+    const makeText = (kind, role, originalId) => {
+      const stream = makeTextStream('en');
+      stream.kind = kind;
+      stream.roles = [role];
+      stream.originalId = originalId;
+      return stream;
+    };
+
+    // The roles do not match across periods, so the streams are matched by
+    // the linear search rather than by an exact hash match.
+    /** @type {!Array<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          makeText('caption', 'alternate', 'p1-caption'),
+          makeText('subtitle', 'commentary', 'p1-subtitle'),
+        ],
+        imageStreams,
+      },
+      {
+        id: '2',
+        videoStreams,
+        audioStreams,
+        textStreams: [
+          makeText('caption', 'supplementary', 'p2-caption'),
+          makeText('subtitle', 'dub', 'p2-subtitle'),
+        ],
+        imageStreams,
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const textStreams = combiner.getTextStreams();
+    expect(textStreams.length).toBe(2);
+
+    const originalIds = textStreams.map((s) => s.originalId);
+    expect(originalIds).toEqual(jasmine.arrayWithExactContents([
+      'p1-caption,p2-caption',
+      'p1-subtitle,p2-subtitle',
+    ]));
+  });
+
   // Regression test for #3383, where we failed on multi-period content with
   // multiple image streams per period.
   it('Can handle multiple image streams', async () => {
