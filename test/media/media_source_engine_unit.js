@@ -125,6 +125,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!jasmine.Spy} */
   let requiresEC3InitSegments;
   /** @type {!jasmine.Spy} */
+  let requiresTimestampOffsetFudgeSpy;
+  /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
@@ -216,6 +218,9 @@ describe('MediaSourceEngine', () => {
 
     requiresEC3InitSegments = spyOn(deviceDetected,
         'requiresEC3InitSegments').and.returnValue(false);
+
+    requiresTimestampOffsetFudgeSpy = spyOn(deviceDetected,
+        'requiresTimestampOffsetFudge').and.returnValue(false);
 
     fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
         .and.callFake((stream, data) => data + 100);
@@ -1073,6 +1078,99 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    // Regression test for the interaction between the legacy Edge rounding
+    // workaround in setTimestampOffset_ and the per-segment recalculation of
+    // the timestamp offset.  The workaround adds 0.001 to any negative offset
+    // before writing it to the SourceBuffer, so reading it back and comparing
+    // it against a freshly calculated offset reported a 0.001 difference on
+    // every segment.  That difference met the "did it change?" threshold, so
+    // every append was preceded by an abort(), which resets MSE's coded frame
+    // processing and makes it drop everything up to the next keyframe.  On
+    // content whose segments are not cut on a GOP boundary, that dropped the
+    // start of every segment and left a gap in the buffered ranges.
+    it('does not re-set an unchanged negative timestampOffset', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+          shaka.media.ManifestParser.HLS);
+
+      // Media timestamps that start far from zero, as in an MPEG-TS stream
+      // carrying a real-time clock, so the offset comes out negative.
+      const mediaStart = 92703.440178;
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.callFake((contentType, data, reference) => {
+            return {timestamp: mediaStart + reference.startTime, metadata: []};
+          });
+
+      const expectedOffset = -mediaStart;
+
+      /** @param {number} startTime */
+      const appendSegment = async (startTime) => {
+        const reference = dummyReference(startTime, startTime + 10);
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, reference, fakeStream,
+            /* hasClosedCaptions= */ false);
+        videoSourceBuffer.updateend();
+        await append;
+      };
+
+      await appendSegment(0);
+
+      expect(videoSourceBuffer.timestampOffset).toBeCloseTo(expectedOffset, 6);
+      videoSourceBuffer.abort.calls.reset();
+
+      // Every later segment resolves to the same offset, so none of them
+      // should abort or touch timestampOffset again.  These have to be
+      // appended one at a time, since each one needs its own updateend.
+      await appendSegment(10);
+      await appendSegment(20);
+      await appendSegment(30);
+
+      expect(videoSourceBuffer.abort).not.toHaveBeenCalled();
+      expect(videoSourceBuffer.timestampOffset).toBeCloseTo(expectedOffset, 6);
+    });
+
+    // Chromium, Gecko and WebKit have all been measured to place the first
+    // frame exactly on appendWindowStart for a negative timestampOffset, so
+    // the fudge from https://github.com/shaka-project/shaka-player/issues/1281
+    // only runs where the device asks for it.  See the matching integration
+    // test, which verifies the measurement against a real SourceBuffer.
+    /**
+     * @param {boolean} requiresFudge
+     * @return {!Promise<number>}
+     */
+    const appendWithNegativeOffset = async (requiresFudge) => {
+      requiresTimestampOffsetFudgeSpy.and.returnValue(requiresFudge);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+          shaka.media.ManifestParser.HLS);
+
+      const mediaStart = 92703.440178;
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({timestamp: mediaStart, metadata: []});
+
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, dummyReference(0, 10), fakeStream,
+          /* hasClosedCaptions= */ false);
+      videoSourceBuffer.updateend();
+      await append;
+
+      return videoSourceBuffer.timestampOffset;
+    };
+
+    it('does not fudge a negative offset by default', async () => {
+      const offset = await appendWithNegativeOffset(false);
+      expect(offset).toBeCloseTo(-92703.440178, 6);
+    });
+
+    it('fudges a negative offset when the device requires it', async () => {
+      const offset = await appendWithNegativeOffset(true);
+      expect(offset).toBeCloseTo(-92703.440178 + 0.001, 6);
+    });
   });
 
   describe('remove', () => {
@@ -1808,6 +1906,7 @@ describe('MediaSourceEngine', () => {
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
         'storeAndAppendClosedCaptions', 'setModifyCueCallback',
+        'setContainerIsMpegTs',
       ]);
 
       const resolve = () => Promise.resolve();

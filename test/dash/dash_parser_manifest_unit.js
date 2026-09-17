@@ -1431,6 +1431,53 @@ describe('DashParser Manifest', () => {
     expect(variant.audio.groupId).toBe('3');
   });
 
+  it('parses IAMF audio', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4" lang="en"',
+      '        codecs="iamf.000.000.Opus">',
+      '      <AudioChannelConfiguration schemeIdUri=',
+      '          "urn:mpeg:dash:23003:3:audio_channel_configuration:2011"',
+      '          value="6" />',
+      '      <Representation bandwidth="100">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4" lang="es"',
+      '        codecs="iamf.001.000.mp4a.40.2">',
+      '      <Representation bandwidth="100">',
+      '        <SegmentTemplate media="3.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('https://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(2);
+
+    const english = manifest.variants.find((v) => v.language == 'en');
+    goog.asserts.assert(english && english.audio, 'Missing English variant');
+    expect(english.audio.mimeType).toBe('audio/mp4');
+    expect(english.audio.codecs).toBe('iamf.000.000.Opus');
+    expect(english.audio.channelsCount).toBe(6);
+
+    const spanish = manifest.variants.find((v) => v.language == 'es');
+    goog.asserts.assert(spanish && spanish.audio, 'Missing Spanish variant');
+    expect(spanish.audio.type).toBe(shaka.util.ManifestParserUtils
+        .ContentType.AUDIO);
+    expect(spanish.audio.codecs).toBe('iamf.001.000.mp4a.40.2');
+  });
+
   it('sets contentType to text for embedded text mime types', async () => {
     // One MIME type for embedded TTML, one for embedded WebVTT.
     // One MIME type specified on AdaptationSet, on one Representation.
@@ -3146,6 +3193,103 @@ describe('DashParser Manifest', () => {
       expect(manifest.serviceDescription.minLatency).toBeUndefined();
       expect(manifest.serviceDescription.minPlaybackRate).toBe(0.95);
     });
+
+    it('with ClientDataReporting CMCD parameters', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S" type="dynamic"',
+        '     availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <BaseURL serviceLocation="beta">https://cdn2.example.com/</BaseURL>',
+        '  <ServiceDescription id="0">',
+        '    <ClientDataReporting schemeIdUri="urn:mpeg:dash:cta-5004:2023"',
+        '        serviceLocations="beta">',
+        '      <CMCDParameters mode="header" keys="br bl cid"',
+        '          contentID="c-1"/>',
+        '    </ClientDataReporting>',
+        '  </ServiceDescription>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', source);
+
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      const reporting = manifest.serviceDescription.clientDataReporting;
+      expect(reporting.serviceLocations).toEqual(['beta']);
+      expect(reporting.serviceLocationBaseUris).toEqual([
+        {serviceLocation: 'beta', uri: 'https://cdn2.example.com/'},
+      ]);
+      expect(reporting.cmcdParameters.mode).toBe('header');
+      expect(reporting.cmcdParameters.keys).toEqual(['br', 'bl', 'cid']);
+      expect(reporting.cmcdParameters.contentId).toBe('c-1');
+      expect(manifest.serviceDescription.targetLatency).toBeUndefined();
+    });
+
+    it('resolves relative Location and BaseURL service locations once',
+        async () => {
+          // Location resolves against the manifest URI and BaseURL against
+          // the updated manifest location, exactly like the request URIs
+          // this parser builds, so the CMCD service-location filter can
+          // match requests by prefix.
+          const source = [
+            '<MPD minBufferTime="PT75S" type="dynamic"',
+            '     availabilityStartTime="1970-01-01T00:00:00Z">',
+            '  <Location serviceLocation="mpd-next">',
+            '    next/manifest.mpd',
+            '  </Location>',
+            '  <BaseURL serviceLocation="cdn">media/</BaseURL>',
+            '  <ServiceDescription id="0">',
+            '    <ClientDataReporting',
+            '        schemeIdUri="urn:mpeg:dash:cta-5004:2023"',
+            '        serviceLocations="mpd-next cdn">',
+            '      <CMCDParameters keys="br"/>',
+            '    </ClientDataReporting>',
+            '  </ServiceDescription>',
+            '</MPD>',
+          ].join('\n');
+
+          const manifestUri = 'https://example.com/dash/manifest.mpd';
+          fakeNetEngine.setResponseText(manifestUri, source);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start(manifestUri, playerInterface);
+
+          const reporting = manifest.serviceDescription.clientDataReporting;
+          expect(reporting.serviceLocationBaseUris).toEqual([
+            {
+              serviceLocation: 'mpd-next',
+              uri: 'https://example.com/dash/next/manifest.mpd',
+            },
+            {
+              serviceLocation: 'cdn',
+              uri: 'https://example.com/dash/next/media/',
+            },
+          ]);
+        });
+
+    it('ignores descriptions scoped to service-description events',
+        async () => {
+          const source = [
+            '<MPD minBufferTime="PT75S" type="dynamic"',
+            '     availabilityStartTime="1970-01-01T00:00:00Z">',
+            '  <ServiceDescription id="1250">',
+            '    <Scope schemeIdUri=',
+            '        "urn:mpeg:dash:event:service-description:2024"/>',
+            '    <Latency target="1250"/>',
+            '    <ClientDataReporting',
+            '        schemeIdUri="urn:mpeg:dash:cta-5004:2023">',
+            '      <CMCDParameters keys="br"/>',
+            '    </ClientDataReporting>',
+            '  </ServiceDescription>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo', source);
+
+          /** @type {shaka.extern.Manifest} */
+          const manifest = await parser.start('https://foo', playerInterface);
+          expect(manifest.serviceDescription).toBeNull();
+        });
   });
 
   it('parses urn:mpeg:dash:chaining:2016', async () => {
@@ -5015,7 +5159,11 @@ describe('DashParser Manifest', () => {
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.MANIFEST,
               jasmine.objectContaining(
-                  {uris: ['https://imported/manifest.mpd']}));
+                  {uris: ['https://imported/manifest.mpd']}),
+              jasmine.objectContaining({
+                type: shaka.net.NetworkingEngine.AdvancedRequestType
+                    .LINKED_MPD,
+              }));
         });
 
         it('two linked periods produce correct total duration', async () => {

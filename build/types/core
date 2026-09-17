@@ -122,6 +122,7 @@
 +../../lib/util/mutex.js
 +../../lib/util/number_utils.js
 +../../lib/util/object_utils.js
++../../lib/util/obu.js
 +../../lib/util/operation_manager.js
 +../../lib/util/periods.js
 +../../lib/util/player_configuration.js

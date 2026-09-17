@@ -265,6 +265,37 @@ describe('UI', () => {
     }
 
     /**
+     * Takes the focus away from |element| for a keyboard test.
+     *
+     * blur() only does something when the element really has the focus, which
+     * is not the case when focusForKeyboardTest() had to fake it, and some
+     * browsers put off focus events while their window is in the background.
+     * Drop the override and deliver the event by hand when the platform does
+     * not, so that the test measures the blur handling and not the platform.
+     *
+     * @param {!HTMLElement} element
+     */
+    function blurForKeyboardTest(element) {
+      if (activeElementIsForced) {
+        // Deleting the override restores the accessor from Document.prototype.
+        delete document['activeElement'];
+        activeElementIsForced = false;
+      }
+
+      let blurred = false;
+      const listener = () => {
+        blurred = true;
+      };
+      element.addEventListener('blur', listener);
+      element.blur();
+      element.removeEventListener('blur', listener);
+
+      if (!blurred) {
+        element.dispatchEvent(new Event('blur'));
+      }
+    }
+
+    /**
      * Creates a keydown event for |key|.
      *
      * Not every platform honors the "key" member of the init dictionary: on
@@ -2309,6 +2340,57 @@ describe('UI', () => {
         // Muting does not interrupt the drag.
         expect(controls.isSeeking()).toBe(true);
         expect(parseFloat(seekBar.value)).toBe(dragTime);
+      });
+
+      describe('when the controls hide', () => {
+        /** @param {boolean} opaque */
+        function hideControls(opaque) {
+          spyOn(controls, 'isOpaque').and.returnValue(opaque);
+          controls.dispatchEvent(new shaka.util.FakeEvent('hidingui'));
+        }
+
+        it('keeps the focused seek bar usable', () => {
+          expect(document.activeElement).toBe(seekBar);
+
+          hideControls(/* opaque= */ false);
+
+          // Disabling the bar here would move the focus to the body, and the
+          // keyboard controls only act while the player has the focus.
+          expect(seekBar.disabled).toBe(false);
+          expect(document.activeElement).toBe(seekBar);
+
+          const before = video.currentTime;
+          pressKey('ArrowRight');
+          expect(video.currentTime)
+              .toBe(before + controls.getConfig().keyboardSeekDistance);
+        });
+
+        it('disables the seek bar once it loses the focus', () => {
+          hideControls(/* opaque= */ false);
+          expect(seekBar.disabled).toBe(false);
+
+          blurForKeyboardTest(seekBar);
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('disables a seek bar that is not focused', () => {
+          blurForKeyboardTest(seekBar);
+
+          hideControls(/* opaque= */ false);
+
+          expect(seekBar.disabled).toBe(true);
+        });
+
+        it('ignores a drag started while the controls are hidden', () => {
+          blurForKeyboardTest(seekBar);
+          hideControls(/* opaque= */ false);
+          seekBar.disabled = false;
+
+          mouseEvent('mousedown', positionOfBar(0.25));
+
+          expect(controls.isSeeking()).toBe(false);
+        });
       });
     });
   });

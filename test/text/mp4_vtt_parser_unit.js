@@ -214,6 +214,34 @@ describe('Mp4VttParser', () => {
     verifyHelper([], result);
   });
 
+  it('rejects a media segment with a zero-length payload box', () => {
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
+        shaka.util.Error.Code.INVALID_MP4_VTT));
+
+    // The first payload box of vtt-segment.mp4 is an 8-byte 'vtte' whose
+    // header starts here.  A size of 0 would move the reader backwards by the
+    // header size, making the sample loop spin forever.
+    const boxOffset = 128;
+    const segment = shaka.util.BufferUtils.toUint8(vttSegment.slice());
+    expect(new shaka.util.DataViewReader(
+        segment.subarray(boxOffset),
+        shaka.util.DataViewReader.Endianness.BIG_ENDIAN).readUint32()).toBe(8);
+    segment.set([0, 0, 0, 0], boxOffset);
+
+    const parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    expect(() => parser.parseMedia(segment, time, null, [])).toThrow(error);
+  });
+
   it('rejects init segment with no vtt', () => {
     const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,

@@ -1051,14 +1051,26 @@ shakaDemo.Main = class {
           this.configure(configName, value);
         }
       };
+      const readArrayParam = (hashName, configName) => {
+        if (!params.has(hashName)) {
+          return;
+        }
+        const parsed = shakaDemo.Main.parseArrayParam_(params.get(hashName));
+        if (parsed) {
+          this.configure(configName, parsed);
+        }
+      };
       const config = this.player_.getConfiguration();
       shakaDemo.Utils.runThroughHashParams(readParam, config);
-      const advanced = this.getCurrentConfigValue('drm.advanced');
-      let isAvailable = !!advanced;
-      if (isAvailable && typeof advanced == 'object') {
-        isAvailable = Object.keys(/** @type {!Object} */(advanced)).length > 0;
-      }
-      if (isAvailable) {
+      shakaDemo.Utils.runThroughHashArrayParams(readArrayParam, config);
+      // Note that these are not read as part of |runThroughHashArrayParams|,
+      // since 'drm.advanced' is set per key system, and is stored in the hash
+      // as a single value for all of the common key systems.
+      const hasAdvancedParams = params.has('videoRobustness') ||
+          params.has('audioRobustness') || params.has('sessionType');
+      if (hasAdvancedParams) {
+        const advanced = /** @type {!Object} */(
+          this.getCurrentConfigValue('drm.advanced') || {});
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!advanced[drmSystem]) {
             advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
@@ -1071,11 +1083,11 @@ shakaDemo.Main = class {
             advanced[drmSystem].audioRobustness =
                 params.get('audioRobustness').split(',');
           }
+          if (params.has('sessionType')) {
+            advanced[drmSystem].sessionType = params.get('sessionType');
+          }
         }
-
-        if (params.has('audioRobustness') || params.has('videoRobustness')) {
-          this.configure('drm.advanced', advanced);
-        }
+        this.configure('drm.advanced', advanced);
       }
     }
     if (params.has('uilang')) {
@@ -1177,22 +1189,6 @@ shakaDemo.Main = class {
               hdrLevel: 'AUTO',
               layout: '',
             })));
-    }
-
-    if (params.has('accessibility.speechToText.languagesToTranslate')) {
-      this.configure('accessibility.speechToText.languagesToTranslate',
-          params.get('accessibility.speechToText.languagesToTranslate')
-              .split(','));
-    }
-
-    if (params.has('manifest.msf.namespaces')) {
-      this.configure('manifest.msf.namespaces',
-          params.get('manifest.msf.namespaces').split(','));
-    }
-
-    if (params.has('drm.preferredKeySystems')) {
-      this.configure('drm.preferredKeySystems',
-          params.get('drm.preferredKeySystems').split(','));
     }
 
     // Add compiled/uncompiled links.
@@ -1725,8 +1721,20 @@ shakaDemo.Main = class {
           params.push(hashName + '=' + currentValue);
         }
       };
+      const setArrayParam = (hashName, configName) => {
+        const currentValue = /** @type {Array<*>} */(
+          this.getCurrentConfigValue(configName));
+        if (!currentValue || !currentValue.length) {
+          // Don't bother saving in the hash unless it's a non-default value.
+          // All arrays in the config default to being empty.
+          return;
+        }
+        params.push(
+            hashName + '=' + shakaDemo.Main.makeArrayParam_(currentValue));
+      };
       const config = this.player_.getConfiguration();
       shakaDemo.Utils.runThroughHashParams(setParam, config);
+      shakaDemo.Utils.runThroughHashArrayParams(setArrayParam, config);
       const advanced = this.getCurrentConfigValue('drm.advanced');
       if (advanced) {
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
@@ -1741,6 +1749,9 @@ shakaDemo.Main = class {
               advancedFor.audioRobustness.length) {
               params.push('audioRobustness=' +
                   advancedFor.audioRobustness.join());
+            }
+            if (advancedFor.sessionType) {
+              params.push('sessionType=' + advancedFor.sessionType);
             }
             break;
           }
@@ -1772,20 +1783,6 @@ shakaDemo.Main = class {
     if (prefVideo.length) {
       params.push('preferredVideo=' +
           encodeURIComponent(JSON.stringify(prefVideo)));
-    }
-
-    const otherArrays = [
-      'accessibility.speechToText.languagesToTranslate',
-      'manifest.msf.namespaces',
-      'drm.preferredKeySystems',
-    ];
-
-    for (const key of otherArrays) {
-      const array = /** @type {!Array<string>} */(
-        this.getCurrentConfigValue(key));
-      if (array.length) {
-        params.push(key + '=' + array.join(','));
-      }
     }
 
     if (this.selectedAsset) {
@@ -2179,6 +2176,44 @@ shakaDemo.Main = class {
       this.selectedAsset = ShakaDemoAssetInfo.makeBlankAsset();
       this.showPlayer_();
     }
+  }
+
+  /**
+   * Serializes an array config value, to be stored in the hash.  Arrays of
+   * plain strings are stored as a comma-separated list, for readability;
+   * anything more complex is stored as JSON.
+   *
+   * @param {!Array<*>} array
+   * @return {string}
+   * @private
+   */
+  static makeArrayParam_(array) {
+    const isStringArray = array.every((item) => typeof item == 'string');
+    const value = isStringArray ? array.join(',') : JSON.stringify(array);
+    // The hash is split on ';' and '=' before being decoded, so the value has
+    // to be encoded here.
+    return encodeURIComponent(value);
+  }
+
+  /**
+   * Parses an array config value that was stored in the hash by
+   * |makeArrayParam_|.  Older hashes might contain values that were not
+   * encoded, but those are decoded the same way.
+   *
+   * @param {string} param
+   * @return {?Array<*>} The parsed array, or null if the value was invalid.
+   * @private
+   */
+  static parseArrayParam_(param) {
+    if (param.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(param);
+        return Array.isArray(parsed) ? parsed : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return param ? param.split(',') : [];
   }
 
   /** @return {!shaka.extern.AdvancedDrmConfiguration} */

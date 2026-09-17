@@ -3226,6 +3226,35 @@ describe('Player', () => {
       }));
     });
 
+    it('chooses the first available configured text language at start',
+        async () => {
+          player.configure({
+            preferredText: [
+              {
+                language: 'fi',
+                role: '',
+                format: '',
+                forced: false,
+              },
+              {
+                language: 'en',
+                role: 'commentary',
+                format: '',
+                forced: false,
+              },
+            ],
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          // The first preference is not available, so the second one is used.
+          expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+            id: 52,
+            language: 'en',
+            roles: ['commentary'],
+          }));
+        });
+
     it('chooses a variant with preferred audio label', async () => {
       expect(getActiveVariantTrack().label).toBe(null);
 
@@ -3245,6 +3274,68 @@ describe('Player', () => {
       expect(getActiveVariantTrack().label).toBe('es-label');
     });
   });  // describe('tracks')
+
+  describe('HTML5 audio tracks in src= mode', () => {
+    let trackEn1;
+    let trackEn2;
+    let trackEs;
+
+    beforeEach(() => {
+      trackEn1 = {
+        id: '',
+        label: 'Stereo',
+        language: 'en',
+        kind: 'main',
+        enabled: true,
+      };
+      trackEn2 = {
+        id: '',
+        label: 'Surround 5.1',
+        language: 'en',
+        kind: 'main',
+        enabled: false,
+      };
+      trackEs = {
+        id: '',
+        label: 'Spanish',
+        language: 'es',
+        kind: 'main',
+        enabled: false,
+      };
+      video.audioTracks = /** @type {?} */ ([trackEn1, trackEn2, trackEs]);
+    });
+
+    it('getAudioTracks assigns unique id and matches native tracks', () => {
+      const tracks = player.getAudioTracks();
+      expect(tracks.length).toBe(3);
+      expect(tracks[0].id).toBeDefined();
+      expect(tracks[1].id).toBeDefined();
+      expect(tracks[0].id).not.toBe(tracks[1].id);
+      expect(tracks[0].active).toBe(true);
+      expect(tracks[1].active).toBe(false);
+    });
+
+    it('selectAudioTrack disables other tracks when id is empty string', () => {
+      const tracks = player.getAudioTracks();
+      expect(trackEn1.enabled).toBe(true);
+      expect(trackEs.enabled).toBe(false);
+
+      player.selectAudioTrack(tracks[2]);
+
+      expect(trackEs.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEn2.enabled).toBe(false);
+    });
+
+    it('selectAudioTrack distinguishes tracks with same language by id', () => {
+      const tracks = player.getAudioTracks();
+      player.selectAudioTrack(tracks[1]);
+
+      expect(trackEn2.enabled).toBe(true);
+      expect(trackEn1.enabled).toBe(false);
+      expect(trackEs.enabled).toBe(false);
+    });
+  });
 
   describe('languages', () => {
     it('chooses the first as default', async () => {
@@ -4941,6 +5032,197 @@ describe('Player', () => {
       // the live edge instead of 0.
       expect(realPlayhead.getTime()).toBe(0);
     });
+  });
+
+  describe('CMCD manifest parameters', () => {
+    /** @type {shaka.extern.ClientDataReporting} */
+    let reporting;
+
+    beforeEach(() => {
+      reporting = {
+        schemeIdUri: 'urn:mpeg:dash:cta-5004:2023',
+        serviceLocations: null,
+        adaptationSets: null,
+        serviceLocationBaseUris: [],
+        cmcdParameters: {
+          version: 1,
+          mode: 'query',
+          includeInRequests: ['segment'],
+          keys: ['sid', 'cid'],
+          contentId: 'cid-1',
+          sessionId: null,
+        },
+      };
+    });
+
+    /**
+     * @return {!shaka.util.CmcdManager}
+     * @suppress {accessControls}
+     */
+    function getCmcdManager() {
+      return /** @type {!shaka.util.CmcdManager} */ (player.cmcdManager_);
+    }
+
+    /**
+     * @param {?shaka.extern.ClientDataReporting} clientDataReporting
+     * @return {shaka.extern.ServiceDescription}
+     */
+    function describeWith(clientDataReporting) {
+      return {
+        targetLatency: null,
+        maxLatency: null,
+        minLatency: null,
+        maxPlaybackRate: null,
+        minPlaybackRate: null,
+        clientDataReporting: clientDataReporting,
+      };
+    }
+
+    it('forwards manifest parameters to the CMCD manager on load',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('forwards null when the manifest has no description', async () => {
+      const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+          .and.callThrough();
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(spy).toHaveBeenCalledWith(null);
+    });
+
+    it('forwards manifest parameters again when the manifest updates',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          spy.calls.reset();
+
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('ignores manifest updates from a preload that is not attached',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).not.toHaveBeenCalled();
+
+          await preloadManager.destroy();
+        });
+
+    it('clears manifest parameters on unload', async () => {
+      manifest.serviceDescription = describeWith(reporting);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      await player.unload();
+      expect(/** @type {?} */ (getCmcdManager()).manifestParams_).toBeNull();
+    });
+
+    it('forwards manifest parameters before the initial segment index is ' +
+        'created', async () => {
+      // With a single variant, the PreloadManager creates the initial
+      // variant's segment index while parsing, before the manifest promise
+      // resolves. That is the fetch (a SegmentBase index range, in the real
+      // world) that must already carry the manifest's CMCD parameters.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+          variant.addVideo(2);
+        });
+      });
+      manifest.serviceDescription = describeWith(reporting);
+      /** @type {!Array<string>} */
+      const order = [];
+      spyOn(getCmcdManager(), 'setManifestParameters').and.callFake(() => {
+        order.push('cmcd');
+      });
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (stream) {
+            // Generated streams come with a segment index already in place,
+            // which would skip createSegmentIndex() entirely.
+            const segmentIndex = stream.segmentIndex;
+            stream.segmentIndex = null;
+            stream.createSegmentIndex = () => {
+              order.push('index');
+              stream.segmentIndex = segmentIndex;
+              return Promise.resolve();
+            };
+          }
+        }
+      }
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(order[0]).toBe('cmcd');
+      expect(order).toContain('index');
+    });
+
+    it('does not forward manifest parameters from a destroyed preload',
+        async () => {
+          // A preload manager can be attached and then destroyed while its
+          // parser is still running; its manifest never plays, so it must
+          // not reconfigure the live CMCD reporter.
+          manifest.serviceDescription = describeWith(reporting);
+          /** @type {function()} */
+          let releaseParser;
+          const parserBlocker = new Promise((resolve) => {
+            releaseParser = resolve;
+          });
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            const parser = new shaka.test.FakeManifestParser(manifest);
+            parser.start.and.callFake(async (uri, playerInterface) => {
+              parser.playerInterface = playerInterface;
+              await parserBlocker;
+              return manifest;
+            });
+            return parser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          preloadManager.setEventHandoffTarget(player);
+          await preloadManager.destroy();
+          releaseParser();
+          await shaka.test.Util.shortDelay();
+          expect(spy).not.toHaveBeenCalled();
+        });
+
+    it('does not forward manifest parameters for a background preload',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+          expect(spy).not.toHaveBeenCalled();
+
+          await player.load(preloadManager);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
   });
 
   describe('language methods', () => {
