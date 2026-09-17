@@ -61,8 +61,10 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       close: () => {},
     }));
 
+    const codec = new shaka.msf.draft18.Codec();
     const dialect = /** @type {!shaka.extern.MsfDialect} */ (/** @type {?} */ ({
-      getCodec: () => new shaka.msf.draft18.Codec(),
+      getCodec: () => codec,
+      getName: () => shaka.config.MsfVersion.DRAFT_18,
     }));
 
     session = new shaka.msf.draft18.Session(
@@ -72,7 +74,8 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         })),
         dialect,
         /** @type {!shaka.extern.MsfManifestConfiguration} */ (
-          /** @type {?} */ ({})));
+          /** @type {?} */ ({})),
+        () => new shaka.msf.draft18.MessageWriter(codec));
   });
 
   afterEach(() => {

@@ -205,7 +205,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 ## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
- - Media over QUIC Transport [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/) and [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/) (plus [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/), deprecated and removed in v6)
+ - Media over QUIC Transport [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/), [draft-20](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/20/) and [draft-21](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/21/) (plus [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/), deprecated and removed in v6)
  - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
