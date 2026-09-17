@@ -275,6 +275,35 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
     }
   }
 };
+
+
+/**
+ * An MSF catalog preprocessor that keeps the LOCMAF encoding of every track
+ * offered under more than one packaging.
+ *
+ * A CMSF publisher may offer one rendition twice, as a `cmaf` track and a
+ * `locmaf` track sharing a single initialization-data entry -- moqlivemock
+ * offers all of them that way. Those are one stream described twice, so
+ * leaving both in the catalog doubles the variant list with pairs identical in
+ * resolution and bitrate and leaves the ABR manager to choose between them
+ * arbitrarily. Which encoding to keep is the application's call, and this is
+ * where an application makes it.
+ *
+ * Tracks that no `locmaf` track shadows -- the subtitle tracks, which LOCMAF
+ * has no variant of -- are left alone.
+ *
+ * @param {!msfCatalog.Catalog} catalog
+ */
+shakaAssets.preferLocmafTracks = (catalog) => {
+  const shadowed = new Set();
+  for (const track of catalog.tracks) {
+    if (track.packaging == 'locmaf' && track.initRef) {
+      shadowed.add(track.initRef);
+    }
+  }
+  catalog.tracks = catalog.tracks.filter(
+      (track) => track.packaging != 'cmaf' || !shadowed.has(track.initRef));
+};
 // End custom callbacks }}}
 
 
@@ -2714,6 +2743,45 @@ shakaAssets.testAssets = [
         manifest: {
           msf: {
             namespaces: ['cmsf/eccp-cbcs'],
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock LOCMAF',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/clear'],
+            catalogPreprocessor: shakaAssets.preferLocmafTracks,
+          },
+        },
+      })
+      .setMimeType('application/msf'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'moqlivemock LOCMAF Multi-DRM',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
+      /* source= */ shakaAssets.Source.EYEVINN)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
+      .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .setExtraConfig({
+        manifest: {
+          msf: {
+            namespaces: ['cmsf/drm-cbcs'],
+            catalogPreprocessor: shakaAssets.preferLocmafTracks,
           },
         },
       })
