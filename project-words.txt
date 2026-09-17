@@ -17,6 +17,7 @@ bufferappending
 canupdatestarttime
 captionselectionupdated
 caststatuschanged
+channelcount
 chaptersupdated
 clearlead
 configurationchanged
@@ -156,6 +157,7 @@ nonprefixed
 overlayed
 playhead
 preflighted
+preflights
 preloaders
 prio
 programinformation
@@ -328,6 +330,7 @@ ftyp
 hdcp
 hdlr
 hvcc
+iacb
 iamf
 ilst
 imagetype
@@ -335,6 +338,7 @@ imsa
 imsc
 inband
 interintra
+ipcm
 isom
 isrc
 itut
@@ -436,6 +440,7 @@ stts
 styp
 subcues
 subframes
+substreams
 subt
 subviewer
 superres
@@ -477,6 +482,7 @@ udta
 ufid
 unalignable
 unskippable
+mpdlink
 urlparam
 uslt
 uvlc
@@ -528,6 +534,7 @@ dashif
 fontdownload
 isobmff
 isoff
+lowlatency
 querypart
 startnumber
 Xlinks
