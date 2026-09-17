@@ -5110,6 +5110,197 @@ describe('Player', () => {
     });
   });
 
+  describe('CMCD manifest parameters', () => {
+    /** @type {shaka.extern.ClientDataReporting} */
+    let reporting;
+
+    beforeEach(() => {
+      reporting = {
+        schemeIdUri: 'urn:mpeg:dash:cta-5004:2023',
+        serviceLocations: null,
+        adaptationSets: null,
+        serviceLocationBaseUris: [],
+        cmcdParameters: {
+          version: 1,
+          mode: 'query',
+          includeInRequests: ['segment'],
+          keys: ['sid', 'cid'],
+          contentId: 'cid-1',
+          sessionId: null,
+        },
+      };
+    });
+
+    /**
+     * @return {!shaka.util.CmcdManager}
+     * @suppress {accessControls}
+     */
+    function getCmcdManager() {
+      return /** @type {!shaka.util.CmcdManager} */ (player.cmcdManager_);
+    }
+
+    /**
+     * @param {?shaka.extern.ClientDataReporting} clientDataReporting
+     * @return {shaka.extern.ServiceDescription}
+     */
+    function describeWith(clientDataReporting) {
+      return {
+        targetLatency: null,
+        maxLatency: null,
+        minLatency: null,
+        maxPlaybackRate: null,
+        minPlaybackRate: null,
+        clientDataReporting: clientDataReporting,
+      };
+    }
+
+    it('forwards manifest parameters to the CMCD manager on load',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('forwards null when the manifest has no description', async () => {
+      const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+          .and.callThrough();
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(spy).toHaveBeenCalledWith(null);
+    });
+
+    it('forwards manifest parameters again when the manifest updates',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          spy.calls.reset();
+
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+
+    it('ignores manifest updates from a preload that is not attached',
+        async () => {
+          /** @type {shaka.test.FakeManifestParser} */
+          let fakeParser;
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            fakeParser = new shaka.test.FakeManifestParser(manifest);
+            return fakeParser;
+          });
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          manifest.serviceDescription = describeWith(reporting);
+          fakeParser.playerInterface.onManifestUpdated();
+          expect(spy).not.toHaveBeenCalled();
+
+          await preloadManager.destroy();
+        });
+
+    it('clears manifest parameters on unload', async () => {
+      manifest.serviceDescription = describeWith(reporting);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      await player.unload();
+      expect(/** @type {?} */ (getCmcdManager()).manifestParams_).toBeNull();
+    });
+
+    it('forwards manifest parameters before the initial segment index is ' +
+        'created', async () => {
+      // With a single variant, the PreloadManager creates the initial
+      // variant's segment index while parsing, before the manifest promise
+      // resolves. That is the fetch (a SegmentBase index range, in the real
+      // world) that must already carry the manifest's CMCD parameters.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+          variant.addVideo(2);
+        });
+      });
+      manifest.serviceDescription = describeWith(reporting);
+      /** @type {!Array<string>} */
+      const order = [];
+      spyOn(getCmcdManager(), 'setManifestParameters').and.callFake(() => {
+        order.push('cmcd');
+      });
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (stream) {
+            // Generated streams come with a segment index already in place,
+            // which would skip createSegmentIndex() entirely.
+            const segmentIndex = stream.segmentIndex;
+            stream.segmentIndex = null;
+            stream.createSegmentIndex = () => {
+              order.push('index');
+              stream.segmentIndex = segmentIndex;
+              return Promise.resolve();
+            };
+          }
+        }
+      }
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(order[0]).toBe('cmcd');
+      expect(order).toContain('index');
+    });
+
+    it('does not forward manifest parameters from a destroyed preload',
+        async () => {
+          // A preload manager can be attached and then destroyed while its
+          // parser is still running; its manifest never plays, so it must
+          // not reconfigure the live CMCD reporter.
+          manifest.serviceDescription = describeWith(reporting);
+          /** @type {function()} */
+          let releaseParser;
+          const parserBlocker = new Promise((resolve) => {
+            releaseParser = resolve;
+          });
+          shaka.media.ManifestParser.registerParserByMime(fakeMimeType, () => {
+            const parser = new shaka.test.FakeManifestParser(manifest);
+            parser.start.and.callFake(async (uri, playerInterface) => {
+              parser.playerInterface = playerInterface;
+              await parserBlocker;
+              return manifest;
+            });
+            return parser;
+          });
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters');
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          preloadManager.setEventHandoffTarget(player);
+          await preloadManager.destroy();
+          releaseParser();
+          await shaka.test.Util.shortDelay();
+          expect(spy).not.toHaveBeenCalled();
+        });
+
+    it('does not forward manifest parameters for a background preload',
+        async () => {
+          manifest.serviceDescription = describeWith(reporting);
+          const spy = spyOn(getCmcdManager(), 'setManifestParameters')
+              .and.callThrough();
+          const preloadManager = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          goog.asserts.assert(preloadManager, 'preload must succeed');
+          await preloadManager.waitForFinish();
+          expect(spy).not.toHaveBeenCalled();
+
+          await player.load(preloadManager);
+          expect(spy).toHaveBeenCalledWith(reporting);
+        });
+  });
+
   describe('language methods', () => {
     beforeEach(() => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
