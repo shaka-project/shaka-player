@@ -854,6 +854,82 @@ describe('Player', () => {
   });  // describe('load/unload')
 
 
+  describe('SCTE-35', () => {
+    /** @type {!shaka.test.FakeManifestParser} */
+    let parser;
+
+    beforeEach(() => {
+      parser = new shaka.test.FakeManifestParser(manifest);
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+    });
+
+    it('exposes discovery, updates and isolated snapshots', async () => {
+      const added = jasmine.createSpy('added');
+      const updated = jasmine.createSpy('updated');
+      player.addEventListener('scte35added', Util.spyFunc(added));
+      player.addEventListener('scte35updated', Util.spyFunc(updated));
+      expect(player.getAllScte35Events()).toEqual([]);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const event = shaka.test.Scte35.event();
+      event.origins[0].source = 'hls';
+      event.duration = null;
+      parser.playerInterface.onScte35Event(event);
+      expect(added).toHaveBeenCalledTimes(1);
+      const snapshot = player.getAllScte35Events()[0];
+      snapshot.data.fill(0);
+      snapshot.command.spliceEventId = 0;
+      expect(player.getAllScte35Events()[0].command.spliceEventId).toBe(1234);
+      event.duration = 60;
+      parser.playerInterface.onScte35Event(event);
+      expect(updated).toHaveBeenCalledTimes(1);
+      await player.unload(false);
+      expect(player.getAllScte35Events()).toEqual([]);
+    });
+
+    it('transfers discovered messages from preload and releases abandoned ones',
+        async () => {
+          const preload = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          await preload.waitForFinish();
+          const added = jasmine.createSpy('added');
+          preload.addEventListener('scte35added', Util.spyFunc(added));
+          parser.playerInterface.onScte35Event(
+              shaka.test.Scte35.event());
+          expect(added).toHaveBeenCalledTimes(1);
+          await player.load(preload);
+          expect(player.getAllScte35Events().length).toBe(1);
+          await player.unload(false);
+          const abandoned = await player.preload(
+              fakeManifestUri, 0, fakeMimeType);
+          await abandoned.waitForFinish();
+          parser.playerInterface.onScte35Event(
+              shaka.test.Scte35.event());
+          const timeline = abandoned.getScte35Timeline();
+          await abandoned.destroy();
+          expect(Array.from(timeline.events())).toEqual([]);
+        });
+
+    it('routes emsg into both dedicated and generic timelines',
+        async () => {
+          await player.unload(false);
+          /** @type {!shaka.media.MediaSourceEngine.PlayerInterface} */
+          let sourceInterface;
+          player.createMediaSourceEngine = (video, text, playerInterface) => {
+            sourceInterface = playerInterface;
+            return /** @type {?} */ (mediaSourceEngine);
+          };
+          const added = jasmine.createSpy('added');
+          player.addEventListener('scte35added', Util.spyFunc(added));
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          sourceInterface.onEmsg(shaka.test.Scte35.emsg());
+          sourceInterface.onEmsg(shaka.test.Scte35.emsg());
+          expect(added).toHaveBeenCalledTimes(1);
+          expect(player.getAllScte35Events().length).toBe(1);
+          expect(player.getAllEmsgRegions().length).toBe(1);
+        });
+  });
+
   describe(`get ID3 related methods`, () => {
     it('return null when not loaded', () => {
       expect(player.getAllMetadataRegions()).toEqual([]);

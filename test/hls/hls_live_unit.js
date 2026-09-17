@@ -75,6 +75,7 @@ describe('HlsParser live', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      onScte35Event: fail,
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
@@ -193,6 +194,42 @@ describe('HlsParser live', () => {
       }
     }
   }
+
+  it('correlates SCTE-35 IN after the live playlist slides', async () => {
+    const onScte35 = jasmine.createSpy('onScte35');
+    playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+    playerInterface.onTimelineRegionAdded = () => {};
+    const hex = '0x' + shaka.util.Uint8ArrayUtils.toHex(
+        shaka.test.Scte35.insert());
+    const header = '#EXTM3U\n#EXT-X-TARGETDURATION:5\n' +
+        '#EXT-X-MAP:URI="init.mp4"\n';
+    const initial = header + '#EXT-X-MEDIA-SEQUENCE:0\n' +
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+        '#EXT-X-DATERANGE:ID="splice",' +
+        'START-DATE="2000-01-01T00:00:01Z",PLANNED-DURATION=10,' +
+        'SCTE35-OUT=' + hex + '\n' +
+        '#EXTINF:5,\nmain0.mp4\n#EXTINF:5,\nmain.mp4\n';
+    const manifest = await testInitialManifest(master, initial);
+    expect(manifest.presentationTimeline.isLive()).toBe(true);
+    expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+      startTime: 1, duration: null, plannedDuration: 10, kind: 'out',
+    }));
+
+    // The open range leaves the playlist before its IN update arrives.
+    const slid = header + '#EXT-X-MEDIA-SEQUENCE:2\n' +
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:10Z\n' +
+        '#EXTINF:5,\nmain2.mp4\n#EXTINF:5,\nmain3.mp4\n';
+    await testUpdate(manifest, slid);
+    onScte35.calls.reset();
+    await testUpdate(manifest, slid +
+        '#EXT-X-DATERANGE:ID="splice",DURATION=12,SCTE35-IN=' + hex + '\n');
+    expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+      startTime: 1, duration: 12, plannedDuration: 10, kind: 'out',
+    }));
+    expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+      startTime: 13, duration: null, kind: 'in', status: 'parsed',
+    }));
+  });
 
   describe('playlist type EVENT', () => {
     const media = [

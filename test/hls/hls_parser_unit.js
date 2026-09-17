@@ -117,6 +117,7 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: shaka.test.Util.spyFunc(onTimelineRegionAddedSpy),
+      onScte35Event: fail,
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
@@ -6899,6 +6900,136 @@ describe('HlsParser', () => {
   });
 
   describe('EXT-X-DATERANGE', () => {
+    describe('SCTE-35', () => {
+      /** @type {!jasmine.Spy} */
+      let onScte35;
+      const hex = '0x' + shaka.util.Uint8ArrayUtils.toHex(
+          shaka.test.Scte35.insert());
+
+      beforeEach(() => {
+        onScte35 = jasmine.createSpy('onScte35');
+        playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+      });
+
+      /**
+       * @param {string} ranges
+       * @return {string}
+       */
+      function playlist(ranges) {
+        return '#EXTM3U\n#EXT-X-TARGETDURATION:5\n' +
+            '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+            '#EXTINF:5,\nvideo1.ts\n' + ranges;
+      }
+
+      it('separates planned and confirmed duration', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",PLANNED-DURATION=60,' +
+            'SCTE35-OUT=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 1, duration: null, plannedDuration: 60,
+          kind: 'out', status: 'parsed',
+        }));
+        expect(onTimelineRegionAddedSpy).toHaveBeenCalled();
+        expect(onMetadataSpy).toHaveBeenCalled();
+      });
+
+      it('merges IN updates without START-DATE, including playlist reloads',
+          async () => {
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="splice",' +
+                'START-DATE="2000-01-01T00:00:01Z",' +
+                'PLANNED-DURATION=60,SCTE35-OUT=' + hex + '\n'))
+                .setResponseValue('test:/video1.ts', tsSegmentData);
+            const manifest =
+                await parser.start('test:/master', playerInterface);
+            await loadAllStreamsFor(manifest);
+            onScte35.calls.reset();
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="splice",DURATION=59.993,' +
+                'SCTE35-IN=' + hex + '\n'));
+            await parser.update();
+            expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+              startTime: 1, duration: 59.993, plannedDuration: 60, kind: 'out',
+            }));
+            expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+              startTime: 60.993, duration: null, kind: 'in',
+            }));
+          });
+
+      it('correlates IN after an open OUT leaves the live window', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-OUT=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        const manifest = await parser.start('test:/master', playerInterface);
+        await loadAllStreamsFor(manifest);
+        spyOn(manifest.presentationTimeline, 'getSeekRangeStart')
+            .and.returnValue(2);
+        fakeNetEngine.setResponseText('test:/master', playlist(''));
+        await parser.update();
+        onScte35.calls.reset();
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",DURATION=3,SCTE35-IN=' + hex + '\n'));
+        await parser.update();
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 4, kind: 'in', status: 'parsed',
+        }));
+      });
+
+      it('forgets ranges explicitly removed by playlist delta updates',
+          async () => {
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="splice",' +
+                'START-DATE="2000-01-01T00:00:01Z",SCTE35-OUT=' + hex + '\n'))
+                .setResponseValue('test:/video1.ts', tsSegmentData);
+            const manifest =
+                await parser.start('test:/master', playerInterface);
+            await loadAllStreamsFor(manifest);
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-SKIP:SKIPPED-SEGMENTS=0,' +
+                'RECENTLY-REMOVED-DATERANGES="splice"\n'));
+            await parser.update();
+            onScte35.calls.reset();
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="splice",DURATION=3,' +
+                'SCTE35-IN=' + hex + '\n'));
+            await parser.update();
+            expect(onScte35).not.toHaveBeenCalled();
+          });
+
+      it('merges tags and schedules IN at the end',
+          async () => {
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="splice",' +
+                'START-DATE="2000-01-01T00:00:01Z",SCTE35-OUT=' + hex + '\n' +
+                '#EXT-X-DATERANGE:ID="splice",' +
+                'END-DATE="2000-01-01T00:00:03Z",SCTE35-IN=' + hex + '\n'))
+                .setResponseValue('test:/video1.ts', tsSegmentData);
+            await parser.start('test:/master', playerInterface);
+            expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+              startTime: 1, duration: 2, kind: 'out',
+            }));
+            expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+              startTime: 3, kind: 'in',
+            }));
+          });
+
+      it('preserves CMD and malformed payloads without failing playback',
+          async () => {
+            fakeNetEngine.setResponseText('test:/master', playlist(
+                '#EXT-X-DATERANGE:ID="cmd",' +
+                'START-DATE="2000-01-01T00:00:01Z",SCTE35-CMD=0xINVALID\n'))
+                .setResponseValue('test:/video1.ts', tsSegmentData);
+            await parser.start('test:/master', playerInterface);
+            expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+              kind: 'cmd', status: 'invalid', rawData: '0xINVALID',
+            }));
+          });
+    });
+
     it('supports multiples tags', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',

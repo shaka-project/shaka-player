@@ -129,6 +129,7 @@ shaka.extern.ManifestParser = class {
  *   filter: function(shaka.extern.Manifest):!Promise,
  *   makeTextStreamsForClosedCaptions: function(shaka.extern.Manifest),
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
+ *   onScte35Event: function(shaka.extern.Scte35Event),
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error),
  *   isLowLatencyMode: function():boolean,
@@ -161,6 +162,8 @@ shaka.extern.ManifestParser = class {
  *   are added to the Manifest.
  * @property {function(shaka.extern.TimelineRegionInfo)} onTimelineRegionAdded
  *   Should be called when a new timeline region is added.
+ * @property {function(shaka.extern.Scte35Event)} onScte35Event
+ *   Should be called when a SCTE-35 message is discovered or updated.
  * @property {function(!Event)} onEvent
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError

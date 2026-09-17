@@ -975,6 +975,64 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity);
 
+    describe('SCTE-35', () => {
+      for (const version of [0, 1]) {
+        it('normalizes registered emsg version ' + version, () => {
+          const stream =
+              shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+          stream.emsgSchemeIdUris = ['urn:scte:scte35:2013:bin'];
+          const box =
+              shaka.test.Scte35.emsgBox(version, version == 0 ? 10 : 20);
+          mediaSourceEngine.getTimestampAndDispatchMetadata(ContentType.VIDEO,
+              box, reference, stream, 'video/mp4');
+          expect(onEmsg).toHaveBeenCalledTimes(1);
+          const message =
+              shaka.util.Scte35.fromEmsg(onEmsg.calls.argsFor(0)[0]);
+          expect(message.startTime).toBe(10);
+          expect(message.status).toBe('parsed');
+          expect(message.command.spliceEventId).toBe(1234);
+        });
+      }
+
+      it('filters undeclared DASH schemes unless configured otherwise',
+          async () => {
+            await mediaSourceEngine.init(new Map(), false,
+                shaka.media.ManifestParser.DASH);
+            const stream =
+                shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+            stream.emsgSchemeIdUris = [];
+            const box = shaka.test.Scte35.emsgBox(0, 10);
+            mediaSourceEngine.getTimestampAndDispatchMetadata(ContentType.VIDEO,
+                box, reference, stream, 'video/mp4');
+            expect(onEmsg).not.toHaveBeenCalled();
+            const config =
+                shaka.util.PlayerConfiguration.createDefault().mediaSource;
+            config.dispatchAllEmsgBoxes = true;
+            mediaSourceEngine.configure(config);
+            mediaSourceEngine.getTimestampAndDispatchMetadata(ContentType.VIDEO,
+                box, reference, stream, 'video/mp4');
+            expect(onEmsg).toHaveBeenCalledTimes(1);
+          });
+
+      it('filters undeclared HLS SCTE-35', async () => {
+        await mediaSourceEngine.init(new Map(), true,
+            shaka.media.ManifestParser.HLS);
+        const stream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+        stream.emsgSchemeIdUris = null;
+        const box = shaka.test.Scte35.emsgBox(0, 10);
+        mediaSourceEngine.getTimestampAndDispatchMetadata(ContentType.VIDEO,
+            box, reference, stream, 'video/mp4');
+        expect(onEmsg).not.toHaveBeenCalled();
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().mediaSource;
+        config.dispatchAllEmsgBoxes = true;
+        mediaSourceEngine.configure(config);
+        mediaSourceEngine.getTimestampAndDispatchMetadata(ContentType.VIDEO,
+            box, reference, stream, 'video/mp4');
+        expect(onEmsg).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('raises an event for registered embedded emsg boxes', () => {
       const videoStream =
           shaka.test.StreamingEngineUtil.createMockVideoStream(1);
