@@ -13,7 +13,7 @@
  *   source: string,
  *   kind: string,
  *   data: ?Uint8Array,
- *   node: ?shaka.extern.xml.Node
+ *   node: ?shaka.extern.xml.Node,
  * }}
  *
  * @description
