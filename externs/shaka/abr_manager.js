@@ -178,7 +178,7 @@ shaka.extern.AbrManager = class {
  * a fast switch that doesn't involve a buffering event. A minimum of two video
  * segments should always be kept buffered to avoid temporary hiccups.
  *
- * @typedef {function(shaka.extern.Variant, boolean=, number=)}
+ * @typedef {function(shaka.extern.Variant, boolean=, number=, number=)}
  * @exportDoc
  */
 shaka.extern.AbrManager.SwitchCallback;
