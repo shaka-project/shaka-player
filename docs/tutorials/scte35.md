@@ -1,8 +1,7 @@
 # SCTE-35 messages
 
 Shaka surfaces SCTE-35 messages from DASH MPD events, in-band MP4 `emsg`, and
-HLS `EXT-X-DATERANGE` through one API, so an application does not need to know
-which transport carried a message.
+HLS `EXT-X-DATERANGE` through one API.
 
 Shaka does not interpret the message. It tells you *where* a message came from
 and *when* it applies, and hands you the payload untouched, so you can decode
