@@ -73,6 +73,9 @@ shakaDemo.Main = class {
     /** @private {string} */
     this.uiLocale_ = '';
 
+    /** @private {!Set<string>} */
+    this.requestedUILocales_ = new Set();
+
     /** @private {boolean} */
     this.noInput_ = false;
 
@@ -949,10 +952,12 @@ shakaDemo.Main = class {
    * @private
    */
   async loadUILocale_(locale) {
-    if (!locale) {
+    if (!locale || this.requestedUILocales_.has(locale)) {
       return;
     }
 
+    // Remember pending and loaded locales, as well as missing locale files.
+    this.requestedUILocales_.add(locale);
     const url = '../ui/locales/' + locale + '.json';
     try {
       const text = await this.loadText_(url);
@@ -960,6 +965,12 @@ shakaDemo.Main = class {
       const map = new Map(Object.entries(obj));
       this.localization_.insert(locale, map);
     } catch (error) {
+      // Allow retries for temporary failures, but not for missing files.
+      if (!(error instanceof shaka.util.Error) ||
+          error.code != shaka.util.Error.Code.BAD_HTTP_STATUS ||
+          error.data[1] != 404) {
+        this.requestedUILocales_.delete(locale);
+      }
       console.warn('Unable to load locale', locale, 'from url', url);
     }
   }
