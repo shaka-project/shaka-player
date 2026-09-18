@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.16.50](https://github.com/shaka-project/shaka-player/compare/v4.16.49...v4.16.50) (2026-09-18)
+
+
+### Bug Fixes
+
+* **Demo:** Avoid requesting missing UI locales repeatedly ([#10610](https://github.com/shaka-project/shaka-player/issues/10610)) ([9264af8](https://github.com/shaka-project/shaka-player/commit/9264af8af7db209bc61c372e77fe36f520bd8d1d))
+* enforce paused state when seeking from ended state ([#10579](https://github.com/shaka-project/shaka-player/issues/10579)) ([a64c992](https://github.com/shaka-project/shaka-player/commit/a64c992aaca437d6ac46c56fef05f592f3236ad6)), closes [#10410](https://github.com/shaka-project/shaka-player/issues/10410)
+* **HLS:** Add missing AV2 video codec detection ([#10594](https://github.com/shaka-project/shaka-player/issues/10594)) ([f258442](https://github.com/shaka-project/shaka-player/commit/f2584425fc667b1695883e807ca152ea8d8b61f7))
+* **HLS:** Avoid TypeError when a media playlist fails during load() ([#10560](https://github.com/shaka-project/shaka-player/issues/10560)) ([64a7244](https://github.com/shaka-project/shaka-player/commit/64a72441218901bc35a165a0abd16e4fbd6f9e74))
+* Keep captions working when periods disagree on caption vs subtitle ([#10600](https://github.com/shaka-project/shaka-player/issues/10600)) ([de583ec](https://github.com/shaka-project/shaka-player/commit/de583ec71359bf5dea4e75e5426f2244c12fab73)), closes [#10599](https://github.com/shaka-project/shaka-player/issues/10599)
+
 ## [4.16.49](https://github.com/shaka-project/shaka-player/compare/v4.16.48...v4.16.49) (2026-09-11)
 
 
