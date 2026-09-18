@@ -71,6 +71,8 @@ describe('StreamingEngine', () => {
   let getPlaybackRate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!HTMLVideoElement} */
+  let video;
   /** @type {!shaka.media.SkipRangeController} */
   let skipRangeController;
   /** @type {!jasmine.Spy} */
@@ -471,11 +473,12 @@ describe('StreamingEngine', () => {
     goog.asserts.assert(
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
+    video = shaka.test.UiUtils.createVideoElement();
     const playerInterface = {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       getPlaybackRate: Util.spyFunc(getPlaybackRate),
-      video: shaka.test.UiUtils.createVideoElement(),
+      video: video,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),
@@ -512,6 +515,87 @@ describe('StreamingEngine', () => {
 
   afterAll(() => {
     jasmine.clock().uninstall();
+  });
+
+  describe('live seekable range', () => {
+    beforeEach(async () => {
+      setupVod();
+      manifest.type = 'HLS';
+      timeline.isDynamic.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      segmentAvailability.start = 10;
+      segmentAvailability.end = 35;
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      spyOn(shaka.media.Capabilities, 'isInfiniteLiveStreamDurationSupported')
+          .and.returnValue(true);
+      createStreamingEngine();
+      await streamingEngine.updateDuration();
+      video.dispatchEvent(new Event('timeupdate'));
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      mediaSourceEngine.setDuration.calls.reset();
+    });
+
+    function endBroadcast() {
+      timeline.isDynamic.and.returnValue(false);
+      timeline.getDuration.and.returnValue(40);
+      segmentAvailability.end = 40;
+    }
+
+    it('preserves the final HLS range while MSE duration is infinite', () => {
+      endBroadcast();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.setLiveSeekableRange)
+          .toHaveBeenCalledWith(10, 40);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.setDuration).not.toHaveBeenCalled();
+    });
+
+    it('clears the range after MSE duration becomes finite', async () => {
+      endBroadcast();
+      jasmine.clock().tick(500);
+      expect(mediaSourceEngine.setLiveSeekableRange)
+          .toHaveBeenCalledWith(10, 40);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      await Util.spyFunc(mediaSourceEngine.setDuration)(40);
+      jasmine.clock().tick(500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      jasmine.clock().tick(1000);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('keeps existing behavior for other manifest types', () => {
+      manifest.type = 'DASH';
+      endBroadcast();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('clears the range without a finite presentation duration', () => {
+      timeline.isDynamic.and.returnValue(false);
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('stops updating after destruction', async () => {
+      endBroadcast();
+      jasmine.clock().tick(500);
+      await streamingEngine.destroy();
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+    });
   });
 
   // This test initializes the StreamingEngine (SE) and allows it to play
