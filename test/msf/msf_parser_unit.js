@@ -51,6 +51,75 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     parser.configure(config);
   });
 
+  describe('a session the server hangs up on', () => {
+    /** @type {?} */
+    let realTransport;
+
+    beforeEach(() => {
+      // A namespace in the configuration is what sends the parser straight to
+      // the catalog subscription instead of waiting for an announcement.
+      config.msf.namespaces = ['msf', 'clear'];
+      parser.configure(config);
+      realTransport = shaka.msf['MSFTransport'];
+    });
+
+    afterEach(() => {
+      shaka.msf['MSFTransport'] = realTransport;
+    });
+
+    /**
+     * A transport whose session ends with the given reason while the catalog
+     * subscription is still waiting for an answer, which is what a server
+     * that rejects something the client sent looks like from here.
+     *
+     * @param {string} reason
+     */
+    function transportThatEnds(reason) {
+      shaka.msf['MSFTransport'] = class {
+        /** @return {!Promise} */
+        connect() {
+          return Promise.resolve({});
+        }
+
+        /**
+         * The subscription dies with the session, but its WebTransport error
+         * says nothing about why; the session's reason does.
+         *
+         * @return {!Promise}
+         */
+        subscribeTrack() {
+          return new Promise(() => {});
+        }
+
+        /** @return {!Promise<string>} */
+        waitForSessionEnd() {
+          return Promise.resolve(reason);
+        }
+
+        /** */
+        configure() {}
+
+        /** */
+        release() {}
+      };
+    }
+
+    it('reports why the session ended instead of a catalog timeout',
+        async () => {
+          const reason = 'WebTransportError: Connection lost.';
+          transportThatEnds(reason);
+
+          const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.MSF_CONNECTION_CLOSED,
+              reason));
+
+          await expectAsync(parser.start('moqt://relay.example/live',
+              playerInterface)).toBeRejectedWith(expected);
+        });
+  });
+
   describe('accessibility descriptors', () => {
     /**
      * @param {!Array<!Object>} accessibility
@@ -123,6 +192,98 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(captions).not.toBeNull();
       expect(captions.size).toBe(0);
     });
+  });
+
+  describe('catalog logging', () => {
+    /**
+     * processCatalog_ writes the presentation timeline, which start() would
+     * normally have created.
+     * @suppress {visibility}
+     */
+    function givenAStartedParser() {
+      parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
+    }
+
+    /**
+     * @param {msfCatalog.Catalog} catalog
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function processCatalog(catalog) {
+      return parser.processCatalog_(catalog);
+    }
+
+    /**
+     * @return {msfCatalog.Catalog}
+     */
+    function catalogWithTwoTracks() {
+      return /** @type {msfCatalog.Catalog} */ ({
+        version: 1,
+        tracks: [
+          {name: 'video_cmaf', packaging: 'cmaf', codec: 'avc3.4d401f',
+            isLive: true},
+          {name: 'video_locmaf', packaging: 'locmaf', codec: 'avc3.4d401f',
+            locmafVersion: '0.3', isLive: true},
+        ],
+      });
+    }
+
+    it('logs the catalog as it arrived, not as the preprocessor left it',
+        async () => {
+          // A console keeps a logged object by reference and renders it when
+          // it is expanded, so logging the catalog before and after an
+          // in-place preprocessor used to show the processed one twice. What
+          // reproduces that is inspecting the logged value afterwards, which
+          // is what expanding it in a console does.
+          const logged = [];
+          spyOn(shaka.log, 'info').and.callFake((...args) => {
+            logged.push(args);
+          });
+
+          config.msf.catalogPreprocessor = (catalog) => {
+            catalog.tracks = catalog.tracks.filter(
+                (track) => track.packaging == 'locmaf');
+          };
+          parser.configure(config);
+
+          givenAStartedParser();
+          const catalog = catalogWithTwoTracks();
+          await processCatalog(catalog);
+
+          const before = logged.find((args) => args[0] == 'MSF Catalog:');
+          const after = logged.find(
+              (args) => args[0] == 'MSF Catalog after preprocessor:');
+          expect(before).toBeDefined();
+          expect(after).toBeDefined();
+
+          expect(before[1].tracks.length).toBe(2);
+          expect(before[1].tracks.map((t) => t.name))
+              .toEqual(['video_cmaf', 'video_locmaf']);
+          expect(after[1].tracks.length).toBe(1);
+          // The two lines must not be the same object, or the first would
+          // change under the reader's feet.
+          expect(before[1]).not.toBe(after[1]);
+          expect(after[1]).toBe(catalog);
+        });
+
+    it('logs only the arrived catalog when no preprocessor is configured',
+        async () => {
+          const logged = [];
+          spyOn(shaka.log, 'info').and.callFake((...args) => {
+            logged.push(args);
+          });
+
+          givenAStartedParser();
+          const catalog = catalogWithTwoTracks();
+          await processCatalog(catalog);
+
+          const before = logged.find((args) => args[0] == 'MSF Catalog:');
+          expect(before).toBeDefined();
+          expect(before[1]).toEqual(catalog);
+          expect(logged.some(
+              (args) => args[0] == 'MSF Catalog after preprocessor:'))
+              .toBe(false);
+        });
   });
 
   describe('segment index lifecycle', () => {
