@@ -2037,4 +2037,121 @@ describe('DashParser Live', () => {
               manifestRequest, manifestContext);
         });
   });
+
+  describe('key ID from the init segment', () => {
+    const clearInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+    const encryptedInitSegmentUri =
+        '/base/test/test/assets/encrypted-sintel-video-init.mp4';
+    // The default_KID of the 'tenc' box in the encrypted asset above.
+    const initSegmentKeyId = '68accc06d6ac535898886c1e31e0bf39';
+    const initSegmentUri = 'http://example.com/init.mp4';
+
+    /** @type {!ArrayBuffer} */
+    let clearInitSegmentData;
+    /** @type {!ArrayBuffer} */
+    let encryptedInitSegmentData;
+
+    const manifestText = [
+      '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+      '    xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:cenc="urn:mpeg:cenc:2013"',
+      '    availabilityStartTime="1970-01-01T00:00:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <ContentProtection value="cenc"',
+      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" />',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com/</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" startNumber="1"',
+      '            duration="5" initialization="init.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    /**
+     * Makes the init segment request fail.
+     */
+    function failInitSegmentRequest() {
+      fakeNetEngine.setResponse(initSegmentUri, () => {
+        return Promise.reject(new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS));
+      });
+    }
+
+    /**
+     * @return {number} The number of requests made for the init segment.
+     */
+    function countInitSegmentRequests() {
+      return fakeNetEngine.request.calls.all().filter((call) => {
+        return call.args[1].uris[0] == initSegmentUri;
+      }).length;
+    }
+
+    beforeAll(async () => {
+      const responses = await Promise.all([
+        shaka.test.Util.fetch(clearInitSegmentUri),
+        shaka.test.Util.fetch(encryptedInitSegmentUri),
+      ]);
+      clearInitSegmentData = responses[0];
+      encryptedInitSegmentData = responses[1];
+    });
+
+    beforeEach(() => {
+      fakeNetEngine.setResponseText('https://foo', manifestText);
+    });
+
+    it('is read from the init segment', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      expect(manifest.variants[0].video.keyIds)
+          .toEqual(new Set([initSegmentKeyId]));
+    });
+
+    it('is not read again after a successful read', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+
+      await parser.start('https://foo', playerInterface);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+
+      expect(countInitSegmentRequests()).toBe(0);
+    });
+
+    it('is not read again when the init segment has no key ID', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, clearInitSegmentData);
+
+      const manifest = await parser.start('https://foo', playerInterface);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+
+      // Finding no key ID is a permanent answer, so it is not requested again.
+      expect(countInitSegmentRequests()).toBe(0);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+    });
+
+    it('is read again on update after a failed read', async () => {
+      failInitSegmentRequest();
+
+      const manifest = await parser.start('https://foo', playerInterface);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+      fakeNetEngine.request.calls.reset();
+
+      // A failure is not cached, so the next update tries again.
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+      await updateManifest();
+
+      expect(countInitSegmentRequests()).toBe(1);
+      expect(manifest.variants[0].video.keyIds)
+          .toEqual(new Set([initSegmentKeyId]));
+    });
+  });
 });
