@@ -117,6 +117,7 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: shaka.test.Util.spyFunc(onTimelineRegionAddedSpy),
+      onScte35Event: fail,
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
@@ -6899,6 +6900,86 @@ describe('HlsParser', () => {
   });
 
   describe('EXT-X-DATERANGE', () => {
+    describe('SCTE-35', () => {
+      /** @type {!jasmine.Spy} */
+      let onScte35;
+      const hex = shaka.test.Scte35.hex();
+
+      beforeEach(() => {
+        onScte35 = jasmine.createSpy('onScte35');
+        playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+      });
+
+      /**
+       * @param {string} ranges
+       * @return {string}
+       */
+      function playlist(ranges) {
+        return '#EXTM3U\n#EXT-X-TARGETDURATION:5\n' +
+            '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+            '#EXTINF:5,\nvideo1.ts\n' + ranges;
+      }
+
+      it('reports an OUT at the start of its range', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",DURATION=60,' +
+            'SCTE35-OUT=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          schemeIdUri: 'urn:scte:scte35:2013:bin',
+          startTime: 1, endTime: 61, kind: 'out', source: 'hls',
+          id: 'splice', node: null,
+        }));
+        expect(onScte35.calls.argsFor(0)[0].data)
+            .toEqual(shaka.test.Scte35.section());
+        // The generic date-range paths keep working alongside it.
+        expect(onTimelineRegionAddedSpy).toHaveBeenCalled();
+        expect(onMetadataSpy).toHaveBeenCalled();
+      });
+
+      it('reports an IN at the end of the range it closes', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-OUT=' + hex + '\n' +
+            '#EXT-X-DATERANGE:ID="splice-in",' +
+            'START-DATE="2000-01-01T00:00:01Z",' +
+            'END-DATE="2000-01-01T00:00:03Z",SCTE35-IN=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        // An OUT with no duration is a point in time.
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 1, endTime: 1, kind: 'out',
+        }));
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 3, endTime: 3, kind: 'in',
+        }));
+      });
+
+      it('reports a standalone CMD', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="cmd",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-CMD=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 1, endTime: 1, kind: 'cmd', id: 'cmd',
+        }));
+      });
+
+      it('skips malformed payloads without failing playback', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="cmd",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-CMD=0xINVALID\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).not.toHaveBeenCalled();
+        // The range is still surfaced through the generic metadata path.
+        expect(onMetadataSpy).toHaveBeenCalled();
+      });
+    });
+
     it('supports multiples tags', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',

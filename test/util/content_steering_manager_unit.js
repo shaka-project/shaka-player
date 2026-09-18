@@ -21,6 +21,7 @@ describe('ContentSteeringManager', () => {
       filter: fail,
       makeTextStreamsForClosedCaptions: fail,
       onTimelineRegionAdded: fail,
+      onScte35Event: fail,
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: fail,

@@ -30,6 +30,7 @@ describe('DashParser Live', () => {
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onScte35Event: fail,
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
@@ -1368,6 +1369,34 @@ describe('DashParser Live', () => {
       onTimelineRegionAddedSpy = jasmine.createSpy('onTimelineRegionAdded');
       playerInterface.onTimelineRegionAdded =
           shaka.test.Util.spyFunc(onTimelineRegionAddedSpy);
+    });
+
+    it('places SCTE-35 events on the timeline with period timing', async () => {
+      const onScte35 = jasmine.createSpy('onScte35');
+      playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+      const base64 = shaka.test.Scte35.base64();
+      const manifest = originalManifest.replace(
+          '<Event duration="5000" />',
+          '<Event id="xml" presentationTime="300" duration="1000">' +
+          '<SpliceInfoSection ptsAdjustment="0"/></Event>')
+          .replace('http://example.com', 'urn:scte:scte35:2013:xml')
+          .replace('<Event id="abc" presentationTime="300" duration="1000" />',
+              '<Event id="bin" presentationTime="400" duration="1000">' +
+              '<Signal><Binary>' + base64 + '</Binary></Signal></Event>');
+      fakeNetEngine.setResponseText('https://foo', manifest);
+      await parser.start('https://foo', playerInterface);
+      expect(onScte35).toHaveBeenCalledTimes(2);
+      // The XML-only message has no binary form; the xml+bin one does.
+      expect(onScte35.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({
+        startTime: 13, endTime: 23, source: 'dash', data: null,
+      }));
+      expect(onScte35.calls.argsFor(0)[0].node).not.toBeNull();
+      expect(onScte35.calls.argsFor(1)[0]).toEqual(jasmine.objectContaining({
+        startTime: 14, endTime: 24, source: 'dash', node: null,
+      }));
+      expect(onScte35.calls.argsFor(1)[0].data)
+          .toEqual(shaka.test.Scte35.section());
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
     });
 
     it('will parse EventStream nodes', async () => {
