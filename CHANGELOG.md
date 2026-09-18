@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.2.11](https://github.com/shaka-project/shaka-player/compare/v5.2.10...v5.2.11) (2026-09-18)
+
+
+### Bug Fixes
+
+* **Ads:** Report the last ad of a pod as complete when using SVTA tracking ([#10576](https://github.com/shaka-project/shaka-player/issues/10576)) ([5c23a03](https://github.com/shaka-project/shaka-player/commit/5c23a0399b21f1d4d5b80cabf39b1d1653f535cb)), closes [#10545](https://github.com/shaka-project/shaka-player/issues/10545)
+* **Demo:** Avoid requesting missing UI locales repeatedly ([#10610](https://github.com/shaka-project/shaka-player/issues/10610)) ([959c271](https://github.com/shaka-project/shaka-player/commit/959c271b00e7dba86b9756a86659a61f2cd09236))
+* enforce paused state when seeking from ended state ([#10579](https://github.com/shaka-project/shaka-player/issues/10579)) ([6389f43](https://github.com/shaka-project/shaka-player/commit/6389f4332cee51c59c365263de2d4bc2b23ac210)), closes [#10410](https://github.com/shaka-project/shaka-player/issues/10410)
+* **HLS:** Add missing AV2 video codec detection ([#10594](https://github.com/shaka-project/shaka-player/issues/10594)) ([612b093](https://github.com/shaka-project/shaka-player/commit/612b09347069c483bfe2d957000891e0a784239c))
+* **HLS:** Avoid TypeError when a media playlist fails during load() ([#10560](https://github.com/shaka-project/shaka-player/issues/10560)) ([0e3f38f](https://github.com/shaka-project/shaka-player/commit/0e3f38f267c30a07c6551bc1aeecb0174412ed9f))
+* Keep captions working when periods disagree on caption vs subtitle ([#10600](https://github.com/shaka-project/shaka-player/issues/10600)) ([1af2c7e](https://github.com/shaka-project/shaka-player/commit/1af2c7ebf36e449c2a4fe48387074da7399203e3)), closes [#10599](https://github.com/shaka-project/shaka-player/issues/10599)
+* **TTML:** Clip each sample of a multi-sample stpp segment to its own time ([#10602](https://github.com/shaka-project/shaka-player/issues/10602)) ([6588698](https://github.com/shaka-project/shaka-player/commit/658869857b928e953df34d399c4ee9f663454f3b)), closes [#10597](https://github.com/shaka-project/shaka-player/issues/10597)
+
 ## [5.2.10](https://github.com/shaka-project/shaka-player/compare/v5.2.9...v5.2.10) (2026-09-11)
 
 
