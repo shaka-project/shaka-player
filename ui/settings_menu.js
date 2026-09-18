@@ -133,8 +133,13 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     this.backButton.classList.add('shaka-back-to-overflow-button');
     this.menu.appendChild(this.backButton);
     this.eventManager.listen(this.backButton, 'click', () => {
-      this.controls.hideSettingsMenus();
-      this.backButton.focus();
+      // Submenus return to their parent through the menu click listener.
+      // A standalone menu closes and returns focus to its opening button.
+      if (!this.isSubMenu) {
+        this.controls.hideSettingsMenus();
+        this.button.setAttribute('aria-expanded', 'false');
+        this.button.focus();
+      }
     });
 
     /** @private {shaka.ui.Icon} */
@@ -161,11 +166,16 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     if (this.isSubMenu) {
       this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
-      this.eventManager.listen(this.menu, 'click', () => {
+      this.eventManager.listen(this.menu, 'click', (event) => {
         this.notifyMenuClose_();
         this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
         shaka.ui.Utils.setDisplay(this.menu, false);
         shaka.ui.Utils.setDisplay(this.parent, true);
+        this.button.setAttribute('aria-expanded', 'false');
+        if (this.backButton.contains(/** @type {?Node} */ (event.target))) {
+          // Restore focus after the parent buttons have become visible.
+          this.button.focus();
+        }
       });
 
       let prevHidden = this.parent.classList.contains('shaka-hidden');
@@ -211,6 +221,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
       if (this.menu.classList.contains('shaka-hidden')) {
         if (this.isSubMenu) {
           this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
+        }
+        if (!this.isSubMenu) {
+          this.controls.setSettingsMenuOpener(this.button);
         }
         shaka.ui.Utils.setDisplay(this.menu, true);
         this.notifyMenuOpen_();
