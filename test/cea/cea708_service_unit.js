@@ -318,6 +318,51 @@ describe('Cea708Service', () => {
     expect(captions).toEqual(expectedCaptions);
   });
 
+  for (const testCase of [
+    {name: 'solid', foreground: 0x30, background: 0x33,
+      textColor: 'red', backgroundColor: 'magenta'},
+    {name: 'flashing fallback', foreground: 0x70, background: 0x73,
+      textColor: 'red', backgroundColor: 'magenta'},
+    {name: 'translucent', foreground: 0xb0, background: 0xb3,
+      textColor: 'rgba(255, 0, 0, 0.5)',
+      backgroundColor: 'rgba(255, 0, 255, 0.5)'},
+    {name: 'transparent', foreground: 0xf0, background: 0xf3,
+      textColor: 'rgba(0, 0, 0, 0)',
+      backgroundColor: 'rgba(0, 0, 0, 0)'},
+    {name: 'transparent background only', foreground: 0x3f, background: 0xc0,
+      textColor: 'white', backgroundColor: 'rgba(0, 0, 0, 0)'},
+    {name: 'transparent foreground only', foreground: 0xff, background: 0x00,
+      textColor: 'rgba(0, 0, 0, 0)', backgroundColor: 'black'},
+    {name: 'quantized translucent', foreground: 0x95, background: 0xaa,
+      textColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(255, 255, 255, 0.5)'},
+  ]) {
+    it(`setPenColor preserves ${testCase.name} opacity in cues`, () => {
+      const packet1 = createCea708PacketFromBytes([
+        ...defineWindow,
+        0x41, // A, before changing the pen style.
+        0x91, testCase.foreground, testCase.background, 0x00,
+        0x42, // B, using the new pen style.
+        0x91, 0x3f, 0x00, 0x00, // Restore solid white on black.
+        0x43, // C, after restoring the pen style.
+      ], startTime);
+      const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
+
+      const topLevelCue = CeaUtils.createWindowedCue(startTime, endTime, '',
+          serviceNumber, windowId, rowCount, colCount, anchorId);
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 'A'),
+        CeaUtils.createStyledCue(startTime, endTime, 'B',
+            /* underline= */ false, /* italics= */ false,
+            testCase.textColor, testCase.backgroundColor),
+        CeaUtils.createDefaultCue(startTime, endTime, 'C'),
+      ];
+      expect(getCaptionsFromPackets(service, packet1, packet2)).toEqual([
+        {stream, cue: topLevelCue},
+      ]);
+    });
+  }
+
   it('handles special characters from the G0, G1, G2, and G3 groups', () => {
     const controlCodes = [
       ...defineWindow,
