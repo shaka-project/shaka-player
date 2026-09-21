@@ -69,6 +69,22 @@ choice. `data` is null only for an XML-only `urn:scte:scte35:2013:xml` message,
 which is exposed as `node` instead. A payload Shaka cannot decode into bytes is
 skipped rather than reported, and never fails playback.
 
-DASH `emsg` must be declared in the MPD unless
-`mediaSource.dispatchAllEmsgBoxes` is enabled. For HLS, enable
-`mediaSource.dispatchAllEmsgBoxes` to receive SCTE-35 `emsg`.
+## In-band `emsg`
+
+Messages carried in-band arrive as MP4 `emsg` boxes, which Shaka only
+dispatches for schemes it has been told to expect. That gate applies before
+SCTE-35 is recognized, so a stream whose scheme is not declared produces no
+messages at all.
+
+For DASH, declare the scheme with `InbandEventStream` in the MPD. For HLS,
+there is nowhere to declare it.
+
+In either case, setting `mediaSource.dispatchAllEmsgBoxes` to `true` lifts the
+gate and dispatches every `emsg` box regardless:
+
+```js
+player.configure('mediaSource.dispatchAllEmsgBoxes', true);
+```
+
+This is required to receive SCTE-35 `emsg` in HLS, and is the fallback for a
+DASH stream that omits the declaration.
