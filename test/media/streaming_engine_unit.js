@@ -2377,6 +2377,65 @@ describe('StreamingEngine', () => {
       netEngine.expectNoRequest('0_audio_init', segmentType);
       netEngine.expectNoRequest('0_video_init', segmentType);
     });
+
+    it('re-fetches an aborted prefetched segment', async () => {
+      const originalRequest = Util.spyFunc(netEngine.request);
+      let mediaRequestCount = 0;
+      netEngine.request = jasmine.createSpy('request').and.callFake(
+          (requestType, request, context) => {
+            if (request.uris[0] == '0_audio_0' && ++mediaRequestCount == 1) {
+              const error = new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.PLAYER,
+                  shaka.util.Error.Code.OPERATION_ABORTED);
+              return shaka.util.AbortableOperation.failed(error);
+            }
+            return originalRequest(requestType, request, context);
+          });
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 1;
+      streamingEngine.configure(config);
+
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(mediaRequestCount).toBe(2);
+    });
+
+    it('removes only an aborted prefetched init segment', async () => {
+      const originalRequest = Util.spyFunc(netEngine.request);
+      let initRequestCount = 0;
+      let mediaRequestCount = 0;
+      netEngine.request = jasmine.createSpy('request').and.callFake(
+          (requestType, request, context) => {
+            const uri = request.uris[0];
+            if (uri == '0_audio_init' && ++initRequestCount == 1) {
+              const error = new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.PLAYER,
+                  shaka.util.Error.Code.OPERATION_ABORTED);
+              return shaka.util.AbortableOperation.failed(error);
+            }
+            if (uri == '0_audio_0') {
+              mediaRequestCount++;
+            }
+            return originalRequest(requestType, request, context);
+          });
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 1;
+      streamingEngine.configure(config);
+
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      await runTest();
+
+      expect(initRequestCount).toBe(2);
+      expect(mediaRequestCount).toBe(1);
+    });
   });
 
   describe('handles seeks (live)', () => {
