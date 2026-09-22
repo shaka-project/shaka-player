@@ -245,6 +245,32 @@ describe('Player', () => {
       }
     });
 
+    // Regression test: shaka.util.Mutex.acquire() has no timeout and no abort,
+    // so an operation that wedges below the JS layer holds the mutex forever.
+    // destroy() used to queue behind it through detach(), leaving the returned
+    // promise pending with no resolution and no rejection.
+    it('completes when another operation is wedged holding the mutex',
+        async () => {
+          const wedgedParser = new shaka.test.FakeManifestParser(manifest);
+          // Never settles, so load() holds the mutex indefinitely.
+          wedgedParser.start.and.returnValue(new Promise(() => {}));
+          shaka.media.ManifestParser.registerParserByMime(
+              fakeMimeType, () => wedgedParser);
+
+          const loadPromise = player.load(fakeManifestUri, 0, fakeMimeType);
+          // The abandoned load rejects once the player is torn down.
+          loadPromise.catch(() => {});
+
+          // Let load() acquire the mutex and reach the wedged parser.
+          await shaka.test.Util.shortDelay();
+
+          const outcome = await Promise.race([
+            player.destroy().then(() => 'destroyed'),
+            shaka.test.Util.delay(5).then(() => 'timed out'),
+          ]);
+          expect(outcome).toBe('destroyed');
+        });
+
     it('destroys drmEngine before mediaSourceEngine with webkit polyfill',
         async () => {
           spyOn(shaka.drm.DrmUtils, 'isMediaKeysPolyfilled')
