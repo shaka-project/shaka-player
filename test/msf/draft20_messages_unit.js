@@ -95,6 +95,33 @@ filterDescribe('shaka.msf.draft20.MessageWriter', isMSFSupported, () => {
     });
   });
 
+  describe('locationFilterParam', () => {
+    it('should encode an absolute open-ended start as two fields', () => {
+      // Draft-20 replaced the Filter Type with a field count: two fields are
+      // a Start Group and a Start Object, absolute and open-ended.
+      const param = writer.locationFilterParam(
+          {group: BigInt(7), object: BigInt(3)});
+
+      expect(param.type).toBe(BigInt(0x21));
+      expect(Array.from(
+          /** @type {!Uint8Array} */(param.value))).toEqual([0x07, 0x03]);
+    });
+
+    it('should not encode the draft-18 filter type', () => {
+      // The same request in draft-18 leads with the Filter Type, so a writer
+      // that inherited that encoding would send a Start Group of 3 here.
+      const draft18Writer = new shaka.msf.draft18.MessageWriter(
+          new shaka.msf.draft18.Codec());
+      const location = {group: BigInt(7), object: BigInt(3)};
+
+      expect(Array.from(
+          /** @type {!Uint8Array} */(
+            writer.locationFilterParam(location).value)))
+          .not.toEqual(Array.from(/** @type {!Uint8Array} */(
+            draft18Writer.locationFilterParam(location).value)));
+    });
+  });
+
   describe('inherited messages', () => {
     it('should serialize SUBSCRIBE exactly as draft-18 does', () => {
       // Every message body but FETCH is unchanged, so this proves the

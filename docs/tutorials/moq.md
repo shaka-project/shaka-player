@@ -89,6 +89,11 @@ When `player.load()` is called with `'application/msf'`, Shaka:
 > **Note:** Only **live** content is supported. VOD content (where `isLive`
 > is false in the catalog) is not supported and will throw an error.
 
+By default a presentation has no DVR window: the seek range is a few seconds
+around the live edge, because nothing in the catalog says where to subscribe
+from to get anything older. A publisher that supplies a **media timeline**
+lifts that restriction; see [Media timeline, DVR and seeking](#media-timeline-dvr-and-seeking).
+
 
 ## Supported Packagings
 
@@ -148,6 +153,98 @@ tells the transmuxer to start a fresh initialization segment.
 > **Note:** `m2ts` needs the transmuxer, which is a separate build target.
 > A custom build must include `+@transmuxer` alongside `+@msf`. The same is
 > true of HLS with transport stream segments.
+
+
+## Media timeline, DVR and seeking
+
+MoQT addresses content by Group and Object, while media is addressed by
+presentation time, and nothing in the transport relates the two. A player that
+does not know the relation can only ever ask for the live edge: a time the
+viewer seeks to names no Location to subscribe from. The **media timeline**
+([draft-ietf-moq-msf](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/)
+section 8) is what supplies it, and with it the seek range stops being
+"whatever has already arrived".
+
+MSF carries the relation two ways, and Shaka reads both. Where they describe
+the same time, the explicit records win, because they are observations of what
+was published while a template is a prediction.
+
+### An explicit media timeline track
+
+A track with `"packaging": "mediatimeline"` publishes JSON documents listing
+one record per published Group: the media presentation timestamp in
+milliseconds, the Location as `[Group ID, Object ID]`, and the wallclock time
+of encoding in milliseconds since the epoch (`0` when it is not known). Its
+`depends` field names the tracks the records address, and is required.
+
+```json
+{
+  "name": "history",
+  "packaging": "mediatimeline",
+  "mimeType": "application/json",
+  "depends": ["video0", "audio0"]
+}
+```
+
+```json
+[
+  [0, [0, 0], 1759924158381],
+  [2002, [1, 0], 1759924160383],
+  [4004, [2, 0], 1759924162385]
+]
+```
+
+The first Object of each Group carries everything the publisher still offers,
+so a record missing from it has aged out and leaves the seek range; the Objects
+after it in that Group carry only what is new.
+
+### A template
+
+Where Groups have a constant duration, a media track can carry the relation
+inline instead, as `[startMediaTime, deltaMediaTime, startLocation,
+deltaLocation, startWallclock, deltaWallclock]`:
+
+```json
+{
+  "name": "video0",
+  "packaging": "loc",
+  "codec": "av01.0.08M.10.0.110.09",
+  "template": [0, 2002, [0, 0], [1, 0], 1759924158381, 2002]
+}
+```
+
+Each entry is then `start + n * delta`, so the template describes any point of
+the presentation without listing it. A track with a template should not also
+have a timeline track, and the template must not change once publishing has
+started.
+
+### What Shaka does with it
+
+- **The seek range** reaches back to the oldest point the timeline describes,
+  instead of sitting at the live edge. It is only offered when *every*
+  subscribed track has a timeline: a range that only half the media can be
+  served for is a stall, not a seek. `manifest.availabilityWindowOverride`
+  still overrides it.
+- **Seeking behind the live edge** withdraws each track's subscription and
+  asks for it again from the Location the timeline gives for the target, which
+  is what a seek costs on a transport where a subscription is a position in a
+  track rather than a URL to fetch. Seeking within what has already arrived
+  costs nothing, and seeking back to the live edge returns the subscriptions to
+  following it.
+
+Every supported draft can subscribe from a past Location, though each carries
+the request differently: draft-14 as fields of the SUBSCRIBE message,
+draft-16 and draft-18 in the `SUBSCRIPTION_FILTER` parameter, draft-20 and
+draft-21 in `LOCATION_FILTER`.
+
+> **Note:** A media timeline describes what the publisher offered when the
+> timeline was written, and a publisher may still refuse to start where it
+> says, typically because the Group is older than anything it still holds.
+> When that happens the track returns to the live edge rather than waiting for
+> media that is not coming.
+
+Compressed timeline documents (`MSF_COMPRESSION`) are not supported yet and
+are discarded.
 
 
 ## MSF Configuration
