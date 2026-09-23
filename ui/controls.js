@@ -291,8 +291,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      const focusIsInMenu = this.menus_.some(
+          (menu) => menu.contains(activeElement));
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+      }
+      if (focusIsInMenu) {
+        this.restoreFocus(this.settingsMenuOpener_);
       }
       this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
       this.hideTextStylePreview();
@@ -307,6 +313,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.util.Timer} */
     this.hideUITimer_ = new shaka.util.Timer(() => {
       this.hideUI();
+    });
+
+    /**
+     * The element inside the player that lost the focus without handing it to
+     * another element.
+     * @private {?Element}
+     */
+    this.lostFocusElement_ = null;
+
+    /**
+     * Checks whether the focus was lost because |lostFocusElement_| can no
+     * longer have it.  That is only known once the browser has finished
+     * moving the focus: a removed element, for example, is only detached
+     * after it loses the focus.
+     * @private {shaka.util.Timer}
+     */
+    this.lostFocusTimer_ = new shaka.util.Timer(() => {
+      const element = this.lostFocusElement_;
+      this.lostFocusElement_ = null;
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      // If the focus went anywhere else, or if the element can still take it
+      // (for example, because the user clicked somewhere else on the page),
+      // this was not a lost focus.
+      if (!element || (activeElement &&
+          activeElement != this.videoContainer_.ownerDocument.body) ||
+          shaka.ui.Controls.canTakeFocus_(element)) {
+        return;
+      }
+      this.restoreFocus();
     });
 
     /**
@@ -468,6 +503,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.hideUITimer_?.stop();
     this.hideUITimer_ = null;
+
+    this.lostFocusTimer_?.stop();
+    this.lostFocusTimer_ = null;
 
     this.timeAndSeekRangeTimer_?.stop();
     this.timeAndSeekRangeTimer_ = null;
@@ -922,6 +960,37 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   setSettingsMenuOpener(button) {
     this.settingsMenuOpener_ = button;
+  }
+
+  /**
+   * Gives the focus back to the player after the focused element was hidden,
+   * disabled or removed.  The keyboard controls only act while the player has
+   * the focus, so they would stop working until the user clicked on it again.
+   * While navigating with the keyboard, |keyboardTarget| gets the focus, if it
+   * can take it, so that Tab navigation continues from there.
+   *
+   * @param {?HTMLElement=} keyboardTarget
+   */
+  restoreFocus(keyboardTarget = null) {
+    const keyboardNavigation = this.controlsContainer_.classList.contains(
+        'shaka-keyboard-navigation');
+    if (keyboardNavigation && keyboardTarget &&
+        shaka.ui.Controls.canTakeFocus_(keyboardTarget)) {
+      keyboardTarget.focus();
+    } else {
+      this.videoContainer_.focus({preventScroll: true});
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  static canTakeFocus_(element) {
+    return element.isConnected && !element.matches(':disabled') &&
+        !element.closest('.shaka-hidden') &&
+        element.getClientRects().length > 0;
   }
 
   /** @export */
@@ -1429,6 +1498,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
+    // Keyboard controls only act while the player has the focus.  Let the
+    // container take it, without making it a tab stop, so that clicking on the
+    // video or on any non-focusable part of the controls keeps them working.
+    if (!this.videoContainer_.hasAttribute('tabindex')) {
+      this.videoContainer_.tabIndex = -1;
+    }
     this.localVideo_.classList.add('shaka-video');
 
     this.addScrimContainer_();
@@ -1837,6 +1912,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(this.vr_, 'vrstatuschanged', () => {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+    });
+
+    // Hiding, disabling or removing the focused element moves the focus to
+    // the body, and the keyboard controls go with it.  See restoreFocus().
+    this.eventManager_.listen(this.videoContainer_, 'focusout', (e) => {
+      const event = /** @type {!FocusEvent} */ (e);
+      if (!event.relatedTarget && event.target != this.videoContainer_) {
+        this.lostFocusElement_ = /** @type {Element} */ (event.target);
+        this.lostFocusTimer_.tickAfter(/* seconds= */ 0);
+      }
     });
 
     this.listenForControlsKeyEvents_(this.videoContainer_,
@@ -2249,12 +2334,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    const isVolumeBar = isControlsFocused && activeElement.classList ?
-        activeElement.classList.contains('shaka-volume-bar') : false;
     const isSeekBar = isControlsFocused && activeElement.classList ?
         activeElement.classList.contains('shaka-seek-bar') : false;
-    const isFullscreenOrControlsInWindow = isFullscreen ||
-        this.config_.enableKeyboardPlaybackControlsInWindow;
+    // Other sliders, such as the volume bar, use the arrow keys themselves.
+    const isOtherRange = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-range-element') &&
+        !isSeekBar : false;
+
+    // From here on, the player either has the focus or the app asked for the
+    // keys of the whole window, so the shortcuts act the same way in and out
+    // of fullscreen.  Only the focused control may need a key for itself.
 
     // Show the control panel if it is on focus or any button is pressed.
     if (isControlsFocused) {
@@ -2266,63 +2355,51 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     switch (event.key.toLowerCase()) {
       case this.config_.shortcuts.small_rewind.toLowerCase():
-        // If it's not focused on the volume bar, or if it's in fullscreen,
-        // move the seek time backward for a few sec.
-        // Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
-              !isVolumeBar) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() - keyboardSeekDistance);
-          }
+        // Move the seek time backward for a few sec, unless another slider is
+        // focused.  That one will be adjusted automatically instead.
+        if (this.seekBar_ && keyboardSeekDistance > 0 && !isOtherRange) {
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() - keyboardSeekDistance);
         }
         break;
       case this.config_.shortcuts.small_fast_forward.toLowerCase():
-        // If it's not focused on the volume bar, or if it's in fullscreen,
-        // move the seek time forward for a few sec.
-        // Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
-              !isVolumeBar) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() + keyboardSeekDistance);
-          }
+        // Move the seek time forward for a few sec, unless another slider is
+        // focused.  That one will be adjusted automatically instead.
+        if (this.seekBar_ && keyboardSeekDistance > 0 && !isOtherRange) {
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() + keyboardSeekDistance);
         }
         break;
       case this.config_.shortcuts.large_rewind.toLowerCase():
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
-          if (isSeekBar || isFullscreenOrControlsInWindow) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
-          }
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
         }
         break;
       case this.config_.shortcuts.large_fast_forward.toLowerCase():
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
-          if (isSeekBar || isFullscreenOrControlsInWindow) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
-          }
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.
       case this.config_.shortcuts.home.toLowerCase():
-        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (this.seekBar_) {
           event.preventDefault();
           this.seek_(this.player_.seekRange().start);
         }
         break;
       // Jump to the end of the video's seek range.
       case this.config_.shortcuts.end.toLowerCase():
-        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (this.seekBar_) {
           event.preventDefault();
           this.seek_(this.player_.seekRange().end);
         }
@@ -2375,17 +2452,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       }
-      // Pause or play by pressing space on the seek bar.
       case ' ':
       // older browsers might return spacebar instead of a space character
       case 'spacebar':
-      case this.config_.shortcuts.play.toLowerCase():
-        if (isSeekBar ||
-            (isFullscreenOrControlsInWindow && !isControlsFocused)) {
+      case this.config_.shortcuts.play.toLowerCase(): {
+        // A focused control handles the space key itself, except for the seek
+        // bar, which does nothing with it.
+        const key = event.key.toLowerCase();
+        const isSpace = key == ' ' || key == 'spacebar';
+        if (!isSpace || isSeekBar || !isControlsFocused) {
           event.preventDefault();
           this.playPausePresentation();
         }
         break;
+      }
       case this.config_.shortcuts.take_screenshot.toLowerCase():
         this.takeScreenshot();
         break;
@@ -2408,7 +2488,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case '8':
       case '9': {
         // Jump to percentage in the video
-        if (!this.ad_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (!this.ad_) {
           const seekRange = this.player_.seekRange();
           const length = seekRange.end - seekRange.start;
           if (length > 0) {
@@ -2737,8 +2817,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
                   menu.contains(activeElement));
     this.hideSettingsMenusTimer_.tickNow();
     if (focusIsInMenu && this.settingsMenuOpener_ &&
-        !this.settingsMenuOpener_.closest('.shaka-hidden') &&
-        this.settingsMenuOpener_.getClientRects().length) {
+        shaka.ui.Controls.canTakeFocus_(this.settingsMenuOpener_)) {
       this.settingsMenuOpener_.setAttribute('aria-expanded', 'false');
       this.settingsMenuOpener_.focus();
     }
@@ -2783,9 +2862,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'button, input, select, textarea, a[href], [tabindex]'));
     const shownChildren = children.filter((child) => {
       const element = /** @type {!HTMLElement} */ (child);
-      return element.tabIndex >= 0 && !child.matches(':disabled') &&
-          !child.closest('.shaka-hidden') &&
-          element.getClientRects().length > 0;
+      return element.tabIndex >= 0 && shaka.ui.Controls.canTakeFocus_(child);
     });
     if (!shownChildren.length) {
       return;
