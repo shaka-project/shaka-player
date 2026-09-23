@@ -193,6 +193,22 @@ function installPromiseWithResolversPolyfill() {
 }
 
 /**
+ * Install a polyfill for structuredClone if needed.
+ *
+ * Old platforms such as Chromecast lack it, and the MSF parser uses it to log
+ * a snapshot of the catalog in debug builds.  MSF needs WebTransport, which
+ * those platforms don't have, so only the tests reach that code there.  The
+ * catalog is plain JSON, so a JSON round-trip is a faithful copy.
+ */
+function installStructuredClonePolyfill() {
+  if (!window.structuredClone) {
+    window.structuredClone = function(value) {
+      return JSON.parse(JSON.stringify(value));
+    };
+  }
+}
+
+/**
  * Work around lab crashes by flagging if we're running in the lab.  This lets
  * us add lab-specific workarounds for our unique lab environment.  This won't
  * affect local test runs on developer machines or GitHub Actions workflows.
@@ -681,6 +697,7 @@ async function setupTestEnvironment() {
   }
 
   installPromiseWithResolversPolyfill();
+  installStructuredClonePolyfill();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
