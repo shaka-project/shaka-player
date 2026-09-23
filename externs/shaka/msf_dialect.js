@@ -107,10 +107,18 @@ shaka.extern.MsfSession = class {
    * @param {Array<string>} namespace
    * @param {string} trackName
    * @param {shaka.extern.MsfObjectCallback} callback
+   * @param {?shaka.extern.MsfLocation=} startLocation Where delivery should
+   *   begin, for a subscription that is not meant to start at the live edge,
+   *   which is what a seek into published-but-not-yet-received content needs.
+   *   Every draft carries it, though not alike: draft-14 as fields of the
+   *   SUBSCRIBE message, draft-16 and draft-18 in the SUBSCRIPTION_FILTER
+   *   parameter, draft-20 in LOCATION_FILTER. A publisher may still refuse
+   *   it, in which case the subscription fails rather than silently starting
+   *   somewhere else.
    * @return {!Promise<bigint>}
    * @exportDoc
    */
-  subscribe(namespace, trackName, callback) {}
+  subscribe(namespace, trackName, callback, startLocation) {}
 
   /**
    * Stops delivery for a subscription.
@@ -183,6 +191,24 @@ shaka.extern.MsfSession = class {
  * @exportDoc
  */
 shaka.extern.MsfObject;
+
+
+/**
+ * Where an Object sits in a track: the MoQT Location, a Group ID and an
+ * Object ID within that Group.
+ *
+ * Defined here for the same reason as shaka.extern.MsfObject: it is part of
+ * the dialect plugin contract, and externs are compiled into every build,
+ * including the ones that leave the MSF parser out.
+ *
+ * @typedef {{
+ *   group: bigint,
+ *   object: bigint,
+ *   subgroup: ?(bigint|undefined),
+ * }}
+ * @exportDoc
+ */
+shaka.extern.MsfLocation;
 
 
 /**
