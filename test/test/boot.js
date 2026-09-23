@@ -201,10 +201,12 @@ function installPromiseWithResolversPolyfill() {
  * catalog is plain JSON, so a JSON round-trip is a faithful copy.
  */
 function installStructuredClonePolyfill() {
+  // A declaration rather than an arrow function, to stay ES5 for Chrome 38.
+  function cloneViaJson(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
   if (!window.structuredClone) {
-    window.structuredClone = function(value) {
-      return JSON.parse(JSON.stringify(value));
-    };
+    window.structuredClone = cloneViaJson;
   }
 }
 
