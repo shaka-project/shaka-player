@@ -162,7 +162,7 @@ presentation time, and nothing in the transport relates the two. A player that
 does not know the relation can only ever ask for the live edge: a time the
 viewer seeks to names no Location to subscribe from. The **media timeline**
 ([draft-ietf-moq-msf](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/)
-section 8) is what supplies it, and with it the seek range stops being
+section 7) is what supplies it, and with it the seek range stops being
 "whatever has already arrived".
 
 MSF carries the relation two ways, and Shaka reads both. Where they describe

@@ -62,7 +62,10 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
     });
 
     it('maps a location back to its media time', () => {
-      addObject([[0, [0, 0], 0], [2002, [1, 0], 0]]);
+      addObject([[0, [0, 0], 0], [2002, [1, 0], 0], [4004, [2, 3], 0]]);
+
+      expect(timeline.timeForLocation(
+          {group: BigInt(2), object: BigInt(3), subgroup: null})).toBe(4.004);
 
       expect(timeline.timeForLocation(
           {group: BigInt(1), object: BigInt(0), subgroup: null})).toBe(2.002);
@@ -109,6 +112,16 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
           {group: BigInt(4), object: BigInt(0), subgroup: null});
     });
 
+    it('keeps a record that carries more than the three defined items', () => {
+      // MSF tells a parser to ignore what it does not understand, so a record
+      // a later draft extended is still a record.
+      addObject([[0, [0, 0], 1759924158381, 'something new']]);
+
+      expect(timeline.locationForTime(0)).toEqual(
+          {group: BigInt(0), object: BigInt(0), subgroup: null});
+      expect(timeline.wallClockForTime(0)).toBe(1759924158381);
+    });
+
     it('discards a document that is not JSON', () => {
       const bytes = shaka.util.BufferUtils.toUint8(
           shaka.util.StringUtils.toUTF8('{not json'));
@@ -125,7 +138,7 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
 
   describe('updating', () => {
     it('adds to what it holds for an incremental object', () => {
-      // MSF section 8.3: the Objects after the first in a Group carry only
+      // MSF section 7.3: the Objects after the first in a Group carry only
       // the records that are new.
       addObject([[0, [0, 0], 0]], /* independent= */ true);
       addObject([[2002, [1, 0], 0]], /* independent= */ false);
@@ -163,6 +176,26 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
       expect(timeline.getEndTime()).toBe(0);
     });
 
+    it('empties itself when nothing in an independent object parses', () => {
+      // The Object carries the whole timeline, so records it leaves out are
+      // gone. Keeping the previous ones would offer a seek range built from a
+      // document the publisher has already superseded; emptying costs the DVR
+      // window and nothing else.
+      addObject([[0, [0, 0], 0], [2002, [1, 0], 0]], /* independent= */ true);
+      addObject(['garbage', {}], /* independent= */ true);
+
+      expect(timeline.isEmpty()).toBe(true);
+      expect(timeline.getStartTime()).toBe(null);
+    });
+
+    it('keeps what it holds when nothing in an incremental object parses',
+        () => {
+          addObject([[0, [0, 0], 0]], /* independent= */ true);
+
+          expect(addObject(['garbage'], /* independent= */ false)).toBe(false);
+          expect(timeline.getStartTime()).toBe(0);
+        });
+
     it('empties itself for an empty independent object', () => {
       addObject([[0, [0, 0], 0]], /* independent= */ true);
       addObject([], /* independent= */ true);
@@ -173,7 +206,7 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
 
   describe('template format', () => {
     beforeEach(() => {
-      // The example from MSF section 8.4.1: 2002 ms per group, one group per
+      // The example from MSF section 7.4.1: 2002 ms per group, one group per
       // entry, wallclock advancing with media time.
       expect(timeline.setTemplate([0, 2002, [0, 0], [1, 0], 1759924158381,
         2002])).toBe(true);
