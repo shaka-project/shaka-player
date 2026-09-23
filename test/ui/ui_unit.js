@@ -2586,6 +2586,8 @@ describe('UI', () => {
       });
 
       it('handles shortcuts while a button has the focus', () => {
+        // Cast, mobile and smart TV defaults leave some controls out.
+        ui1.configure({controlPanelElements: ['play_pause']});
         const playSpy =
             spyOn(video1, 'play').and.returnValue(Promise.resolve());
         const button = /** @type {!HTMLElement} */ (
@@ -2606,6 +2608,8 @@ describe('UI', () => {
       });
 
       it('leaves the arrow keys to other sliders', () => {
+        // Cast, mobile and smart TV defaults leave the volume bar out.
+        ui1.configure({controlPanelElements: ['mute_volume']});
         const volumeBar = /** @type {!HTMLElement} */ (
           container1.querySelector('.shaka-volume-bar'));
         focusForKeyboardTest(volumeBar);
@@ -2621,22 +2625,26 @@ describe('UI', () => {
         let button;
 
         beforeEach(() => {
+          ui1.configure({controlPanelElements: ['play_pause']});
           button = /** @type {!HTMLElement} */ (
             container1.querySelector('.shaka-play-button'));
         });
 
         /**
          * Loses the focus the way the browser does when the focused element
-         * can no longer have it.
+         * can no longer have it: the focus moves to the body, with no other
+         * element taking it.
+         *
+         * Force document.activeElement, since not every platform moves the
+         * real focus (see focusForKeyboardTest()).
          */
         function loseFocus() {
-          if (activeElementIsForced) {
-            // Deleting the override restores the accessor from
-            // Document.prototype.
-            delete document['activeElement'];
-            activeElementIsForced = false;
-          }
           button.blur();
+          Object.defineProperty(document, 'activeElement', {
+            get: () => document.body,
+            configurable: true,
+          });
+          activeElementIsForced = true;
           button.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
         }
 
