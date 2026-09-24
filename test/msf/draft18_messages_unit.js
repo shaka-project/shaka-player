@@ -92,6 +92,40 @@ filterDescribe('shaka.msf.draft18.MessageWriter', isMSFSupported, () => {
     });
   });
 
+  describe('locationFilterParam', () => {
+    it('should encode an AbsoluteStart filter', () => {
+      // Draft-18 spells the filter as a Filter Type followed by the fields
+      // that type takes: AbsoluteStart (0x3) takes a Start Location and no
+      // end, so the subscription runs from there onwards.
+      const param = writer.locationFilterParam(
+          {group: BigInt(7), object: BigInt(3)});
+
+      expect(param.type).toBe(BigInt(0x21));
+      expect(Array.from(
+          /** @type {!Uint8Array} */(param.value))).toEqual([0x03, 0x07, 0x03]);
+    });
+
+    it('should ride along in a SUBSCRIBE as an odd-keyed parameter', () => {
+      writer.marshalSubscribe({
+        requestId: BigInt(1),
+        namespace: [],
+        trackName: '',
+        params: [writer.locationFilterParam(
+            {group: BigInt(9), object: BigInt(0)})],
+      });
+
+      expectMessage([0x03], [
+        0x01, // requestId
+        0x00, // empty namespace
+        0x00, // empty track name
+        0x01, // parameter count
+        0x21, // type delta, from 0: SUBSCRIPTION_FILTER
+        0x03, // value length, because an odd key carries bytes
+        0x03, 0x09, 0x00, // AbsoluteStart, group 9, object 0
+      ]);
+    });
+  });
+
   describe('marshalFetch', () => {
     it('should encode start and end as Location structures', () => {
       writer.marshalFetch({
@@ -111,6 +145,29 @@ filterDescribe('shaka.msf.draft18.MessageWriter', isMSFSupported, () => {
         0x01, 0x02, // start location
         0x03, 0x04, // end location
         0x00, // parameter count
+      ]);
+    });
+
+    it('should default the range to the object at {0, 0}', () => {
+      // The range is an inclusive pair of absolute Locations, so this asks for
+      // one Object, not for the whole track.
+      writer.marshalFetch({
+        requestId: BigInt(2),
+        namespace: ['ns'],
+        trackName: 'a',
+        startLocation: undefined,
+        endLocation: undefined,
+        params: [],
+      });
+
+      expectMessage([0x16], [
+        0x02,
+        0x01,
+        0x01, 0x02, 0x6e, 0x73,
+        0x01, 0x61,
+        0x00, 0x00, // start location {0, 0}
+        0x00, 0x00, // end location {0, 0}
+        0x00,
       ]);
     });
   });

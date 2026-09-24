@@ -19,6 +19,9 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
 
     const webTransport = /** @type {!WebTransport} */ (/** @type {?} */ ({
       incomingUnidirectionalStreams: {getReader: () => ({read: never})},
+      // The session watches this to know when the peer has gone away, so it
+      // must stay pending for the length of a test.
+      closed: never(),
       close: () => {},
     }));
     const controlStream = /** @type {!shaka.msf.IControlStream} */ (
@@ -35,7 +38,68 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
         webTransport, controlStream,
         /** @type {!shaka.extern.MsfDialect} */ (/** @type {?} */ ({})),
         /** @type {!shaka.extern.MsfManifestConfiguration} */ (
-          /** @type {?} */ ({})));
+          /** @type {?} */ ({
+            subscribeFilterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
+          })));
+  });
+
+  describe('subscribe', () => {
+    const NAMESPACE = ['msf', 'clear'];
+    const TRACK = 'video0';
+
+    /**
+     * Sends a SUBSCRIBE and returns the message that went out, answering it so
+     * that the request does not sit waiting for a SUBSCRIBE_OK that this
+     * stubbed control stream never delivers.
+     *
+     * @param {?shaka.msf.Utils.Location=} startLocation
+     * @return {!Promise<shaka.msf.Utils.Subscribe>}
+     * @suppress {visibility}
+     */
+    async function subscribeAndReadMessage(startLocation) {
+      const subscribed =
+          session.subscribe(NAMESPACE, TRACK, () => {}, startLocation);
+
+      // The message goes out before the response is awaited, so it is there
+      // by the time the send() stub has resolved.
+      await shaka.test.Util.shortDelay();
+      expect(sent.length).toBe(1);
+      const message = /** @type {shaka.msf.Utils.Subscribe} */ (sent[0]);
+
+      const handler = session.messageHandlers_
+          .get(shaka.msf.Utils.MessageType.SUBSCRIBE_OK)
+          .get(message.requestId);
+      handler(/** @type {shaka.msf.Utils.SubscribeOk} */ (/** @type {?} */ ({
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_OK,
+        requestId: message.requestId,
+        trackAlias: BigInt(1),
+      })));
+      await subscribed;
+
+      return message;
+    }
+
+    it('asks for an absolute start when given a location', async () => {
+      // Draft-14 writes the Start Location as fields of the message and
+      // draft-16 inside the SUBSCRIPTION_FILTER parameter, but both take it
+      // from here, and both only write it for an absolute filter.
+      const message = await subscribeAndReadMessage(
+          {group: BigInt(30), object: BigInt(0), subgroup: null});
+
+      expect(message.filterType)
+          .toBe(shaka.config.MsfFilterType.ABSOLUTE_START);
+      expect(message.startLocation).toEqual(
+          {group: BigInt(30), object: BigInt(0), subgroup: null});
+    });
+
+    it('uses the configured filter when it starts at the live edge',
+        async () => {
+          const message = await subscribeAndReadMessage();
+
+          expect(message.filterType)
+              .toBe(shaka.config.MsfFilterType.LARGEST_OBJECT);
+          expect(message.startLocation).toBeUndefined();
+        });
   });
 
   describe('unsubscribe', () => {

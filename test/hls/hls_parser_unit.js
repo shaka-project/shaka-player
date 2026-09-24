@@ -54,6 +54,8 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
+  let packedAudioSegmentData;
+  /** @type {!Uint8Array} */
   let aesKey;
   /** @type {!Uint8Array} */
   let aes256GcmKey;
@@ -80,6 +82,22 @@ describe('HlsParser', () => {
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     tsSegmentData = responses[2];
+
+    // Packed audio: an empty ID3v2 tag followed by two silent ADTS frames of
+    // AAC-LC, 44100 Hz, stereo.
+    const adtsFrame = [
+      0xff, 0xf1, // sync word, MPEG-4, layer 0, no CRC
+      0x50, // AAC-LC, sampling frequency index 4 (44100 Hz)
+      0x80, // channel configuration 2 (stereo), frame length bits 12-11
+      0x02, 0x1f, // frame length 16, buffer fullness
+      0xfc, // buffer fullness, 1 raw data block
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // payload
+    ];
+    packedAudioSegmentData = new Uint8Array([
+      0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ID3v2
+      ...adtsFrame,
+      ...adtsFrame,
+    ]);
     iamfInitSegmentData = responses[3];
     iamfSegmentData = responses[4];
 
@@ -6398,6 +6416,44 @@ describe('HlsParser', () => {
     const actual = await parser.start('test:/media', playerInterface);
     await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
+  });
+
+  it('detects packed audio published with a .ts extension', async () => {
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/10619
+    // Some packagers publish packed audio (a containerless audio elementary
+    // stream) with a container extension, so the extension can't be trusted.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.ts',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/aac');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/media', media)
+        .setResponseValue('test:/main.ts', packedAudioSegmentData);
+
+    const actual = await parser.start('test:/media', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+
+    const audio = actual.variants[0].audio;
+    goog.asserts.assert(audio.segmentIndex, 'Segment index should exist!');
+    const references = Array.from(audio.segmentIndex);
+    // The reference must not keep the MIME type guessed from the extension,
+    // or MediaSourceEngine would switch the source buffer to video/mp2t.
+    expect(references[0].mimeType).toBe('audio/aac');
   });
 
   it('throw error when no segments', async () => {
