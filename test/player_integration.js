@@ -103,6 +103,60 @@ describe('Player', () => {
     });
   });
   describe('Live to VOD', () => {
+    it('seeks beyond the buffer after HLS ends with infinite MSE duration',
+        async () => {
+          if (!shaka.media.Capabilities
+              .isInfiniteLiveStreamDurationSupported() ||
+              !('setLiveSeekableRange' in new MediaSource())) {
+            pending('Requires infinite MSE duration and live seekable ranges');
+          }
+          const uri =
+              '/base/test/test/assets/hls-ts-muxed-aac-h264/chunk.m3u8';
+          let ended = false;
+          const netEngine = player.getNetworkingEngine();
+          netEngine.registerResponseFilter((type, response) => {
+            if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+              return;
+            }
+            if (!ended) {
+              // Initially publish five segments, then publish the last segment
+              // and ENDLIST together when the broadcast ends.
+              const text = shaka.util.StringUtils.fromUTF8(response.data)
+                  .replace('#EXTINF:6,\nn_5_0_0.ts\n', '')
+                  .replace('#EXT-X-ENDLIST', '');
+              response.data = shaka.util.StringUtils.toUTF8(text);
+            }
+          });
+          player.configure({streaming: {
+            bufferingGoal: 2,
+            rebufferingGoal: 1,
+            preferNativeHls: false,
+          }});
+          await player.load(uri, 3);
+          await video.play();
+          await waiter.waitForMovement(video);
+          video.pause();
+          expect(player.isLive()).toBe(true);
+          ended = true;
+          await waiter.timeoutAfter(20).waitUntilVodTransition(video);
+          // Allow the live seekable range timer to observe the transition.
+          await Util.delay(1);
+          const target = 26;
+          expect(player.seekRange().start).toBeLessThan(target);
+          expect(player.seekRange().end).toBeGreaterThan(target);
+          expect(video.duration).toBe(Infinity);
+          expect(video.buffered.end(video.buffered.length - 1))
+              .toBeLessThan(target);
+          expect(video.seekable.end(video.seekable.length - 1))
+              .toBeGreaterThan(target);
+          const seeked = waiter.waitForEvent(video, 'seeked');
+          video.currentTime = target;
+          await seeked;
+          expect(video.currentTime).toBeCloseTo(target, 1);
+          await video.play();
+          await waiter.waitForMovement(video);
+        });
+
     it('playback transition when current time is in the past', async () => {
       const netEngine = player.getNetworkingEngine();
       const startTime = Date.now();

@@ -5,6 +5,15 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
++../../lib/codec/ac3.js
++../../lib/codec/adts.js
++../../lib/codec/av1.js
++../../lib/codec/ec3.js
++../../lib/codec/h264.js
++../../lib/codec/h265.js
++../../lib/codec/mpeg_audio.js
++../../lib/codec/opus.js
+
 +../../lib/config/codec_switching_strategy.js
 +../../lib/config/cross_boundary_strategy.js
 +../../lib/config/msf_filter_type.js

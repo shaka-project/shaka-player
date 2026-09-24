@@ -449,6 +449,16 @@ describe('tXml', () => {
     expect(TXml.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
 
+  it('parseStringList', () => {
+    expect(TXml.parseStringList('a')).toEqual(['a']);
+    expect(TXml.parseStringList('a b c')).toEqual(['a', 'b', 'c']);
+    expect(TXml.parseStringList('  a \t b\nc  ')).toEqual(['a', 'b', 'c']);
+    expect(TXml.parseStringList('1 2')).toEqual(['1', '2']);
+
+    expect(TXml.parseStringList('')).toEqual([]);
+    expect(TXml.parseStringList('   ')).toEqual([]);
+  });
+
   it('parseXpath', () => {
     expect(TXml.parseXpath('/MPD'))
         .toEqual([{name: 'MPD', id: null, position: null,

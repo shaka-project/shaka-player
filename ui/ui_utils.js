@@ -47,8 +47,8 @@ shaka.ui.Utils = class {
 
 
   /**
-   * Finds a descendant of |menu| that has a 'shaka-chosen-item' class
-   * and focuses on its' parent.
+   * Focuses the button containing the selected item, or the back button
+   * when no item is selected.
    *
    * @param {HTMLElement} menu
    */
@@ -58,8 +58,11 @@ shaka.ui.Utils = class {
     }
     const chosenItem = shaka.ui.Utils.getDescendantIfExists(
         menu, 'shaka-chosen-item');
-    if (chosenItem) {
-      chosenItem.parentElement.focus();
+    // The selected class may be on the button itself or on its label.
+    const button = chosenItem ? chosenItem.closest('button') :
+        menu.querySelector('.shaka-back-to-overflow-button');
+    if (button) {
+      /** @type {!HTMLElement} */ (button).focus();
     }
   }
 

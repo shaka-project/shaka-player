@@ -5,7 +5,7 @@
  */
 
 describe('MpegAudio', () => {
-  const MpegAudio = shaka.transmuxer.MpegAudio;
+  const MpegAudio = shaka.codec.MpegAudio;
 
   it('parses a MPEG-1 Layer II header', () => {
     const data = new Uint8Array([0xff, 0xfc, 0xc4, 0x00]);

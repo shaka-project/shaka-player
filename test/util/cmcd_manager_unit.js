@@ -89,9 +89,42 @@ describe('CmcdManager', () => {
       rtpSafetyFactor: 5,
       useHeaders: false,
       includeKeys: [],
+      includeInRequests: [],
       version: 2,
       eventTargets: [],
+      applyParametersFromManifest: true,
     }, overrides);
+  }
+
+  /**
+   * @param {!Object=} cmcdOverrides Overrides for the CMCDParameters part.
+   * @param {!Object=} reportingOverrides Overrides for the reporting part.
+   * @return {shaka.extern.ClientDataReporting}
+   */
+  function createManifestParams(cmcdOverrides = {}, reportingOverrides = {}) {
+    const cmcdParameters = Object.assign({
+      version: 1,
+      mode: 'query',
+      includeInRequests: ['segment'],
+      keys: null,
+      contentId: null,
+      sessionId: null,
+    }, cmcdOverrides);
+    return /** @type {shaka.extern.ClientDataReporting} */ (Object.assign({
+      schemeIdUri: 'urn:mpeg:dash:cta-5004:2023',
+      serviceLocations: null,
+      adaptationSets: null,
+      serviceLocationBaseUris: [],
+      cmcdParameters: cmcdParameters,
+    }, reportingOverrides));
+  }
+
+  /**
+   * @param {!shaka.extern.Request} request
+   * @return {string} The decoded CMCD query dictionary, or '' when absent.
+   */
+  function cmcdQueryOf(request) {
+    return new URL(request.uris[0]).searchParams.get('CMCD') || '';
   }
 
   function createManager(player, configOverrides = {}, attach = true) {
@@ -141,6 +174,14 @@ describe('CmcdManager', () => {
       }),
     });
   }
+
+  describe('default configuration', () => {
+    it('applies manifest parameters and uses the legacy request set', () => {
+      const cmcd = shaka.util.PlayerConfiguration.createDefault().cmcd;
+      expect(cmcd.applyParametersFromManifest).toBe(true);
+      expect(cmcd.includeInRequests).toEqual([]);
+    });
+  });
 
   // ── Public API back-compat re-exports ──
 
@@ -241,11 +282,10 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_'].recordEvent).toHaveBeenCalledTimes(1);
     });
 
-    it('rebuilt reporter re-learns sf after a material config change', () => {
-      // The manifest path only pushes sf into the reporter when it
-      // differs from the cached sf_. The configure() teardown must clear
-      // session-scoped state (via reset()) so a rebuilt reporter is not
-      // starved of sf by the previous session's cache.
+    it('rebuilt reporter keeps the learned sf', () => {
+      // The manifest request that teaches sf has already happened when a
+      // rebuild occurs (for example when manifest parameters arrive), so the
+      // rebuilt reporter must be re-taught the cached value.
       const player = createMockPlayer();
       const {manager, config} = createManager(player);
       const manifestContext = /** @type {shaka.extern.RequestContext} */ (
@@ -253,12 +293,9 @@ describe('CmcdManager', () => {
       manager.applyRequestData(
           RequestType.MANIFEST, createRequest(), manifestContext);
       manager.configure(Object.assign({}, config, {contentId: 'changed'}));
-      const newReporter = priv(manager)['reporter_'];
-      spyOn(newReporter, 'update');
-      manager.applyRequestData(
-          RequestType.MANIFEST, createRequest(), manifestContext);
-      expect(newReporter.update).toHaveBeenCalledWith(
-          jasmine.objectContaining({sf: StreamingFormat.DASH}));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
     });
 
     it('reset stops the reporter and clears state', () => {
@@ -342,6 +379,556 @@ describe('CmcdManager', () => {
       expect(priv(manager)['reporter_'].update).toHaveBeenCalledWith(
           {sta: PlayerState.PAUSED});
     });
+  });
+
+  // ── Manifest-signaled parameters ──
+
+  describe('manifest parameters', () => {
+    const resolve = CmcdManager.resolveEffectiveConfig;
+
+    it('uses the application configuration when the manifest says nothing',
+        () => {
+          const config = createConfig({
+            version: 2, useHeaders: true, includeKeys: ['br'],
+            includeInRequests: ['mpd'],
+          });
+          const effective = resolve(config, null, 'generated');
+          expect(effective.enabled).toBe(true);
+          expect(effective.version).toBe(2);
+          expect(effective.useHeaders).toBe(true);
+          expect(effective.includeKeys).toEqual(['br']);
+          expect(effective.includeInRequests).toEqual(['mpd']);
+          expect(effective.sessionId).toBe(config.sessionId);
+          expect(effective.contentId).toBe('testing');
+          expect(effective.fromManifest).toBe(false);
+        });
+
+    it('lets manifest parameters override the overlapping fields', () => {
+      const config = createConfig({
+        version: 2, useHeaders: true, includeKeys: ['br'],
+        contentId: 'app', sessionId: 'app-session',
+      });
+      const params = createManifestParams({
+        version: 1, mode: 'query', keys: ['bl', 'cid'],
+        contentId: 'mpd', sessionId: 'mpd-session',
+        includeInRequests: ['segment', 'mpd'],
+      });
+      const effective = resolve(config, params, null);
+      expect(effective.enabled).toBe(true);
+      expect(effective.version).toBe(1);
+      expect(effective.useHeaders).toBe(false);
+      expect(effective.includeKeys).toEqual(['bl', 'cid']);
+      expect(effective.contentId).toBe('mpd');
+      expect(effective.sessionId).toBe('mpd-session');
+      expect(effective.includeInRequests).toEqual(['segment', 'mpd']);
+      expect(effective.rtpSafetyFactor).toBe(config.rtpSafetyFactor);
+      expect(effective.eventTargets).toBe(config.eventTargets);
+      expect(effective.fromManifest).toBe(true);
+    });
+
+    it('falls back to app values for absent manifest ids and keys', () => {
+      const config = createConfig({
+        includeKeys: ['br'], contentId: 'app', sessionId: 'app-session',
+      });
+      const effective = resolve(config, createManifestParams(), null);
+      expect(effective.includeKeys).toEqual(['br']);
+      expect(effective.contentId).toBe('app');
+      expect(effective.sessionId).toBe('app-session');
+    });
+
+    it('enables CMCD when the manifest carries parameters', () => {
+      const effective = resolve(
+          createConfig({enabled: false}), createManifestParams(), 'generated');
+      expect(effective.enabled).toBe(true);
+      expect(effective.sessionId).toBe(
+          '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3');
+    });
+
+    it('ignores the manifest when applyParametersFromManifest is false',
+        () => {
+          const config = createConfig({
+            enabled: false, applyParametersFromManifest: false,
+          });
+          const effective = resolve(
+              config, createManifestParams({contentId: 'mpd'}), null);
+          expect(effective.enabled).toBe(false);
+          expect(effective.contentId).toBe('testing');
+          expect(effective.fromManifest).toBe(false);
+        });
+
+    it('drops manifest keys the player does not support', () => {
+      const params = createManifestParams({
+        version: 1, keys: ['br', 'bogus', 'com.example-custom', 'sid'],
+      });
+      const effective = resolve(createConfig(), params, null);
+      expect(effective.includeKeys).toEqual(
+          ['br', 'com.example-custom', 'sid']);
+    });
+
+    it('keeps the app keys when no manifest key is supported', () => {
+      // 'ltc' and 'msd' are v2-only keys, so under the manifest's version 1
+      // nothing survives filtering. An empty list would expand to every v1
+      // key in toReporterConfig_, the opposite of what Table K.8 asks for.
+      const config = createConfig({includeKeys: ['br']});
+      const params = createManifestParams({version: 1, keys: ['ltc', 'msd']});
+      const effective = resolve(config, params, null);
+      expect(effective.includeKeys).toEqual(['br']);
+    });
+
+    it('starts a reporter from manifest parameters when the app disabled ' +
+        'CMCD', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      expect(priv(manager)['reporter_']).toBeNull();
+      manager.setManifestParameters(
+          createManifestParams({keys: ['sid', 'cid', 'ot'], contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('cid="mpd"');
+    });
+
+    it('rebuilds only when the effective configuration changes', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      const first = priv(manager)['reporter_'];
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      const second = priv(manager)['reporter_'];
+      expect(second).not.toBe(first);
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).toBe(second);
+    });
+
+    it('does not rebuild when only includeInRequests changes', () => {
+      // includeInRequests is evaluated outside the reporter, so a change
+      // must not cost the reporter's request timestamps and CML counters.
+      const player = createMockPlayer();
+      const {manager} = createManager(player);
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      const reporter = priv(manager)['reporter_'];
+      expect(reporter).not.toBeNull();
+      manager.setManifestParameters(createManifestParams({
+        contentId: 'mpd', includeInRequests: ['segment', 'mpd'],
+      }));
+      expect(priv(manager)['reporter_']).toBe(reporter);
+      const r = createRequest('https://test.com/x.mpd');
+      manager.applyRequestData(RequestType.MANIFEST, r,
+          /** @type {shaka.extern.RequestContext} */ (
+            {type: AdvancedRequestType.MPD}));
+      expect(r.uris[0]).toContain('CMCD=');
+    });
+
+    it('keeps the generated session id across rebuilds and drops it on ' +
+        'reset', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {sessionId: ''});
+      const sid = priv(manager)['effective_'].sessionId;
+      expect(sid).toBeTruthy();
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['effective_'].sessionId).toBe(sid);
+      manager.reset();
+      manager.onLoad();
+      expect(priv(manager)['effective_'].sessionId).toBeTruthy();
+      expect(priv(manager)['effective_'].sessionId).not.toBe(sid);
+    });
+
+    it('re-teaches sf and sta to a rebuilt reporter', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(
+          player, {includeKeys: ['sf', 'sta', 'ot']});
+      manager.applyRequestData(RequestType.MANIFEST, createRequest(),
+          /** @type {shaka.extern.RequestContext} */ (
+            {type: AdvancedRequestType.MPD}));
+      priv(manager)['video_'].dispatchEvent(
+          new shaka.util.FakeEvent('playing'));
+      manager.setManifestParameters(createManifestParams({
+        version: 2, contentId: 'mpd', keys: ['sf', 'sta', 'ot', 'cid'],
+      }));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      const cmcd = cmcdQueryOf(r);
+      expect(cmcd).toContain('sf=d');
+      expect(cmcd).toContain('sta=p');
+    });
+
+    it('keeps the start time of load across a rebuild so msd still fires',
+        () => {
+          // A live MPD refresh can deliver material CMCD parameters after
+          // setStartTimeOfLoad() but before the first 'playing' event.
+          // startTimeOfLoad_ is session-scoped, so the rebuild must not
+          // clear it or msd is lost for the whole session.
+          const player = createMockPlayer();
+          const {manager} = createManager(player);
+          const video = priv(manager)['video_'];
+          manager.setStartTimeOfLoad(Date.now() - 200);
+          manager.setManifestParameters(
+              createManifestParams({version: 2, contentId: 'mpd'}));
+          video.dispatchEvent(new shaka.util.FakeEvent('playing'));
+          const r = createRequest();
+          manager.applyRequestData(
+              RequestType.SEGMENT, r, createSegmentContext());
+          expect(cmcdQueryOf(r)).toContain('msd=');
+        });
+
+    it('rebuilds on the app configuration when a refresh drops the ' +
+        'parameters', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {
+        contentId: 'app', includeKeys: ['cid', 'ot'],
+      });
+      manager.setManifestParameters(createManifestParams({
+        contentId: 'mpd', keys: ['cid', 'ot'],
+      }));
+      const fromManifest = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, fromManifest, createSegmentContext());
+      expect(cmcdQueryOf(fromManifest)).toContain('cid="mpd"');
+
+      manager.setManifestParameters(null);
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      const fromApp = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, fromApp, createSegmentContext());
+      expect(cmcdQueryOf(fromApp)).toContain('cid="app"');
+    });
+
+    it('stops reporting when a refresh drops the parameters and the app ' +
+        'is disabled', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      manager.setManifestParameters(createManifestParams({contentId: 'mpd'}));
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      manager.setManifestParameters(null);
+      expect(priv(manager)['reporter_']).toBeNull();
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(r.uris[0]).not.toContain('CMCD=');
+    });
+
+    it('leaves the reporter off when applyParametersFromManifest is false',
+        () => {
+          const player = createMockPlayer();
+          const {manager} = createManager(player, {
+            enabled: false, applyParametersFromManifest: false,
+          });
+          manager.setManifestParameters(
+              createManifestParams({contentId: 'mpd'}));
+          expect(priv(manager)['reporter_']).toBeNull();
+        });
+
+    it('reset() clears manifest parameters', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, {enabled: false});
+      manager.setManifestParameters(createManifestParams());
+      expect(priv(manager)['reporter_']).not.toBeNull();
+      manager.reset();
+      manager.onLoad();
+      expect(priv(manager)['manifestParams_']).toBeNull();
+      expect(priv(manager)['reporter_']).toBeNull();
+    });
+  });
+
+  describe('includeInRequests', () => {
+    /**
+     * @param {!Object} fields
+     * @return {shaka.extern.RequestContext}
+     */
+    function ctx(fields) {
+      return /** @type {shaka.extern.RequestContext} */ (fields);
+    }
+
+    /**
+     * @param {!shaka.util.CmcdManager} manager
+     * @param {!shaka.net.NetworkingEngine.RequestType} type
+     * @param {shaka.extern.RequestContext=} context
+     * @return {boolean} Whether CMCD was attached.
+     */
+    function decorated(manager, type, context) {
+      const r = createRequest('https://test.com/resource');
+      manager.applyRequestData(type, r, context);
+      return r.uris[0].includes('CMCD=');
+    }
+
+    const mpdContext = ctx({type: AdvancedRequestType.MPD});
+
+    it('uses the legacy set when the list is empty', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.XLINK}))).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.LINKED_MPD}))).toBe(true);
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(true);
+      expect(decorated(manager, RequestType.TIMING)).toBe(true);
+      expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(false);
+      expect(decorated(manager, RequestType.EVENT_CALLBACK)).toBe(false);
+    });
+
+    it('honors an explicit list', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment', 'steering']});
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(false);
+      expect(decorated(manager, RequestType.TIMING)).toBe(false);
+    });
+
+    it('treats segment as covering init segments and init as init only',
+        () => {
+          const initContext = ctx(Object.assign(createSegmentContext(),
+              {type: AdvancedRequestType.INIT_SEGMENT}));
+          const {manager} = createManager(createMockPlayer(),
+              {includeInRequests: ['segment']});
+          expect(decorated(manager, RequestType.SEGMENT, initContext))
+              .toBe(true);
+
+          const {manager: initOnly} = createManager(createMockPlayer(),
+              {includeInRequests: ['init']});
+          expect(decorated(initOnly, RequestType.SEGMENT, initContext))
+              .toBe(true);
+          expect(decorated(initOnly, RequestType.SEGMENT,
+              createSegmentContext())).toBe(false);
+        });
+
+    it('distinguishes mpd, mpdpatch, xlink and mpdlink', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['mpdpatch', 'mpdlink']});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.MPD_PATCH}))).toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.XLINK}))).toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST,
+          ctx({type: AdvancedRequestType.LINKED_MPD}))).toBe(true);
+    });
+
+    it('maps certificate and key requests to the license token', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      expect(decorated(manager, RequestType.SERVER_CERTIFICATE)).toBe(true);
+      expect(decorated(manager, RequestType.KEY)).toBe(true);
+
+      const {manager: segmentsOnly} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(decorated(segmentsOnly, RequestType.SERVER_CERTIFICATE))
+          .toBe(false);
+      expect(decorated(segmentsOnly, RequestType.KEY)).toBe(false);
+    });
+
+    it('never decorates request types CMCD has no mapping for', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      expect(decorated(manager, RequestType.APP)).toBe(false);
+    });
+
+    it('learns sf and st from undecorated manifest requests', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      const r = createRequest();
+      manager.applyRequestData(
+          RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
+      expect(cmcdQueryOf(r)).toContain('st=' + cml.cmcd.CmcdStreamType.VOD);
+    });
+
+    it('learns sf before a reporter exists', () => {
+      const {manager} = createManager(createMockPlayer(), {enabled: false});
+      const manifestRequest = createRequest('https://test.com/manifest.mpd');
+      manager.applyRequestData(
+          RequestType.MANIFEST, manifestRequest, mpdContext);
+      expect(manifestRequest.uris[0]).not.toContain('CMCD=');
+      manager.setManifestParameters(createManifestParams({
+        version: 2, keys: ['sf', 'ot', 'sid', 'cid'],
+      }));
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r, createSegmentContext());
+      expect(cmcdQueryOf(r)).toContain('sf=d');
+    });
+
+    it('decorates everything with "*", including steering and callbacks',
+        () => {
+          const {manager} = createManager(createMockPlayer(),
+              {includeInRequests: ['*']});
+          expect(decorated(manager, RequestType.CONTENT_STEERING)).toBe(true);
+          expect(decorated(manager, RequestType.EVENT_CALLBACK)).toBe(true);
+          expect(decorated(manager, RequestType.LICENSE)).toBe(true);
+          expect(decorated(manager, RequestType.MANIFEST, mpdContext))
+              .toBe(true);
+        });
+
+    it('sends ot=o on steering and callback requests', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      spyOn(priv(manager)['reporter_'], 'createRequestReport')
+          .and.callThrough();
+      for (const type of [
+        RequestType.CONTENT_STEERING, RequestType.EVENT_CALLBACK,
+      ]) {
+        manager.applyRequestData(type, createRequest());
+        const data = /** @type {!Object} */ (
+          priv(manager)['reporter_'].createRequestReport.calls
+              .mostRecent().args[1]);
+        expect(data.ot).toBe(ObjectType.OTHER);
+      }
+    });
+
+    it('applies manifest includeInRequests over the app list', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['*']});
+      manager.setManifestParameters(
+          createManifestParams({includeInRequests: ['segment']}));
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(true);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+      expect(decorated(manager, RequestType.LICENSE)).toBe(false);
+    });
+
+    it('decorates nothing when the manifest list is empty', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: []});
+      manager.setManifestParameters(
+          createManifestParams({includeInRequests: []}));
+      expect(decorated(manager, RequestType.SEGMENT, createSegmentContext()))
+          .toBe(false);
+      expect(decorated(manager, RequestType.MANIFEST, mpdContext)).toBe(false);
+    });
+
+    it('gates sidecar text and src= URIs on the segment token', () => {
+      const {manager} = createManager(createMockPlayer(),
+          {includeInRequests: ['mpd']});
+      expect(manager.appendSrcData('https://test.com/a.mp4', 'video/mp4'))
+          .toBe('https://test.com/a.mp4');
+      expect(manager.appendTextTrackData('https://test.com/a.vtt'))
+          .toBe('https://test.com/a.vtt');
+      const r = createRequest('https://test.com/a.vtt');
+      manager.applyTextData(r);
+      expect(r.uris[0]).toBe('https://test.com/a.vtt');
+
+      const {manager: withSegments} = createManager(createMockPlayer(),
+          {includeInRequests: ['segment']});
+      expect(withSegments.appendSrcData('https://test.com/a.mp4', 'video/mp4'))
+          .toContain('CMCD=');
+    });
+  });
+
+  describe('manifest filters', () => {
+    const BASE_URIS = [
+      {serviceLocation: 'alpha', uri: 'https://cdn1.example.com/'},
+      {serviceLocation: 'beta', uri: 'https://cdn2.example.com/'},
+      {serviceLocation: 'beta-hd', uri: 'https://cdn2.example.com/hd/'},
+    ];
+
+    /**
+     * @param {!Object} reportingOverrides
+     * @return {!shaka.util.CmcdManager}
+     */
+    function managerWithFilters(reportingOverrides) {
+      const {manager} = createManager(createMockPlayer(), {enabled: false});
+      manager.setManifestParameters(createManifestParams(
+          {includeInRequests: ['*']},
+          Object.assign({serviceLocationBaseUris: BASE_URIS},
+              reportingOverrides)));
+      return manager;
+    }
+
+    /**
+     * @param {!shaka.util.CmcdManager} manager
+     * @param {string} uri
+     * @param {!shaka.net.NetworkingEngine.RequestType} type
+     * @param {shaka.extern.RequestContext=} context
+     * @return {boolean}
+     */
+    function decoratedUri(manager, uri, type, context) {
+      const r = createRequest(uri);
+      manager.applyRequestData(type, r, context);
+      return r.uris[0].includes('CMCD=');
+    }
+
+    /**
+     * @param {?string} groupId
+     * @return {shaka.extern.RequestContext}
+     */
+    function segmentContextInGroup(groupId) {
+      const context = createSegmentContext();
+      context.stream.groupId = groupId;
+      return context;
+    }
+
+    it('only decorates requests to the listed service locations', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+      expect(decoratedUri(manager, 'https://cdn1.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('uses the longest matching prefix', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta-hd']});
+      expect(decoratedUri(manager, 'https://cdn2.example.com/hd/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+      expect(decoratedUri(manager, 'https://cdn2.example.com/sd/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('skips requests whose service location is unknown', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://other.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(false);
+    });
+
+    it('lets steering requests bypass the service location filter', () => {
+      const manager = managerWithFilters({serviceLocations: ['beta']});
+      expect(decoratedUri(manager, 'https://steering.example.com/dcsm',
+          RequestType.CONTENT_STEERING)).toBe(true);
+    });
+
+    it('does not filter by service location when the list is absent', () => {
+      const manager = managerWithFilters({serviceLocations: null});
+      expect(decoratedUri(manager, 'https://other.example.com/seg.mp4',
+          RequestType.SEGMENT, createSegmentContext())).toBe(true);
+    });
+
+    it('only decorates listed adaptation sets', () => {
+      const manager = managerWithFilters({adaptationSets: ['6']});
+      const uri = 'https://cdn2.example.com/seg.mp4';
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('6'))).toBe(true);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('8'))).toBe(false);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup('6_preselection_1'))).toBe(true);
+      expect(decoratedUri(manager, uri, RequestType.SEGMENT,
+          segmentContextInGroup(null))).toBe(false);
+    });
+
+    it('intersects the service location and adaptation set filters', () => {
+      const manager = managerWithFilters({
+        serviceLocations: ['beta'], adaptationSets: ['6'],
+      });
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('6'))).toBe(true);
+      // Listed location, unlisted adaptation set.
+      expect(decoratedUri(manager, 'https://cdn2.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('8'))).toBe(false);
+      // Listed adaptation set, unlisted location.
+      expect(decoratedUri(manager, 'https://cdn1.example.com/seg.mp4',
+          RequestType.SEGMENT, segmentContextInGroup('6'))).toBe(false);
+    });
+
+    it('applies the adaptation set filter only to requests with a stream',
+        () => {
+          const manager = managerWithFilters({adaptationSets: ['6']});
+          expect(decoratedUri(manager, 'https://cdn2.example.com/x.mpd',
+              RequestType.MANIFEST,
+              /** @type {shaka.extern.RequestContext} */ (
+                {type: AdvancedRequestType.MPD}))).toBe(true);
+        });
   });
 
   // ── Configuration translation ──
@@ -433,13 +1020,11 @@ describe('CmcdManager', () => {
       expect(cfg.eventTargets[0].url).toBe('https://collector/cmcd');
     });
 
-    it('auto-generates a sessionId when not provided', () => {
+    it('auto-generates a sessionId without mutating the app config', () => {
       const player = createMockPlayer();
-      const {manager} = createManager(player);
-      const cfg = createConfig({sessionId: ''});
-      const reporterCfg = priv(manager)['toReporterConfig_'](cfg);
-      expect(reporterCfg.sid).toBeTruthy();
-      expect(cfg.sessionId).toBe(/** @type {string} */ (reporterCfg.sid));
+      const {manager, config} = createManager(player, {sessionId: ''});
+      expect(priv(manager)['effective_'].sessionId).toBeTruthy();
+      expect(config.sessionId).toBe('');
     });
   });
 
@@ -687,6 +1272,33 @@ describe('CmcdManager', () => {
       expect(data.rc).toBe(200);
       expect(data.ttlb).toBe(50);
       expect(data.url).toBe('https://test/seg.mp4');
+    });
+
+    it('keeps the request timestamp for undecorated segments', () => {
+      // Response reporting is not gated by includeInRequests: a segment
+      // kept out of request decoration still reports its response, and
+      // that report needs the request's start time.
+      const player = createMockPlayer();
+      const {manager} = createManager(player, Object.assign(
+          createResponseConfig(), {includeInRequests: ['mpd']}));
+      spyOn(priv(manager)['reporter_'], 'recordResponseReceived');
+      const r = createRequest();
+      manager.applyRequestData(RequestType.SEGMENT, r,
+          createSegmentContext('video'));
+      expect(r.uris[0]).not.toContain('CMCD=');
+      manager.applyResponseData(RequestType.SEGMENT,
+          /** @type {shaka.extern.Response} */ ({
+            status: 200,
+            uri: 'https://test/seg.mp4',
+            originalUri: 'https://test/seg.mp4',
+            originalRequest: r,
+            timeMs: 50,
+            headers: {},
+          }));
+      const data = /** @type {!Object} */ (
+        priv(manager)['reporter_'].recordResponseReceived.calls
+            .mostRecent().args[1]);
+      expect(data.ts).toEqual(jasmine.any(Number));
     });
 
     it('only fires for SEGMENT responses', () => {

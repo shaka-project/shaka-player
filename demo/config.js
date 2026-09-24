@@ -329,8 +329,10 @@ shakaDemo.Config = class {
     const msfVersionOptionNames = {
       'AUTO': 'Auto',
       'DRAFT_14': 'draft-14 (deprecated)',
-      'DRAFT_16': 'draft-16',
+      'DRAFT_16': 'draft-16 (deprecated)',
       'DRAFT_18': 'draft-18',
+      'DRAFT_20': 'draft-20',
+      'DRAFT_21': 'draft-21',
     };
 
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
@@ -450,7 +452,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false)
         .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
             /* canBeDecimal= */ true)
-        .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+        .addBoolInput_('Use Headers', 'cmcd.useHeaders')
+        .addBoolInput_('Apply Parameters From Manifest',
+            'cmcd.applyParametersFromManifest');
 
     // CMCD v2 event-mode targets. JSON because the typedef is an
     // array of objects with several fields each; a per-field UI would
@@ -475,6 +479,23 @@ shakaDemo.Config = class {
       shakaDemoMain.getCurrentConfigValue('cmcd.eventTargets'));
     this.latestInput_.input().value =
         (current && current.length) ? JSON.stringify(current) : '';
+
+    // includeInRequests is an array of request-type tokens; a single
+    // space-separated text field mirrors the MPD attribute syntax.
+    const includeInRequestsTooltip =
+        'Space-separated ISO/IEC 23009-1 request types that carry CMCD, ' +
+        'e.g. "segment mpd steering" or "*". Leave empty for the default set.';
+    const onIncludeInRequestsChange = (input) => {
+      const tokens = input.value.trim().split(/\s+/).filter((t) => t);
+      shakaDemoMain.configure('cmcd.includeInRequests', tokens);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_('Include In Requests', onIncludeInRequestsChange,
+        includeInRequestsTooltip);
+    const currentTokens = /** @type {Array<string>} */ (
+      shakaDemoMain.getCurrentConfigValue('cmcd.includeInRequests'));
+    this.latestInput_.input().value =
+        (currentTokens && currentTokens.length) ? currentTokens.join(' ') : '';
   }
 
   /** @private */

@@ -5,7 +5,7 @@
  */
 
 describe('H265', () => {
-  const H265 = shaka.transmuxer.H265;
+  const H265 = shaka.codec.H265;
 
   /**
    * @param {number} type

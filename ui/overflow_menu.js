@@ -160,6 +160,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
       // Force to close any submenu.
       this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
 
+      this.controls.setSettingsMenuOpener(this.overflowMenuButton_);
       shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
       this.overflowMenuButton_.setAttribute('aria-expanded', 'true');
       this.controls.computeOpacity();

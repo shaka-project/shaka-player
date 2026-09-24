@@ -139,6 +139,110 @@ describe('Obu', () => {
     });
   });
 
+  describe('parseAv1Ts', () => {
+    const startCode = new Uint8Array([0x00, 0x00, 0x01]);
+
+    // 0x0a: obu_type=1 (OBU_SEQUENCE_HEADER), obu_has_size_field=1.
+    const sequenceHeaderObu = new Uint8Array([
+      0x0a, 0x0b,
+      0x00, 0x00, 0x00, 0x2d, 0x4c, 0xff, 0xb3, 0xc6, 0xaf, 0x98, 0x04,
+    ]);
+
+    // 0x32: obu_type=6 (OBU_FRAME), obu_has_size_field=1.
+    const frameObu = new Uint8Array([0x32, 0x03, 0x10, 0x00, 0x96]);
+
+    it('strips the start codes of an access unit', () => {
+      const accessUnit = Obu.parseAv1Ts(concat(
+          startCode, sequenceHeaderObu, startCode, frameObu));
+
+      expect(accessUnit).toEqual(concat(sequenceHeaderObu, frameObu));
+    });
+
+    it('keeps the trailing zeros of an OBU', () => {
+      // A temporal delimiter has an empty payload, so its size field leaves
+      // the OBU ending in a zero, right ahead of the next start code.
+      const temporalDelimiterObu = new Uint8Array([0x12, 0x00]);
+      const accessUnit = Obu.parseAv1Ts(concat(
+          startCode, temporalDelimiterObu, startCode, sequenceHeaderObu));
+
+      expect(accessUnit)
+          .toEqual(concat(temporalDelimiterObu, sequenceHeaderObu));
+    });
+
+    it('removes the emulation prevention bytes', () => {
+      // The sequence header payload holds 0x00 0x00 0x00 0x2d, a forbidden
+      // sequence the muxer has to escape for it not to emulate a start code.
+      const escaped = new Uint8Array([
+        0x0a, 0x0b,
+        0x00, 0x00, 0x03, 0x00, 0x2d,
+        0x4c, 0xff, 0xb3, 0xc6, 0xaf, 0x98, 0x04,
+      ]);
+
+      const accessUnit = Obu.parseAv1Ts(concat(startCode, escaped));
+      expect(accessUnit).toEqual(sequenceHeaderObu);
+      // And what comes out is readable as an OBU again.
+      goog.asserts.assert(accessUnit, 'Should have read the access unit');
+      const obus = Obu.parseAv1(accessUnit);
+      expect(obus.length).toBe(1);
+      expect(obus[0].data.byteLength).toBe(11);
+    });
+
+    it('keeps an escaped 0x03 that is not a prevention byte', () => {
+      // 0x00 0x03 is not an escape: only two zeros ahead of it make one.
+      const data = new Uint8Array([0x32, 0x03, 0x00, 0x03, 0x96]);
+
+      expect(Obu.parseAv1Ts(concat(startCode, data))).toEqual(data);
+    });
+
+    it('restores a missing obu_size field', () => {
+      // 0x08 clears obu_has_size_field, which the start code makes redundant.
+      const unsized =
+          concat(new Uint8Array([0x08]), sequenceHeaderObu.subarray(2));
+
+      const accessUnit =
+          Obu.parseAv1Ts(concat(startCode, unsized, startCode, frameObu));
+      expect(accessUnit).toEqual(concat(sequenceHeaderObu, frameObu));
+    });
+
+    it('restores a missing obu_size field after the extension byte', () => {
+      // 0x0c is the sequence header type with obu_extension_flag set and
+      // obu_has_size_field clear, so the size goes after the extension byte.
+      const unsized = concat(
+          new Uint8Array([0x0c, 0x00]), sequenceHeaderObu.subarray(2));
+
+      const accessUnit = Obu.parseAv1Ts(concat(startCode, unsized));
+      expect(accessUnit).toEqual(concat(
+          new Uint8Array([0x0e, 0x00, 0x0b]), sequenceHeaderObu.subarray(2)));
+    });
+
+    it('restores a multi-byte obu_size field', () => {
+      const payload = new Uint8Array(200).fill(0xaa);
+      const accessUnit = Obu.parseAv1Ts(
+          concat(startCode, new Uint8Array([0x30]), payload));
+
+      // 200 = 0xc8 -> leb128 0xc8 0x01.
+      expect(accessUnit).toEqual(
+          concat(new Uint8Array([0x32, 0xc8, 0x01]), payload));
+    });
+
+    it('returns null when there is no start code', () => {
+      expect(Obu.parseAv1Ts(sequenceHeaderObu)).toBeNull();
+      expect(Obu.parseAv1Ts(new Uint8Array([]))).toBeNull();
+    });
+
+    it('returns null when obu_forbidden_bit is set', () => {
+      expect(Obu.parseAv1Ts(concat(startCode, new Uint8Array([0x80, 0x00]))))
+          .toBeNull();
+    });
+
+    it('drops an empty OBU', () => {
+      const accessUnit = Obu.parseAv1Ts(concat(
+          startCode, startCode, sequenceHeaderObu));
+
+      expect(accessUnit).toEqual(sequenceHeaderObu);
+    });
+  });
+
   describe('parseIamf', () => {
     // obu_type=31 (OBU_IA_Sequence_Header), no flags, 6-byte payload.
     const sequenceHeaderObu = new Uint8Array([
