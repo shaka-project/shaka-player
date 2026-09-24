@@ -33,26 +33,7 @@ describe('DashParser ContentProtection', () => {
     manifestConfig.ignoreDrmInfo = ignoreDrmInfo || false;
     dashParser.configure(manifestConfig);
 
-    const playerInterface = {
-      networkingEngine: netEngine,
-      modifyManifestRequest: (request, manifestInfo) => {},
-      modifySegmentRequest: (request, segmentInfo) => {},
-      filter: (manifest) => Promise.resolve(),
-      makeTextStreamsForClosedCaptions: (manifest) => {},
-      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
-      onEvent: fail,
-      onError: fail,
-      isLowLatencyMode: () => false,
-      updateDuration: () => {},
-      newDrmInfo: (stream) => {},
-      onManifestUpdated: () => {},
-      getBandwidthEstimate: () => 1e6,
-      onMetadata: () => {},
-      disableStream: (stream) => {},
-      addFont: (name, url) => {},
-      getStreamingRetryParameters: () => config.streaming.retryParameters,
-      onSegmentReceived: (deltaTimeMs, numBytes) => {},
-    };
+    const playerInterface = createPlayerInterface(netEngine, config);
 
     const actual = await dashParser.start(
         'http://example.com', playerInterface);
@@ -83,6 +64,34 @@ describe('DashParser ContentProtection', () => {
       expect(actualKeyIds).withContext(`video keyIds, i=${i}`)
           .toEqual(expectedKeyIds);
     }
+  }
+
+  /**
+   * @param {!shaka.test.FakeNetworkingEngine} netEngine
+   * @param {shaka.extern.PlayerConfiguration} config
+   * @return {shaka.extern.ManifestParser.PlayerInterface}
+   */
+  function createPlayerInterface(netEngine, config) {
+    return {
+      networkingEngine: netEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
+      filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onEvent: fail,
+      onError: fail,
+      isLowLatencyMode: () => false,
+      updateDuration: () => {},
+      newDrmInfo: (stream) => {},
+      onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
+      onMetadata: () => {},
+      disableStream: (stream) => {},
+      addFont: (name, url) => {},
+      getStreamingRetryParameters: () => config.streaming.retryParameters,
+      onSegmentReceived: (deltaTimeMs, numBytes) => {},
+    };
   }
 
   /**
@@ -1277,6 +1286,160 @@ describe('DashParser ContentProtection', () => {
       };
       const actual = ContentProtection.getServerCertificateUri(input);
       expect(actual).toBe('');
+    });
+  });
+
+  describe('key ID from the init segment', () => {
+    const videoInitSegmentUri =
+        '/base/test/test/assets/encrypted-sintel-video-init.mp4';
+    // The default_KID of the 'tenc' box in the asset above.
+    const initSegmentKeyId = '68accc06d6ac535898886c1e31e0bf39';
+    const manifestKeyId = 'deadbeeffeedbaadf00d000008675309';
+
+    /** @type {!ArrayBuffer} */
+    let initSegmentData;
+
+    beforeAll(async () => {
+      initSegmentData = await shaka.test.Util.fetch(videoInitSegmentUri);
+    });
+
+    /**
+     * @param {!Array<string>} contentProtectionLines
+     * @param {string=} initialization
+     * @return {string}
+     */
+    function buildManifest(contentProtectionLines, initialization = 'i.mp4') {
+      return [
+        '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+        '    xmlns:cenc="urn:mpeg:cenc:2013">',
+        '  <Period duration="PT30S">',
+        '    <SegmentTemplate media="s.mp4" duration="2"',
+        '        initialization="' + initialization + '" />',
+        '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+        contentProtectionLines.join('\n'),
+        '      <Representation bandwidth="50" width="576" height="432" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+    }
+
+    /**
+     * @param {string} manifestText
+     * @return {!Promise<{
+     *   manifest: shaka.extern.Manifest,
+     *   netEngine: !shaka.test.FakeNetworkingEngine,
+     * }>}
+     */
+    async function parseManifest(manifestText) {
+      const netEngine = new shaka.test.FakeNetworkingEngine();
+      netEngine.setDefaultText(manifestText);
+      netEngine.setResponseValue('http://example.com/i.mp4', initSegmentData);
+
+      const config = shaka.util.PlayerConfiguration.createDefault();
+      const dashParser = new shaka.dash.DashParser();
+      dashParser.configure(config.manifest);
+
+      const manifest = await dashParser.start(
+          'http://example.com', createPlayerInterface(netEngine, config));
+      dashParser.stop();
+      return {manifest, netEngine};
+    }
+
+    it('is used when the manifest has no default_KID', async () => {
+      const manifestText = buildManifest([
+        '      <ContentProtection',
+        '          schemeIdUri="urn:mpeg:dash:mp4protection:2011"',
+        '          value="cenc" />',
+        '      <ContentProtection',
+        '          schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+        '          />',
+      ]);
+      const {manifest} = await parseManifest(manifestText);
+
+      const video = manifest.variants[0].video;
+      expect(video.keyIds).toEqual(new Set([initSegmentKeyId]));
+      expect(video.drmInfos.length).toBe(1);
+      expect(video.drmInfos[0].keyIds).toEqual(new Set([initSegmentKeyId]));
+    });
+
+    it('is not requested when the manifest has a default_KID', async () => {
+      const manifestText = buildManifest([
+        '      <ContentProtection',
+        '          schemeIdUri="urn:mpeg:dash:mp4protection:2011"',
+        '          value="cenc"',
+        '          cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+        '      <ContentProtection',
+        '          schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+        '          />',
+      ]);
+      const {manifest, netEngine} = await parseManifest(manifestText);
+
+      const video = manifest.variants[0].video;
+      expect(video.keyIds).toEqual(new Set([manifestKeyId]));
+      netEngine.expectNoRequest(
+          'http://example.com/i.mp4',
+          shaka.net.NetworkingEngine.RequestType.SEGMENT);
+    });
+
+    it('is not requested for clear content', async () => {
+      const manifestText = buildManifest([]);
+      const {manifest, netEngine} = await parseManifest(manifestText);
+
+      const video = manifest.variants[0].video;
+      expect(video.encrypted).toBe(false);
+      expect(video.keyIds).toEqual(new Set());
+      netEngine.expectNoRequest(
+          'http://example.com/i.mp4',
+          shaka.net.NetworkingEngine.RequestType.SEGMENT);
+    });
+
+    it('is not requested when there is no init segment', async () => {
+      const manifestText = [
+        '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+        '    xmlns:cenc="urn:mpeg:cenc:2013">',
+        '  <Period duration="PT30S">',
+        '    <SegmentTemplate media="s.mp4" duration="2" />',
+        '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+        '      <ContentProtection',
+        '          schemeIdUri="urn:mpeg:dash:mp4protection:2011"',
+        '          value="cenc" />',
+        '      <Representation bandwidth="50" width="576" height="432" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const {manifest} = await parseManifest(manifestText);
+
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+    });
+
+    it('is only requested once for the same init segment', async () => {
+      const manifestText = [
+        '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+        '    xmlns:cenc="urn:mpeg:cenc:2013">',
+        '  <Period duration="PT30S">',
+        '    <SegmentTemplate media="s.mp4" duration="2"',
+        '        initialization="i.mp4" />',
+        '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+        '      <ContentProtection',
+        '          schemeIdUri="urn:mpeg:dash:mp4protection:2011"',
+        '          value="cenc" />',
+        '      <Representation bandwidth="50" width="576" height="432" />',
+        '      <Representation bandwidth="100" width="576" height="432" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const {manifest, netEngine} = await parseManifest(manifestText);
+
+      for (const variant of manifest.variants) {
+        expect(variant.video.keyIds).toEqual(new Set([initSegmentKeyId]));
+      }
+      const requests = netEngine.request.calls.all().filter((call) => {
+        return call.args[1].uris[0] == 'http://example.com/i.mp4';
+      });
+      expect(requests.length).toBe(1);
     });
   });
 });
