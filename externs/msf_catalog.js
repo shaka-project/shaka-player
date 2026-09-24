@@ -99,6 +99,7 @@ msfCatalog.Accessibility;
  *   initData: (string|undefined),
  *   initRef: (string|undefined),
  *   depends: (Array<string>|undefined),
+ *   template: (Array<*>|undefined),
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
  *   codec: (string|undefined),

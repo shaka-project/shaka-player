@@ -5,7 +5,7 @@
  */
 
 describe('AV1', () => {
-  const AV1 = shaka.transmuxer.AV1;
+  const AV1 = shaka.codec.AV1;
   const Obu = shaka.util.Obu;
 
   /**
