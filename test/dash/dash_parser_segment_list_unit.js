@@ -344,6 +344,7 @@ describe('DashParser SegmentList', () => {
       filter: () => {},
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onScte35Event: fail,
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,

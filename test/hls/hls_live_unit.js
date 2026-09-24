@@ -75,6 +75,7 @@ describe('HlsParser live', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      onScte35Event: fail,
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
@@ -193,6 +194,39 @@ describe('HlsParser live', () => {
       }
     }
   }
+
+  it('reports SCTE-35 OUT and IN from date ranges', async () => {
+    const onScte35 = jasmine.createSpy('onScte35');
+    playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+    playerInterface.onTimelineRegionAdded = () => {};
+    const hex = shaka.test.Scte35.hex();
+    const header = '#EXTM3U\n#EXT-X-TARGETDURATION:5\n' +
+        '#EXT-X-MAP:URI="init.mp4"\n';
+    const initial = header + '#EXT-X-MEDIA-SEQUENCE:0\n' +
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+        '#EXT-X-DATERANGE:ID="splice",' +
+        'START-DATE="2000-01-01T00:00:01Z",DURATION=12,' +
+        'SCTE35-OUT=' + hex + '\n' +
+        '#EXTINF:5,\nmain0.mp4\n#EXTINF:5,\nmain.mp4\n';
+    const manifest = await testInitialManifest(master, initial);
+    expect(manifest.presentationTimeline.isLive()).toBe(true);
+    // The OUT applies at the start of the range and spans its duration.
+    expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+      startTime: 1, endTime: 13, kind: 'out', source: 'hls', id: 'splice',
+    }));
+
+    onScte35.calls.reset();
+    await testUpdate(manifest, header + '#EXT-X-MEDIA-SEQUENCE:0\n' +
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+        '#EXT-X-DATERANGE:ID="splice",' +
+        'START-DATE="2000-01-01T00:00:01Z",DURATION=12,' +
+        'SCTE35-IN=' + hex + '\n' +
+        '#EXTINF:5,\nmain0.mp4\n#EXTINF:5,\nmain.mp4\n');
+    // The IN closes the range, so it applies at its end.
+    expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+      startTime: 13, endTime: 13, kind: 'in', source: 'hls',
+    }));
+  });
 
   describe('playlist type EVENT', () => {
     const media = [
