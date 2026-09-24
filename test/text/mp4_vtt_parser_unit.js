@@ -13,6 +13,9 @@ describe('Mp4VttParser', () => {
   const vttSegNoDurationUri =
       '/base/test/test/assets/vtt-segment-no-duration.mp4';
   const audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
+  // A livesim2 segment of four 0.5 s fragments, one sample each.
+  const vttChunkedInitUri = '/base/test/test/assets/vtt-chunked-init.mp4';
+  const vttChunkedSegmentUri = '/base/test/test/assets/vtt-chunked-segment.mp4';
 
   /** @type {!Uint8Array} */
   let vttInitSegment;
@@ -26,6 +29,10 @@ describe('Mp4VttParser', () => {
   let vttSegNoDuration;
   /** @type {!Uint8Array} */
   let audioInitSegment;
+  /** @type {!Uint8Array} */
+  let vttChunkedInit;
+  /** @type {!Uint8Array} */
+  let vttChunkedSegment;
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -35,6 +42,8 @@ describe('Mp4VttParser', () => {
       shaka.test.Util.fetch(vttSegSettingsUri),
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
+      shaka.test.Util.fetch(vttChunkedInitUri),
+      shaka.test.Util.fetch(vttChunkedSegmentUri),
     ]);
     vttInitSegment = shaka.util.BufferUtils.toUint8(responses[0]);
     vttSegment = shaka.util.BufferUtils.toUint8(responses[1]);
@@ -42,6 +51,8 @@ describe('Mp4VttParser', () => {
     vttSegSettings = shaka.util.BufferUtils.toUint8(responses[3]);
     vttSegNoDuration = shaka.util.BufferUtils.toUint8(responses[4]);
     audioInitSegment = shaka.util.BufferUtils.toUint8(responses[5]);
+    vttChunkedInit = shaka.util.BufferUtils.toUint8(responses[6]);
+    vttChunkedSegment = shaka.util.BufferUtils.toUint8(responses[7]);
   });
 
   it('parses init segment', () => {
@@ -240,6 +251,29 @@ describe('Mp4VttParser', () => {
       isMpegTs: false,
     };
     expect(() => parser.parseMedia(segment, time, null, [])).toThrow(error);
+  });
+
+  it('parses every fragment of a multi-fragment segment', () => {
+    // The fragments hold a cue, a vtte, and a new cue that the last fragment
+    // repeats.  Each is timed by its own tfdt.
+    const parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttChunkedInit);
+    const time = {
+      periodStart: 0,
+      segmentStart: 1790260814,
+      segmentEnd: 1790260816,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const cues = parser.parseMedia(vttChunkedSegment, time, null, []);
+
+    expect(cues.map((c) => [c.startTime, c.endTime])).toEqual([
+      [1790260814, 1790260814.5],
+      [1790260815, 1790260815.5],
+      [1790260815.5, 1790260816],
+    ]);
+    expect(cues[2].payload).toBe(cues[1].payload);
+    expect(cues[0].payload).not.toBe(cues[1].payload);
   });
 
   it('rejects init segment with no vtt', () => {
