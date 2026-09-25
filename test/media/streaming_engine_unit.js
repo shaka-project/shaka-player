@@ -464,6 +464,9 @@ describe('StreamingEngine', () => {
       // test them.
       config.evictionGoal = 30;
       config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.KEEP;
+      // Device-specific config may change the tolerance (Apple sets it to
+      // 0), but these tests expect the default.
+      config.inaccurateManifestTolerance = 2;
     }
 
     if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
