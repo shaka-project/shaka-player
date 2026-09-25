@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.1.25](https://github.com/shaka-project/shaka-player/compare/v5.1.24...v5.1.25) (2026-09-25)
+
+
+### Bug Fixes
+
+* **CEA:** Honor CEA-708 caption pen opacity ([#10621](https://github.com/shaka-project/shaka-player/issues/10621)) ([fb9ceea](https://github.com/shaka-project/shaka-player/commit/fb9ceeac2021f492367dd13e90b6159a890ae6a8)), closes [#10620](https://github.com/shaka-project/shaka-player/issues/10620)
+* **DRM:** Ignore session creation during teardown ([#10614](https://github.com/shaka-project/shaka-player/issues/10614)) ([b123a81](https://github.com/shaka-project/shaka-player/commit/b123a81f1baffad8506a7d64a571c00f4d316769))
+* **net:** Avoid dropping low-latency segments when a retried request succeeds ([#10646](https://github.com/shaka-project/shaka-player/issues/10646)) ([e7abce9](https://github.com/shaka-project/shaka-player/commit/e7abce9cf99057a8f90cfd7b3c30031bb5cb963a))
+* Prevent destroy() from hanging when playback is wedged ([#10624](https://github.com/shaka-project/shaka-player/issues/10624)) ([9585825](https://github.com/shaka-project/shaka-player/commit/958582570d17bea0e07c84eab0040b52c85baccb)), closes [#10623](https://github.com/shaka-project/shaka-player/issues/10623)
+* **WebVTT:** Parse every fragment of a multi-fragment MP4 segment ([#10642](https://github.com/shaka-project/shaka-player/issues/10642)) ([aa42523](https://github.com/shaka-project/shaka-player/commit/aa4252343aa0d4f967f563a62f0df2b7a346c162))
+
 ## [5.1.24](https://github.com/shaka-project/shaka-player/compare/v5.1.23...v5.1.24) (2026-09-18)
 
 
