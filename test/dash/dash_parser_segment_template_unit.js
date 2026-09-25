@@ -1008,6 +1008,22 @@ describe('DashParser SegmentTemplate', () => {
         expect(index.find(2.0)).toBe(2);
         expect(index.find(6.0)).toBe(3);
       });
+
+      it('does not evict the same entries twice', async () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = await makeTimelineSegmentIndex(info, false);
+        // Evicting every entry releases the index.
+        index.evict(20);
+
+        // The evicted entries stay listed for a while, then new ones follow.
+        for (const numRanges of [10, 10, 15]) {
+          index.appendTemplateInfo(
+              makeTemplateInfo(makeRanges(0, 2.0, numRanges)), 0, 30);
+          index.evict(20);
+        }
+
+        expect(index.find(22)).toBe(11);
+      });
     });
   });
 
