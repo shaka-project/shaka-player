@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.2.12](https://github.com/shaka-project/shaka-player/compare/v5.2.11...v5.2.12) (2026-09-25)
+
+
+### Bug Fixes
+
+* **CEA:** Honor CEA-708 caption pen opacity ([#10621](https://github.com/shaka-project/shaka-player/issues/10621)) ([4dc1474](https://github.com/shaka-project/shaka-player/commit/4dc14742250c8f895718d87b2b4a7006238a352d)), closes [#10620](https://github.com/shaka-project/shaka-player/issues/10620)
+* **DASH:** Get the key ID from the init segment when the manifest has none ([#10552](https://github.com/shaka-project/shaka-player/issues/10552)) ([7ee04ec](https://github.com/shaka-project/shaka-player/commit/7ee04ec6490cac7c69614e14bf56ee1ac6ee12eb)), closes [#10390](https://github.com/shaka-project/shaka-player/issues/10390)
+* **DRM:** Ignore session creation during teardown ([#10614](https://github.com/shaka-project/shaka-player/issues/10614)) ([fc396d0](https://github.com/shaka-project/shaka-player/commit/fc396d041640b91201d1f8538417498ab7a8813a))
+* **net:** Avoid dropping low-latency segments when a retried request succeeds ([#10646](https://github.com/shaka-project/shaka-player/issues/10646)) ([d6f939f](https://github.com/shaka-project/shaka-player/commit/d6f939f22f89b65dad2762d393059df67e1a12a1))
+* Prevent destroy() from hanging when playback is wedged ([#10624](https://github.com/shaka-project/shaka-player/issues/10624)) ([5d713d0](https://github.com/shaka-project/shaka-player/commit/5d713d09f755b9b3585acadfd788643416a7ac83)), closes [#10623](https://github.com/shaka-project/shaka-player/issues/10623)
+* **WebVTT:** Parse every fragment of a multi-fragment MP4 segment ([#10642](https://github.com/shaka-project/shaka-player/issues/10642)) ([0d8a677](https://github.com/shaka-project/shaka-player/commit/0d8a677d768335c3e2dbc8e3bfa7b77fce63766a))
+
 ## [5.2.11](https://github.com/shaka-project/shaka-player/compare/v5.2.10...v5.2.11) (2026-09-18)
 
 
