@@ -217,6 +217,28 @@ function httpPluginTests(usingFetch) {
       expect(response).toBeTruthy();
       expect(streamDataCallback).toHaveBeenCalledTimes(1);
     });
+
+    it('does not stream the body of an error response', async () => {
+      // An error body (e.g. a 404 page for a low-latency segment requested
+      // before it is available) is not media. The callback's state outlives
+      // this attempt, so if a retry succeeds, the error body would be parsed
+      // together with the real segment.
+      const uri = 'https://foo.bar/404';
+      const streamDataCallback = jasmine.createSpy('streamDataCallback');
+
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], retryParameters, Util.spyFunc(streamDataCallback));
+      const expected = new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          uri, 404, 'ABC', {'foo': 'BAR'}, requestType, uri);
+      await expectAsync(plugin(
+          uri, request, requestType, progressUpdated, headersReceived, {})
+          .promise).toBeRejectedWith(expected);
+
+      expect(streamDataCallback).not.toHaveBeenCalled();
+    });
   }
 
   it('succeeds with 204 status', async () => {
