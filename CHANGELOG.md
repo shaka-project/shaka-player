@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.15.62](https://github.com/shaka-project/shaka-player/compare/v4.15.61...v4.15.62) (2026-09-25)
+
+
+### Bug Fixes
+
+* **net:** Avoid dropping low-latency segments when a retried request succeeds ([#10646](https://github.com/shaka-project/shaka-player/issues/10646)) ([1545966](https://github.com/shaka-project/shaka-player/commit/1545966a5ab6cff01223db2619f984c04a4901e5))
+* Prevent destroy() from hanging when playback is wedged ([#10624](https://github.com/shaka-project/shaka-player/issues/10624)) ([00bc821](https://github.com/shaka-project/shaka-player/commit/00bc82147ad78adac27bc66b77772aaa998752d9)), closes [#10623](https://github.com/shaka-project/shaka-player/issues/10623)
+* **WebVTT:** Parse every fragment of a multi-fragment MP4 segment ([#10642](https://github.com/shaka-project/shaka-player/issues/10642)) ([514e7b9](https://github.com/shaka-project/shaka-player/commit/514e7b91cddefcfac64db3578f02e56270bae2de))
+
 ## [4.15.61](https://github.com/shaka-project/shaka-player/compare/v4.15.60...v4.15.61) (2026-09-18)
 
 
