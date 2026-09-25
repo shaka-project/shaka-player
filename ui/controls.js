@@ -301,6 +301,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
       if (this.config_.enableTooltips) {
         this.topControlsButtonPanel_.classList.add('shaka-tooltips-on');
+        this.bigButtonsContainer_?.classList.add('shaka-tooltips-on');
       }
     });
 
@@ -343,6 +344,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
+
+    /** @private {?HTMLElement} */
+    this.bigButtonsContainer_ = null;
 
     /** @private {shaka.ui.Localization} */
     this.localization_ = shaka.ui.Controls.createLocalization_();
@@ -612,6 +616,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
       this.releaseChildElements_();
+      this.bigButtonsContainer_ = null;
     } else {
       this.addControlsContainer_();
       // The ad container is only created once, and is never
@@ -1518,6 +1523,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   addBigButtons_() {
     const bigButtonsContainer = shaka.util.Dom.createHTMLElement('div');
     bigButtonsContainer.classList.add('shaka-big-buttons-container');
+    if (this.config_.enableTooltips) {
+      bigButtonsContainer.classList.add('shaka-tooltips-on');
+    }
+    this.bigButtonsContainer_ = bigButtonsContainer;
     this.controlsContainer_.appendChild(bigButtonsContainer);
 
     const elementNamesToFactories =
@@ -2072,6 +2081,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.anySettingsMenusAreOpen()) {
       this.topControlsButtonPanel_.classList.remove('shaka-tooltips-on');
       this.controlsButtonPanel_.classList.remove('shaka-tooltips-on');
+      this.bigButtonsContainer_?.classList.remove('shaka-tooltips-on');
     }
   }
 
