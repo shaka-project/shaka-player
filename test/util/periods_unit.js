@@ -1422,6 +1422,45 @@ describe('PeriodCombiner', () => {
     expect(video2.matchedStreams.length).toBe(1);
   });
 
+  it('Updates streams when a used period ID reappears', async () => {
+    const makeIndexedStream = (startTime) => {
+      const stream = makeVideoStream(1080);
+      stream.segmentIndex = shaka.media.SegmentIndex.forSingleSegment(
+          startTime, /* duration= */ 10, [`test:${startTime}`]);
+      stream.createSegmentIndex = async () => {};
+      return stream;
+    };
+
+    const firstStream = makeIndexedStream(0);
+    const secondStream = makeIndexedStream(10);
+    const replacementStream = makeIndexedStream(20);
+    const makePeriod = (id, stream) => ({
+      id,
+      videoStreams: [stream],
+      audioStreams: [],
+      textStreams: [],
+      imageStreams: [],
+    });
+
+    await combiner.combinePeriods(
+        [makePeriod('a', firstStream)], /* isDynamic= */ true);
+    const output = combiner.getVariants()[0].video;
+    await output.createSegmentIndex();
+
+    await combiner.combinePeriods(
+        [makePeriod('b', secondStream)], /* isDynamic= */ true);
+    await combiner.combinePeriods(
+        [makePeriod('a', replacementStream)], /* isDynamic= */ true);
+
+    expect(output.matchedStreams).toEqual([secondStream, replacementStream]);
+    expect(output.segmentIndex.find(20)).not.toBe(null);
+
+    // Reprocessing the same stream must not append its index twice.
+    await combiner.combinePeriods(
+        [makePeriod('a', replacementStream)], /* isDynamic= */ true);
+    expect(output.matchedStreams.length).toBe(2);
+  });
+
   it('Variant has highest bandwidth from matched streams', async () => {
     const stream1 = makeVideoStream(1080);
     stream1.originalId = '1';
