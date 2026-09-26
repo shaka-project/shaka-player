@@ -188,14 +188,16 @@ const config = {
 ui.configure(config);
 ```
 
-#### Adding tooltips to control panel buttons
+#### Adding tooltips to control panel and big buttons
 
-Tooltips can be enabled to display the function of every button in the control panel. Where applicable, they will also contain the current selection in parenthesis.
+Tooltips can be enabled to display the function of buttons in the control panels
+and the big buttons. Where applicable, they also contain the current selection
+in parentheses. Big button tooltips appear above the buttons.
 
 Example:
 ```js
 const config = {
-  'enableTooltips' : true
+  'enableTooltips': true,
 }
 ui.configure(config);
 ```

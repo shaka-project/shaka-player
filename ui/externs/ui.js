@@ -528,8 +528,8 @@ shaka.extern.UITrackLabelCallback;
  *   Defaults to <code>false</code> except on mobile where the default value
  *   is <code>true</code>
  * @property {boolean} enableTooltips
- *   Whether or not buttons in the control panel display tooltips that contain
- *   information about their function.
+ *   Whether or not buttons in the control panels and big buttons display
+ *   tooltips that contain information about their function.
  *   <br>
  *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
  *   default value is <code>false</code>.
