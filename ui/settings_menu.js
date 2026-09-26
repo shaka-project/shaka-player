@@ -167,6 +167,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
       this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
       this.eventManager.listen(this.menu, 'click', (event) => {
+        const activeElement = this.menu.ownerDocument.activeElement;
+        const focusIsInMenu = this.menu.contains(activeElement);
         this.notifyMenuClose_();
         this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
         shaka.ui.Utils.setDisplay(this.menu, false);
@@ -175,6 +177,9 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
         if (this.backButton.contains(/** @type {?Node} */ (event.target))) {
           // Restore focus after the parent buttons have become visible.
           this.button.focus();
+        } else if (focusIsInMenu) {
+          // An item was chosen, and it was hidden along with the menu.
+          this.controls.restoreFocus(this.button);
         }
       });
 

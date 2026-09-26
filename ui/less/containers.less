@@ -37,6 +37,12 @@
    * setting is enabled on chromium-based browsers */
   user-select: none;
 
+  /* The container only takes the focus so that the keyboard controls keep
+   * working, and it is never a tab stop, so don't outline all of it. */
+  &:focus {
+    outline: none;
+  }
+
   *,
   ::after,
   ::before {
