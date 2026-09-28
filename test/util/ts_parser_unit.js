@@ -95,4 +95,28 @@ describe('TsParser', () => {
     expect(codecs.audio).toBe('aac');
     expect(codecs.video).toBe(null);
   });
+
+  it('forgets a stale PID reused by a different track type', async () => {
+    // Both segments use PID 0x50: for video in one and audio in the other.
+    // This happens when a transmuxer is reused after switching from audio
+    // muxed in video to a separate audio rendition.
+    const responses = await Promise.all([
+      Util.fetch('/base/test/test/assets/video.ts'),
+      Util.fetch('/base/test/test/assets/audio.ts'),
+    ]);
+    const videoSegment = BufferUtils.toUint8(responses[0]);
+    const audioSegment = BufferUtils.toUint8(responses[1]);
+
+    const tsParser = new shaka.util.TsParser();
+    tsParser.parse(videoSegment);
+    expect(tsParser.getCodecs().video).toBe('avc');
+
+    tsParser.clearData();
+    tsParser.parse(audioSegment);
+    const codecs = tsParser.getCodecs();
+    expect(codecs.audio).toBe('aac');
+    expect(codecs.video).toBe(null);
+    expect(tsParser.getAudioData().length).toBeGreaterThan(0);
+    expect(tsParser.getVideoData().length).toBe(0);
+  });
 });

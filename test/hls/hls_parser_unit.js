@@ -7416,6 +7416,40 @@ describe('HlsParser', () => {
     expect(video2.codecs).toBe('dav1.10.01');
   });
 
+  it('shares one muxed audio placeholder across variants', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="es",',
+      'NAME="Muxed",DEFAULT=YES\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="qaa",',
+      'NAME="Original",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=1280x720\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=1024x576\n',
+      'video2\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=100,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=640x360\n',
+      'video3\n',
+    ].join('');
+
+    fakeNetEngine.setResponseText('test:/master', master);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('test:/master', playerInterface);
+
+    // One variant per video and audio rendition, no more.
+    expect(manifest.variants.length).toBe(6);
+    const muxedAudios = new Set();
+    for (const variant of manifest.variants) {
+      if (variant.audio.isAudioMuxedInVideo) {
+        muxedAudios.add(variant.audio);
+      }
+    }
+    expect(muxedAudios.size).toBe(1);
+  });
+
   it('supports SUPPLEMENTAL-CODECS with muxed audio', async () => {
     const master = [
       '#EXTM3U\n',
