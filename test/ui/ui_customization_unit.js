@@ -92,6 +92,54 @@ describe('UI Customization', () => {
     UiUtils.confirmElementFound(container, 'shaka-big-buttons-container');
   });
 
+  it('updates big button tooltips when reconfigured', async () => {
+    const ui = await UiUtils.createUIThroughAPI(container, video, {
+      bigButtons: ['play_pause'],
+      enableTooltips: true,
+    }, canvas);
+
+    let bigButtons = UiUtils.getElementByClassName(
+        container, 'shaka-big-buttons-container');
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(true);
+
+    ui.configure({enableTooltips: false});
+    bigButtons = UiUtils.getElementByClassName(
+        container, 'shaka-big-buttons-container');
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(false);
+
+    ui.configure({enableTooltips: true});
+    bigButtons = UiUtils.getElementByClassName(
+        container, 'shaka-big-buttons-container');
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(true);
+
+    ui.configure({bigButtons: []});
+    UiUtils.confirmElementMissing(container, 'shaka-big-buttons-container');
+    ui.getControls().hideSettingsMenus();
+  });
+
+  it('hides big button tooltips while a settings menu is open', async () => {
+    const ui = await UiUtils.createUIThroughAPI(container, video, {
+      bigButtons: ['play_pause'],
+      controlPanelElements: ['overflow_menu'],
+      overflowMenuButtons: ['loop'],
+      enableTooltips: true,
+    }, canvas);
+    const bigButtons = UiUtils.getElementByClassName(
+        container, 'shaka-big-buttons-container');
+    const overflowButton = UiUtils.getElementByClassName(
+        container, 'shaka-overflow-menu-button');
+    const controls = ui.getControls();
+
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(true);
+    controls.computeOpacity();
+    UiUtils.simulateEvent(overflowButton, 'click');
+    expect(controls.anySettingsMenusAreOpen()).toBe(true);
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(false);
+
+    controls.hideSettingsMenus();
+    expect(bigButtons.classList.contains('shaka-tooltips-on')).toBe(true);
+  });
+
   it('controls are created in specified order', async () => {
     const config = {
       controlPanelElements: [
