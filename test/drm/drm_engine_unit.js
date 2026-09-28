@@ -274,6 +274,72 @@ describe('DrmEngine', () => {
       expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.abc']);
     });
 
+    it('overrides manifest Clear Key license server with configured one',
+        async () => {
+          setDecodingInfoSpy(['org.w3.clearkey']);
+
+          // A Clear Key license server from the manifest (e.g. dashif:Laurl).
+          tweakDrmInfos((drmInfos) => {
+            drmInfos[0].keySystem = 'org.w3.clearkey';
+            drmInfos[0].licenseServerUri = 'http://manifest.drm/license';
+          });
+
+          config.servers['org.w3.clearkey'] = 'http://clearkey.drm/license';
+          config.advanced['org.w3.clearkey'] = {
+            distinctiveIdentifierRequired: false,
+            persistentStateRequired: false,
+            videoRobustness: [''],
+            audioRobustness: [''],
+            serverCertificate: new Uint8Array(0),
+            serverCertificateUri: 'http://clearkey.drm/cert',
+            individualizationServer: '',
+            sessionType: '',
+            headers: {},
+          };
+          drmEngine.configure(config);
+          fakeNetEngine.setResponseValue(
+              'http://clearkey.drm/cert', new Uint8Array(1));
+
+          const variants = manifest.variants;
+          await drmEngine.initForPlayback(
+              variants, manifest.offlineSessionIds);
+
+          const selectedDrmInfo = drmEngine.getDrmInfo();
+          expect(selectedDrmInfo).not.toBe(null);
+          expect(selectedDrmInfo.keySystem).toBe('org.w3.clearkey');
+          expect(selectedDrmInfo.licenseServerUri)
+              .toBe('http://clearkey.drm/license');
+          expect(selectedDrmInfo.serverCertificateUri)
+              .toBe('http://clearkey.drm/cert');
+          fakeNetEngine.expectRequest(
+              'http://clearkey.drm/cert',
+              shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE);
+        });
+
+    it('does not override Clear Key raw keys with configured server',
+        async () => {
+          setDecodingInfoSpy(['org.w3.clearkey']);
+
+          const rawKeysUri = 'data:application/json;base64,' +
+              window.btoa(JSON.stringify({keys: []}));
+          tweakDrmInfos((drmInfos) => {
+            drmInfos[0].keySystem = 'org.w3.clearkey';
+            drmInfos[0].licenseServerUri = rawKeysUri;
+          });
+
+          config.servers['org.w3.clearkey'] = 'http://clearkey.drm/license';
+          drmEngine.configure(config);
+
+          const variants = manifest.variants;
+          await drmEngine.initForPlayback(
+              variants, manifest.offlineSessionIds);
+
+          const selectedDrmInfo = drmEngine.getDrmInfo();
+          expect(selectedDrmInfo).not.toBe(null);
+          expect(selectedDrmInfo.keySystem).toBe('org.w3.clearkey');
+          expect(selectedDrmInfo.licenseServerUri).toBe(rawKeysUri);
+        });
+
     it('fails to initialize if no key systems are available', async () => {
       // Accept no key systems.
       setDecodingInfoSpy([]);
