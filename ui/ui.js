@@ -415,6 +415,7 @@ shaka.ui.Overlay = class {
       showAudioChannelCountVariants: true,
       seekOnTaps: false,
       tapSeekDistance: 10,
+      seekButtonDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',

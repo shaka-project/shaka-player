@@ -55,6 +55,8 @@
   "RESOLUTION": "Resolution",
   "REWIND": "Rewind",
   "SEEK": "Seek",
+  "SEEK_BACKWARD": "Seek backward [SECONDS] seconds",
+  "SEEK_FORWARD": "Seek forward [SECONDS] seconds",
   "SKIP_AD": "Skip Ad",
   "SKIP_TO_LIVE": "Skip ahead to live",
   "SKIP_NEXT": "Next",
