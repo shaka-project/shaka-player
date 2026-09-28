@@ -517,6 +517,8 @@ describe('UI', () => {
         describe(inOverflow ? 'nested submenu' : 'control panel menu', () => {
           /** @type {!HTMLElement} */
           let menu;
+          /** @type {shaka.ui.Controls} */
+          let controls;
 
           beforeEach(async () => {
             const ui = await UiUtils.createUIThroughAPI(
@@ -527,7 +529,8 @@ describe('UI', () => {
                   overflowMenuButtons: ['playback_rate'],
                   customContextMenu: false,
                 });
-            player = ui.getControls().getLocalPlayer();
+            controls = ui.getControls();
+            player = controls.getLocalPlayer();
             if (inOverflow) {
               const button = /** @type {!HTMLElement} */ (
                 videoContainer.querySelector('.shaka-overflow-menu-button'));
@@ -684,6 +687,59 @@ describe('UI', () => {
             expect(event.defaultPrevented).toBe(false);
             window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
           });
+
+          it('focuses the player when the menus hide with the focus inside',
+              () => {
+                const focus = spyOn(videoContainer, 'focus').and.callThrough();
+                const chosen = /** @type {!HTMLElement} */ (
+                  menu.querySelector('button[aria-checked="true"]'));
+                focusForKeyboardTest(chosen);
+                controls.hideSettingsMenus();
+                expect(menu.classList.contains('shaka-hidden')).toBe(true);
+                expect(focus).toHaveBeenCalledTimes(1);
+              });
+
+          it('does not move outside focus when the menus hide', () => {
+            const focus = spyOn(videoContainer, 'focus');
+            focusForKeyboardTest(document.body);
+            controls.hideSettingsMenus();
+            expect(focus).not.toHaveBeenCalled();
+          });
+
+          if (inOverflow) {
+            it('focuses the player when an item is picked with the mouse',
+                () => {
+                  const focus =
+                      spyOn(videoContainer, 'focus').and.callThrough();
+                  // Nothing is loaded, so picking a rate cannot apply it.
+                  spyOn(player, 'trickPlay');
+                  const item = /** @type {!HTMLElement} */ (
+                    menu.querySelector('button[aria-checked="false"]'));
+                  focusForKeyboardTest(item);
+                  item.click();
+                  expect(menu.classList.contains('shaka-hidden')).toBe(true);
+                  expect(focus).toHaveBeenCalledTimes(1);
+                });
+
+            it('returns to the submenu button when an item is picked with ' +
+                'the keyboard', () => {
+              const controlsContainer =
+                  videoContainer.querySelector('.shaka-controls-container');
+              controlsContainer.classList.add('shaka-keyboard-navigation');
+              const button = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector('.shaka-playbackrate-button'));
+              const focus = spyOn(button, 'focus').and.callThrough();
+              const containerFocus = spyOn(videoContainer, 'focus');
+              spyOn(player, 'trickPlay');
+              const item = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="false"]'));
+              focusForKeyboardTest(item);
+              item.click();
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              expect(focus).toHaveBeenCalledTimes(1);
+              expect(containerFocus).not.toHaveBeenCalled();
+            });
+          }
         });
       }
     });
@@ -2494,6 +2550,129 @@ describe('UI', () => {
         expect(video1.currentTime).toBe(55);
         expect(video1.currentTime).not.toBe(initialTime1);
         expect(video2.currentTime).toBe(initialTime2);
+      });
+
+      it('lets the player take the focus without adding a tab stop', () => {
+        expect(container1.tabIndex).toBe(-1);
+        expect(container1.getAttribute('tabindex')).toBe('-1');
+      });
+
+      it('keeps a tabindex set by the app', async () => {
+        const container =
+          /** @type {!HTMLElement} */ (document.createElement('div'));
+        container.tabIndex = 0;
+        document.body.appendChild(container);
+        const video = shaka.test.UiUtils.createVideoElement();
+        container.appendChild(video);
+        const ui = await UiUtils.createUIThroughAPI(container, video);
+        expect(container.tabIndex).toBe(0);
+        await ui.destroy();
+        document.body.removeChild(container);
+      });
+
+      it('handles shortcuts while the player itself has the focus', () => {
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        focusForKeyboardTest(container1);
+
+        container1.dispatchEvent(createKeydownEvent('ArrowRight'));
+        expect(video1.currentTime).toBe(55);
+        expect(video2.currentTime).toBe(50);
+
+        const spaceEvent = createKeydownEvent(' ');
+        container1.dispatchEvent(spaceEvent);
+        expect(playSpy).toHaveBeenCalledTimes(1);
+        expect(spaceEvent.defaultPrevented).toBe(true);
+      });
+
+      it('handles shortcuts while a button has the focus', () => {
+        // Cast, mobile and smart TV defaults leave some controls out.
+        ui1.configure({controlPanelElements: ['play_pause']});
+        const playSpy =
+            spyOn(video1, 'play').and.returnValue(Promise.resolve());
+        const button = /** @type {!HTMLElement} */ (
+          container1.querySelector('.shaka-play-button'));
+        focusForKeyboardTest(button);
+
+        button.dispatchEvent(createKeydownEvent('ArrowLeft'));
+        expect(video1.currentTime).toBe(45);
+
+        // The button handles the space key itself.
+        const spaceEvent = createKeydownEvent(' ');
+        button.dispatchEvent(spaceEvent);
+        expect(playSpy).not.toHaveBeenCalled();
+        expect(spaceEvent.defaultPrevented).toBe(false);
+
+        button.dispatchEvent(createKeydownEvent('k'));
+        expect(playSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('leaves the arrow keys to other sliders', () => {
+        // Cast, mobile and smart TV defaults leave the volume bar out.
+        ui1.configure({controlPanelElements: ['mute_volume']});
+        const volumeBar = /** @type {!HTMLElement} */ (
+          container1.querySelector('.shaka-volume-bar'));
+        focusForKeyboardTest(volumeBar);
+
+        const event = createKeydownEvent('ArrowRight');
+        volumeBar.dispatchEvent(event);
+        expect(video1.currentTime).toBe(50);
+        expect(event.defaultPrevented).toBe(false);
+      });
+
+      describe('when the focused element is lost', () => {
+        /** @type {!HTMLElement} */
+        let button;
+
+        beforeEach(() => {
+          ui1.configure({controlPanelElements: ['play_pause']});
+          button = /** @type {!HTMLElement} */ (
+            container1.querySelector('.shaka-play-button'));
+        });
+
+        /**
+         * Loses the focus the way the browser does when the focused element
+         * can no longer have it: the focus moves to the body, with no other
+         * element taking it.
+         *
+         * Force document.activeElement, since not every platform moves the
+         * real focus (see focusForKeyboardTest()).
+         */
+        function loseFocus() {
+          button.blur();
+          Object.defineProperty(document, 'activeElement', {
+            get: () => document.body,
+            configurable: true,
+          });
+          activeElementIsForced = true;
+          button.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+        }
+
+        it('gives the focus back to the player when hidden', async () => {
+          const focus = spyOn(container1, 'focus').and.callThrough();
+          focusForKeyboardTest(button);
+          button.style.display = 'none';
+          loseFocus();
+          await Util.shortDelay();
+          expect(focus).toHaveBeenCalledTimes(1);
+        });
+
+        it('gives the focus back to the player when removed', async () => {
+          const focus = spyOn(container1, 'focus').and.callThrough();
+          focusForKeyboardTest(button);
+          loseFocus();
+          button.remove();
+          await Util.shortDelay();
+          expect(focus).toHaveBeenCalledTimes(1);
+        });
+
+        it('lets the focus go when the user moves it elsewhere', async () => {
+          const focus = spyOn(container1, 'focus');
+          focusForKeyboardTest(button);
+          loseFocus();
+          await Util.shortDelay();
+          expect(focus).not.toHaveBeenCalled();
+        });
       });
 
       it('does not trigger shortcuts when typing in a form input', () => {
