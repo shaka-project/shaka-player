@@ -107,6 +107,42 @@ filterDescribe('shaka.msf.draft14.MessageWriter', isMSFSupported, () => {
     ]);
   });
 
+  it('should write the Subscription Request ID in SUBSCRIBE_UPDATE', () => {
+    writer.marshalSubscribeUpdate({
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+      requestId: BigInt(4),
+      subscriptionRequestId: BigInt(2),
+      startLocation: {group: BigInt(10), object: BigInt(20)},
+      endGroup: BigInt(30),
+      subscriberPriority: 1,
+      forward: true,
+      params: [],
+    });
+
+    expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_UPDATE, [
+      0x04, // requestId
+      0x02, // subscription requestId
+      0x0a, 0x14, // start location {10, 20}
+      0x1e, // endGroup
+      0x01, // subscriberPriority
+      0x01, // forward
+      0x00, // param count
+    ]);
+  });
+
+  it('should refuse a SUBSCRIBE_UPDATE with a field left out', () => {
+    expect(() => writer.marshalSubscribeUpdate({
+      kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+      requestId: BigInt(4),
+      subscriptionRequestId: BigInt(2),
+      startLocation: undefined,
+      endGroup: BigInt(30),
+      subscriberPriority: 1,
+      forward: true,
+      params: [],
+    })).toThrow();
+  });
+
   it('should write parameters with absolute, not delta, types', () => {
     writer.marshalPublishNamespace({
       kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE,

@@ -9,6 +9,11 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
   let session;
   /** @type {!Array<shaka.msf.Utils.Message>} */
   let sent;
+  /**
+   * Delivers the next control message to the session's listen loop.
+   * @type {function(shaka.msf.Utils.Message)}
+   */
+  let receive;
 
   beforeEach(() => {
     sent = [];
@@ -30,7 +35,9 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
           sent.push(msg);
           return Promise.resolve();
         },
-        receive: never,
+        receive: () => new Promise((resolve) => {
+          receive = resolve;
+        }),
         close: () => {},
       }));
 
@@ -100,6 +107,46 @@ filterDescribe('shaka.msf.RequestIdSession', isMSFSupported, () => {
               .toBe(shaka.config.MsfFilterType.LARGEST_OBJECT);
           expect(message.startLocation).toBeUndefined();
         });
+  });
+
+  describe('fetch', () => {
+    it('rejects when draft-16 answers with REQUEST_ERROR', async () => {
+      // Draft-16 has no FETCH_ERROR: every failed request is answered with
+      // REQUEST_ERROR, which must still reach the FETCH waiting on it.
+      const fetched = session.fetch(['msf', 'clear'], 'catalog', () => {});
+      await shaka.test.Util.shortDelay();
+      const request = /** @type {shaka.msf.Utils.Fetch} */ (sent[0]);
+
+      receive(/** @type {shaka.msf.Utils.RequestError} */ ({
+        kind: shaka.msf.Utils.MessageType.REQUEST_ERROR,
+        requestId: request.requestId,
+        code: BigInt(4),
+        retryInterval: BigInt(0),
+        reason: 'not found',
+      }));
+
+      await expectAsync(fetched).toBeRejectedWith(
+          jasmine.objectContaining({reason: 'not found'}));
+    });
+
+    it('rejects a SUBSCRIBE answered with REQUEST_ERROR', async () => {
+      const subscribed =
+          session.subscribe(['msf', 'clear'], 'video0', () => {});
+      await shaka.test.Util.shortDelay();
+      const request = /** @type {shaka.msf.Utils.Subscribe} */ (sent[0]);
+
+      receive(/** @type {shaka.msf.Utils.RequestError} */ ({
+        kind: shaka.msf.Utils.MessageType.REQUEST_ERROR,
+        requestId: request.requestId,
+        code: BigInt(4),
+        retryInterval: BigInt(0),
+        reason: 'not found',
+      }));
+
+      // The error itself, not the 2 second timeout.
+      await expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({reason: 'not found'}));
+    });
   });
 
   describe('unsubscribe', () => {
