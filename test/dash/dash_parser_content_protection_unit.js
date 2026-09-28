@@ -33,31 +33,7 @@ describe('DashParser ContentProtection', () => {
     manifestConfig.ignoreDrmInfo = ignoreDrmInfo || false;
     dashParser.configure(manifestConfig);
 
-<<<<<<< HEAD
-    const playerInterface = {
-      networkingEngine: netEngine,
-      modifyManifestRequest: (request, manifestInfo) => {},
-      modifySegmentRequest: (request, segmentInfo) => {},
-      filter: (manifest) => Promise.resolve(),
-      makeTextStreamsForClosedCaptions: (manifest) => {},
-      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
-      onScte35Event: fail,
-      onEvent: fail,
-      onError: fail,
-      isLowLatencyMode: () => false,
-      updateDuration: () => {},
-      newDrmInfo: (stream) => {},
-      onManifestUpdated: () => {},
-      getBandwidthEstimate: () => 1e6,
-      onMetadata: () => {},
-      disableStream: (stream) => {},
-      addFont: (name, url) => {},
-      getStreamingRetryParameters: () => config.streaming.retryParameters,
-      onSegmentReceived: (deltaTimeMs, numBytes) => {},
-    };
-=======
     const playerInterface = createPlayerInterface(netEngine, config);
->>>>>>> upstream/main
 
     const actual = await dashParser.start(
         'http://example.com', playerInterface);
