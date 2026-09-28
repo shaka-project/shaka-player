@@ -687,6 +687,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if (!this.isOpaque()) {
             return;
           }
+          // Stopping the event keeps it from reaching onMouseMove_ on the
+          // video container, which is what restarts the hide timer after a
+          // touchmove stopped it.  Restart it here, or a drag that starts on
+          // a panel while the controls are hidden (for example the swipe
+          // that shows the Android status bar in fullscreen) leaves the
+          // controls on screen until the next tap.
+          this.onMouseMove_(event);
           event.stopPropagation();
         };
         this.eventManager_.listen(element, 'touchend', touchCb);
