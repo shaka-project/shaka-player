@@ -1,6 +1,7 @@
 # The MOQT Streaming Format manifest parser plugin.
 
 +../../lib/msf/buffer_control_writer.js
++../../lib/msf/compression.js
 +../../lib/msf/dialect_registry.js
 +../../lib/msf/i_control_stream.js
 +../../lib/msf/loc_parser.js

@@ -567,7 +567,7 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     it('falls back to the group number when the block is truncated', () => {
       const obj = moqObject([{type: 0x10, value: 1000000}],
           undefined, /* group= */ 3);
-      // Cut the value short so readVi64At_ underflows.
+      // Cut the value short so readVi64At underflows.
       obj.extensions = obj.extensions.subarray(0, 1);
       const parser = locParser(FRAME);
       const result = parser.parse(obj);

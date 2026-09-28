@@ -1,4 +1,43 @@
 filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
+  // '{"version":1,"tracks":[]}', gzipped.
+  const GZIPPED_CATALOG = new Uint8Array([
+    0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xab, 0x56,
+    0x2a, 0x4b, 0x2d, 0x2a, 0xce, 0xcc, 0xcf, 0x53, 0xb2, 0x32, 0xd4, 0x51,
+    0x2a, 0x29, 0x4a, 0x4c, 0xce, 0x2e, 0x56, 0xb2, 0x8a, 0x8e, 0xad, 0x05,
+    0x00, 0x05, 0xdf, 0x04, 0x44, 0x19, 0x00, 0x00, 0x00,
+  ]);
+
+  // '[[0,[0,0],0],[2002,[1,0],0]]', a media timeline, gzipped.
+  const GZIPPED_TIMELINE = new Uint8Array([
+    0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8b, 0x8e,
+    0x36, 0xd0, 0x01, 0x22, 0x83, 0x58, 0x10, 0x8a, 0x36, 0x32, 0x30, 0x30,
+    0xd2, 0x89, 0x36, 0x84, 0x70, 0x63, 0x01, 0x7c, 0x5b, 0xc8, 0xe4, 0x1c,
+    0x00, 0x00, 0x00,
+  ]);
+
+  /**
+   * An MSF_COMPRESSION property block. 0x78 and every value used here fit in
+   * one byte in the draft-18 var int encoding.
+   *
+   * @param {number} algorithm
+   * @return {!Uint8Array}
+   */
+  function compressionProperty(algorithm) {
+    return new Uint8Array([0x78, algorithm]);
+  }
+
+  /**
+   * @param {function():boolean} condition
+   * @return {!Promise}
+   */
+  async function waitFor(condition) {
+    for (let i = 0; i < 100 && !condition(); i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await shaka.test.Util.shortDelay();
+    }
+    expect(condition()).toBe(true);
+  }
+
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
   /** @type {!shaka.msf.MSFParser} */
@@ -287,6 +326,105 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         });
   });
 
+  describe('catalog compression', () => {
+    /** @type {number} */
+    let draftNumber;
+
+    beforeEach(() => {
+      draftNumber = 18;
+    });
+
+    /**
+     * @return {shaka.extern.MsfObjectCallback}
+     * @suppress {visibility}
+     */
+    function catalogCallback() {
+      const codec = new shaka.msf.draft18.Codec();
+      parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
+        /** @type {?} */ ({
+          getCodec: () => codec,
+          getDraftNumber: () => draftNumber,
+          release: () => {},
+        }));
+      return parser.createCatalogCallback_();
+    }
+
+    /**
+     * @return {!Promise<msfCatalog.Catalog>}
+     * @suppress {visibility}
+     */
+    function catalog() {
+      return parser.catalogPromise_.promise;
+    }
+
+    /**
+     * @param {!Uint8Array} data
+     * @param {?Uint8Array} extensions
+     * @param {?Uint8Array=} trackProperties
+     * @return {!shaka.extern.MsfObject}
+     */
+    function catalogObject(data, extensions, trackProperties = null) {
+      return {
+        trackAlias: BigInt(1),
+        location: {group: BigInt(0), object: BigInt(0), subgroup: null},
+        data,
+        extensions,
+        trackProperties,
+        status: null,
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 0,
+      };
+    }
+
+    /**
+     * @return {!Uint8Array}
+     */
+    function plainCatalog() {
+      return shaka.util.BufferUtils.toUint8(
+          shaka.util.StringUtils.toUTF8('{"version":1,"tracks":[]}'));
+    }
+
+    filterDescribe('with GZIP', isDecompressionStreamSupported, () => {
+      it('reads a catalog compressed by Track Property', async () => {
+        catalogCallback()(catalogObject(
+            GZIPPED_CATALOG, null, compressionProperty(1)));
+        expect(await catalog()).toEqual(
+            /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
+      });
+
+      it('reads a catalog compressed by Object Property', async () => {
+        catalogCallback()(catalogObject(
+            GZIPPED_CATALOG, compressionProperty(1)));
+        expect(await catalog()).toEqual(
+            /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
+      });
+    });
+
+    it('fails on a compression it does not support', async () => {
+      catalogCallback()(catalogObject(plainCatalog(), compressionProperty(2)));
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.MSF_UNSUPPORTED_COMPRESSION,
+          2));
+      await expectAsync(catalog()).toBeRejectedWith(expected);
+    });
+
+    it('reads an uncompressed catalog', async () => {
+      catalogCallback()(catalogObject(plainCatalog(), compressionProperty(0)));
+      expect(await catalog()).toEqual(
+          /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
+    });
+
+    it('leaves the deprecated drafts as they were', async () => {
+      // Only draft-18 and later are read for MSF_COMPRESSION.
+      draftNumber = 16;
+      catalogCallback()(catalogObject(plainCatalog(), compressionProperty(2)));
+      expect(await catalog()).toEqual(
+          /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
+    });
+  });
+
   describe('segment index lifecycle', () => {
     const PACKAGING = 'fake-for-test';
 
@@ -459,11 +597,17 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let unsubscribeSpy;
     /** @type {boolean} */
     let refuseAbsoluteStart;
+    /** @type {?shaka.extern.MsfCodec} */
+    let codec;
+    /** @type {number} */
+    let draftNumber;
 
     beforeEach(() => {
       nextSegments = [];
       subscribes = [];
       refuseAbsoluteStart = false;
+      codec = null;
+      draftNumber = 0;
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
 
@@ -493,7 +637,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
-          getCodec: () => null,
+          getCodec: () => codec,
+          getDraftNumber: () => draftNumber,
           subscribeTrack: (namespace, trackName, callback, startLocation) => {
             subscribes.push({
               trackName,
@@ -566,14 +711,19 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     /**
      * @param {*} document
      * @param {number=} object
+     * @param {?Uint8Array=} extensions
      * @return {!shaka.extern.MsfObject}
      */
-    function timelineObject(document, object = 0) {
+    function timelineObject(document, object = 0, extensions = null) {
+      const data = ArrayBuffer.isView(document) ?
+          /** @type {!Uint8Array} */ (document) :
+          shaka.util.BufferUtils.toUint8(
+              shaka.util.StringUtils.toUTF8(JSON.stringify(document)));
       return /** @type {!shaka.extern.MsfObject} */ (/** @type {?} */ ({
         trackAlias: BigInt(1),
         location: {group: BigInt(0), object: BigInt(object), subgroup: null},
-        data: shaka.util.BufferUtils.toUint8(
-            shaka.util.StringUtils.toUTF8(JSON.stringify(document))),
+        data,
+        extensions,
         payloadReadStartMs: 0,
         receiveTimestampMs: 1,
       }));
@@ -696,6 +846,66 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           timeline = timelineOf('video0');
           expect(timeline.getStartTime()).toBe(2.002);
         });
+
+    describe('compression', () => {
+      beforeEach(() => {
+        codec = new shaka.msf.draft18.Codec();
+        draftNumber = 18;
+      });
+
+      filterDescribe('with GZIP', isDecompressionStreamSupported, () => {
+        it('keeps the order of a compressed Object and the ones after it',
+            async () => {
+              // The complete timeline is compressed and the update after it
+              // is not, so the update is ready first. Applied first, the
+              // complete timeline would then replace it.
+              givenAStartedParser();
+              await processCatalog([videoTrack(), timelineTrack()]);
+              const subscription = lastSubscribeTo('history');
+              const addObject =
+                  spyOn(timelineOf('video0'), 'addObject').and.callThrough();
+
+              subscription.callback(timelineObject(
+                  GZIPPED_TIMELINE, /* object= */ 0, compressionProperty(1)));
+              subscription.callback(timelineObject(
+                  [[4004, [2, 0], 0]], /* object= */ 1));
+              await waitFor(() => addObject.calls.count() == 2);
+
+              const timeline = timelineOf('video0');
+              expect(timeline.getStartTime()).toBe(0);
+              expect(timeline.getEndTime()).toBe(4.004);
+            });
+      });
+
+      it('unsubscribes from a track compressed in a way it cannot undo',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack()]);
+            const subscription = lastSubscribeTo('history');
+
+            subscription.callback(timelineObject(
+                [[0, [0, 0], 0]], /* object= */ 0, compressionProperty(2)));
+
+            expect(unsubscribeSpy).toHaveBeenCalled();
+            expect(timelineOf('video0').getStartTime()).toBeNull();
+          });
+
+      it('leaves the deprecated drafts as they were', async () => {
+        draftNumber = 16;
+        givenAStartedParser();
+        await processCatalog([videoTrack(), timelineTrack()]);
+        const subscription = lastSubscribeTo('history');
+
+        // Not read for MSF_COMPRESSION, so the unsupported value does not
+        // stop an uncompressed document from being used.
+        subscription.callback(timelineObject(
+            [[0, [0, 0], 0], [2002, [1, 0], 0]], /* object= */ 0,
+            compressionProperty(2)));
+
+        expect(unsubscribeSpy).not.toHaveBeenCalled();
+        expect(timelineOf('video0').getEndTime()).toBe(2.002);
+      });
+    });
 
     it('reads a template off the media track itself', async () => {
       givenAStartedParser();

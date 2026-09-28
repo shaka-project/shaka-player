@@ -630,6 +630,23 @@ window.isMSFSupported = () => {
 };
 
 /**
+ * Check if DecompressionStream is supported with the GZIP format, which MSF
+ * uses to compress its JSON tracks. It arrived later than everything else MSF
+ * needs (Chromium 80, Firefox 113, Safari 16.4), so platforms such as Tizen
+ * 5.5 and 6 pass isMSFSupported() without it.
+ * @return {boolean}
+ */
+window.isDecompressionStreamSupported = () => {
+  try {
+    new DecompressionStream('gzip'); // eslint-disable-line no-new
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+/**
  * Check if ReadableStream is supported.
  * @return {boolean}
  */
