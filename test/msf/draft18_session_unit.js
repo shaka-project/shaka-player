@@ -179,6 +179,29 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
           expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(true);
         });
+
+    it('reports the reason of a REQUEST_ERROR', async () => {
+      // The Retry Interval sits between the Error Code and the Reason. Read
+      // as the Reason's length, a Retry Interval of 0 turns every reason
+      // into "".
+      const reason = 'non-matching namespace';
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(new Uint8Array([
+        0x05, // REQUEST_ERROR
+        0x00, 3 + reason.length, // Length
+        0x10, // Error Code = DOES_NOT_EXIST
+        0x00, // Retry Interval
+        reason.length,
+        ...Array.from(reason, (c) => c.charCodeAt(0)),
+      ]));
+
+      await expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(
+                /code 16, reason "non-matching namespace"/),
+          }));
+    });
   });
 
   describe('unsubscribe', () => {
