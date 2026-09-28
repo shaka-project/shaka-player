@@ -1173,6 +1173,53 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('getTimestampAndDispatchMetadata', () => {
+    /** @type {!BufferSource} */
+    let packedAac;
+    /** @type {!BufferSource} */
+    let tsAudio;
+
+    beforeAll(async () => {
+      [packedAac, tsAudio] = await Promise.all([
+        Util.fetch('/base/test/test/assets/hls-raw-aac/fileSequence0.aac'),
+        Util.fetch('/base/test/test/assets/audio.ts'),
+      ]);
+    });
+
+    it('reads the ID3 timestamp of raw AAC', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.AUDIO, packedAac, dummyReference(0, 10), fakeStream,
+          'audio/aac');
+      expect(timestamp).toBeCloseTo(9.907, 3);
+    });
+
+    // Packed audio is sometimes published with a .ts extension, so the stream
+    // claims MPEG-2 TS.  The transmuxer handles it as packed audio, so the
+    // timestamp must come from the ID3 tag too, or the audio never gets a
+    // timestamp offset and never lines up with video.
+    // See https://github.com/shaka-project/shaka-player/issues/10654
+    it('reads the ID3 timestamp of raw AAC labelled as TS', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.AUDIO, packedAac, dummyReference(0, 10), fakeStream,
+          'video/mp2t; codecs="mp4a.40.2"');
+      expect(timestamp).toBeCloseTo(9.907, 3);
+    });
+
+    it('still reads the PES timestamp of real TS audio', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.AUDIO, tsAudio, dummyReference(0, 10), fakeStream,
+          'video/mp2t; codecs="mp4a.40.2"');
+      expect(timestamp).toBeCloseTo(56.013333, 3);
+    });
+
+    it('does not treat video labelled as TS as packed audio', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO, packedAac, dummyReference(0, 10), fakeStream,
+          'video/mp2t; codecs="avc1.42E01E"');
+      expect(timestamp).toBeNull();
+    });
+  });
+
   describe('remove', () => {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
