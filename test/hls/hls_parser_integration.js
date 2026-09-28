@@ -341,6 +341,62 @@ describe('HlsParser', () => {
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
   });
 
+  it('switches from muxed TS audio to a separate TS audio', async () => {
+    // This live asset mimics a real one: the default audio is muxed in the
+    // video (a URI-less EXT-X-MEDIA) and the alternative one is a separate
+    // audio-only TS whose audio uses the PID of the video in the muxed TS.
+    // The separate audio playlist starts two segments later, as if the live
+    // window had slid before it was selected.
+    const url =
+        '/base/test/test/assets/hls-ts-muxed-and-separate-audio/master.m3u8';
+
+    await player.load(url, /* startTime= */ 4);
+    expect(player.isLive()).toBe(true);
+
+    // Two videos by two audios, with no duplicates of the muxed audio.
+    expect(player.getVariantTracks().length).toBe(4);
+
+    await video.play();
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    const separateAudio =
+        player.getAudioTracks().find((track) => track.language == 'qaa');
+    goog.asserts.assert(separateAudio, 'audio track must be non-null');
+    player.selectAudioTrack(separateAudio);
+
+    // Playback must go on with the new audio.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(
+        video, video.currentTime + 3, 20);
+    const activeTrack = player.getVariantTracks().find((t) => t.active);
+    expect(activeTrack.language).toBe('qaa');
+
+    // The same media sequence number must start at the same time in the
+    // audio and the video, otherwise they are out of sync.
+    const activeVariant = player.getManifest().variants.find(
+        (variant) => variant.id == activeTrack.id);
+    const getStartTimesBySequence = (stream) => {
+      const startTimes = new Map();
+      const segmentIndex = stream.segmentIndex;
+      const firstPosition = segmentIndex.getNumEvicted();
+      const endPosition = firstPosition + segmentIndex.getNumReferences();
+      for (let position = firstPosition; position < endPosition; position++) {
+        const reference = segmentIndex.get(position);
+        const sequence = reference.getUris()[0].match(/_(\d+)\.ts$/)[1];
+        startTimes.set(sequence, reference.getStartTime());
+      }
+      return startTimes;
+    };
+    const videoStartTimes = getStartTimesBySequence(activeVariant.video);
+    const audioStartTimes = getStartTimesBySequence(activeVariant.audio);
+    expect(audioStartTimes.size).toBeGreaterThan(0);
+    for (const [sequence, startTime] of audioStartTimes) {
+      expect(startTime).withContext('sequence ' + sequence)
+          .toBe(videoStartTimes.get(sequence));
+    }
+
+    await player.unload();
+  });
+
   it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
     if (deviceDetected.getDeviceName() === 'Tizen' &&
         deviceDetected.getVersion() === 3) {
