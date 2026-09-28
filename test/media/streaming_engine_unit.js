@@ -5326,6 +5326,30 @@ describe('StreamingEngine', () => {
       expect(result).toBe(true);
     });
 
+    // https://github.com/shaka-project/shaka-player/issues/10647
+    it('does not overwrite a RESET_TO_ENCRYPTED configuration', () => {
+      const CrossBoundaryStrategy = shaka.config.CrossBoundaryStrategy;
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.crossBoundaryStrategy = CrossBoundaryStrategy.RESET_TO_ENCRYPTED;
+      streamingEngine.configure(config);
+
+      const lastInitRef = makeInitRef(MIME_AVC, 0);
+      lastInitRef.encrypted = true;
+      const initRef = makeInitRef(MIME_AVC, 10);
+      const mediaState = makeMediaState(lastInitRef);
+      const segRef = makeSegmentRef(initRef);
+      const engine = /** @type {?} */(streamingEngine);
+
+      // Once initialized with an encrypted init segment, the buffer is kept.
+      expect(engine.discardReferenceByBoundary_(mediaState, segRef))
+          .toBe(false);
+      expect(engine.getCrossBoundaryStrategy_())
+          .toBe(CrossBoundaryStrategy.KEEP);
+      // But the app's configuration is left untouched for later loads.
+      expect(config.crossBoundaryStrategy)
+          .toBe(CrossBoundaryStrategy.RESET_TO_ENCRYPTED);
+    });
+
     it('still resets an incompatible boundary after an internal seek', () => {
       const lastInitRef = makeInitRef(MIME_AVC, 0);
       const initRef = makeInitRef(MIME_HEVC, 10);
