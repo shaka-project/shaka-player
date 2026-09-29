@@ -103,4 +103,31 @@ describe('H265', () => {
       expect(sampleNaluTypes(frame.data)).toEqual([IDR]);
     });
   });
+
+  describe('getCodecs', () => {
+    it('gives the profile, compatibility, level and constraints', () => {
+      // Main 10 (profile 2, compatible with 2), main tier, level 4.0 (120),
+      // and the constraint byte 0x90.
+      const hvcC = new Uint8Array([
+        1, 0x02,
+        0x20, 0x00, 0x00, 0x00,
+        0x90, 0, 0, 0, 0, 0,
+        120,
+      ]);
+      expect(shaka.codec.H265.getCodecs(hvcC)).toBe('hvc1.2.4.L120.90');
+    });
+
+    it('gives the tier, the profile space and every constraint', () => {
+      // Profile space 1 ("A"), high tier, profile 1, compatible with 1 and 2
+      // (0x60000000 becomes 6 when the bits are reversed), level 5.1 (153),
+      // and constraints 0xB0 0x00 0x0A.
+      const hvcC = new Uint8Array([
+        1, 0x40 | 0x20 | 0x01,
+        0x60, 0x00, 0x00, 0x00,
+        0xb0, 0x00, 0x0a, 0, 0, 0,
+        153,
+      ]);
+      expect(shaka.codec.H265.getCodecs(hvcC)).toBe('hvc1.A1.6.H153.B0.0.A');
+    });
+  });
 });
