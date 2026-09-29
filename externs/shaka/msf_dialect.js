@@ -184,10 +184,19 @@ shaka.extern.MsfSession = class {
  *   },
  *   data: !Uint8Array,
  *   extensions: ?(Uint8Array|undefined),
+ *   trackProperties: ?(Uint8Array|undefined),
  *   status: ?(bigint|undefined),
  *   payloadReadStartMs: number,
  *   receiveTimestampMs: number,
  * }}
+ *
+ * @property {?(Uint8Array|undefined)} extensions
+ *   The Object Properties block, without its length prefix, or null when the
+ *   Object carries none.
+ * @property {?(Uint8Array|undefined)} trackProperties
+ *   The Track Properties block of the SUBSCRIBE_OK or FETCH_OK that answered
+ *   the request this Object was delivered on, or null when there were none.
+ *   Sessions for drafts that have no Track Properties leave it unset.
  * @exportDoc
  */
 shaka.extern.MsfObject;

@@ -243,4 +243,206 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       expect(() => session.unsubscribe(BigInt(99))).toThrow();
     });
   });
+
+  describe('Track Properties', () => {
+    // MSF_COMPRESSION = GZIP, the Track Property MSF defines. 0x78 and 1 both
+    // fit in one byte in the draft-18 var int encoding.
+    const COMPRESSION = [0x78, 0x01];
+
+    /**
+     * @param {!Array<number>} params The Parameters, count included.
+     * @param {!Array<number>} properties
+     * @return {!Uint8Array}
+     */
+    function subscribeOkWith(params, properties) {
+      const payload = [0x07].concat(params, properties); // Track Alias 7
+      return new Uint8Array([0x04, 0x00, payload.length].concat(payload));
+    }
+
+    /**
+     * @param {!Array<number>} properties
+     * @return {!Uint8Array}
+     */
+    function fetchOkWith(properties) {
+      const payload = [
+        0x00, // End Of Track
+        0x00, 0x00, // End Location
+        0x00, // Parameter count
+      ].concat(properties);
+      return new Uint8Array([0x18, 0x00, payload.length].concat(payload));
+    }
+
+    /**
+     * A fetch data stream carrying one Object with the payload '{}', read
+     * past its stream type as handleIncomingStream_ would have.
+     *
+     * @return {!shaka.msf.Reader}
+     */
+    function fetchStream() {
+      const bytes = new Uint8Array([
+        0x00, // Request ID
+        0x00, // Group ID
+        0x00, // Subgroup ID
+        0x00, // Object ID
+        0x80, // Publisher Priority
+        0x00, // Properties Length
+        0x02, 0x7b, 0x7d, // Payload
+      ]);
+      const stream = new ReadableStream({
+        start: (controller) => {
+          controller.enqueue(bytes);
+          controller.close();
+        },
+      });
+      return new shaka.msf.Reader(
+          new Uint8Array([]), stream, new shaka.msf.draft18.Codec());
+    }
+
+    /**
+     * @param {!shaka.msf.Reader} reader
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function handleFetchStream(reader) {
+      return session.handleFetchStream_(reader);
+    }
+
+    /**
+     * Delivers an Object as the data stream reader would, once it has read
+     * one for the given alias.
+     *
+     * @param {bigint} alias
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function deliverObject(alias) {
+      return session.deliver_(alias, {
+        trackAlias: alias,
+        location: {group: BigInt(0), object: BigInt(0), subgroup: null},
+        data: new Uint8Array([0x7b, 0x7d]),
+        extensions: null,
+        status: null,
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 0,
+      });
+    }
+
+    /**
+     * @param {!Uint8Array} response
+     * @return {!Promise<!shaka.extern.MsfObject>}
+     */
+    async function subscribeAndDeliver(response) {
+      /** @type {!Array<!shaka.extern.MsfObject>} */
+      const received = [];
+      const subscribed = session.subscribe(
+          NAMESPACE, TRACK, (obj) => received.push(obj));
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(response);
+      const alias = await subscribed;
+      await deliverObject(alias);
+      expect(received.length).toBe(1);
+      return received[0];
+    }
+
+    it('are handed on with the Objects of a subscription', async () => {
+      const obj = await subscribeAndDeliver(subscribeOkWith(
+          [0x01, 0x09, 0x00, 0x00], // LARGEST_OBJECT = {0, 0}
+          COMPRESSION));
+      expect(obj.trackProperties).toEqual(new Uint8Array(COMPRESSION));
+    });
+
+    it('are found after every Parameter a SUBSCRIBE_OK may carry',
+        async () => {
+          const obj = await subscribeAndDeliver(subscribeOkWith(
+              [
+                0x02, // Parameter count
+                0x08, 0x05, // EXPIRES = 5
+                0x01, 0x03, 0x04, // delta 1 -> LARGEST_OBJECT = {3, 4}
+              ],
+              COMPRESSION));
+          expect(obj.trackProperties).toEqual(new Uint8Array(COMPRESSION));
+        });
+
+    it('are null when the SUBSCRIBE_OK has none', async () => {
+      const obj = await subscribeAndDeliver(subscribeOk());
+      expect(obj.trackProperties).toBeNull();
+    });
+
+    it('are given up on after a Parameter that cannot be stepped over',
+        async () => {
+          // Parameter values are encoded however their type says, so there is
+          // no telling where an unknown one ends. The SUBSCRIBE_OK still has
+          // to be consumed whole, or PUBLISH_DONE would be missed.
+          const received = [];
+          const subscribed = session.subscribe(
+              NAMESPACE, TRACK, (obj) => received.push(obj));
+          await shaka.test.Util.shortDelay();
+          responses.enqueue(subscribeOkWith(
+              [0x01, 0x40, 0x00, 0x00], // unknown type 0x40
+              COMPRESSION));
+          const alias = await subscribed;
+          await deliverObject(alias);
+          expect(received[0].trackProperties).toBeNull();
+
+          responses.enqueue(publishDone());
+          await shaka.test.Util.shortDelay();
+          expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(true);
+        });
+
+    it('are handed on with the Objects of a fetch', async () => {
+      const received = [];
+      const fetched = session.fetch(
+          NAMESPACE, TRACK, (obj) => received.push(obj));
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(fetchOkWith(COMPRESSION));
+      await fetched;
+
+      await handleFetchStream(fetchStream());
+
+      expect(received.length).toBe(1);
+      expect(received[0].trackProperties).toEqual(new Uint8Array(COMPRESSION));
+    });
+
+    it('hold fetched Objects that beat the FETCH_OK until it arrives',
+        async () => {
+          // A publisher may send Objects before answering, and the Track
+          // Properties that say how to read them are in the answer.
+          const received = [];
+          const fetched = session.fetch(
+              NAMESPACE, TRACK, (obj) => received.push(obj));
+          await shaka.test.Util.shortDelay();
+
+          const handled = handleFetchStream(fetchStream());
+          await shaka.test.Util.shortDelay();
+          expect(received.length).toBe(0);
+
+          responses.enqueue(fetchOkWith(COMPRESSION));
+          await fetched;
+          await handled;
+
+          expect(received.length).toBe(1);
+          expect(received[0].trackProperties)
+              .toEqual(new Uint8Array(COMPRESSION));
+        });
+
+    it('drop the fetched Objects of a fetch that failed', async () => {
+      const received = [];
+      const fetched = session.fetch(
+          NAMESPACE, TRACK, (obj) => received.push(obj));
+      await shaka.test.Util.shortDelay();
+
+      const handled = handleFetchStream(fetchStream());
+      responses.enqueue(new Uint8Array([
+        0x05, // REQUEST_ERROR
+        0x00, 0x03, // Length
+        0x00, // Error Code
+        0x00, // Retry Interval
+        0x00, // Empty Reason
+      ]));
+      await expectAsync(fetched).toBeRejected();
+      await handled;
+
+      expect(received.length).toBe(0);
+    });
+  });
 });
