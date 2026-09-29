@@ -430,7 +430,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
     /** @type {!Array<!shaka.extern.MsfSegment>} */
     let nextSegments;
-    /** @type {!Array<{resolve: function(bigint)}>} */
+    /** @type {!Array<{resolve: function(bigint), reject: function(*)}>} */
     let pendingSubscribes;
     /** @type {!Array<shaka.extern.MsfObjectCallback>} */
     let objectCallbacks;
@@ -478,8 +478,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           getCodec: () => null,
           subscribeTrack: (namespace, trackName, callback) => {
             objectCallbacks.push(callback);
-            return new Promise((resolve) => {
-              pendingSubscribes.push({resolve});
+            return new Promise((resolve, reject) => {
+              pendingSubscribes.push({resolve, reject});
             });
           },
           unsubscribeTrack: shaka.test.Util.spyFunc(unsubscribeSpy),
@@ -578,6 +578,72 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           stream.closeSegmentIndex();
           expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(7));
         });
+
+    it('fails when the publisher refuses the track', async () => {
+      // Nothing else is coming for this stream. Waiting for its first
+      // segment used to leave the load buffering forever.
+      const stream = makeStream();
+      const indexCreated = stream.createSegmentIndex();
+
+      pendingSubscribes[0].reject(new Error(
+          'subscribe cmsf/clear:video0 failed: code 16, reason ""'));
+
+      await expectAsync(indexCreated).toBeRejectedWith(
+          shaka.test.Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.MSF_SUBSCRIBE_FAILED,
+              'video0',
+              'subscribe cmsf/clear:video0 failed: code 16, reason ""')));
+    });
+
+    it('does not fail a track closed before it was refused', async () => {
+      const onErrorSpy = jasmine.createSpy('onError');
+      playerInterface.onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const stream = makeStream();
+      const indexCreated = stream.createSegmentIndex();
+      stream.closeSegmentIndex();
+
+      pendingSubscribes[0].reject(new Error('refused'));
+      await shaka.test.Util.shortDelay();
+
+      expect(onErrorSpy).not.toHaveBeenCalled();
+      let settled = false;
+      const settle = () => {
+        settled = true;
+      };
+      indexCreated.then(settle, settle);
+      await shaka.test.Util.shortDelay();
+      expect(settled).toBe(false);
+    });
+
+    it('reports a refused re-subscription to the player', async () => {
+      // A re-subscription after a seek, or the fallback to the live edge when
+      // the publisher refuses the seek, has nobody waiting on it, so the
+      // player has to be told directly.
+      const onErrorSpy = jasmine.createSpy('onError');
+      playerInterface.onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const stream = makeStream();
+      stream.createSegmentIndex();
+      pendingSubscribes[0].resolve(BigInt(7));
+      nextSegments = [fakeSegment()];
+      objectCallbacks[0](fakeObject(0));
+      await shaka.test.Util.shortDelay();
+
+      /** @type {?} */
+      const p = parser;
+      p.resubscribe_(p.activeStreams_.get('/video0'), null);
+      pendingSubscribes[1].reject(new Error('refused'));
+      await shaka.test.Util.shortDelay();
+
+      expect(onErrorSpy).toHaveBeenCalledWith(
+          shaka.test.Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.MSF_SUBSCRIBE_FAILED,
+              'video0',
+              'refused')));
+    });
   });
 
   describe('media timeline', () => {
@@ -1118,5 +1184,31 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         });
       }
     }
+  });
+
+  describe('namespaceTuple', () => {
+    const namespaceTuple = shaka.msf.MSFParser.namespaceTuple;
+
+    it('splits a catalog namespace into its fields', () => {
+      // moqlivemock announces ("mlm", "cmsf", "clear") and writes it in the
+      // catalog as "mlm/cmsf/clear". Sent as one field it does not exist.
+      expect(namespaceTuple('mlm/cmsf/clear', []))
+          .toEqual(['mlm', 'cmsf', 'clear']);
+      expect(namespaceTuple('mlm/cmsf/clear', ['other']))
+          .toEqual(['mlm', 'cmsf', 'clear']);
+    });
+
+    it('drops empty fields', () => {
+      expect(namespaceTuple('/cmsf//clear/', [])).toEqual(['cmsf', 'clear']);
+    });
+
+    it('keeps the session tuple when the catalog names it', () => {
+      // A publisher that announces one field containing a slash writes the
+      // same string in its catalog.
+      expect(namespaceTuple('cmsf/clear', ['cmsf/clear']))
+          .toEqual(['cmsf/clear']);
+      expect(namespaceTuple('mlm/cmsf/clear', ['mlm', 'cmsf', 'clear']))
+          .toEqual(['mlm', 'cmsf', 'clear']);
+    });
   });
 });

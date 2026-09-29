@@ -61,6 +61,10 @@ The following elements can be added to the UI bar using this configuration value
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
+* seek_backward: adds a button that seeks backward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
+* seek_forward: adds a button that seeks forward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
 * spacer: adds a chunk of empty space between the adjacent elements.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the
@@ -165,6 +169,10 @@ The following elements can be added as big buttons using this configuration valu
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
+* seek_backward: adds a button that seeks backward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
+* seek_forward: adds a button that seeks forward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the
   [Document Picture-in-Picture API]() if supported.
@@ -291,6 +299,21 @@ const config = {
   'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
   'fastForwardRates': [2, 4, 8, 1],
   'rewindRates': [-1, -2, -4, -8],
+}
+ui.configure(config);
+```
+
+#### Configuring the seek backward and forward buttons
+The `seek_backward` and `seek_forward` buttons seek by the number of seconds set
+in `seekButtonDistance` (10 by default), which is also shown inside their icon.
+They can be used both in the control panel and as big buttons, and they are
+hidden when the seek bar is hidden (e.g. live content without a DVR window, or
+while a linear ad is playing) or not added.
+
+```js
+const config = {
+  'bigButtons': ['seek_backward', 'play_pause', 'seek_forward'],
+  'seekButtonDistance': 15,
 }
 ui.configure(config);
 ```

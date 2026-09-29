@@ -207,6 +207,14 @@
     "description": "Label for a slider used to show progress or seek to a particular time in a video.",
     "message": "Seek"
   },
+  "SEEK_BACKWARD": {
+    "description": "Label for a button used to seek backward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
+    "message": "Seek backward [SECONDS] seconds"
+  },
+  "SEEK_FORWARD": {
+    "description": "Label for a button used to seek forward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
+    "message": "Seek forward [SECONDS] seconds"
+  },
   "SKIP_AD": {
     "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",
     "message": "Skip Ad"

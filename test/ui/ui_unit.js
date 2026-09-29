@@ -2195,6 +2195,57 @@ describe('UI', () => {
       });
     });
 
+    describe('touch drag that starts on a control panel', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let panel;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+        jasmine.clock().install();
+
+        // Keep the controls from staying up just because the video is paused.
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, {showUIOnPaused: false});
+        controlsContainer = ui.getControls().getControlsContainer();
+
+        // The top panel is where the swipe that shows the Android status bar
+        // starts in fullscreen.
+        const panels =
+            videoContainer.getElementsByClassName('shaka-top-controls');
+        expect(panels.length).toBe(1);
+        panel = /** @type {!HTMLElement} */ (panels[0]);
+        expect(panel.classList.contains('shaka-no-propagation')).toBe(true);
+      });
+
+      afterEach(() => {
+        jasmine.clock().uninstall();
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('hides the controls again after the drag ends', () => {
+        // Start from hidden controls, as when the video has been playing.
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+
+        // The drag shows the controls, then ends on the panel while they are
+        // showing, where the panel stops the touchend.
+        UiUtils.simulateEvent(panel, 'touchstart');
+        UiUtils.simulateEvent(panel, 'touchmove');
+        expect(controlsContainer.getAttribute('shown')).not.toBe(null);
+        UiUtils.simulateEvent(panel, 'touchend');
+
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;
@@ -2780,6 +2831,171 @@ describe('UI', () => {
         await Util.delay(0.1);
         expect(video.currentTime).toBe(50);
         expect(thumbnailContainer.style.visibility).not.toBe('visible');
+      });
+    });
+
+    describe('seek buttons', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!jasmine.Spy} */
+      let seekRangeSpy;
+
+      beforeEach(() => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 50;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+      });
+
+      /**
+       * @param {!Object=} extraConfig
+       * @return {!Promise}
+       */
+      async function createUI(extraConfig = {}) {
+        const config = Object.assign({
+          controlPanelElements: ['seek_backward', 'seek_forward'],
+          bigButtons: ['seek_backward', 'seek_forward'],
+        }, extraConfig);
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        seekRangeSpy = spyOn(player, 'seekRange')
+            .and.returnValue({start: 0, end: 100});
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.  This update is also what
+        // shows the big buttons, which are built before the seek bar.
+        if (controls.getConfig().addSeekBar) {
+          controls.seekTo(50, false);
+        }
+
+        // The click handler ignores clicks while the controls are hidden.
+        controlsContainer = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container');
+        controlsContainer.setAttribute('shown', 'true');
+      }
+
+      /**
+       * @param {string} containerClassName
+       * @param {string} buttonClassName
+       * @return {!HTMLElement}
+       */
+      function getButton(containerClassName, buttonClassName) {
+        const container = UiUtils.getElementByClassName(
+            videoContainer, containerClassName);
+        return UiUtils.getElementByClassName(container, buttonClassName);
+      }
+
+      for (const containerClassName of [
+        'shaka-controls-button-panel',
+        'shaka-big-buttons-container',
+      ]) {
+        describe('in ' + containerClassName, () => {
+          it('seek by seekButtonDistance', async () => {
+            await createUI({seekButtonDistance: 15});
+
+            getButton(containerClassName, 'shaka-seek-forward-button')
+                .click();
+            expect(video.currentTime).toBe(65);
+
+            getButton(containerClassName, 'shaka-seek-backward-button')
+                .click();
+            getButton(containerClassName, 'shaka-seek-backward-button')
+                .click();
+            expect(video.currentTime).toBe(35);
+          });
+
+          it('ignore clicks while the controls are hidden', async () => {
+            await createUI();
+            controlsContainer.removeAttribute('shown');
+
+            getButton(containerClassName, 'shaka-seek-forward-button')
+                .click();
+            getButton(containerClassName, 'shaka-seek-backward-button')
+                .click();
+            expect(video.currentTime).toBe(50);
+          });
+
+          it('show the distance in the icon and the label', async () => {
+            await createUI({seekButtonDistance: 30});
+
+            for (const className of [
+              'shaka-seek-backward-button',
+              'shaka-seek-forward-button',
+            ]) {
+              const button = getButton(containerClassName, className);
+              const distance = UiUtils.getElementByClassName(
+                  button, 'shaka-seek-button-distance');
+              expect(distance.textContent).toBe('30');
+              expect(button.getAttribute('aria-label')).toContain('30');
+            }
+          });
+        });
+      }
+
+      it('are hidden without a seek bar', async () => {
+        await createUI({addSeekBar: false});
+
+        const buttons = videoContainer.querySelectorAll(
+            '.shaka-seek-backward-button, .shaka-seek-forward-button');
+        expect(buttons.length).toBe(4);
+        for (const button of buttons) {
+          expect(button.classList.contains('shaka-hidden')).toBe(true);
+        }
+      });
+
+      it('are hidden when seekButtonDistance is not positive', async () => {
+        await createUI({seekButtonDistance: 0});
+
+        const buttons = videoContainer.querySelectorAll(
+            '.shaka-seek-backward-button, .shaka-seek-forward-button');
+        expect(buttons.length).toBe(4);
+        for (const button of buttons) {
+          expect(button.classList.contains('shaka-hidden')).toBe(true);
+        }
+      });
+
+      it('follow the seek bar visibility', async () => {
+        await createUI();
+
+        const buttons = videoContainer.querySelectorAll(
+            '.shaka-seek-backward-button, .shaka-seek-forward-button');
+        expect(buttons.length).toBe(4);
+        for (const button of buttons) {
+          expect(button.classList.contains('shaka-hidden')).toBe(false);
+        }
+
+        // Live content without a DVR window hides the seek bar.
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        seekRangeSpy.and.returnValue({start: 50, end: 50});
+        controls.seekTo(50, false);
+
+        expect(controls.isSeekBarShowing()).toBe(false);
+        for (const button of buttons) {
+          expect(button.classList.contains('shaka-hidden')).toBe(true);
+        }
+
+        // It comes back once there is a seek window again.
+        seekRangeSpy.and.returnValue({start: 0, end: 100});
+        controls.seekTo(50, false);
+
+        for (const button of buttons) {
+          expect(button.classList.contains('shaka-hidden')).toBe(false);
+        }
       });
     });
 

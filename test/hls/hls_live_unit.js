@@ -1022,6 +1022,42 @@ describe('HlsParser live', () => {
             manifest.variants[1].video, [ref4]);
       });
 
+      it('aligns a separate audio loaded after muxed audio', async () => {
+        const masterWithMuxedAndSeparateAudio = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="es",',
+          'NAME="Muxed",DEFAULT=YES\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="qaa",',
+          'NAME="Original",URI="audio2"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",AUDIO="aud",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'video\n',
+        ].join('');
+        configureNetEngineForInitialManifest(masterWithMuxedAndSeparateAudio,
+            mediaWithAdditionalSegment, mediaWithAdditionalSegment);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        const muxedVariant =
+            manifest.variants.find((v) => v.audio.isAudioMuxedInVideo);
+        const separateVariant =
+            manifest.variants.find((v) => !v.audio.isAudioMuxedInVideo);
+        await muxedVariant.audio.createSegmentIndex();
+        await muxedVariant.video.createSegmentIndex();
+
+        // The live window slides before the separate audio is selected.
+        fakeNetEngine
+            .setResponseText('test:/video', mediaWithRemovedSegment)
+            .setResponseText('test:/audio2', mediaWithRemovedSegment);
+        await delayForUpdatePeriod();
+        await separateVariant.audio.createSegmentIndex();
+
+        // Sequence 1 starts at 2 in the video, so it must in the audio too.
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        ManifestParser.verifySegmentIndex(separateVariant.video, [ref2]);
+        ManifestParser.verifySegmentIndex(separateVariant.audio, [ref2]);
+      });
+
       describe('when ignoreManifestProgramDateTime is set', () => {
         const config = shaka.util.PlayerConfiguration.createDefault().manifest;
         config.hls.ignoreManifestProgramDateTime = true;

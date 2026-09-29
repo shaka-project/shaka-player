@@ -55,6 +55,8 @@
   "RESOLUTION": "Resolución",
   "REWIND": "Rebobinar",
   "SEEK": "Buscar",
+  "SEEK_BACKWARD": "Retroceder [SECONDS] segundos",
+  "SEEK_FORWARD": "Avanzar [SECONDS] segundos",
   "SKIP_AD": "Saltar anuncio",
   "SKIP_TO_LIVE": "Ir al vídeo en directo",
   "SKIP_NEXT": "Siguiente",

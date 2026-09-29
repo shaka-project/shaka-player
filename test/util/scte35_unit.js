@@ -94,6 +94,19 @@ describe('Scte35', () => {
     emsg.schemeIdUri = 'urn:scte:scte35:2014:xml+bin';
     const event = Scte35.fromEmsg(emsg);
     expect(event.data).toEqual(Fixtures.section());
+    expect(event.node).toBeNull();
+  });
+
+  it('keeps an XML-only emsg payload as a node', () => {
+    const emsg = Fixtures.emsg(shaka.util.BufferUtils.toUint8(
+        shaka.util.StringUtils.toUTF8(
+            '<SpliceInfoSection ptsAdjustment="0"><TimeSignal>' +
+            '<SpliceTime ptsTime="900000"/></TimeSignal>' +
+            '</SpliceInfoSection>')));
+    emsg.schemeIdUri = 'urn:scte:scte35:2013:xml';
+    const event = Scte35.fromEmsg(emsg);
+    expect(event.data).toBeNull();
+    expect(event.node.tagName).toBe('SpliceInfoSection');
   });
 
   it('treats an unknown emsg duration as a point in time', () => {
