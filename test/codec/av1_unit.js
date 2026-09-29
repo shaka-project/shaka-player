@@ -163,4 +163,19 @@ describe('AV1', () => {
           .toBe(false);
     });
   });
+
+  describe('getCodecs', () => {
+    it('gives the profile, level, tier and bit depth from av1C', () => {
+      // Profile 0, level 4.0 (index 8), main tier, 10 bits.
+      expect(AV1.getCodecs(new Uint8Array([0x81, 0x08, 0x4c, 0])))
+          .toBe('av01.0.08M.10');
+      // Profile 2, level 5.1 (index 13), high tier, 12 bits.
+      expect(AV1.getCodecs(
+          new Uint8Array([0x81, 0x40 | 13, 0x80 | 0x40 | 0x20, 0])))
+          .toBe('av01.2.13H.12');
+      // 8 bits.
+      expect(AV1.getCodecs(new Uint8Array([0x81, 0x00, 0x00, 0])))
+          .toBe('av01.0.00M.08');
+    });
+  });
 });
