@@ -2195,6 +2195,57 @@ describe('UI', () => {
       });
     });
 
+    describe('touch drag that starts on a control panel', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let panel;
+      /** @type {number} */
+      let originalMaxTouchPoints;
+
+      beforeEach(async () => {
+        originalMaxTouchPoints = navigator.maxTouchPoints;
+        // The touch listeners are only wired up on touch-capable devices, so
+        // pretend to be one before the UI is created.
+        Util.setMaxTouchPoints(1);
+        jasmine.clock().install();
+
+        // Keep the controls from staying up just because the video is paused.
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, {showUIOnPaused: false});
+        controlsContainer = ui.getControls().getControlsContainer();
+
+        // The top panel is where the swipe that shows the Android status bar
+        // starts in fullscreen.
+        const panels =
+            videoContainer.getElementsByClassName('shaka-top-controls');
+        expect(panels.length).toBe(1);
+        panel = /** @type {!HTMLElement} */ (panels[0]);
+        expect(panel.classList.contains('shaka-no-propagation')).toBe(true);
+      });
+
+      afterEach(() => {
+        jasmine.clock().uninstall();
+        Util.setMaxTouchPoints(originalMaxTouchPoints);
+      });
+
+      it('hides the controls again after the drag ends', () => {
+        // Start from hidden controls, as when the video has been playing.
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+
+        // The drag shows the controls, then ends on the panel while they are
+        // showing, where the panel stops the touchend.
+        UiUtils.simulateEvent(panel, 'touchstart');
+        UiUtils.simulateEvent(panel, 'touchmove');
+        expect(controlsContainer.getAttribute('shown')).not.toBe(null);
+        UiUtils.simulateEvent(panel, 'touchend');
+
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;
