@@ -335,6 +335,7 @@ shaka.extern.UITrackLabelCallback;
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
+ *   seekButtonDistance: number,
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
@@ -565,6 +566,12 @@ shaka.extern.UITrackLabelCallback;
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right part of the video. If less than or equal to 0,
  *   no seeking will occur.
+ *   <br>
+ *   Defaults to <code>10</code>.
+ * @property {number} seekButtonDistance
+ *   The time interval, in seconds, to seek when the user presses the
+ *   <code>seek_backward</code> or <code>seek_forward</code> buttons. If less
+ *   than or equal to 0, the buttons are hidden.
  *   <br>
  *   Defaults to <code>10</code>.
  * @property {number} refreshTickInSeconds

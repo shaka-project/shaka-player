@@ -940,6 +940,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {boolean}
+   */
+  isSeekBarShowing() {
+    return !!this.seekBar_ && this.seekBar_.isShowing();
+  }
+
+  /**
    * @param {?number} time
    * @param {boolean} container
    * @export

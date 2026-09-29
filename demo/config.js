@@ -1223,6 +1223,8 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Seek On Taps', 'seekOnTaps')
         .addUINumberInput_('Tap Seek Distance (sec)', 'tapSeekDistance',
             /* canBeDecimal= */ false)
+        .addUINumberInput_('Seek Button Distance (sec)', 'seekButtonDistance',
+            /* canBeDecimal= */ false)
         .addUINumberInput_('Refresh Tick (sec)', 'refreshTickInSeconds',
             /* canBeDecimal= */ true)
         .addUIBoolInput_('Show Audio Codec', 'showAudioCodec')
