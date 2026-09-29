@@ -434,8 +434,10 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       const handled = handleFetchStream(fetchStream());
       responses.enqueue(new Uint8Array([
         0x05, // REQUEST_ERROR
-        0x00, 0x02, // Length
-        0x00, 0x00, // Error Code, empty Reason
+        0x00, 0x03, // Length
+        0x00, // Error Code
+        0x00, // Retry Interval
+        0x00, // Empty Reason
       ]));
       await expectAsync(fetched).toBeRejected();
       await handled;
