@@ -32,9 +32,10 @@
  *   startTime when the transport does not signal a duration.
  * @property {string} id
  *   The transport's identifier for this message.  It is independent of the
- *   splice and segmentation event IDs inside the payload.
+ *   splice and segmentation event IDs inside the payload.  MSF has none, so
+ *   for 'msf' it is derived from the record's index reference and payload.
  * @property {string} source
- *   Where the message was found: 'dash', 'hls' or 'emsg'.
+ *   Where the message was found: 'dash', 'hls', 'emsg' or 'msf'.
  * @property {string} kind
  *   'out', 'in' or 'cmd' for HLS, matching the attribute that carried the
  *   payload.  The empty string for other sources.

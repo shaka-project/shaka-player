@@ -3,6 +3,7 @@
 +../../lib/msf/buffer_control_writer.js
 +../../lib/msf/compression.js
 +../../lib/msf/dialect_registry.js
++../../lib/msf/event_timeline.js
 +../../lib/msf/i_control_stream.js
 +../../lib/msf/loc_parser.js
 +../../lib/msf/media_timeline.js

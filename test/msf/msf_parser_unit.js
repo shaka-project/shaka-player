@@ -1029,6 +1029,230 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(presentationTimeline().getSegmentAvailabilityEnd()).toBe(104);
     });
 
+    describe('SCTE-35 event timeline', () => {
+      const Fixtures = shaka.test.Scte35;
+
+      /** @type {!jasmine.Spy} */
+      let onScte35EventSpy;
+
+      beforeEach(() => {
+        onScte35EventSpy = jasmine.createSpy('onScte35Event');
+        playerInterface.onScte35Event =
+            shaka.test.Util.spyFunc(onScte35EventSpy);
+      });
+
+      /**
+       * @param {!Object=} extra
+       * @return {msfCatalog.Track}
+       */
+      function scte35Track(extra) {
+        return /** @type {msfCatalog.Track} */ (Object.assign({
+          name: 'scte35',
+          packaging: 'eventtimeline',
+          eventType: 'urn:scte:scte35:2022:bin',
+          isLive: true,
+        }, extra || {}));
+      }
+
+      /**
+       * @param {string} index
+       * @param {*} value
+       * @param {string=} payload
+       * @return {!Object}
+       */
+      function record(index, value, payload = Fixtures.base64()) {
+        return {[index]: value, data: {'scte35_payload': payload}};
+      }
+
+      /**
+       * @param {!Array<!Object>|!Uint8Array} records
+       * @param {number=} object
+       * @param {Uint8Array=} extensions
+       */
+      function deliverScte35(records, object = 0, extensions = null) {
+        const subscription = lastSubscribeTo('scte35');
+        expect(subscription).not.toBeNull();
+        subscription.callback(timelineObject(records, object, extensions));
+      }
+
+      /** @return {!Array<number>} */
+      function reportedStartTimes() {
+        return onScte35EventSpy.calls.allArgs().map(
+            (args) => args[0].startTime);
+      }
+
+      it('reports a record indexed by media time', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), scte35Track()]);
+
+        deliverScte35([record('m', 480500)]);
+
+        expect(onScte35EventSpy).toHaveBeenCalledTimes(1);
+        const event = onScte35EventSpy.calls.argsFor(0)[0];
+        expect(event).toEqual(jasmine.objectContaining({
+          schemeIdUri: 'urn:scte:scte35:2022:bin',
+          startTime: 480.5,
+          endTime: 480.5,
+          source: 'msf',
+          kind: '',
+          node: null,
+        }));
+        expect(event.data).toEqual(Fixtures.section());
+      });
+
+      it('reads XML payloads', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(),
+          scte35Track({eventType: 'urn:scte:scte35:2022:xml'})]);
+
+        deliverScte35([record('m', 92000,
+            '<SpliceInfoSection><TimeSignal><SpliceTime ptsTime="8280000"/>' +
+            '</TimeSignal></SpliceInfoSection>')]);
+
+        expect(onScte35EventSpy).toHaveBeenCalledTimes(1);
+        const event = onScte35EventSpy.calls.argsFor(0)[0];
+        expect(event.data).toBeNull();
+        expect(event.node.tagName).toBe('SpliceInfoSection');
+      });
+
+      it('reports each record once, however often it is repeated',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(), scte35Track()]);
+
+            deliverScte35([record('m', 1000)], /* object= */ 0);
+            // An incremental update, then the complete document of the next
+            // Group, which repeats everything still accessible.
+            deliverScte35([record('m', 3000)], /* object= */ 1);
+            deliverScte35([record('m', 1000), record('m', 3000)],
+                /* object= */ 0);
+
+            expect(reportedStartTimes()).toEqual([1, 3]);
+          });
+
+      it('places a Location with the media timeline its depends names',
+          async () => {
+            givenAStartedParser();
+            // As in the MSF catalog example, the event timeline depends on
+            // the timeline track, not on the media track.
+            await processCatalog([videoTrack(), timelineTrack(),
+              scte35Track({depends: ['history']})]);
+            lastSubscribeTo('history').callback(
+                timelineObject([[0, [0, 0], 0], [2002, [1, 0], 0]]));
+
+            // An Object inside Group 1 is placed at the start of the Group.
+            deliverScte35([record('l', [1, 3])]);
+
+            expect(reportedStartTimes()).toEqual([2.002]);
+          });
+
+      it('holds a record until the media timeline can place it',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack(),
+              scte35Track({depends: ['history']})]);
+
+            deliverScte35([record('l', [1, 0])]);
+            expect(onScte35EventSpy).not.toHaveBeenCalled();
+
+            lastSubscribeTo('history').callback(
+                timelineObject([[0, [0, 0], 0], [2002, [1, 0], 0]]));
+            expect(reportedStartTimes()).toEqual([2.002]);
+
+            // The next complete document repeats it; it is not reported again.
+            lastSubscribeTo('history').callback(timelineObject(
+                [[0, [0, 0], 0], [2002, [1, 0], 0], [4004, [2, 0], 0]]));
+            deliverScte35([record('l', [1, 0])]);
+            expect(onScte35EventSpy).toHaveBeenCalledTimes(1);
+          });
+
+      it('places a wallclock time with the media timeline', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), timelineTrack(),
+          scte35Track({depends: ['history']})]);
+        lastSubscribeTo('history').callback(timelineObject([
+          [0, [0, 0], 1759924158381],
+          [2002, [1, 0], 1759924160383],
+        ]));
+
+        deliverScte35([record('t', 1759924160883)]);
+
+        expect(reportedStartTimes().length).toBe(1);
+        expect(reportedStartTimes()[0]).toBeCloseTo(2.502, 6);
+      });
+
+      it('places a Location with the template of the track it depends on',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([
+              videoTrack({template: [0, 2002, [0, 0], [1, 0], 0, 0]}),
+              scte35Track({depends: ['video0']}),
+            ]);
+
+            deliverScte35([record('l', [3, 0])]);
+
+            expect(reportedStartTimes()).toEqual([6.006]);
+          });
+
+      it('falls back to any media timeline without depends', async () => {
+        givenAStartedParser();
+        await processCatalog([
+          videoTrack({template: [0, 2002, [0, 0], [1, 0], 0, 0]}),
+          scte35Track(),
+        ]);
+
+        deliverScte35([record('l', [2, 0])]);
+
+        expect(reportedStartTimes()).toEqual([4.004]);
+      });
+
+      it('discards a record without a decodable payload', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), scte35Track()]);
+
+        deliverScte35([
+          {m: 1000, data: {}},
+          {m: 2000, data: 'not an object'},
+          record('m', 3000, 'not base64!'),
+          record('m', 5000),
+        ]);
+
+        expect(reportedStartTimes()).toEqual([5]);
+      });
+
+      it('ignores event timelines of other types', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(),
+          scte35Track({eventType: 'com.example.iab.vast'})]);
+
+        expect(lastSubscribeTo('scte35')).toBeNull();
+      });
+
+      it('does not let an event timeline track decide the presentation is VOD',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(),
+              scte35Track({isLive: false, trackDuration: 10})]);
+
+            expect(presentationTimeline().isDynamic()).toBe(true);
+            expect(presentationTimeline().getDuration()).toBe(Infinity);
+          });
+
+      it('unsubscribes from a track compressed in a way it cannot undo',
+          async () => {
+            codec = new shaka.msf.draft18.Codec();
+            draftNumber = 18;
+            givenAStartedParser();
+            await processCatalog([videoTrack(), scte35Track()]);
+
+            deliverScte35([record('m', 1000)], /* object= */ 0,
+                compressionProperty(2));
+
+            expect(unsubscribeSpy).toHaveBeenCalled();
+            expect(onScte35EventSpy).not.toHaveBeenCalled();
+          });
+    });
+
     describe('seeking', () => {
       /** @type {!shaka.test.FakeVideo} */
       let video;

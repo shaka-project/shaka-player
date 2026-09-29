@@ -14,6 +14,10 @@ underlying specifications are finalized and no longer in draft status.
 - [draft-ietf-moq-transport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/)
 - [draft-ietf-moq-msf](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/)
 - [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/)
+- [draft-ietf-moq-loc](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/)
+- [draft-einarsson-moq-locmaf](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/)
+- [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/)
+- [draft-wilaw-moq-scte35-event-timeline](https://datatracker.ietf.org/doc/draft-wilaw-moq-scte35-event-timeline/)
 
 
 ## Prerequisites
@@ -85,6 +89,10 @@ When `player.load()` is called with `'application/msf'`, Shaka:
    video, and text tracks.
 5. Subscribes to each track's MoQT data stream, feeding segments into Shaka's
    regular media pipeline.
+6. Subscribes to the catalog's **media timeline** and **event timeline**
+   tracks, if any: the first gives the presentation a DVR window and lets the
+   viewer seek behind the live edge, the second carries metadata such as
+   SCTE-35 messages.
 
 > **Note:** Only **live** content is supported. VOD content (where `isLive`
 > is false in the catalog) is not supported and will throw an error.
@@ -106,7 +114,48 @@ and the rest of the catalog still plays.
 | `cmaf` | One CMAF chunk | [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/) |
 | `chunk-per-object` | One CMAF chunk | [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/) |
 | `loc` | One frame of a raw bitstream | [draft-ietf-moq-loc](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/) |
+| `locmaf` | One CMAF chunk with its `moof` compacted | [draft-einarsson-moq-locmaf](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/) |
 | `m2ts` | A run of whole transport packets | [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/) |
+
+Two more `packaging` values carry no media, but metadata about it:
+
+| `packaging` | Object contains | Spec | See |
+| --- | --- | --- | --- |
+| `mediatimeline` | A JSON map from media time to Location and wallclock time | [draft-ietf-moq-msf](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/) section 7 | [Media timeline, DVR and seeking](#media-timeline-dvr-and-seeking) |
+| `eventtimeline` | JSON records of metadata placed on the timeline | [draft-ietf-moq-msf](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/) section 8 | [Event timelines and SCTE-35](#event-timelines-and-scte-35) |
+
+A media track can also carry its media timeline inline, in a `template` field.
+Neither kind of track decides whether the presentation is live or how long it
+is.
+
+### LOCMAF (`locmaf`)
+
+A LOCMAF object is a CMAF chunk whose `moof` has been reduced to a few tagged
+fields, some of them sent only when they change from the previous chunk. Shaka
+rebuilds the `moof` before appending, so the media, the initialization segment
+and the DRM signaling are exactly those of a `cmaf` track.
+
+- **The track must declare `locmafVersion`.** Only `"0.3"` is supported; a
+  track with any other version is skipped, because an unknown version would
+  decode into plausible but wrong values.
+- **The track must have initialization data** (`initData` or `initRef`): the
+  chunk's fields fall back to the defaults it declares.
+
+A publisher may offer each rendition twice, as a `cmaf` track and a `locmaf`
+track sharing one `initRef`. Those are the same stream described twice, and
+Shaka keeps both, which doubles the variant list with identical pairs. Which
+one to keep is the application's choice, made with `catalogPreprocessor` (see
+[MSF Configuration](#msf-configuration)); for example, to prefer LOCMAF:
+
+```js
+player.configure('manifest.msf.catalogPreprocessor', (catalog) => {
+  const shadowed = new Set(catalog.tracks
+      .filter((t) => t.packaging == 'locmaf' && t.initRef)
+      .map((t) => t.initRef));
+  catalog.tracks = catalog.tracks.filter(
+      (t) => t.packaging != 'cmaf' || !shadowed.has(t.initRef));
+});
+```
 
 ### MPEG-2 Transport Stream (`m2ts`)
 
@@ -243,8 +292,25 @@ draft-21 in `LOCATION_FILTER`.
 > When that happens the track returns to the live edge rather than waiting for
 > media that is not coming.
 
-Compressed timeline documents (`MSF_COMPRESSION`) are not supported yet and
-are discarded.
+Timeline documents compressed with `MSF_COMPRESSION` (GZIP) are decompressed
+on draft-18 and later. A compression that is not supported makes Shaka
+unsubscribe from the timeline track, and playback carries on without a DVR
+window.
+
+
+## Event timelines and SCTE-35
+
+A track with `"packaging": "eventtimeline"` associates metadata with the
+presentation (draft-ietf-moq-msf section 8). Each record carries its data and
+one index reference saying where it applies: a media time (`M`), a wallclock
+time (`T`) or a Location (`L`). A wallclock time or a Location is placed
+through the media timeline of the tracks the event timeline `depends` on.
+
+What the data means is defined by the track's `eventType`. Shaka consumes
+SCTE-35 (`urn:scte:scte35:2022:bin` and `urn:scte:scte35:2022:xml`, as defined
+by [draft-wilaw-moq-scte35-event-timeline](https://datatracker.ietf.org/doc/draft-wilaw-moq-scte35-event-timeline/00/)),
+and reports it through the same events as SCTE-35 in DASH and HLS; see
+{@tutorial scte35}. Event timelines of other types are ignored.
 
 
 ## MSF Configuration
@@ -357,8 +423,9 @@ player.configure({
 });
 ```
 
-When `false` (the default), Shaka subscribes to the catalog track and will
-pick up catalog updates if the server sends them.
+When `false` (the default), Shaka subscribes to the catalog track. Either way,
+only the first catalog received is used: catalog updates are not supported
+yet.
 
 ### `version` (MsfVersion, default: `AUTO`)
 
@@ -417,7 +484,7 @@ one is accepted. That costs up to one WebTransport handshake per supported draft
 on such relays. If you know which draft your relay speaks, setting `version`
 explicitly avoids it.
 
-### `catalogPreprocessor` (function, default: identity)
+### `catalogPreprocessor` (function, default: no-op)
 
 An optional callback invoked after the catalog JSON is parsed, before Shaka
 processes its tracks. Use this to modify or filter catalog entries
@@ -431,14 +498,16 @@ player.configure({
         // Example: remove loc tracks from the catalog
         catalog.tracks = catalog.tracks.filter(
             (t) => t.packaging !== 'loc');
-        return catalog;
       },
     }
   }
 });
 ```
 
-The function receives and must return a `msfCatalog.Catalog` object.
+The function receives the `msfCatalog.Catalog` object and modifies it in
+place; its return value is ignored. Choosing between a `cmaf` and a `locmaf`
+encoding of the same rendition is a typical use; see the LOCMAF section under
+[Supported Packagings](#supported-packagings).
 
 
 ## Full Configuration Example
@@ -453,7 +522,7 @@ player.configure({
       useFetchCatalog: false,       // true = one-shot FETCH, false = SUBSCRIBE
       version: shaka.config.MsfVersion.AUTO, // Version negotiation strategy
       subscribeFilterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
-      catalogPreprocessor: (catalog) => catalog, // Identity (no-op)
+      catalogPreprocessor: (catalog) => {}, // Modifies the catalog in place
     }
   }
 });
