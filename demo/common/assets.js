@@ -2704,7 +2704,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/clear'],
+            namespaces: ['mlm', 'cmsf', 'clear'],
           },
         },
       })
@@ -2724,7 +2724,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/drm-cbcs'],
+            namespaces: ['mlm', 'cmsf', 'drm-cbcs'],
           },
         },
       })
@@ -2742,7 +2742,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/eccp-cbcs'],
+            namespaces: ['mlm', 'cmsf', 'eccp-cbcs'],
           },
         },
       })
@@ -2759,7 +2759,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/clear'],
+            namespaces: ['mlm', 'cmsf', 'clear'],
             catalogPreprocessor: shakaAssets.preferLocmafTracks,
           },
         },
@@ -2780,7 +2780,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['cmsf/drm-cbcs'],
+            namespaces: ['mlm', 'cmsf', 'drm-cbcs'],
             catalogPreprocessor: shakaAssets.preferLocmafTracks,
           },
         },
@@ -2798,7 +2798,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         manifest: {
           msf: {
-            namespaces: ['msf/clear'],
+            namespaces: ['mlm', 'msf', 'clear'],
           },
         },
       })
