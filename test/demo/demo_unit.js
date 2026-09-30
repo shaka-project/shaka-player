@@ -202,6 +202,9 @@ describe('Demo', () => {
           .add('playRangeStart')
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI')
+          // Deprecated options remain accepted until v6, but have no effect.
+          .add('manifest.dash.sequenceMode')
+          .add('manifest.hls.sequenceMode')
           .add('manifest.hls.ignoreManifestProgramDateTimeForTypes')
           .add('drm.keySystemsMapping')
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')

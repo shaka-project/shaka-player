@@ -311,10 +311,9 @@ describe('Player', () => {
     // Player owns the manifest stream-type guard; add/remove/buffered behavior
     // lives in SkipRangeController and is covered by its own tests.
     const unsupportedWarning =
-        'addSkipRange() supports segments mode, VOD only; ignoring';
+        'addSkipRange() supports VOD only; ignoring';
 
-    it('accepts a range on segments-mode VOD content', async () => {
-      manifest.sequenceMode = false;
+    it('accepts a range on VOD content', async () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
@@ -322,17 +321,16 @@ describe('Player', () => {
       expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
-    it('ignores a range in sequence mode', async () => {
-      manifest.sequenceMode = true;
+    it('accepts a range with legacy sequenceMode', async () => {
+      player.configure('manifest.dash.sequenceMode', true);
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
 
-      expect(player.addSkipRange(10, 30)).toBe(false);
-      expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
+      expect(player.addSkipRange(10, 30)).toBe(true);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(unsupportedWarning);
     });
 
     it('ignores a range on live content', async () => {
-      manifest.sequenceMode = false;
       spyOn(manifest.presentationTimeline, 'isDynamic').and.returnValue(true);
       await player.load(fakeManifestUri, 0, fakeMimeType);
       logWarnSpy.calls.reset();
@@ -1037,6 +1035,27 @@ describe('Player', () => {
       player.addEventListener('configurationchanged',
           Util.spyFunc(onConfigurationChanged));
     });
+
+    for (const type of ['dash', 'hls']) {
+      for (const enabled of [true, false]) {
+        it('accepts deprecated ' + type + ' sequenceMode=' + enabled, () => {
+          const deprecate = spyOn(shaka.Deprecate, 'deprecateFeature');
+          const key = 'manifest.' + type + '.sequenceMode';
+          expect(player.configure(key, enabled)).toBe(true);
+          expect(deprecate).toHaveBeenCalledOnceWith(6,
+              key + ' configuration', 'Segments mode is now always used.');
+          expect(player.getConfiguration().manifest[type].sequenceMode)
+              .toBe(enabled);
+
+          deprecate.calls.reset();
+          const config = {manifest: {}};
+          config.manifest[type] = {sequenceMode: enabled};
+          expect(player.configure(config)).toBe(true);
+          expect(deprecate).toHaveBeenCalledOnceWith(6,
+              key + ' configuration', 'Segments mode is now always used.');
+        });
+      }
+    }
 
     it('overwrites defaults', () => {
       expect(onConfigurationChanged).not.toHaveBeenCalled();

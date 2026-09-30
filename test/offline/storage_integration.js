@@ -760,6 +760,21 @@ filterDescribe('Storage', storageSupport, () => {
       await player.destroy();
     });
 
+    it('accepts deprecated sequenceMode configurations', () => {
+      const deprecate = spyOn(shaka.Deprecate, 'deprecateFeature');
+      for (const type of ['dash', 'hls']) {
+        for (const enabled of [true, false]) {
+          deprecate.calls.reset();
+          const key = 'manifest.' + type + '.sequenceMode';
+          expect(storage.configure(key, enabled)).toBe(true);
+          expect(deprecate).toHaveBeenCalledOnceWith(6,
+              key + ' configuration', 'Segments mode is now always used.');
+          expect(storage.getConfiguration().manifest[type].sequenceMode)
+              .toBe(enabled);
+        }
+      }
+    });
+
     it('stores and lists content', async () => {
       /** @type {!Array<string>} */
       const manifestUris = [

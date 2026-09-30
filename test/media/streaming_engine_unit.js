@@ -643,7 +643,7 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN',
+        /** manifestType= */ 'UNKNOWN',
         /** ignoreManifestTimestampsInSegmentsMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
@@ -4604,7 +4604,7 @@ describe('StreamingEngine', () => {
         });
 
     // The manifest stream-type guard lives in Player.addSkipRange; its
-    // live/non-DASH/sequence-mode rejection is covered by the Player tests.
+    // live/non-DASH rejection is covered by the Player tests.
 
     it('does not skip a range whose end is mid-segment', async () => {
       const warnOnce = spyOn(shaka.log, 'warning').and.callThrough();
