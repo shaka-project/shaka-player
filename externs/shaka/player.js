@@ -1687,7 +1687,6 @@ shaka.extern.HlsManifestConfiguration;
  *   namespaces: !Array<string>,
  *   authorizationToken: string,
  *   subscribeFilterType: shaka.config.MsfFilterType,
- *   useFetchCatalog: boolean,
  *   version: shaka.config.MsfVersion,
  *   catalogPreprocessor: function(!msfCatalog.Catalog),
  * }}
@@ -1719,10 +1718,6 @@ shaka.extern.HlsManifestConfiguration;
  *   delivers data to the subscriber.
  *   <br>
  *   Defaults to <code>shaka.config.MsfFilterType.LARGEST_OBJECT</code>.
- * @property {boolean} useFetchCatalog
- *   Use FETCH to retrieve the catalog instead of SUBSCRIBE.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.config.MsfVersion} version
  *   MoQ version used in the connection.
  *   <br>
