@@ -562,6 +562,8 @@ SQUEEZECURRENT
 
 # MSF (Media over QUIC Transport Streaming format)
 cmsf
+einarsson
+eventtimeline
 gregoire
 locmaf
 mediatimeline
@@ -570,6 +572,7 @@ msf
 msfts
 unparseable
 wallclock
+wilaw
 QUIC
 WEBTRANSPORT
 

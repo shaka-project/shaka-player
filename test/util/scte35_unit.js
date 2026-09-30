@@ -109,6 +109,16 @@ describe('Scte35', () => {
     expect(event.node.tagName).toBe('SpliceInfoSection');
   });
 
+  it('survives an XML emsg payload that is not XML at all', () => {
+    const emsg = Fixtures.emsg(shaka.util.BufferUtils.toUint8(
+        shaka.util.StringUtils.toUTF8('not xml')));
+    emsg.schemeIdUri = 'urn:scte:scte35:2013:xml';
+    const event = Scte35.fromEmsg(emsg);
+    expect(event).not.toBeNull();
+    expect(event.data).toBeNull();
+    expect(event.node).toBeNull();
+  });
+
   it('treats an unknown emsg duration as a point in time', () => {
     const emsg = Fixtures.emsg();
     emsg.eventDuration = 0xffffffff;
@@ -121,6 +131,69 @@ describe('Scte35', () => {
     const event = Scte35.fromEmsg(emsg);
     expect(event).not.toBeNull();
     expect(event.data).toBeNull();
+  });
+
+  describe('fromMsf', () => {
+    it('decodes a base64 payload for binary carriage', () => {
+      for (const eventType of [
+        'urn:scte:scte35:2022:bin', 'urn:scte:scte35:2013:bin',
+      ]) {
+        const event = Scte35.fromMsf(eventType, Fixtures.base64(), 480.5, 'x');
+        expect(event).toEqual(jasmine.objectContaining({
+          schemeIdUri: eventType,
+          startTime: 480.5,
+          endTime: 480.5,
+          id: 'x',
+          source: 'msf',
+          kind: '',
+          node: null,
+        }));
+        expect(event.data).toEqual(Fixtures.section());
+      }
+    });
+
+    it('keeps an XML-only payload as a node', () => {
+      const event = Scte35.fromMsf('urn:scte:scte35:2022:xml',
+          '<SpliceInfoSection><SpliceInsert spliceImmediateFlag="1" ' +
+          'eventId="101"/></SpliceInfoSection>', 1, 'x');
+      expect(event.data).toBeNull();
+      expect(event.node.tagName).toBe('SpliceInfoSection');
+    });
+
+    it('skips an XML declaration', () => {
+      const event = Scte35.fromMsf('urn:scte:scte35:2022:xml',
+          '<?xml version="1.0" encoding="UTF-8"?>\n' +
+          '<SpliceInfoSection><SpliceNull/></SpliceInfoSection>', 1, 'x');
+      expect(event.node.tagName).toBe('SpliceInfoSection');
+    });
+
+    it('decodes Binary from an XML payload', () => {
+      const event = Scte35.fromMsf('urn:scte:scte35:2022:xml',
+          '<Signal><Binary>' + Fixtures.base64() + '</Binary></Signal>',
+          1, 'x');
+      expect(event.data).toEqual(Fixtures.section());
+      expect(event.node).toBeNull();
+    });
+
+    it('rejects payloads it cannot decode, and other event types', () => {
+      for (const payload of ['not base64!', 'YWJ', '']) {
+        expect(Scte35.fromMsf('urn:scte:scte35:2022:bin', payload, 1, 'x'))
+            .toBeNull();
+      }
+      expect(Scte35.fromMsf('urn:scte:scte35:2022:xml', 'not xml', 1, 'x'))
+          .toBeNull();
+      expect(Scte35.fromMsf('com.example.iab.vast', Fixtures.base64(), 1, 'x'))
+          .toBeNull();
+    });
+
+    it('recognizes its event types without widening the DASH schemes',
+        () => {
+          expect(Scte35.isMsfEventType(' urn:scte:scte35:2022:bin '))
+              .toBe(true);
+          expect(Scte35.isMsfEventType('urn:scte:scte35:2022:xml')).toBe(true);
+          expect(Scte35.isMsfEventType('com.example.iab.vast')).toBe(false);
+          expect(Scte35.isScheme('urn:scte:scte35:2022:bin')).toBe(false);
+        });
   });
 
   it('decodes hexadecimal HLS payloads and rejects malformed ones', () => {

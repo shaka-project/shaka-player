@@ -87,6 +87,39 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
       expect(timeline.wallClockForTime(0)).toBe(null);
     });
 
+    it('places a location inside a group at the start of the group', () => {
+      addObject([[0, [0, 0], 0], [2002, [1, 0], 0], [4004, [2, 0], 0]]);
+
+      expect(timeline.timeAtOrBefore(
+          {group: BigInt(1), object: BigInt(0), subgroup: null})).toBe(2.002);
+      expect(timeline.timeAtOrBefore(
+          {group: BigInt(1), object: BigInt(3), subgroup: null})).toBe(2.002);
+      // A group it has no record for is not answered with an earlier one.
+      expect(timeline.timeAtOrBefore(
+          {group: BigInt(5), object: BigInt(0), subgroup: null})).toBe(null);
+    });
+
+    it('maps a wallclock time to a media time', () => {
+      addObject([
+        [0, [0, 0], 1759924158381],
+        [2002, [1, 0], 1759924160383],
+        [4004, [2, 0], 1759924162385],
+      ]);
+
+      expect(timeline.timeForWallClock(1759924160883)).toBeCloseTo(2.502, 6);
+      expect(timeline.timeForWallClock(1759924160383)).toBeCloseTo(2.002, 6);
+      // Past the newest record, media time keeps pace with wallclock time.
+      expect(timeline.timeForWallClock(1759924163385)).toBeCloseTo(5.004, 6);
+      // Before the oldest record there is nothing to go from.
+      expect(timeline.timeForWallClock(1759924158000)).toBe(null);
+    });
+
+    it('maps no wallclock time when the publisher sent zero', () => {
+      addObject([[0, [0, 0], 0], [2002, [1, 0], 0]]);
+
+      expect(timeline.timeForWallClock(1759924160383)).toBe(null);
+    });
+
     it('sorts records a publisher sent out of order', () => {
       addObject([[4004, [2, 0], 0], [0, [0, 0], 0], [2002, [1, 0], 0]]);
 
@@ -247,6 +280,22 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
     it('reports the wallclock time', () => {
       expect(timeline.wallClockForTime(2.002)).toBe(1759924160383);
     });
+
+    it('places a location inside a group at the start of the group', () => {
+      expect(timeline.timeAtOrBefore(
+          {group: BigInt(3), object: BigInt(2), subgroup: null})).toBe(6.006);
+    });
+
+    it('maps a wallclock time to a media time', () => {
+      expect(timeline.timeForWallClock(1759924161381)).toBeCloseTo(3, 6);
+      expect(timeline.timeForWallClock(1759924158000)).toBe(null);
+    });
+
+    it('maps no wallclock time when the publisher sent zero', () => {
+      expect(timeline.setTemplate([0, 2002, [0, 0], [1, 0], 0, 0]))
+          .toBe(true);
+      expect(timeline.timeForWallClock(1759924161381)).toBe(null);
+    });
   });
 
   describe('template validation', () => {
@@ -305,5 +354,8 @@ filterDescribe('shaka.msf.MediaTimeline', isMSFSupported, () => {
     expect(timeline.wallClockForTime(5)).toBe(null);
     expect(timeline.timeForLocation(
         {group: BigInt(0), object: BigInt(0), subgroup: null})).toBe(null);
+    expect(timeline.timeAtOrBefore(
+        {group: BigInt(0), object: BigInt(0), subgroup: null})).toBe(null);
+    expect(timeline.timeForWallClock(1759924158381)).toBe(null);
   });
 });

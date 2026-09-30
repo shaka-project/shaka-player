@@ -212,7 +212,12 @@ Features supported:
  - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
  - LoC [draft-2](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/02/) support
+ - LOCMAF [draft-1](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/01/) support (`locmafVersion` 0.3)
+ - MPEG-2 TS [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/) support
  - Live
+ - Media timeline tracks and templates, with DVR and seeking behind the live edge
+ - MSF_COMPRESSION (GZIP) for the catalog, media timeline and event timeline tracks (draft-18 and later)
+ - SCTE-35 over event timeline tracks, as defined in [draft-wilaw-moq-scte35-event-timeline-00](https://datatracker.ietf.org/doc/draft-wilaw-moq-scte35-event-timeline/00/) (see [SCTE-35 messages](docs/tutorials/scte35.md))
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
 
 Features **not** supported:
