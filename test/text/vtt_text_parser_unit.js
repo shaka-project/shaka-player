@@ -1775,6 +1775,300 @@ describe('VttTextParser', () => {
         });
   });
 
+  describe('REGION blocks', () => {
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+
+    /**
+     * @param {!Object} region
+     * @return {!Object}
+     */
+    const regionMatching = (region) => jasmine.objectContaining(region);
+
+    it('parses all the region settings', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 40,
+                height: 3,
+                heightUnits: CueRegion.units.LINES,
+                widthUnits: CueRegion.units.PERCENTAGE,
+                regionAnchorX: 0,
+                regionAnchorY: 100,
+                viewportAnchorX: 10,
+                viewportAnchorY: 90,
+                viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+                scroll: CueRegion.scrollMode.UP,
+              }),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n' +
+          'width:40%\n' +
+          'lines:3\n' +
+          'regionanchor:0%,100%\n' +
+          'viewportanchor:10%,90%\n' +
+          'scroll:up\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+      expect(logWarningSpy).not.toHaveBeenCalled();
+    });
+
+    it('parses settings separated by spaces and tabs', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 40,
+                height: 2,
+                viewportAnchorX: 10,
+                viewportAnchorY: 90,
+              }),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred width:40%\tlines:2\n' +
+          'viewportanchor:10%,90%\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+    });
+
+    it('parses decimal percentages', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 33.5,
+                regionAnchorX: 12.25,
+                regionAnchorY: 0,
+                viewportAnchorX: 50,
+                viewportAnchorY: 7.5,
+              }),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n' +
+          'width:33.5%\n' +
+          'regionanchor:12.25%,0%\n' +
+          'viewportanchor:50%,7.5%\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+    });
+
+    it('uses the WebVTT defaults for missing settings', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 100,
+                height: 3,
+                heightUnits: CueRegion.units.LINES,
+                regionAnchorX: 0,
+                regionAnchorY: 100,
+                viewportAnchorX: 0,
+                viewportAnchorY: 100,
+                scroll: CueRegion.scrollMode.NONE,
+              }),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+    });
+
+    it('ignores and logs invalid region settings', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 100,
+                height: 3,
+                regionAnchorX: 0,
+                regionAnchorY: 100,
+                viewportAnchorX: 0,
+                viewportAnchorY: 100,
+                scroll: CueRegion.scrollMode.NONE,
+              }),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n' +
+          'width:101%\n' +
+          'lines:2.5\n' +
+          'regionanchor:50%\n' +
+          'viewportanchor:-10%,50%\n' +
+          'scroll:down\n' +
+          'width:\n' +
+          'foo:bar\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+      expect(logWarningSpy).toHaveBeenCalledTimes(7);
+    });
+
+    it('ignores REGION blocks after the first cue', () => {
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, payload: 'Test'},
+            {
+              startTime: 20,
+              endTime: 30,
+              payload: 'Test2',
+              region: regionMatching({id: ''}),
+            },
+          ],
+          'WEBVTT\n\n' +
+          '00:00:10.000 --> 00:00:20.000\n' +
+          'Test\n\n' +
+          'REGION\n' +
+          'id:fred\n\n' +
+          '00:00:20.000 --> 00:00:30.000 region:fred\n' +
+          'Test2',
+          time);
+    });
+
+    it('uses the last region with the same id', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({id: 'fred', width: 90}),
+            },
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n' +
+          'width:10%\n\n' +
+          'REGION\n' +
+          'id:fred\n' +
+          'width:90%\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+    });
+
+    it('drops the region of cues with a line, a size or vertical', () => {
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, region: regionMatching({id: ''})},
+            {startTime: 20, endTime: 30, region: regionMatching({id: ''})},
+            {startTime: 30, endTime: 40, region: regionMatching({id: ''})},
+            {startTime: 40, endTime: 50, region: regionMatching({id: ''})},
+            {startTime: 50, endTime: 60, region: regionMatching({id: 'fred'})},
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          'id:fred\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred line:0\n' +
+          'Test\n\n' +
+          '00:00:20.000 --> 00:00:30.000 line:50% region:fred\n' +
+          'Test\n\n' +
+          '00:00:30.000 --> 00:00:40.000 region:fred size:50%\n' +
+          'Test\n\n' +
+          '00:00:40.000 --> 00:00:50.000 region:fred vertical:rl\n' +
+          'Test\n\n' +
+          '00:00:50.000 --> 00:01:00.000 region:fred size:100% ' +
+          'position:10% align:start\n' +
+          'Test',
+          time);
+    });
+
+    it('parses a cue with REGION as its identifier', () => {
+      verifyHelper(
+          [
+            {id: 'REGION', startTime: 10, endTime: 20, payload: 'Test'},
+          ],
+          'WEBVTT\n\n' +
+          'REGION\n' +
+          '00:00:10.000 --> 00:00:20.000\n' +
+          'Test',
+          time);
+    });
+
+    it('applies the WebVTT defaults to legacy regions', () => {
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              payload: 'Test',
+              region: regionMatching({
+                id: 'fred',
+                width: 33.5,
+                height: 3,
+                heightUnits: CueRegion.units.LINES,
+                regionAnchorX: 0,
+                regionAnchorY: 100,
+                viewportAnchorX: 0,
+                viewportAnchorY: 100,
+              }),
+            },
+          ],
+          'WEBVTT\n' +
+          'Region: id=fred width=33.5%\n\n' +
+          '00:00:10.000 --> 00:00:20.000 region:fred\n' +
+          'Test',
+          time);
+    });
+  });
+
+  it('parses the regions of a WebVTT header', () => {
+    const regions = shaka.text.VttTextParser.parseRegions(
+        'WEBVTT\n' +
+        'Region: id=legacy width=50%\n\n' +
+        'REGION\n' +
+        'id:fred\n' +
+        'width:40%\n\n' +
+        'STYLE\n' +
+        '::cue { color: red; }\n\n' +
+        'REGION\n' +
+        'id:bob\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        'Test\n\n' +
+        'REGION\n' +
+        'id:late\n');
+    expect(regions.map((r) => r.id)).toEqual(['legacy', 'fred', 'bob']);
+    expect(regions[1].width).toBe(40);
+  });
+
   it('supports an extra newline inside the cue body', () => {
     verifyHelper(
         [
