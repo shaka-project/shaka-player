@@ -4832,4 +4832,62 @@ describe('StreamingEngine', () => {
       expect(resetSpy).toHaveBeenCalledWith(true);
     });
   });
+
+  describe('forwardTimeForCrossBoundary_', () => {
+    /** @type {?} */
+    let engine;
+
+    beforeEach(() => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.RESET;
+      streamingEngine.configure(config);
+
+      const lastInitRef = new shaka.media.InitSegmentReference(
+          () => ['init.mp4'], 0, null);
+      lastInitRef.boundaryEnd = 10;
+
+      engine = /** @type {?} */(streamingEngine);
+      engine.mediaStates_.set(ContentType.VIDEO, {
+        type: ContentType.VIDEO,
+        stream: {id: 1},
+        lastInitSegmentReference: lastInitRef,
+        seeked: false,
+      });
+    });
+
+    it('crosses the boundary when the playhead overshoots it', () => {
+      // Approaching the boundary schedules the crossing.
+      presentationTimeInSeconds = 9.9;
+      engine.forwardTimeForCrossBoundary_();
+
+      // The buffer runs dry and the platform reports a playhead slightly past
+      // the boundary before the timer fires.  This must not cancel the
+      // crossing.
+      presentationTimeInSeconds = 10.005;
+      engine.forwardTimeForCrossBoundary_();
+
+      jasmine.clock().tick(1);
+
+      expect(engine.crossBoundaryResetPending_).toBe(true);
+      expect(engine.crossBoundarySeekTarget_).toBeCloseTo(10.1, 5);
+    });
+
+    it('ignores a playhead well past the boundary', () => {
+      presentationTimeInSeconds = 9.9;
+      engine.forwardTimeForCrossBoundary_();
+
+      // A seek forward, away from the boundary.
+      presentationTimeInSeconds = 12;
+      engine.forwardTimeForCrossBoundary_();
+
+      jasmine.clock().tick(1000);
+
+      expect(engine.crossBoundaryResetPending_).toBe(false);
+      expect(engine.crossBoundarySeekTarget_).toBeNull();
+    });
+  });
 });
