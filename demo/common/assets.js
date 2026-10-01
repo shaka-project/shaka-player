@@ -1343,6 +1343,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ADS),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Live sim with SVTA2053-2 ads',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/svta_p60:20;ads=2/testpic_2s/Manifest.mpd?sessionId=shaka',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.ADS),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Live sim Content-Steering',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim2.dashif.org/livesim2/steer_alpha,beta;ttl=20/testpic_2s/Manifest.mpd?sessionId=alice',
