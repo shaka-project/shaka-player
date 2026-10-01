@@ -32,7 +32,8 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
     defineTests();
   });
 
-  describe('using browser-native rendering', () => {
+  const nativeSupported = shaka.test.NativeTextLayoutTests.supported;
+  filterDescribe('using browser-native rendering', nativeSupported, () => {
     beforeAll(async () => {
       helper = new shaka.test.NativeTextLayoutTests('text-displayer-native');
 
