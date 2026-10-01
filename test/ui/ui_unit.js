@@ -1562,8 +1562,10 @@ describe('UI', () => {
         jasmine.clock().install();
 
         // Keep the controls from staying up just because the video is paused.
+        // Cast defaults fadeDelay to 3 seconds, which would push the hide
+        // past the 5 seconds the test waits, so pin it.
         const ui = await UiUtils.createUIThroughAPI(
-            videoContainer, video, {showUIOnPaused: false});
+            videoContainer, video, {showUIOnPaused: false, fadeDelay: 0});
         controlsContainer = ui.getControls().getControlsContainer();
 
         // The top panel is where the swipe that shows the Android status bar
