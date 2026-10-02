@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2016 Google LLC
+ SPDX-License-Identifier: Apache-2.0
+-->
+<!--
+  Translations dashboard for the Shaka Player UI.
+
+  Read-only report: open this page from any web server that serves
+  ui/locales/ (for example, the nightly demo on GitHub Pages).
+  Editor: run `python3 build/translations.py`, which serves this page and
+  saves edits straight to ui/locales/*.json.
+
+  This page is a standalone tool.  It is not part of any build.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Translations</title>
+<style>
+@font-face {
+  /* Tengwar glyphs for the Sindarin (sjn) translation, only loaded for the
+   * Private Use Area codepoints they live in. */
+  font-family: "Tengwar Telcontar";
+  src: url("../../demo/TengwarTelcontar.woff2") format("woff2");
+  unicode-range: U+E000-E0FF;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #dde1e6;
+  --text: #1b1f24;
+  --text-2: #5b6470;
+  --accent: #1f6feb;
+  --accent-text: #ffffff;
+  --focus: #1f6feb;
+
+  --st-ok: #2da44e;
+  --st-ok-bg: #e6f4ea;
+  --st-missing: #d1242f;
+  --st-missing-bg: #fde8e8;
+  --st-issue: #d4a106;
+  --st-issue-bg: #fff6d6;
+  --st-same: #e8cf6a;
+  --st-same-bg: #fffbea;
+  --st-orphan: #e16f24;
+  --st-orphan-bg: #fff0e3;
+  --st-empty: #eceef1;
+
+  --warn-bg: #fff6d6;
+  --warn-border: #e9cf72;
+  --info-bg: #e8f0fe;
+  --info-border: #b5ccf7;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1216;
+    --surface: #171b21;
+    --surface-2: #1f242c;
+    --border: #2c333d;
+    --text: #e6e9ed;
+    --text-2: #9aa4b0;
+    --accent: #4c8dff;
+    --accent-text: #0b0e12;
+    --focus: #6ea2ff;
+
+    --st-ok: #3fb950;
+    --st-ok-bg: #12261a;
+    --st-missing: #f85149;
+    --st-missing-bg: #2d1415;
+    --st-issue: #e3b341;
+    --st-issue-bg: #2b2412;
+    --st-same: #a8913e;
+    --st-same-bg: #24210f;
+    --st-orphan: #f0883e;
+    --st-orphan-bg: #2d1c0f;
+    --st-empty: #232931;
+
+    --warn-bg: #2b2412;
+    --warn-border: #6b5520;
+    --info-bg: #13213a;
+    --info-border: #2a4475;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto,
+      "Tengwar Telcontar", sans-serif;
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+a { color: var(--accent); }
+
+code, .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+
+header.top {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+header.top .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding-top: 14px;
+  padding-bottom: 0;
+}
+
+header.top h1 { font-size: 18px; margin: 0; font-weight: 650; }
+
+.mode {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.mode.server { border-color: var(--st-ok); color: var(--st-ok); }
+
+nav.tabs { display: flex; gap: 4px; width: 100%; margin-top: 6px; }
+
+nav.tabs a {
+  padding: 8px 12px;
+  text-decoration: none;
+  color: var(--text-2);
+  border-bottom: 2px solid transparent;
+  font-weight: 550;
+}
+nav.tabs a[aria-current="page"] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+main { padding: 16px 0 96px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+.stat .v {
+  font-size: 22px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.stat .l { color: var(--text-2); font-size: 12.5px; }
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.toolbar .grow { flex: 1 1 200px; }
+
+input[type="search"], input[type="text"], select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  min-width: 0;
+}
+input[type="search"] { width: 100%; }
+
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-weight: 550;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.small { padding: 3px 8px; font-size: 12.5px; }
+.btn:disabled { opacity: 0.5; cursor: default; filter: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.chip .n { color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  flex: none;
+}
+.s-ok { background: var(--st-ok); }
+.s-missing { background: var(--st-missing); }
+.s-issue { background: var(--st-issue); }
+.s-same {
+  background: repeating-linear-gradient(
+      135deg, var(--st-same) 0 2px, var(--st-same-bg) 2px 4px);
+  box-shadow: inset 0 0 0 1px var(--st-same);
+}
+.s-orphan { background: var(--st-orphan); }
+.s-none { background: var(--st-empty); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+/* Languages table */
+.table-scroll { overflow-x: auto; }
+table.langs { width: 100%; border-collapse: collapse; }
+table.langs th, table.langs td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+table.langs th {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+table.langs th button {
+  all: unset;
+  cursor: pointer;
+}
+table.langs th button:focus-visible { outline: 2px solid var(--focus); }
+table.langs tbody tr { cursor: pointer; }
+table.langs tbody tr:hover { background: var(--surface-2); }
+table.langs tbody tr:last-child td { border-bottom: 0; }
+table.langs td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+table.langs .name { font-weight: 550; }
+table.langs .code { color: var(--text-2); }
+
+.bar {
+  display: flex;
+  width: 180px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--st-empty);
+}
+.bar span { display: block; height: 100%; }
+.pct {
+  font-variant-numeric: tabular-nums;
+  width: 44px;
+  display: inline-block;
+  text-align: right;
+}
+.cov { display: inline-flex; align-items: center; gap: 10px; }
+
+.badge {
+  display: inline-block;
+  font-size: 11.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-weight: 550;
+}
+.badge.google { color: var(--accent); border-color: var(--info-border); }
+.badge.community { color: var(--st-ok); border-color: var(--st-ok); }
+.badge.generated { color: var(--text-2); }
+.badge.dirty {
+  color: var(--st-orphan);
+  border-color: var(--st-orphan);
+}
+
+/* Matrix */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.matrix-scroll {
+  overflow: auto;
+  max-height: calc(100vh - 230px);
+  min-height: 300px;
+}
+table.matrix { border-collapse: separate; border-spacing: 2px; }
+table.matrix th {
+  position: sticky;
+  background: var(--surface);
+  z-index: 1;
+  font-weight: 500;
+}
+table.matrix thead th {
+  top: 0;
+  vertical-align: bottom;
+  padding: 4px 0;
+  z-index: 2;
+}
+table.matrix thead th a {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-decoration: none;
+  color: var(--text-2);
+  font-size: 12px;
+  display: inline-block;
+}
+table.matrix thead th a:hover { color: var(--accent); }
+table.matrix thead th.corner { left: 0; z-index: 3; }
+table.matrix tbody th {
+  left: 0;
+  text-align: left;
+  padding: 0 10px 0 4px;
+  white-space: nowrap;
+}
+table.matrix tbody th .mono { font-size: 12px; }
+table.matrix tbody th .miss {
+  color: var(--st-missing);
+  font-size: 11.5px;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+table.matrix td { padding: 0; }
+table.matrix td a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+table.matrix td a:hover {
+  outline: 2px solid var(--text);
+  outline-offset: 0;
+}
+
+/* Editor */
+.lang-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+}
+.lang-head h2 { margin: 0; font-size: 20px; }
+
+.note {
+  border: 1px solid var(--info-border);
+  background: var(--info-bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.note.warn { border-color: var(--warn-border); background: var(--warn-bg); }
+
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 6px 16px;
+  padding: 12px 14px 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 8px;
+}
+.row.st-ok { border-left-color: var(--st-ok); }
+.row.st-missing {
+  border-left-color: var(--st-missing);
+  background: var(--st-missing-bg);
+}
+.row.st-issue {
+  border-left-color: var(--st-issue);
+  background: var(--st-issue-bg);
+}
+.row.st-same {
+  border-left-color: var(--st-same);
+  background: var(--st-same-bg);
+}
+.row.st-orphan {
+  border-left-color: var(--st-orphan);
+  background: var(--st-orphan-bg);
+}
+.row.flash { animation: flash 1.2s ease-out; }
+@keyframes flash {
+  0% { box-shadow: 0 0 0 3px var(--accent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.row .meta { min-width: 0; }
+.row .key {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.row .key code { font-weight: 600; }
+.row .desc { color: var(--text-2); font-size: 13px; margin-top: 4px; }
+.row .ref { margin-top: 6px; }
+.row .ref .lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.row .problem { font-size: 12.5px; margin-top: 4px; color: var(--text); }
+.row .problem::before { content: "⚠ "; }
+.row textarea {
+  width: 100%;
+  min-height: 42px;
+  resize: vertical;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+      "Tengwar Telcontar", sans-serif;
+}
+.row textarea:read-only { background: var(--surface-2); }
+.row .edit { display: flex; flex-direction: column; gap: 6px; }
+.row .edit .acts {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.row .changed {
+  font-size: 12px;
+  color: var(--st-orphan);
+  margin-right: auto;
+  align-self: center;
+}
+
+.savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+  z-index: 5;
+}
+.savebar .wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+}
+.savebar .msg { flex: 1 1 200px; color: var(--text-2); }
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0;
+  width: min(460px, calc(100vw - 32px));
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+#ed-badges { display: inline-flex; gap: 6px; }
+
+dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
+dialog form { padding: 18px 20px; }
+dialog h3 { margin: 0 0 12px; font-size: 17px; }
+dialog label {
+  display: block;
+  font-weight: 550;
+  margin-bottom: 4px;
+}
+dialog input[type="text"] { width: 100%; }
+dialog .hint {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 6px 0 0;
+  min-height: 1.4em;
+}
+dialog .hint.err { color: var(--st-missing); }
+dialog .acts {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+  max-width: calc(100vw - 32px);
+}
+#toast.show { opacity: 1; }
+
+[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .bar { width: 90px; }
+  table.langs .hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Shaka Player UI translations</h1>
+    <span id="mode" class="mode">Loading…</span>
+    <nav class="tabs" aria-label="Views">
+      <a href="#/languages" data-view="languages">Languages</a>
+      <a href="#/matrix" data-view="matrix">Matrix</a>
+      <a href="#/edit" data-view="edit" id="edit-tab" hidden>Edit</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="error" class="note warn" hidden></div>
+
+  <!-- Languages overview -->
+  <section id="view-languages" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="toolbar">
+      <div class="grow">
+        <input type="search" id="lang-search"
+            placeholder="Filter languages by name or code"
+            aria-label="Filter languages">
+      </div>
+      <select id="lang-owner" aria-label="Maintainer">
+        <option value="">All maintainers</option>
+        <option value="google">Google</option>
+        <option value="community">Community</option>
+        <option value="generated">Generated</option>
+      </select>
+      <button class="btn primary" id="add-lang" type="button">
+        + Add language
+      </button>
+    </div>
+    <div class="card table-scroll">
+      <table class="langs">
+        <thead>
+          <tr>
+            <th><button type="button" data-sort="name">Language</button></th>
+            <th class="hide-sm">Maintainer</th>
+            <th><button type="button" data-sort="coverage">Coverage</button>
+            </th>
+            <th class="num">
+              <button type="button" data-sort="missing">Missing</button>
+            </th>
+            <th class="num hide-sm">
+              <button type="button" data-sort="issues">Check</button>
+            </th>
+            <th class="num hide-sm">
+              <button type="button" data-sort="orphans">Obsolete</button>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="lang-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Keys × languages heat map -->
+  <section id="view-matrix" hidden>
+    <div class="toolbar">
+      <div class="legend" id="legend"></div>
+      <span class="grow"></span>
+      <label class="chip">
+        <input type="checkbox" id="mx-gaps"> Only keys with gaps
+      </label>
+      <label class="chip">
+        <input type="checkbox" id="mx-generated"> Show pseudo-locales
+      </label>
+    </div>
+    <div class="card matrix-scroll">
+      <table class="matrix" id="matrix"></table>
+    </div>
+  </section>
+
+  <!-- Single language editor -->
+  <section id="view-edit" hidden>
+    <div class="lang-head">
+      <h2 id="ed-title"></h2>
+      <span id="ed-badges"></span>
+      <span id="ed-cov" class="cov"></span>
+    </div>
+    <div id="ed-note" class="note" hidden></div>
+    <div class="toolbar">
+      <div class="chips" id="ed-filters" role="group"
+          aria-label="Filter by status"></div>
+      <div class="grow">
+        <input type="search" id="ed-search"
+            placeholder="Search keys, English or translations"
+            aria-label="Search keys">
+      </div>
+    </div>
+    <div class="rows" id="ed-rows"></div>
+  </section>
+</main>
+
+<div class="savebar" id="savebar" hidden>
+  <div class="wrap">
+    <span class="msg" id="save-msg"></span>
+    <button class="btn" id="revert" type="button">Revert</button>
+    <button class="btn primary" id="save" type="button">Save</button>
+  </div>
+</div>
+
+<dialog id="add-dialog">
+  <form method="dialog" id="add-form">
+    <h3>Add a language</h3>
+    <label for="add-code">Locale code</label>
+    <input type="text" id="add-code" autocomplete="off" spellcheck="false"
+        placeholder="e.g. eu, gl, pt-AO">
+    <p class="hint" id="add-hint">
+      A BCP-47 code: language, optionally followed by a region or script.
+    </p>
+    <div class="acts">
+      <button class="btn" value="cancel" type="submit"
+          formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok" type="submit"
+          id="add-ok" disabled>Create</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* Configuration                                                      */
+/* ------------------------------------------------------------------ */
+
+// Pseudo-locales generated automatically by Google's internal systems.
+const GENERATED = {
+  'ar-XB': 'Pseudo-locale: right-to-left English',
+  'en-XA': 'Pseudo-locale: accented English',
+};
+
+// Locales synced from Google's internal translation system (see
+// ui/locales/README.md).  Everything else is maintained by the community,
+// including any language added later.
+const GOOGLE = new Set([
+  'ar', 'az', 'be', 'bg', 'br', 'ca', 'cs', 'da', 'de', 'el', 'en', 'en-GB',
+  'es', 'es-419', 'fa', 'fi', 'fil', 'fr', 'hi', 'hr', 'hu', 'id', 'it', 'iw',
+  'ja', 'ko', 'lt', 'lv', 'nl', 'no', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru',
+  'sk', 'sl', 'sr', 'sv', 'th', 'tr', 'uk', 'vi', 'zh', 'zh-HK', 'zh-TW',
+]);
+
+const SPECIAL_NAMES = {
+  'sjn': 'Sindarin',
+  'ar-XB': 'RTL pseudo-locale',
+  'en-XA': 'Accented pseudo-locale',
+};
+
+// Messages that are names, and so usually stay the same in every language.
+const NAMES = new Set(['AIRPLAY']);
+
+const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'iw', 'ps', 'ur', 'yi']);
+
+const LOCALE_RE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
+const GITHUB_LISTING_URL = 'https://api.github.com/repos/' +
+    'shaka-project/shaka-player/contents/ui/locales?ref=main';
+
+const STATUS = {
+  ok: {label: 'Translated', cls: 's-ok'},
+  missing: {label: 'Missing', cls: 's-missing'},
+  issue: {label: 'Placeholders differ from English', cls: 's-issue'},
+  same: {label: 'Identical to English', cls: 's-same'},
+  orphan: {label: 'Obsolete (not in source.json)', cls: 's-orphan'},
+  none: {label: 'Not present', cls: 's-none'},
+};
+
+/* ------------------------------------------------------------------ */
+/* State                                                              */
+/* ------------------------------------------------------------------ */
+
+const state = {
+  // 'server' when build/translations.py can save, otherwise 'static'.
+  mode: 'static',
+  // Message definitions from source.json.
+  source: {},
+  sourceKeys: [],
+  // English reference text per key: the source message without the
+  // ":example" part of each placeholder.
+  english: {},
+  // code -> {original, data, raw, escapeNonAscii, isNew}
+  locales: {},
+  langSort: {by: 'name', dir: 1},
+  edFilter: 'all',
+};
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+const $ = (id) => document.getElementById(id);
+
+/**
+ * Creates an element.  Children may be strings (as text) or nodes.
+ */
+function el(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) {
+      continue;
+    }
+    if (k === 'class') {
+      node.className = v;
+    } else if (k === 'text') {
+      node.textContent = v;
+    } else if (k.startsWith('on')) {
+      node.addEventListener(k.slice(2), v);
+    } else {
+      node.setAttribute(k, v === true ? '' : v);
+    }
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) {
+      continue;
+    }
+    node.append(child instanceof Node ? child : String(child));
+  }
+  return node;
+}
+
+let displayNames = null;
+try {
+  displayNames = new Intl.DisplayNames(['en'], {type: 'language'});
+} catch (e) {
+  // Old browser: show codes only.
+}
+
+function languageName(code) {
+  if (SPECIAL_NAMES[code]) {
+    return SPECIAL_NAMES[code];
+  }
+  if (displayNames) {
+    try {
+      const name = displayNames.of(code);
+      if (name && name !== code) {
+        return name;
+      }
+    } catch (e) {
+      // Invalid tag.
+    }
+  }
+  return code;
+}
+
+function maintainer(code) {
+  if (GENERATED[code]) {
+    return 'generated';
+  }
+  return GOOGLE.has(code) ? 'google' : 'community';
+}
+
+function isEnglish(code) {
+  return code === 'en' || code.startsWith('en-');
+}
+
+function isRtl(code) {
+  return code === 'ar-XB' || RTL_LANGUAGES.has(code.split('-')[0]);
+}
+
+function placeholders(text) {
+  // Also match "[NAME:example]", copied by mistake from source.json, so that
+  // it is reported.  The accented pseudo-locale wraps whole messages in
+  // brackets, which must not match.
+  return (text.match(/\[[A-Z][A-Z0-9_]*(:[^\]\n]*)?\]/g) || []).sort();
+}
+
+function sameList(a, b) {
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+
+let toastTimer = null;
+function toast(message) {
+  const t = $('toast');
+  t.textContent = message;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ------------------------------------------------------------------ */
+/* Status computation                                                 */
+/* ------------------------------------------------------------------ */
+
+/** Returns the status of one key in one locale, plus a reason if any. */
+function cellStatus(code, key) {
+  const data = state.locales[code].data;
+  const value = Object.prototype.hasOwnProperty.call(data, key) ?
+      data[key] : null;
+  if (!(key in state.source)) {
+    return value == null ? {status: 'none'} : {status: 'orphan'};
+  }
+  if (value == null || value.trim() === '') {
+    return {status: 'missing'};
+  }
+  const expected = placeholders(state.english[key]);
+  const actual = placeholders(value);
+  if (!sameList(expected, actual)) {
+    const want = expected.length ? expected.join(' ') : 'none';
+    const got = actual.length ? actual.join(' ') : 'none';
+    return {
+      status: 'issue',
+      reason: `Placeholders should be ${want}, found ${got}.`,
+    };
+  }
+  if (!isEnglish(code) && !NAMES.has(key) &&
+      value === state.english[key]) {
+    return {
+      status: 'same',
+      reason: 'Identical to English.  This is fine if the word is the ' +
+          'same in this language, otherwise it is probably untranslated.',
+    };
+  }
+  return {status: 'ok'};
+}
+
+function orphanKeys(code) {
+  return Object.keys(state.locales[code].data)
+      .filter((k) => !(k in state.source));
+}
+
+function summary(code) {
+  const counts = {ok: 0, missing: 0, issue: 0, same: 0, orphan: 0};
+  for (const key of state.sourceKeys) {
+    counts[cellStatus(code, key).status]++;
+  }
+  counts.orphan = orphanKeys(code).length;
+  const total = state.sourceKeys.length;
+  const translated = total - counts.missing;
+  return {
+    ...counts,
+    total,
+    translated,
+    coverage: total ? translated / total : 1,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Serialization: byte-identical to Python's json.dumps(data,        */
+/* indent=2, sort_keys=True, ensure_ascii=...) + '\n', which is what  */
+/* the "locales" check in build/check.py enforces.                     */
+/* ------------------------------------------------------------------ */
+
+function quote(text, escapeNonAscii) {
+  let out = JSON.stringify(text);
+  if (escapeNonAscii) {
+    out = out.replace(/[\u0080-￿]/g,
+        (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+  }
+  return out;
+}
+
+function serialize(loc) {
+  const keys = Object.keys(loc.data).sort();
+  if (!keys.length) {
+    return '{}\n';
+  }
+  const lines = keys.map((k) =>
+    '  ' + quote(k, loc.escapeNonAscii) + ': ' +
+    quote(loc.data[k], loc.escapeNonAscii));
+  return '{\n' + lines.join(',\n') + '\n}\n';
+}
+
+function isDirty(code) {
+  const loc = state.locales[code];
+  return loc.isNew || serialize(loc) !== loc.raw;
+}
+
+function dirtyLocales() {
+  return Object.keys(state.locales).filter(isDirty);
+}
+
+/* ------------------------------------------------------------------ */
+/* Loading                                                            */
+/* ------------------------------------------------------------------ */
+
+async function fetchText(url) {
+  const response = await fetch(url, {cache: 'no-store'});
+  if (!response.ok) {
+    throw new Error(`${url}: HTTP ${response.status}`);
+  }
+  return response.text();
+}
+
+/** Returns the locale codes, and sets state.mode. */
+async function listLocales() {
+  // 1. Local editor server (build/translations.py).
+  try {
+    const response = await fetch('/api/locales', {cache: 'no-store'});
+    const type = response.headers.get('Content-Type') || '';
+    if (response.ok && type.includes('json')) {
+      state.mode = 'server';
+      return (await response.json()).locales;
+    }
+  } catch (e) {
+    // Not served by the editor server.
+  }
+
+  // 2. A static server with directory listings (python3 -m http.server).
+  try {
+    const html = await fetchText('./');
+    const codes = new Set();
+    for (const match of html.matchAll(/href="([^"/?#]+)\.json"/g)) {
+      codes.add(decodeURIComponent(match[1]));
+    }
+    codes.delete('source');
+    codes.delete('app_manifest');
+    if (codes.size) {
+      return [...codes].filter((c) => LOCALE_RE.test(c)).sort();
+    }
+  } catch (e) {
+    // No directory listing.
+  }
+
+  // 3. GitHub Pages: ask GitHub which files exist on main, then load them
+  //    from this deployment.
+  const listing = JSON.parse(await fetchText(GITHUB_LISTING_URL));
+  return listing
+      .map((f) => f.name)
+      .filter((n) => n.endsWith('.json') && n !== 'source.json')
+      .map((n) => n.slice(0, -5))
+      .filter((c) => LOCALE_RE.test(c))
+      .sort();
+}
+
+async function load() {
+  const sourceText = await fetchText('source.json');
+  state.source = JSON.parse(sourceText);
+  state.sourceKeys = Object.keys(state.source);
+  for (const key of state.sourceKeys) {
+    state.english[key] = state.source[key].message
+        .replace(/\[([A-Z0-9_]+):[^\]]*\]/g, '[$1]');
+  }
+
+  const codes = await listLocales();
+  const results = await Promise.allSettled(
+      codes.map((code) => fetchText(`${code}.json`)));
+  const failed = [];
+  results.forEach((result, i) => {
+    const code = codes[i];
+    if (result.status !== 'fulfilled') {
+      failed.push(code);
+      return;
+    }
+    const raw = result.value;
+    const data = JSON.parse(raw);
+    state.locales[code] = {
+      original: {...data},
+      data,
+      raw,
+      escapeNonAscii: /\\u[0-9a-fA-F]{4}/.test(raw),
+      isNew: false,
+    };
+  });
+
+  // Self-check: saving an untouched file must not change it.
+  for (const code of Object.keys(state.locales)) {
+    if (isDirty(code)) {
+      console.warn(`${code}.json would be reformatted when saved.`);
+    }
+  }
+
+  if (failed.length) {
+    showError(`Could not load: ${failed.map((c) => c + '.json').join(', ')}`);
+  }
+}
+
+function showError(message) {
+  const box = $('error');
+  box.textContent = message;
+  box.hidden = false;
+}
+
+/* ------------------------------------------------------------------ */
+/* Languages view                                                     */
+/* ------------------------------------------------------------------ */
+
+function coverageBar(sum) {
+  const pct = (n) => (100 * n / sum.total) + '%';
+  const ok = sum.ok;
+  return el('span', {class: 'cov'},
+      el('span', {class: 'bar', 'aria-hidden': 'true'},
+          el('span', {class: 's-ok', style: `width:${pct(ok)}`}),
+          el('span', {class: 's-same', style: `width:${pct(sum.same)}`}),
+          el('span', {class: 's-issue', style: `width:${pct(sum.issue)}`})),
+      el('span', {class: 'pct', text: Math.floor(sum.coverage * 100) + '%'}));
+}
+
+function badges(code) {
+  const who = maintainer(code);
+  const label = {google: 'Google', community: 'Community',
+    generated: 'Generated'}[who];
+  const result = [el('span', {class: `badge ${who}`, text: label})];
+  if (isDirty(code)) {
+    result.push(el('span', {class: 'badge dirty',
+      text: state.locales[code].isNew ? 'new, unsaved' : 'unsaved'}));
+  }
+  return result;
+}
+
+function renderStats() {
+  const codes = Object.keys(state.locales);
+  const sums = codes.map(summary);
+  const complete = sums.filter((s) => s.missing === 0).length;
+  const missing = sums.reduce((n, s) => n + s.missing, 0);
+  const avg = sums.length ?
+      sums.reduce((n, s) => n + s.coverage, 0) / sums.length : 0;
+  const stat = (v, l) => el('div', {class: 'stat'},
+      el('div', {class: 'v', text: v}), el('div', {class: 'l', text: l}));
+  $('stats').replaceChildren(
+      stat(codes.length, 'languages'),
+      stat(state.sourceKeys.length, 'messages in source.json'),
+      stat(`${complete} / ${codes.length}`, 'fully translated'),
+      stat(Math.round(avg * 100) + '%', 'average coverage'),
+      stat(missing, 'missing translations'));
+}
+
+function renderLanguages() {
+  renderStats();
+  const query = $('lang-search').value.trim().toLowerCase();
+  const owner = $('lang-owner').value;
+  const rows = Object.keys(state.locales)
+      .map((code) => ({code, name: languageName(code), sum: summary(code)}))
+      .filter((r) => !owner || maintainer(r.code) === owner)
+      .filter((r) => !query || r.code.toLowerCase().includes(query) ||
+          r.name.toLowerCase().includes(query));
+
+  const {by, dir} = state.langSort;
+  const value = {
+    name: (r) => r.name.toLowerCase(),
+    coverage: (r) => r.sum.coverage,
+    missing: (r) => r.sum.missing,
+    issues: (r) => r.sum.issue + r.sum.same,
+    orphans: (r) => r.sum.orphan,
+  }[by];
+  rows.sort((a, b) => {
+    const x = value(a);
+    const y = value(b);
+    return (x < y ? -1 : x > y ? 1 : a.code.localeCompare(b.code)) * dir;
+  });
+
+  document.querySelectorAll('table.langs th button').forEach((b) => {
+    const active = b.dataset.sort === by;
+    b.closest('th').setAttribute('aria-sort',
+        active ? (dir > 0 ? 'ascending' : 'descending') : 'none');
+    b.textContent = b.textContent.replace(/ [▲▼]$/, '') +
+        (active ? (dir > 0 ? ' ▲' : ' ▼') : '');
+  });
+
+  const body = $('lang-rows');
+  if (!rows.length) {
+    body.replaceChildren(el('tr', {},
+        el('td', {colspan: 6, class: 'empty', text: 'No languages match.'})));
+    return;
+  }
+  body.replaceChildren(...rows.map(({code, name, sum}) => el('tr', {
+    tabindex: 0,
+    onclick: () => location.hash = `#/edit/${code}`,
+    onkeydown: (e) => {
+      if (e.key === 'Enter') {
+        location.hash = `#/edit/${code}`;
+      }
+    },
+  },
+  el('td', {},
+      el('span', {class: 'name', text: name}), ' ',
+      el('span', {class: 'code mono', text: code}), ' ',
+      badges(code)[1]),
+  el('td', {class: 'hide-sm'}, badges(code)[0]),
+  el('td', {}, coverageBar(sum)),
+  el('td', {class: 'num', text: sum.missing || '–'}),
+  el('td', {class: 'num hide-sm', text: (sum.issue + sum.same) || '–'}),
+  el('td', {class: 'num hide-sm', text: sum.orphan || '–'}))));
+}
+
+/* ------------------------------------------------------------------ */
+/* Matrix view                                                        */
+/* ------------------------------------------------------------------ */
+
+function renderLegend() {
+  $('legend').replaceChildren(...['ok', 'missing', 'issue', 'same', 'orphan']
+      .map((s) => el('span', {},
+          el('i', {class: `dot ${STATUS[s].cls}`}), STATUS[s].label)));
+}
+
+function renderMatrix() {
+  const showGenerated = $('mx-generated').checked;
+  const onlyGaps = $('mx-gaps').checked;
+  const codes = Object.keys(state.locales).sort()
+      .filter((c) => showGenerated || !GENERATED[c]);
+
+  const allOrphans = new Set();
+  for (const code of codes) {
+    orphanKeys(code).forEach((k) => allOrphans.add(k));
+  }
+  let keys = [...state.sourceKeys, ...[...allOrphans].sort()];
+
+  const statuses = {};
+  for (const key of keys) {
+    statuses[key] = codes.map((code) => cellStatus(code, key));
+  }
+  if (onlyGaps) {
+    keys = keys.filter((k) => statuses[k].some((s) => s.status !== 'ok'));
+  }
+
+  const head = el('tr', {}, el('th', {class: 'corner'}),
+      codes.map((code) => el('th', {scope: 'col'},
+          el('a', {href: `#/edit/${code}`, title: languageName(code),
+            text: code}))));
+
+  const body = keys.map((key) => {
+    const missing = statuses[key].filter((s) => s.status === 'missing').length;
+    return el('tr', {},
+        el('th', {scope: 'row', title: state.source[key] ?
+            state.source[key].description : STATUS.orphan.label},
+        el('span', {class: 'mono', text: key}),
+        missing ? el('span', {class: 'miss', text: `${missing} missing`}) :
+            null),
+        statuses[key].map((s, i) => el('td', {},
+            el('a', {
+              class: STATUS[s.status].cls,
+              href: `#/edit/${codes[i]}/${key}`,
+              title: `${codes[i]} · ${key}: ${STATUS[s.status].label}`,
+              'aria-label': `${codes[i]} ${key}: ${STATUS[s.status].label}`,
+            }))));
+  });
+
+  $('matrix').replaceChildren(el('thead', {}, head), el('tbody', {}, body));
+}
+
+/* ------------------------------------------------------------------ */
+/* Editor view                                                        */
+/* ------------------------------------------------------------------ */
+
+let editing = null;
+
+function editorKeys(code) {
+  return [...state.sourceKeys, ...orphanKeys(code)];
+}
+
+function renderEditor(code, focusKey) {
+  const loc = state.locales[code];
+  if (!loc) {
+    showError(`Unknown language "${code}".`);
+    location.hash = '#/languages';
+    return;
+  }
+  const changedLanguage = editing !== code;
+  editing = code;
+  if (changedLanguage) {
+    $('ed-search').value = '';
+    state.edFilter = 'all';
+  }
+  const who = maintainer(code);
+  const readOnly = who === 'generated';
+  const sum = summary(code);
+
+  $('edit-tab').hidden = false;
+  $('edit-tab').href = `#/edit/${code}`;
+  $('edit-tab').textContent = `Edit: ${languageName(code)}`;
+  $('ed-title').replaceChildren(languageName(code), ' ',
+      el('span', {class: 'code mono', text: code}));
+  $('ed-badges').replaceChildren(...badges(code));
+  $('ed-cov').replaceChildren(coverageBar(sum),
+      el('span', {class: 'code',
+        text: `${sum.translated} of ${sum.total} translated`}));
+
+  const note = $('ed-note');
+  note.hidden = false;
+  note.className = 'note';
+  if (readOnly) {
+    note.textContent = `${GENERATED[code]}.  It is generated automatically ` +
+        'by Google\'s internal systems and cannot be edited here.';
+  } else if (who === 'google') {
+    note.className = 'note warn';
+    note.textContent = 'This translation is maintained by Google\'s ' +
+        'internal translation system.  Edits are welcome, but a Googler ' +
+        'needs to push them back into that system, or they may be ' +
+        'overwritten by the next sync.';
+  } else {
+    note.textContent = 'This translation is maintained by the community.';
+  }
+
+  // Filter chips.
+  const counts = {all: 0, missing: 0, issue: 0, same: 0, orphan: 0, ok: 0};
+  for (const key of editorKeys(code)) {
+    counts.all++;
+    counts[cellStatus(code, key).status]++;
+  }
+  const filters = [
+    ['all', 'All', null],
+    ['missing', 'Missing', 's-missing'],
+    ['issue', 'Placeholders', 's-issue'],
+    ['same', 'Same as English', 's-same'],
+    ['orphan', 'Obsolete', 's-orphan'],
+    ['ok', 'Translated', 's-ok'],
+  ].filter(([id]) => id === 'all' || counts[id]);
+  if (!filters.some(([id]) => id === state.edFilter)) {
+    state.edFilter = 'all';
+  }
+  $('ed-filters').replaceChildren(...filters.map(([id, label, cls]) =>
+    el('button', {
+      type: 'button',
+      class: 'chip',
+      'aria-pressed': String(state.edFilter === id),
+      onclick: () => {
+        state.edFilter = id;
+        renderEditor(code);
+      },
+    }, cls ? el('i', {class: `dot ${cls}`}) : null, label,
+    el('span', {class: 'n', text: counts[id]}))));
+
+  // Rows.
+  const query = $('ed-search').value.trim().toLowerCase();
+  const rows = [];
+  for (const key of editorKeys(code)) {
+    const st = cellStatus(code, key);
+    if (state.edFilter !== 'all' && st.status !== state.edFilter &&
+        key !== focusKey) {
+      continue;
+    }
+    const value = loc.data[key] != null ? loc.data[key] : '';
+    const english = state.english[key];
+    if (query && key !== focusKey &&
+        ![key, english || '', value].some(
+            (s) => s.toLowerCase().includes(query))) {
+      continue;
+    }
+    rows.push(editorRow(code, key, st, readOnly));
+  }
+  $('ed-rows').replaceChildren(...(rows.length ? rows :
+      [el('div', {class: 'card empty', text: 'Nothing to show.'})]));
+
+  if (focusKey) {
+    const row = document.querySelector(
+        `.row[data-key="${CSS.escape(focusKey)}"]`);
+    if (row) {
+      row.scrollIntoView({block: 'center'});
+      row.classList.add('flash');
+      const input = row.querySelector('textarea');
+      if (input && !readOnly) {
+        input.focus({preventScroll: true});
+      }
+    }
+  }
+  updateSaveBar();
+}
+
+function editorRow(code, key, st, readOnly) {
+  const loc = state.locales[code];
+  const def = state.source[key];
+  const original = loc.original[key];
+  const value = loc.data[key] != null ? loc.data[key] : '';
+  const changed = loc.data[key] !== original;
+
+  const textarea = el('textarea', {
+    'rows': 1,
+    'lang': code,
+    'dir': isRtl(code) ? 'rtl' : 'auto',
+    'aria-label': `${key} in ${languageName(code)}`,
+    'placeholder': st.status === 'missing' ? 'Missing translation' : null,
+    'readonly': readOnly,
+    'spellcheck': 'true',
+  });
+  textarea.value = value;
+  textarea.addEventListener('input', () => {
+    // Empty means "remove the key", which makes it fall back to English.
+    if (textarea.value === '') {
+      delete loc.data[key];
+    } else {
+      loc.data[key] = textarea.value;
+    }
+    refreshRow(row, code, key, readOnly);
+    updateSaveBar();
+  });
+  textarea.addEventListener('change', () => renderEditorHeader(code));
+
+  const acts = el('div', {class: 'acts'});
+  const row = el('div', {class: `row st-${st.status}`, 'data-key': key},
+      el('div', {class: 'meta'},
+          el('div', {class: 'key'},
+              el('i', {class: `dot ${STATUS[st.status].cls}`,
+                title: STATUS[st.status].label}),
+              el('code', {text: key})),
+          def ? el('div', {class: 'desc', text: def.description}) :
+              el('div', {class: 'desc',
+                text: 'This key no longer exists in source.json, so the ' +
+                    'player never uses it.  It can be removed.'}),
+          def ? el('div', {class: 'ref'},
+              el('span', {class: 'lbl', text: 'English  '}),
+              el('span', {text: state.english[key]}),
+              def.meaning ?
+                  el('span', {class: 'code', text: ` (${def.meaning})`}) :
+                  null) : null,
+          el('div', {class: 'problem', hidden: !st.reason,
+            text: st.reason || ''})),
+      el('div', {class: 'edit'}, textarea, acts));
+  row._textarea = textarea;
+  row._acts = acts;
+  fillRowActions(row, code, key, readOnly, changed);
+  return row;
+}
+
+function fillRowActions(row, code, key, readOnly, changed) {
+  const loc = state.locales[code];
+  const acts = row._acts;
+  const textarea = row._textarea;
+  const items = [];
+  if (changed) {
+    items.push(el('span', {class: 'changed',
+      text: loc.original[key] == null ? 'Added' :
+          loc.data[key] == null ? 'Removed' : 'Changed'}));
+  }
+  if (!readOnly) {
+    if (key in state.source && loc.data[key] == null) {
+      items.push(el('button', {
+        type: 'button', class: 'btn small',
+        title: 'Start from the English text',
+        onclick: () => {
+          textarea.value = state.english[key];
+          textarea.dispatchEvent(new Event('input'));
+          textarea.focus();
+        },
+      }, 'Copy English'));
+    }
+    if (changed) {
+      items.push(el('button', {
+        type: 'button', class: 'btn small',
+        onclick: () => {
+          textarea.value = loc.original[key] != null ? loc.original[key] : '';
+          textarea.dispatchEvent(new Event('input'));
+        },
+      }, 'Undo'));
+    }
+    if (!(key in state.source) && loc.data[key] != null) {
+      items.push(el('button', {
+        type: 'button', class: 'btn small',
+        onclick: () => {
+          textarea.value = '';
+          textarea.dispatchEvent(new Event('input'));
+        },
+      }, 'Remove'));
+    }
+  }
+  acts.replaceChildren(...items);
+  acts.hidden = !items.length;
+}
+
+function refreshRow(row, code, key, readOnly) {
+  const loc = state.locales[code];
+  const st = cellStatus(code, key);
+  row.className = `row st-${st.status}`;
+  const dot = row.querySelector('.key .dot');
+  dot.className = `dot ${STATUS[st.status].cls}`;
+  dot.title = STATUS[st.status].label;
+  const problem = row.querySelector('.problem');
+  problem.hidden = !st.reason;
+  problem.textContent = st.reason || '';
+  row._textarea.placeholder =
+      st.status === 'missing' ? 'Missing translation' : '';
+  fillRowActions(row, code, key, readOnly,
+      loc.data[key] !== loc.original[key]);
+}
+
+function renderEditorHeader(code) {
+  if (editing !== code) {
+    return;
+  }
+  const sum = summary(code);
+  $('ed-badges').replaceChildren(...badges(code));
+  $('ed-cov').replaceChildren(coverageBar(sum),
+      el('span', {class: 'code',
+        text: `${sum.translated} of ${sum.total} translated`}));
+}
+
+/* ------------------------------------------------------------------ */
+/* Saving                                                             */
+/* ------------------------------------------------------------------ */
+
+function changeCount(code) {
+  const loc = state.locales[code];
+  const keys = new Set([...Object.keys(loc.data),
+    ...Object.keys(loc.original)]);
+  return [...keys].filter((k) => loc.data[k] !== loc.original[k]).length;
+}
+
+function updateSaveBar() {
+  const bar = $('savebar');
+  const onEditor = currentView() === 'edit' && editing;
+  if (!onEditor || !isDirty(editing)) {
+    bar.hidden = true;
+    return;
+  }
+  const loc = state.locales[editing];
+  const n = changeCount(editing);
+  const file = `ui/locales/${editing}.json`;
+  bar.hidden = false;
+  $('save-msg').textContent = loc.isNew && !n ?
+      `New file ${file}` :
+      `${n} unsaved change${n === 1 ? '' : 's'} in ${file}`;
+  $('save').textContent = state.mode === 'server' ?
+      'Save' : `Download ${editing}.json`;
+  $('revert').hidden = loc.isNew;
+}
+
+async function save() {
+  const code = editing;
+  const loc = state.locales[code];
+  const text = serialize(loc);
+
+  if (state.mode !== 'server') {
+    const blob = new Blob([text], {type: 'application/json'});
+    const link = el('a', {href: URL.createObjectURL(blob),
+      download: `${code}.json`});
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    toast(`Downloaded ${code}.json.  Copy it to ui/locales/ to keep it.`);
+    return;
+  }
+
+  $('save').disabled = true;
+  try {
+    const response = await fetch(`/api/locales/${encodeURIComponent(code)}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: text,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+    loc.raw = text;
+    loc.original = {...loc.data};
+    loc.isNew = false;
+    toast(`Saved ui/locales/${code}.json`);
+    renderEditor(code);
+  } catch (e) {
+    toast(`Could not save: ${e.message}`);
+  } finally {
+    $('save').disabled = false;
+  }
+}
+
+function revert() {
+  const loc = state.locales[editing];
+  loc.data = {...loc.original};
+  renderEditor(editing);
+  toast('Changes reverted.');
+}
+
+/* ------------------------------------------------------------------ */
+/* Add language                                                       */
+/* ------------------------------------------------------------------ */
+
+function validateNewCode() {
+  const code = $('add-code').value.trim();
+  const hint = $('add-hint');
+  let error = '';
+  if (!code) {
+    hint.textContent =
+        'A BCP-47 code: language, optionally followed by a region or script.';
+  } else if (!LOCALE_RE.test(code)) {
+    error = 'Use a lowercase language code, optionally followed by ' +
+        'subtags, e.g. "eu" or "pt-AO".';
+  } else if (state.locales[code]) {
+    error = `${languageName(code)} (${code}) already exists.`;
+  } else {
+    const name = languageName(code);
+    hint.textContent = name === code ?
+        `"${code}" is not a language this browser knows; double-check it.` :
+        `Creates ui/locales/${code}.json for ${name}.`;
+  }
+  if (error) {
+    hint.textContent = error;
+  }
+  hint.classList.toggle('err', !!error);
+  $('add-ok').disabled = !code || !!error;
+}
+
+function openAddDialog() {
+  $('add-code').value = '';
+  validateNewCode();
+  $('add-dialog').showModal();
+  $('add-code').focus();
+}
+
+function addLanguage(code) {
+  state.locales[code] = {
+    original: {},
+    data: {},
+    raw: '',
+    escapeNonAscii: false,
+    isNew: true,
+  };
+  toast(state.mode === 'server' ?
+      `Added ${languageName(code)}.  Save to create ${code}.json.` :
+      `Added ${languageName(code)}.  Download the file when done.`);
+  location.hash = `#/edit/${code}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Routing                                                            */
+/* ------------------------------------------------------------------ */
+
+function parseHash() {
+  const parts = location.hash.replace(/^#\/?/, '').split('/')
+      .map(decodeURIComponent);
+  return {view: parts[0] || 'languages', code: parts[1], key: parts[2]};
+}
+
+function currentView() {
+  return parseHash().view;
+}
+
+function route() {
+  let {view, code, key} = parseHash();
+  if (view === 'edit' && !code) {
+    if (editing) {
+      code = editing;
+    } else {
+      view = 'languages';
+    }
+  }
+  if (!['languages', 'matrix', 'edit'].includes(view)) {
+    view = 'languages';
+  }
+  for (const v of ['languages', 'matrix', 'edit']) {
+    $(`view-${v}`).hidden = v !== view;
+  }
+  document.querySelectorAll('nav.tabs a').forEach((a) => {
+    if (a.dataset.view === view) {
+      a.setAttribute('aria-current', 'page');
+    } else {
+      a.removeAttribute('aria-current');
+    }
+  });
+
+  if (view === 'languages') {
+    renderLanguages();
+  } else if (view === 'matrix') {
+    renderMatrix();
+  } else {
+    renderEditor(code, key);
+    if (!key) {
+      window.scrollTo(0, 0);
+    }
+  }
+  updateSaveBar();
+}
+
+/* ------------------------------------------------------------------ */
+/* Startup                                                            */
+/* ------------------------------------------------------------------ */
+
+function bindEvents() {
+  window.addEventListener('hashchange', route);
+  $('lang-search').addEventListener('input', renderLanguages);
+  $('lang-owner').addEventListener('change', renderLanguages);
+  document.querySelectorAll('table.langs th button').forEach((b) => {
+    b.addEventListener('click', () => {
+      const by = b.dataset.sort;
+      state.langSort = {
+        by,
+        dir: state.langSort.by === by ? -state.langSort.dir :
+            (by === 'name' ? 1 : -1),
+      };
+      renderLanguages();
+    });
+  });
+  $('mx-gaps').addEventListener('change', renderMatrix);
+  $('mx-generated').addEventListener('change', renderMatrix);
+
+  let searchTimer = null;
+  $('ed-search').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => renderEditor(editing), 120);
+  });
+
+  $('save').addEventListener('click', save);
+  $('revert').addEventListener('click', revert);
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's' &&
+        currentView() === 'edit' && editing && isDirty(editing)) {
+      e.preventDefault();
+      save();
+    }
+  });
+
+  $('add-lang').addEventListener('click', openAddDialog);
+  $('add-code').addEventListener('input', validateNewCode);
+  $('add-code').addEventListener('keydown', (e) => {
+    // Enter would otherwise trigger the first button, which is "Cancel".
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!$('add-ok').disabled) {
+        $('add-dialog').close('ok');
+      }
+    }
+  });
+  $('add-dialog').addEventListener('close', () => {
+    const code = $('add-code').value.trim();
+    if ($('add-dialog').returnValue === 'ok' && !$('add-ok').disabled) {
+      addLanguage(code);
+    }
+  });
+
+  // Chrome does not repaint a textarea that was drawn before the Tengwar font
+  // finished loading, which leaves Sindarin text as empty boxes.
+  if (document.fonts) {
+    document.fonts.addEventListener('loadingdone', () => {
+      document.querySelectorAll('.row textarea').forEach((t) => {
+        if (t !== document.activeElement) {
+          const value = t.value;
+          t.value = '';
+          t.value = value;
+        }
+      });
+    });
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (dirtyLocales().length) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+}
+
+async function main() {
+  bindEvents();
+  renderLegend();
+  try {
+    await load();
+  } catch (e) {
+    $('mode').textContent = 'Error';
+    showError('Could not load the translations: ' + e.message +
+        (location.protocol === 'file:' ?
+          '.  Browsers block loading files from file:// URLs; run ' +
+          '"python3 build/translations.py" instead.' : ''));
+    return;
+  }
+  const mode = $('mode');
+  if (state.mode === 'server') {
+    mode.textContent = 'Editor: saves to ui/locales/';
+    mode.classList.add('server');
+  } else {
+    mode.textContent = 'Read-only report: edits are downloaded as files';
+  }
+  route();
+}
+
+main();
+</script>
+</body>
+</html>
