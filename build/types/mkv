@@ -1,0 +1,14 @@
+# Matroska (.mkv) playback.  Included only by the experimental build.
+# The subtitles need the SRT parser, which is in optionalText.
+# The transmuxer worker includes the files that convert the media by itself;
+# see transmuxer-worker.
+
++../../lib/mkv/matroska_cluster_parser.js
++../../lib/mkv/matroska_codecs.js
++../../lib/mkv/matroska_constants.js
++../../lib/mkv/matroska_index_parser.js
++../../lib/mkv/matroska_parser.js
++../../lib/text/matroska_text_parser.js
++../../lib/text/ssa_text_parser.js
++../../lib/transmuxer/matroska_transmuxer.js
++../../lib/util/webm_generator.js
