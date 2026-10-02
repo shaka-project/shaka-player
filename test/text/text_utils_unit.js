@@ -89,14 +89,10 @@ describe('TextUtils', () => {
         // eslint-disable-next-line no-restricted-syntax
         'region' in VTTCue.prototype;
 
-    /** @type {!HTMLVideoElement} */
-    let video;
-
     beforeEach(() => {
       if (!window.VTTCue) {
         pending('VTTCue not available');
       }
-      video = shaka.test.UiUtils.createVideoElement();
     });
 
     /**
@@ -118,28 +114,28 @@ describe('TextUtils', () => {
 
     /**
      * @param {!shaka.text.CueRegion} region
-     * @param {TextTrack=} textTrack
+     * @param {Map<string, !VTTRegion>=} nativeRegions
      * @return {!VTTCue}
      */
-    function mapCue(region, textTrack) {
+    function mapCue(region, nativeRegions) {
       const cue = new shaka.text.Cue(10, 20, 'foo');
       cue.region = region;
       return /** @type {!VTTCue} */ (
-        shaka.text.Utils.mapShakaCueToNativeCue(cue, textTrack));
+        shaka.text.Utils.mapShakaCueToNativeCue(cue, nativeRegions));
     }
 
     it('does not set a region where VTTRegion is not supported', () => {
       if (regionsSupported()) {
         pending('VTTRegion is supported');
       }
-      const track = video.addTextTrack('subtitles');
-      expect(mapCue(createVttRegion(), track).region).toBeFalsy();
+      const nativeRegions = new Map();
+      expect(mapCue(createVttRegion(), nativeRegions).region).toBeFalsy();
+      expect(nativeRegions.size).toBe(0);
     });
 
     filterDescribe('with VTTRegion support', regionsSupported, () => {
       it('maps WebVTT regions to VTTRegions', () => {
-        const track = video.addTextTrack('subtitles');
-        const region = mapCue(createVttRegion(), track).region;
+        const region = mapCue(createVttRegion(), new Map()).region;
         expect(region).toEqual(jasmine.any(VTTRegion));
         expect(region.id).toBe('fred');
         expect(region.width).toBe(40);
@@ -151,43 +147,45 @@ describe('TextUtils', () => {
         expect(region.scroll).toBe('up');
       });
 
-      it('shares the VTTRegion of equal regions in a track', () => {
-        const track = video.addTextTrack('subtitles');
-        const otherTrack = video.addTextTrack('subtitles');
+      it('shares the VTTRegion of equal regions', () => {
+        const nativeRegions = new Map();
         // Equal regions, as parsed from different segments.
-        const region1 = mapCue(createVttRegion(), track).region;
-        const region2 = mapCue(createVttRegion(), track).region;
-        const otherRegion = mapCue(createVttRegion(), otherTrack).region;
+        const region1 = mapCue(createVttRegion(), nativeRegions).region;
+        const region2 = mapCue(createVttRegion(), nativeRegions).region;
+        const otherRegion = mapCue(createVttRegion(), new Map()).region;
         const differentRegion = createVttRegion();
         differentRegion.width = 50;
-        const region3 = mapCue(differentRegion, track).region;
+        const region3 = mapCue(differentRegion, nativeRegions).region;
 
         expect(region1).toBeTruthy();
         expect(region2).toBe(region1);
         expect(otherRegion).not.toBe(region1);
         expect(region3).not.toBe(region1);
         expect(region3.width).toBe(50);
+        expect(nativeRegions.size).toBe(2);
       });
 
       it('does not map regions that are not WebVTT regions', () => {
-        const track = video.addTextTrack('subtitles');
+        const nativeRegions = new Map();
 
         // TTML-like region, sized as a percentage.
         const ttmlRegion = createVttRegion();
         ttmlRegion.height = 20;
         ttmlRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
-        expect(mapCue(ttmlRegion, track).region).toBeFalsy();
+        expect(mapCue(ttmlRegion, nativeRegions).region).toBeFalsy();
 
         // CEA-708-like region, sized in lines and columns.
         const ceaRegion = createVttRegion();
         ceaRegion.widthUnits = shaka.text.CueRegion.units.LINES;
-        expect(mapCue(ceaRegion, track).region).toBeFalsy();
+        expect(mapCue(ceaRegion, nativeRegions).region).toBeFalsy();
 
         // Default region of a cue without a region.
-        expect(mapCue(new shaka.text.CueRegion(), track).region).toBeFalsy();
+        expect(mapCue(new shaka.text.CueRegion(), nativeRegions).region)
+            .toBeFalsy();
+        expect(nativeRegions.size).toBe(0);
       });
 
-      it('does not set a region without a text track', () => {
+      it('does not set a region without native regions', () => {
         expect(mapCue(createVttRegion()).region).toBeFalsy();
       });
     });
