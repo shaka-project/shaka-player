@@ -309,8 +309,7 @@ shaka.ui.Overlay = class {
       ],
       bigButtons: [],
       overflowMenuButtons: [
-        'captions',
-        'captions-position',
+        'captions-settings',
         'quality',
         'video_type',
         'language',
@@ -358,8 +357,6 @@ shaka.ui.Overlay = class {
         'errors',
       ],
       contextMenuElements: [
-        'captions-position',
-        'captions-size',
         'loop',
         'picture_in_picture',
         'copy_video_frame',

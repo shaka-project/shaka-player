@@ -188,7 +188,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
 
-    const label = this.localization.resolve(LocIds.CAPTIONS);
+    // Inside a menu group, the group already names the context.
+    const label = this.localization.resolve(
+        this.isInMenuGroup ? LocIds.LANGUAGE : LocIds.CAPTIONS);
     this.button.ariaLabel = label;
     this.nameSpan.textContent = label;
     this.backSpan.textContent = label;

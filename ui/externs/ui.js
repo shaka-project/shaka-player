@@ -782,6 +782,12 @@ shaka.extern.IUIElement = class {
      * @exportInterface
      */
     this.isSubMenuOpened;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isInMenuGroup;
   }
 
   /**
@@ -971,6 +977,42 @@ shaka.extern.IUISettingsMenu = class {
      */
     this.backSpan;
   }
+};
+
+/**
+ * Interface for UI menu groups: a menu button that opens a submenu holding
+ * other UI elements, which may be menu groups too.  UI menu groups should
+ * inherit from the abstract base class shaka.ui.MenuGroup.  The methods
+ * defined here are defined to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUISettingsMenu}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIMenuGroup = class {
+  /**
+   * Returns the localized name of the group, shown on its button and as the
+   * title of its submenu.
+   *
+   * @return {string}
+   */
+  getName() {}
+
+  /**
+   * Returns the names of the elements inside the group, as registered with
+   * shaka.ui.OverflowMenu.registerElement.
+   *
+   * @return {!Array<string>}
+   */
+  getChildElementNames() {}
+
+  /**
+   * Returns the name of the element, among getChildElementNames(), whose
+   * current selection is shown on the group button, or null to show none.
+   *
+   * @return {?string}
+   */
+  getSummaryElementName() {}
 };
 
 /**

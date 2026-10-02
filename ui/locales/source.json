@@ -181,6 +181,10 @@
     "message": "Playback speed",
     "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
   },
+  "POSITION": {
+    "description": "Label for a button used to navigate to a submenu to choose the subtitle position, when it is already inside the subtitle style submenu.",
+    "message": "Position"
+  },
   "QUALITY": {
     "description": "Label for a button used to open a submenu to choose audio quality in the video player.",
     "meaning": "Audio quality",
@@ -215,6 +219,10 @@
     "description": "Label for a button used to seek forward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
     "message": "Seek forward [SECONDS] seconds"
   },
+  "SIZE": {
+    "description": "Label for a button used to navigate to a submenu to choose the subtitle size, when it is already inside the subtitle style submenu.",
+    "message": "Size"
+  },
   "SKIP_AD": {
     "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",
     "message": "Skip Ad"
@@ -235,6 +243,10 @@
     "description": "Label for a button that displays statistics of the video.",
     "message": "Statistics"
   },
+  "STYLE": {
+    "description": "Label for a button used to navigate to a submenu with the subtitle style options, when it is already inside the subtitles submenu.",
+    "message": "Style"
+  },
   "SUBTITLE_FORCED": {
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
@@ -250,6 +262,10 @@
   "SUBTITLE_SIZE": {
     "description": "Label for a button used to indicate a subtitle size.",
     "message": "Subtitle size"
+  },
+  "SUBTITLE_STYLE": {
+    "description": "Label for a button used to navigate to a submenu with the subtitle style options, such as the size and the position.",
+    "message": "Subtitle style"
   },
   "SURROUND": {
     "description": "Label used to identify a audio track that has surround audio.",
