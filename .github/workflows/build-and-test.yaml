@@ -64,6 +64,9 @@ jobs:
             browser: Firefox
             extra_flags: "--use-xvfb --running_in_vm"
           - os: ubuntu-latest
+            browser: Edge
+            extra_flags: "--use-xvfb --running_in_vm"
+          - os: ubuntu-latest
             browser: Opera
             extra_flags: "--use-xvfb --running_in_vm"
 
@@ -133,6 +136,18 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         shell: bash
         run: choco install -y googlechrome --ignore-checksums
+
+      # The Ubuntu CI image ships Edge with every file under /opt/microsoft
+      # made world-writable, which strips the setuid bit from Edge's sandbox
+      # helper.  Since Ubuntu also restricts unprivileged user namespaces,
+      # Edge has no usable sandbox and aborts on startup.  Restore the
+      # ownership and mode the package expects.
+      - name: 'Fix Edge sandbox on Ubuntu'
+        timeout-minutes: 5
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Edge'
+        run: |
+          sudo chown root:root /opt/microsoft/msedge/msedge-sandbox
+          sudo chmod 4755 /opt/microsoft/msedge/msedge-sandbox
 
       - name: 'Install Opera on Ubuntu'
         timeout-minutes: 5
