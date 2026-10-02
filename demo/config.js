@@ -347,8 +347,6 @@ shakaDemo.Config = class {
             'manifest.msf.subscribeFilterType',
             msfFilterTypeOptions,
             msfFilterTypeOptionNames)
-        .addBoolInput_('Use FETCH to retrieve the catalog',
-            'manifest.msf.useFetchCatalog')
         .addSelectInput_('MoQ version used in the connection',
             'manifest.msf.version',
             msfVersionOptions,

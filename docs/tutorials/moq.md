@@ -84,9 +84,14 @@ When `player.load()` is called with `'application/msf'`, Shaka:
 3. Either subscribes to the **catalog** track in a known namespace (if
    `manifest.msf.namespaces` is configured), or waits for a
    `PUBLISH_NAMESPACE` announcement from the server to discover the namespace
-   dynamically.
+   dynamically. As MSF requires, the subscription also retrieves the current
+   Group of the catalog track from its first Object (a Joining FETCH in
+   draft-18, `FILL_PARAMETERS` in draft-20 and later), so the latest complete
+   catalog is received even when the server does not publish it again.
 4. Parses the catalog (a JSON document) to discover all available audio,
-   video, and text tracks.
+   video, and text tracks. The catalog is rebuilt from its independent
+   version and any delta updates that follow it, and the version it declares
+   is checked.
 5. Subscribes to each track's MoQT data stream, feeding segments into Shaka's
    regular media pipeline.
 6. Subscribes to the catalog's **media timeline** and **event timeline**
@@ -96,6 +101,11 @@ When `player.load()` is called with `'application/msf'`, Shaka:
 
 > **Note:** Only **live** content is supported. VOD content (where `isLive`
 > is false in the catalog) is not supported and will throw an error.
+
+> **Note:** Catalog updates are not applied yet. The catalog subscription
+> stays open and every update is tracked, but the tracks Shaka plays are the
+> ones in the first complete catalog it receives; later changes are only
+> logged.
 
 By default a presentation has no DVR window: the seek range is a few seconds
 around the live edge, because nothing in the catalog says where to subscribe
@@ -365,7 +375,7 @@ player.configure({
 });
 ```
 
-When `namespaces` is set, Shaka immediately subscribes (or fetches) the
+When `namespaces` is set, Shaka immediately subscribes to the
 catalog in that namespace. When left empty (`[]`), Shaka instead listens for
 a `PUBLISH_NAMESPACE` announcement from the server and uses the advertised
 namespace automatically. Use the explicit form when you know the namespace
@@ -406,26 +416,6 @@ player.configure({
   }
 });
 ```
-
-### `useFetchCatalog` (boolean, default: `false`)
-
-When `true`, Shaka retrieves the catalog using a **FETCH** (one-shot
-retrieval) instead of an ongoing `SUBSCRIBE`. Use this when the catalog is
-static and does not update over the lifetime of the session.
-
-```js
-player.configure({
-  manifest: {
-    msf: {
-      useFetchCatalog: true,
-    }
-  }
-});
-```
-
-When `false` (the default), Shaka subscribes to the catalog track. Either way,
-only the first catalog received is used: catalog updates are not supported
-yet.
 
 ### `version` (MsfVersion, default: `AUTO`)
 
@@ -519,7 +509,6 @@ player.configure({
       fingerprintUri: '',           // Set for self-signed cert servers
       namespaces: ['live', 'ch1'], // Known namespace; leave [] to auto-discover
       authorizationToken: '',       // Bearer token if required by server
-      useFetchCatalog: false,       // true = one-shot FETCH, false = SUBSCRIBE
       version: shaka.config.MsfVersion.AUTO, // Version negotiation strategy
       subscribeFilterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
       catalogPreprocessor: (catalog) => {}, // Modifies the catalog in place

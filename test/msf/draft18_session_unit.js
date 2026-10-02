@@ -43,6 +43,13 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     return {writable, readable};
   }
 
+  /** @type {!WebTransport} */
+  let webTransport;
+  /** @type {!shaka.extern.MsfDialect} */
+  let dialect;
+  /** @type {!shaka.msf.draft18.Codec} */
+  let codec;
+
   beforeEach(() => {
     written = [];
     requestStream = {aborted: false, cancelled: false};
@@ -51,7 +58,7 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     // or the listen loop spins.
     const never = () => new Promise(() => {});
 
-    const webTransport = /** @type {!WebTransport} */ (/** @type {?} */ ({
+    const fakeWebTransport = /** @type {?} */ ({
       incomingUnidirectionalStreams: {getReader: () => ({read: never})},
       createBidirectionalStream: () =>
         Promise.resolve(fakeBidirectionalStream()),
@@ -59,15 +66,24 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       // must stay pending for the length of a test.
       closed: never(),
       close: () => {},
-    }));
+    });
+    webTransport = /** @type {!WebTransport} */ (fakeWebTransport);
 
-    const codec = new shaka.msf.draft18.Codec();
-    const dialect = /** @type {!shaka.extern.MsfDialect} */ (/** @type {?} */ ({
+    codec = new shaka.msf.draft18.Codec();
+    dialect = /** @type {!shaka.extern.MsfDialect} */ (/** @type {?} */ ({
       getCodec: () => codec,
       getName: () => shaka.config.MsfVersion.DRAFT_18,
     }));
 
-    session = new shaka.msf.draft18.Session(
+    session = createSession(() => new shaka.msf.draft18.MessageWriter(codec));
+  });
+
+  /**
+   * @param {function():!shaka.msf.draft18.MessageWriter} writerFactory
+   * @return {!shaka.msf.draft18.Session}
+   */
+  function createSession(writerFactory) {
+    return new shaka.msf.draft18.Session(
         webTransport,
         /** @type {!shaka.msf.Writer} */ (/** @type {?} */ ({
           write: () => Promise.resolve(),
@@ -75,8 +91,70 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         dialect,
         /** @type {!shaka.extern.MsfManifestConfiguration} */ (
           /** @type {?} */ ({})),
-        () => new shaka.msf.draft18.MessageWriter(codec));
-  });
+        writerFactory);
+  }
+
+  /**
+   * Encodes var ints in the draft-18 encoding. A nested array is copied as
+   * raw bytes, which is how Publisher Priority is written.
+   *
+   * @param {...(number|!Array<number>)} values
+   * @return {!Array<number>}
+   */
+  function bytesOf(...values) {
+    const writer = new shaka.util.DataViewWriter(
+        64, shaka.util.DataViewWriter.Endianness.BIG_ENDIAN);
+    for (const value of values) {
+      if (Array.isArray(value)) {
+        writer.writeBytes(new Uint8Array(value));
+      } else {
+        codec.encodeVarInt(writer, BigInt(value));
+      }
+    }
+    return Array.from(writer.getBytes());
+  }
+
+  /**
+   * A fetch data stream, read past its stream type as handleIncomingStream_
+   * would have.
+   *
+   * @param {!Array<number>} bytes The FETCH_HEADER's Request ID onwards.
+   * @return {!shaka.msf.Reader}
+   */
+  function fetchStreamOf(bytes) {
+    const stream = new ReadableStream({
+      start: (controller) => {
+        controller.enqueue(new Uint8Array(bytes));
+        controller.close();
+      },
+    });
+    return new shaka.msf.Reader(
+        new Uint8Array([]), stream, new shaka.msf.draft18.Codec());
+  }
+
+  /**
+   * @param {!shaka.msf.Reader} reader
+   * @return {!Promise}
+   * @suppress {visibility}
+   */
+  function readFetchStream(reader) {
+    return session.handleFetchStream_(reader);
+  }
+
+  /**
+   * A FETCH_OK with no Parameters and no Track Properties.
+   *
+   * @return {!Uint8Array}
+   */
+  function fetchOk() {
+    return new Uint8Array([
+      0x18, // FETCH_OK
+      0x00, 0x04, // Length
+      0x00, // End Of Track
+      0x00, 0x00, // End Location
+      0x00, // Parameter count
+    ]);
+  }
 
   afterEach(() => {
     session.release();
@@ -281,11 +359,10 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     function fetchStream() {
       const bytes = new Uint8Array([
         0x00, // Request ID
+        0x1c, // Serialization Flags: Group and Object ID, Priority
         0x00, // Group ID
-        0x00, // Subgroup ID
         0x00, // Object ID
         0x80, // Publisher Priority
-        0x00, // Properties Length
         0x02, 0x7b, 0x7d, // Payload
       ]);
       const stream = new ReadableStream({
@@ -443,6 +520,193 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       await handled;
 
       expect(received.length).toBe(0);
+    });
+  });
+
+  describe('fetch streams', () => {
+    /**
+     * @return {!Promise<!Array<!shaka.extern.MsfObject>>}
+     */
+    async function acceptedFetch() {
+      /** @type {!Array<!shaka.extern.MsfObject>} */
+      const received = [];
+      const fetched = session.fetch(
+          NAMESPACE, TRACK, (obj) => received.push(obj));
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(fetchOk());
+      await fetched;
+      return received;
+    }
+
+    /**
+     * @param {!Array<!shaka.extern.MsfObject>} objects
+     * @return {!Array<string>}
+     */
+    function locationsOf(objects) {
+      return objects.map((obj) => `${obj.location.group}/` +
+          `${obj.location.subgroup}/${obj.location.object}`);
+    }
+
+    it('reads the fields the Serialization Flags say are present',
+        async () => {
+          const received = await acceptedFetch();
+          await readFetchStream(fetchStreamOf(bytesOf(
+              0, // Request ID
+              // Group 3, Object 0, with a Priority.
+              0x1c, 3, 0, [0x80], 1, [0xa0],
+              // Everything left out: the next Object in the same Group.
+              0x00, 1, [0xa1],
+              // An Object ID Delta within a Group is added as it is.
+              0x04, 2, 1, [0xa2],
+              // A Group ID Delta is one less than the gap, and the Object ID
+              // then starts afresh; the Subgroup ID is spelled out.
+              0x0f, 1, 7, 4, 1, [0xa3],
+              // The prior Object's Subgroup ID.
+              0x01, 1, [0xa4],
+              // An End of Non-Existent Range moves the Location on.
+              0x8c, 5, 9,
+              0x00, 1, [0xa5],
+              // Properties.
+              0x20, 2, [0x78, 0x01], 1, [0xa6])));
+
+          expect(locationsOf(received)).toEqual([
+            '3/0/0', '3/0/1', '3/0/3', '5/7/4', '5/7/5', '5/0/10', '5/0/11',
+          ]);
+          expect(received.map((obj) => obj.data[0])).toEqual(
+              [0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6]);
+          expect(received[6].extensions).toEqual(new Uint8Array([0x78, 0x01]));
+          expect(received[0].extensions).toBeNull();
+        });
+
+    it('refuses a first Object that does not spell out its Location',
+        async () => {
+          const received = await acceptedFetch();
+          await expectAsync(readFetchStream(fetchStreamOf(bytesOf(
+              0, 0x00, 1, [0xa0])))).toBeRejected();
+          expect(received.length).toBe(0);
+        });
+  });
+
+  describe('joining the current group', () => {
+    /** @type {!Array<!shaka.extern.MsfObject>} */
+    let received;
+
+    beforeEach(() => {
+      received = [];
+    });
+
+    /**
+     * @return {!Promise<bigint>}
+     */
+    async function subscribeJoining() {
+      const subscribed = session.subscribe(
+          NAMESPACE, TRACK, (obj) => received.push(obj),
+          /* startLocation= */ null, /* joinCurrentGroup= */ true);
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk());
+      const alias = await subscribed;
+      await shaka.test.Util.shortDelay();
+      return alias;
+    }
+
+    /**
+     * One Object at the given Location on a fetch stream answering the given
+     * request.
+     *
+     * @param {number} requestId
+     * @param {number} group
+     * @param {number} object
+     * @return {!shaka.msf.Reader}
+     */
+    function oneObjectFor(requestId, group, object) {
+      return fetchStreamOf(
+          bytesOf(requestId, 0x1c, group, object, [0x80], 2, [0x7b, 0x7d]));
+    }
+
+    it('sends a Relative Joining FETCH for the current group', async () => {
+      await subscribeJoining();
+
+      expect(written.length).toBe(2);
+      expect(Array.from(written[1])).toEqual([
+        0x16, // FETCH
+        0x00, 0x05, // Length
+        0x02, // Request ID
+        0x02, // Fetch Type = Relative Joining
+        0x00, // Joining Request ID, the SUBSCRIBE's
+        0x00, // Joining Start: the current Group
+        0x00, // Parameter count
+      ]);
+    });
+
+    it('delivers the fetched Objects to the subscription', async () => {
+      await subscribeJoining();
+      responses.enqueue(fetchOk());
+      await shaka.test.Util.shortDelay();
+
+      await readFetchStream(oneObjectFor(2, 5, 0));
+
+      expect(received.length).toBe(1);
+      expect(received[0].location.group).toBe(BigInt(5));
+      expect(received[0].location.object).toBe(BigInt(0));
+    });
+
+    it('withdraws the Joining FETCH with the subscription', async () => {
+      const alias = await subscribeJoining();
+      responses.enqueue(fetchOk());
+      await shaka.test.Util.shortDelay();
+
+      await session.unsubscribe(alias);
+      await readFetchStream(oneObjectFor(2, 5, 0));
+
+      expect(received.length).toBe(0);
+    });
+
+    it('keeps the subscription when the Joining FETCH fails', async () => {
+      // A track with nothing published yet has no current Group to fetch.
+      const alias = await subscribeJoining();
+      responses.enqueue(new Uint8Array([
+        0x05, // REQUEST_ERROR
+        0x00, 0x03, // Length
+        0x03, // Error Code
+        0x00, // Retry Interval
+        0x00, // Empty Reason
+      ]));
+      await shaka.test.Util.shortDelay();
+
+      expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(false);
+    });
+
+    describe('in draft-20', () => {
+      beforeEach(() => {
+        session.release();
+        session = createSession(
+            () => new shaka.msf.draft20.MessageWriter(codec));
+      });
+
+      it('asks for it with FILL_PARAMETERS instead of a FETCH', async () => {
+        await subscribeJoining();
+
+        const payload = subscribePayload();
+        const params = payload.subarray(
+            1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+        expect(Array.from(params)).toEqual([
+          0x03, // Parameter count
+          0x10, 0x01, // FORWARD = 1
+          0x10, 0x00, // delta 0x10 -> SUBSCRIBER_PRIORITY = 0
+          0x03, 0x04, // delta 0x03 -> FILL_PARAMETERS, 4 bytes:
+          0x01, // Parameter count
+          0x21, 0x01, 0x01, // LOCATION_FILTER, StartGroup = 1
+        ]);
+      });
+
+      it('delivers the fill fetch stream to the subscription', async () => {
+        // Its FETCH_HEADER carries the SUBSCRIBE's own Request ID.
+        await subscribeJoining();
+        await readFetchStream(oneObjectFor(0, 5, 0));
+
+        expect(received.length).toBe(1);
+        expect(received[0].location.group).toBe(BigInt(5));
+      });
     });
   });
 });
