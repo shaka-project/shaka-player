@@ -56,8 +56,18 @@ shaka.ui.Utils = class {
     if (!menu) {
       return;
     }
-    const chosenItem = shaka.ui.Utils.getDescendantIfExists(
-        menu, 'shaka-chosen-item');
+    // Skip the items of hidden nested submenus, e.g. those inside a
+    // shaka.ui.MenuGroup.
+    const isShownInMenu = (element) => {
+      for (let e = element; e && e != menu; e = e.parentElement) {
+        if (e.classList.contains('shaka-hidden')) {
+          return false;
+        }
+      }
+      return true;
+    };
+    const chosenItem = Array.from(
+        menu.getElementsByClassName('shaka-chosen-item')).find(isShownInMenu);
     // The selected class may be on the button itself or on its label.
     const button = chosenItem ? chosenItem.closest('button') :
         menu.querySelector('.shaka-back-to-overflow-button');

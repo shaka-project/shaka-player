@@ -48,8 +48,11 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
 
   /** @override */
   checkAvailability() {
+    // The style can be set before the text is enabled, so it is available as
+    // soon as there is any text track.  The preview shows an example
+    // subtitle even while the text is hidden.
     const tracks = this.player.getTextTracks() || [];
-    const hasTrack = tracks.some((track) => track.active);
+    const hasTrack = tracks.length > 0;
     const available = hasTrack && !this.isSubMenuOpened &&
         this.controls.getConfig().captionsStyles;
     shaka.ui.Utils.setDisplay(this.button, available);

@@ -88,6 +88,11 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a menu group with the captions-size and
+  captions-position buttons. The group is visible only if one of them is.
+* captions-settings: adds a menu group with the captions and captions-style
+  elements. The group is visible only if one of them is, and shows the current
+  text track.
 * skip_next: adds a button to skip to next element in the queue. The button
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
@@ -138,6 +143,11 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a menu group with the captions-size and
+  captions-position buttons. The group is visible only if one of them is.
+* captions-settings: adds a menu group with the captions and captions-style
+  elements. The group is visible only if one of them is, and shows the current
+  text track.
 * queue: adds a button that opens a menu listing all items in the playback queue.
   Each item displays its title and, if available, a poster thumbnail. The currently
   playing item is highlighted with a checkmark. The button is visible only if there
@@ -379,6 +389,58 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 ```
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
+
+#### Grouping elements in a submenu
+The overflow menu fills up quickly.  Elements can be grouped in a submenu with
+a menu group, like `captions-settings` and `captions-style` do.  A menu group is
+a button that opens a submenu holding other elements registered with
+{@linksource shaka.ui.OverflowMenu}, which may be menu groups too.  The group is
+only shown while at least one of its elements is shown, and keeps the keyboard
+focus inside each level of the menu.
+
+To create one, extend {@linksource shaka.ui.MenuGroup} and register it like any
+other element:
+
+```js
+myapp.PlaybackGroup = class extends shaka.ui.MenuGroup {
+  constructor(parent, controls) {
+    // The icon of the group.
+    super(parent, controls, 'M320-200v-560l440 280-440 280Z');
+  }
+
+  // The name shown on the group button and as the title of its submenu.
+  getName() {
+    return 'Playback';
+  }
+
+  // The elements inside the group, in order.
+  getChildElementNames() {
+    return ['playback_rate', 'loop'];
+  }
+
+  // Optional: the element whose current selection is shown on the group
+  // button.  By default, none is shown.
+  getSummaryElementName() {
+    return 'playback_rate';
+  }
+};
+
+myapp.PlaybackGroup.Factory = class {
+  create(rootElement, controls) {
+    return new myapp.PlaybackGroup(rootElement, controls);
+  }
+};
+
+shaka.ui.OverflowMenu.registerElement(
+    'playback_group', new myapp.PlaybackGroup.Factory());
+
+uiConfig['overflowMenuButtons'] = ['captions-settings', 'playback_group'];
+```
+
+Elements can check `this.isInMenuGroup` to use a shorter label, since the
+group already names the context: inside `captions-settings`, the `captions`
+element is labeled "Language" instead of "Captions".
+
 
 #### Customizing the UI with CSS variables
 

@@ -752,6 +752,28 @@ describe('UITextDisplayer', () => {
     expect(videoContainer.querySelector('.shaka-text-container')).toBe(null);
   });
 
+  it('shows example text over a hidden cue while visibility is off',
+      async () => {
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+        config.suspendRenderingWhenHidden = false;
+
+        textDisplayer.configure(config);
+        textDisplayer.append([new shaka.text.Cue(0, 100, 'Real subtitle')]);
+        await updateCaptions();
+
+        textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+        const textContainer =
+            videoContainer.querySelector('.shaka-text-container');
+        expect(textContainer.textContent).toBe('Subtitles example');
+
+        textDisplayer.clearTextStylePreview();
+
+        expect(videoContainer.querySelector('.shaka-text-container'))
+            .toBe(null);
+      });
+
   it('replaces example text during repeated preview updates', () => {
     const config =
         shaka.util.PlayerConfiguration.createDefault().textDisplayer;

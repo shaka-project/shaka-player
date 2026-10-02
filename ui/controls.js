@@ -62,6 +62,10 @@ goog.requireType('shaka.cast.CastReceiver');
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuopen'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 
@@ -72,6 +76,10 @@ goog.requireType('shaka.cast.CastReceiver');
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuclose'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 
@@ -363,6 +371,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    /**
+     * Places the text containers as soon as the text displayer adds them,
+     * e.g. when the text style preview is shown while the text is disabled.
+     * Otherwise they would slide up from the bottom of the video.
+     *
+     * @private {MutationObserver}
+     */
+    this.textContainerObserver_ = new MutationObserver((mutations) => {
+      const isTextContainer = (node) => node instanceof HTMLElement &&
+          (node.classList.contains('shaka-text-container') ||
+           node.classList.contains('shaka-speech-to-text-container'));
+      const added = mutations.some(
+          (mutation) => Array.from(mutation.addedNodes).some(isTextContainer));
+      if (added) {
+        this.computeShakaTextContainerSize_(/* animate= */ false);
+      }
+    });
+    this.textContainerObserver_.observe(
+        this.videoContainer_, {childList: true});
+
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
 
@@ -492,6 +520,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.textStylePreview_?.release();
     this.textStylePreview_ = null;
+
+    this.textContainerObserver_?.disconnect();
+    this.textContainerObserver_ = null;
 
     this.eventManager_?.release();
     this.eventManager_ = null;
@@ -2120,9 +2151,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {boolean=} animate Whether the text containers move with their
+   *   CSS transition.
    * @private
    */
-  computeShakaTextContainerSize_() {
+  computeShakaTextContainerSize_(animate = true) {
     const elements = [];
     const shakaTextContainer = this.videoContainer_.getElementsByClassName(
         'shaka-text-container')[0];
@@ -2141,7 +2174,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         bottom = this.bottomControls_.clientHeight + 'px';
       }
       for (const element of elements) {
-        element.style.bottom = bottom;
+        if (animate) {
+          element.style.bottom = bottom;
+        } else {
+          element.style.transition = 'none';
+          element.style.bottom = bottom;
+          // Apply the position before the transition comes back.
+          element.getBoundingClientRect();
+          element.style.transition = '';
+        }
       }
     }
   }
@@ -3196,6 +3237,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuopen'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 
