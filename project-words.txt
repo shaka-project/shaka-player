@@ -628,10 +628,14 @@ SEEKTABLE
 servernum
 SGAI
 Shoutcast
+Sindarin
 sintel
 stardate
+subtags
 systeminfo
 templatized
+Telcontar
+Tengwar
 TRACKNUMBER
 UNLCK
 vaage
