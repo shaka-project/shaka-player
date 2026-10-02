@@ -71,7 +71,9 @@ shaka.ui.TextSize = class extends shaka.ui.TextStyleMenu {
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
 
-    const label = this.localization.resolve(LocIds.SUBTITLE_SIZE);
+    // Inside a menu group, the group already names the context.
+    const label = this.localization.resolve(
+        this.isInMenuGroup ? LocIds.SIZE : LocIds.SUBTITLE_SIZE);
     this.button.ariaLabel = label;
     this.nameSpan.textContent = label;
     this.backSpan.textContent = label;

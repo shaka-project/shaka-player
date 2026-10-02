@@ -1522,6 +1522,40 @@ describe('UI', () => {
         expect(clearPreviewSpy).toHaveBeenCalledTimes(1);
       });
 
+      it('places a newly added text container without a transition',
+          async () => {
+            const config = {
+              controlPanelElements: [
+                'captions-size',
+              ],
+              customContextMenu: false,
+            };
+            const ui = await UiUtils.createUIThroughAPI(
+                videoContainer, video, config);
+            controls = ui.getControls();
+            controls.showUI();
+            const bottomControls = UiUtils.getElementByClassName(
+                videoContainer, 'shaka-bottom-controls');
+            expect(bottomControls.clientHeight).toBeGreaterThan(0);
+
+            // The text displayer adds its container when the preview is
+            // shown while the text is disabled.
+            const textContainer = /** @type {!HTMLElement} */ (
+              document.createElement('div'));
+            textContainer.classList.add('shaka-text-container');
+            videoContainer.appendChild(textContainer);
+            await Util.shortDelay();
+
+            expect(textContainer.style.bottom)
+                .toBe(bottomControls.clientHeight + 'px');
+            expect(getComputedStyle(textContainer).bottom)
+                .toBe(bottomControls.clientHeight + 'px');
+            if (textContainer.getAnimations) {
+              expect(textContainer.getAnimations().length).toBe(0);
+            }
+            textContainer.remove();
+          });
+
       it('hides the preview when the UI is reconfigured', async () => {
         const config = {
           controlPanelElements: [
