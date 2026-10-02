@@ -2051,6 +2051,72 @@ describe('Player', () => {
           goog.asserts.assert(videoTrack, 'video track must exist');
           expect(videoTrack.language).toBe('sgn-US');
         });
+
+    // https://github.com/shaka-project/shaka-player/issues/10578
+    it('lists videos offered only with another rendition of the audio',
+        async () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(40, (variant) => {
+              variant.language = 'et';
+              variant.addAudio(1, (stream) => {
+                stream.originalId = 'a64';
+                stream.channelsCount = 1;
+              });
+              variant.addVideo(2, (stream) => {
+                stream.originalId = 'v360';
+                stream.size(640, 360);
+              });
+            });
+            manifest.addVariant(41, (variant) => {
+              variant.language = 'et';
+              variant.addAudio(3, (stream) => {
+                stream.originalId = 'a128';
+                // Channels and container are only known once loaded.
+                stream.channelsCount = null;
+                stream.mimeType = 'video/mp2t';
+              });
+              variant.addVideo(4, (stream) => {
+                stream.originalId = 'v1080';
+                stream.size(1920, 1080);
+              });
+            });
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          const videoTracks = player.getVideoTracks();
+          const heights = videoTracks.map((t) => t.height);
+          expect(heights.sort((a, b) => a - b)).toEqual([360, 1080]);
+          expect(videoTracks.filter((t) => t.active).length).toBe(1);
+        });
+
+    it('does not list videos offered only with another audio language',
+        async () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(50, (variant) => {
+              variant.language = 'en';
+              variant.addAudio(1, (stream) => {
+                stream.originalId = 'a-en';
+              });
+              variant.addVideo(2, (stream) => {
+                stream.originalId = 'v360';
+                stream.size(640, 360);
+              });
+            });
+            manifest.addVariant(51, (variant) => {
+              variant.language = 'es';
+              variant.addAudio(3, (stream) => {
+                stream.originalId = 'a-es';
+              });
+              variant.addVideo(4, (stream) => {
+                stream.originalId = 'v1080';
+                stream.size(1920, 1080);
+              });
+            });
+          });
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          expect(player.getVideoTracks().length).toBe(1);
+        });
   });
 
   describe('tracks', () => {
