@@ -95,9 +95,9 @@ jobs:
           - os: windows-latest
             browser: Edge
             extra_flags: "--html-coverage-report --uncompiled --running_in_vm"
-          # Disabled until working properly
-          # - os: windows-latest
-          #   browser: Opera
+          - os: windows-latest
+            browser: Opera
+            extra_flags: "--running_in_vm"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
