@@ -186,7 +186,7 @@ describe('ManifestConverter', () => {
       expect(manifest.variants[1].video).toBe(null);
     });
 
-    it('supports containerless content', () => {
+    it('ignores the legacy sequenceMode field', () => {
       /** @type {shaka.extern.ManifestDB} */
       const manifestDb = {
         originalManifestUri: 'http://example.com/foo',
@@ -205,7 +205,7 @@ describe('ManifestConverter', () => {
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
-      expect(manifest.sequenceMode).toBe(true);
+      expect(Object.keys(manifest)).not.toContain('sequenceMode');
       expect(manifest.variants.length).toBe(1);
     });
 

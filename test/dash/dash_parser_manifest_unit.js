@@ -169,7 +169,6 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.sequenceMode = true;
           manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.addPartialVariant((variant) => {
@@ -256,7 +255,6 @@ describe('DashParser Manifest', () => {
           '</MPD>',
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.sequenceMode = false;
           manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.addPartialVariant((variant) => {

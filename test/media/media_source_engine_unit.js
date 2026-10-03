@@ -400,7 +400,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/mp4');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/mp4');
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
@@ -412,7 +412,7 @@ describe('MediaSourceEngine', () => {
 
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, stream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       const audioCodec = shaka.util.MimeUtils.getCorrectAudioCodecs(
           'opus', stream.mimeType);
@@ -435,7 +435,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
           'audio/mp4; extra_audio_param');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith(
@@ -453,7 +453,7 @@ describe('MediaSourceEngine', () => {
 
           mockMediaSource.readyState = 'closed';
           await expectAsync(
-              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+              mediaSourceEngine.init(initObject)).not.toBeRejected();
         });
 
     it('creates SourceBuffers when MediaSource readyState is ended',
@@ -466,13 +466,13 @@ describe('MediaSourceEngine', () => {
 
           mockMediaSource.readyState = 'ended';
           await expectAsync(
-              mediaSourceEngine.init(initObject, false)).not.toBeRejected();
+              mediaSourceEngine.init(initObject)).not.toBeRejected();
         });
 
     it('creates TextEngines for text types', async () => {
       const initObject = new Map();
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.text.TextEngine).toHaveBeenCalled();
     });
@@ -483,7 +483,7 @@ describe('MediaSourceEngine', () => {
 
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       expect(proxySpy).toHaveBeenCalled();
     });
 
@@ -497,7 +497,7 @@ describe('MediaSourceEngine', () => {
 
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       expect(proxySpy).toHaveBeenCalledOnceWith(
           mockTransmuxer, 'https://example.com/worker.js');
     });
@@ -508,7 +508,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('returns correct timestamps for one range', () => {
@@ -552,7 +552,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('returns the amount of data ahead of the given position', () => {
@@ -614,7 +614,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('should apply fake encryption by default', async () => {
@@ -949,7 +949,7 @@ describe('MediaSourceEngine', () => {
       mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
 
       const init = async () => {
-        await mediaSourceEngine.init(initObject, false);
+        await mediaSourceEngine.init(initObject);
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, fakeStream,
             /* hasClosedCaptions= */ false);
@@ -975,7 +975,7 @@ describe('MediaSourceEngine', () => {
         return ['foo', 'bar'];
       });
 
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       // Initialize the closed caption parser.
       const appendInit = mediaSourceEngine.appendBuffer(
@@ -1011,7 +1011,7 @@ describe('MediaSourceEngine', () => {
         return ['foo', 'bar'];
       });
 
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       // Initialize the closed caption parser.
       let appendInit = mediaSourceEngine.appendBuffer(
@@ -1056,12 +1056,11 @@ describe('MediaSourceEngine', () => {
           .toHaveBeenCalledWith(buffer, true, 1);
     });
 
-    it('sets timestampOffset on adaptations in sequence mode', async () => {
+    it('preserves timestampOffset on adaptations', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      videoSourceBuffer.mode = 'sequence';
 
-      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+      await mediaSourceEngine.init(initObject);
 
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
@@ -1076,7 +1075,7 @@ describe('MediaSourceEngine', () => {
       videoSourceBuffer.updateend();
       await appendVideo;
 
-      expect(videoSourceBuffer.timestampOffset).toBe(0.50);
+      expect(videoSourceBuffer.timestampOffset).toBe(0);
     });
 
     // Regression test for the interaction between the legacy Edge rounding
@@ -1093,7 +1092,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+      await mediaSourceEngine.init(initObject,
           shaka.media.ManifestParser.HLS);
 
       // Media timestamps that start far from zero, as in an MPEG-TS stream
@@ -1146,7 +1145,7 @@ describe('MediaSourceEngine', () => {
 
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+      await mediaSourceEngine.init(initObject,
           shaka.media.ManifestParser.HLS);
 
       const mediaStart = 92703.440178;
@@ -1228,7 +1227,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('removes the given data', async () => {
@@ -1394,7 +1393,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('clears the given data', async () => {
@@ -1449,7 +1448,7 @@ describe('MediaSourceEngine', () => {
           /* timestampOffset= */ 10,
           /* appendWindowStart= */ 0,
           /* appendWindowEnd= */ 20,
-          /* sequenceMode= */ false,
+          /* ignoreTimestampOffset= */ false,
           fakeStream.mimeType,
           fakeStream.codecs,
           /* streamsByType= */ new Map());
@@ -1465,7 +1464,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('ends the MediaSource stream with the given reason', async () => {
@@ -1556,7 +1555,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('sets the given duration', async () => {
@@ -1698,20 +1697,20 @@ describe('MediaSourceEngine', () => {
     }
 
     it('should re-create a new MediaSource', async () => {
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       await resetMSE(initObject);
       expect(createMediaSourceSpy).toHaveBeenCalled();
     });
 
     it('should re-create the audio & video source buffers', async () => {
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
       mockMediaSource.addSourceBuffer.calls.reset();
       await resetMSE(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve autoplay and paused state', async () => {
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       mockVideo.autoplay = true;
       mockVideo.paused = true;
@@ -1738,7 +1737,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('should not clear autoplay if playback has not begun', async () => {
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       mockVideo.autoplay = true;
 
@@ -1755,7 +1754,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('should preserve playing state', async () => {
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
 
       mockVideo.autoplay = false;
       mockVideo.paused = false;
@@ -1789,7 +1788,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
-      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.init(initObject);
     });
 
     it('waits for all operations to complete', async () => {

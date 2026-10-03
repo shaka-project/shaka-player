@@ -182,6 +182,17 @@ application:
     - `airplay` button has been removed; use the `remote` button instead
 
 
+## v5.3
+
+  - Sequence mode has been removed. Playback always uses segments mode.
+    The `manifest.dash.sequenceMode` and `manifest.hls.sequenceMode`
+    configuration options are still accepted, but have no effect and produce
+    a deprecation warning. Remove these options from your configuration before
+    upgrading to v6.0, when they will be removed.
+  - Previously downloaded content remains supported. The legacy `sequenceMode`
+    field in stored manifests is ignored during playback.
+
+
 ## v6.0
 
   - Configuration changes:

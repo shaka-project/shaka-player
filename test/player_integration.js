@@ -533,15 +533,9 @@ describe('Player', () => {
       expect(numberOfRatechangeEvents).toBe(5);
     });
 
-    it('in sequence mode', async () => {
-      if (!deviceDetected.supportsSequenceMode()) {
-        pending('Sequence mode is not supported by the platform.');
-      }
-      // sequenceMode is no longer enabled by default, so opt in explicitly
-      // to exercise this code path regardless of the default.
+    it('with the legacy sequenceMode configuration', async () => {
       player.configure('manifest.hls.sequenceMode', true);
-      await player.load('test:sintel_sequence_compiled');
-      expect(player.getManifest().sequenceMode).toBe(true);
+      await player.load('test:sintel_compiled');
 
       // Ensure the video plays.
       await video.play();
