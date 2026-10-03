@@ -3420,4 +3420,188 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue));
     });
   });
+
+  describe('interstitial URI scheme', () => {
+    /**
+     * @param {string} uri
+     * @param {string} mimeType
+     * @return {!shaka.extern.AdInterstitial}
+     */
+    function overlayInterstitialWithUri(uri, mimeType) {
+      return {
+        id: null,
+        groupId: null,
+        startTime: 0,
+        endTime: null,
+        uri: uri,
+        mimeType: mimeType,
+        isSkippable: false,
+        skipOffset: null,
+        skipFor: null,
+        canJump: false,
+        resumeOffset: null,
+        playoutLimit: null,
+        once: true,
+        pre: true,
+        post: false,
+        timelineRange: false,
+        loop: false,
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 0,
+            y: 0,
+          },
+          size: {
+            x: 1920,
+            y: 1080,
+          },
+        },
+        displayOnBackground: false,
+        currentVideo: null,
+        background: null,
+        clickThroughUrl: null,
+        tracking: null,
+      };
+    }
+
+    /**
+     * Starts an overlay interstitial with the given URI and MIME type.
+     *
+     * @param {string} uri
+     * @param {string} mimeType
+     */
+    async function startAd(uri, mimeType) {
+      await interstitialAdManager.addInterstitials(
+          [overlayInterstitialWithUri(uri, mimeType)]);
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+    }
+
+    it('renders http(s) interstitial URIs into an iframe', async () => {
+      await startAd('https://example.com/ad.html', 'text/html');
+
+      const element = /** @type {HTMLIFrameElement} */(
+        adContainer.querySelector('iframe'));
+      expect(element).not.toBeNull();
+      expect(element.src).toBe('https://example.com/ad.html');
+    });
+
+    it('renders data: interstitial URIs into an iframe', async () => {
+      // VAST HTMLResource creatives are converted into data: URIs, which
+      // render in an opaque origin, so they must keep working.
+      await startAd('data:text/html,<p>ad</p>', 'text/html');
+
+      const element = /** @type {HTMLIFrameElement} */(
+        adContainer.querySelector('iframe'));
+      expect(element).not.toBeNull();
+    });
+
+    it('renders data: image interstitial URIs into an img', async () => {
+      // A valid 1x1 PNG: an invalid image would fire onerror, which removes
+      // the element before the assertion runs.
+      await startAd(
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJ' +
+              'AAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+          'image/png');
+
+      const element = /** @type {HTMLImageElement} */(
+        adContainer.querySelector('img'));
+      expect(element).not.toBeNull();
+    });
+
+    it('does not render javascript: interstitial URIs', async () => {
+      // A javascript: URI assigned to an unsandboxed iframe src executes in
+      // the publisher's origin.
+      // eslint-disable-next-line no-script-url
+      await startAd('javascript:alert(1)', 'text/html');
+
+      expect(adContainer.querySelector('iframe')).toBeNull();
+      expect(onEventSpy).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-started'}));
+      expect(onEventSpy).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-break-ended'}));
+    });
+
+    it('drops a rejected repeatable interstitial without affecting others',
+        async () => {
+          // once:false entries must not disturb the sequence when dropped.
+          const rejected = overlayInterstitialWithUri(
+              // eslint-disable-next-line no-script-url
+              'javascript:alert(1)', 'text/html');
+          rejected.once = false;
+          const accepted = overlayInterstitialWithUri(
+              'https://example.com/ad.html', 'text/html');
+          accepted.id = 'accepted';
+          await interstitialAdManager.addInterstitials([rejected, accepted]);
+
+          video.play();
+          video.dispatchEvent(new Event('timeupdate'));
+
+          await shaka.test.Util.shortDelay();
+
+          const element = /** @type {HTMLIFrameElement} */(
+            adContainer.querySelector('iframe'));
+          expect(element).not.toBeNull();
+          expect(element.src).toBe('https://example.com/ad.html');
+        });
+
+    it('handles a long run of rejected interstitials without recursion',
+        async () => {
+          // A manifest may repeat many unsafe interstitials; rejecting them
+          // must not recurse or break the sequence.
+          const interstitials = [];
+          for (let i = 0; i < 3000; i++) {
+            const rejected = overlayInterstitialWithUri(
+                // eslint-disable-next-line no-script-url
+                'javascript:alert(1)', 'text/html');
+            rejected.id = 'rejected-' + i;
+            interstitials.push(rejected);
+          }
+          const accepted = overlayInterstitialWithUri(
+              'https://example.com/ad.html', 'text/html');
+          accepted.id = 'accepted';
+          interstitials.push(accepted);
+
+          await interstitialAdManager.addInterstitials(interstitials);
+
+          video.play();
+          video.dispatchEvent(new Event('timeupdate'));
+
+          await shaka.test.Util.shortDelay();
+
+          const element = /** @type {HTMLIFrameElement} */(
+            adContainer.querySelector('iframe'));
+          expect(element).not.toBeNull();
+          expect(element.src).toBe('https://example.com/ad.html');
+        });
+
+    it('skips to the next interstitial after a rejected one', async () => {
+      const rejected = overlayInterstitialWithUri(
+          // eslint-disable-next-line no-script-url
+          'javascript:alert(1)', 'text/html');
+      const accepted = overlayInterstitialWithUri(
+          'https://example.com/ad.html', 'text/html');
+      accepted.id = 'accepted';
+      await interstitialAdManager.addInterstitials([rejected, accepted]);
+
+      video.play();
+      video.dispatchEvent(new Event('timeupdate'));
+
+      await shaka.test.Util.shortDelay();
+
+      const element = /** @type {HTMLIFrameElement} */(
+        adContainer.querySelector('iframe'));
+      expect(element).not.toBeNull();
+      expect(element.src).toBe('https://example.com/ad.html');
+      expect(onEventSpy).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'ad-break-ended'}));
+    });
+  });
 });
