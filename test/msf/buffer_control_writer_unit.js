@@ -62,7 +62,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         subscriberPriority: 1,
         groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
         forward: true,
-        filterType: shaka.config.MsfFilterType.NONE,
+        filterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
         params: [],
       };
       writer.marshalSubscribe(msg);
@@ -76,8 +76,35 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         0x04, // param count
         0x10, 0x01, // type 0x10 FORWARD = 1
         0x10, 0x01, // delta 0x10 -> type 0x20 SUBSCRIBER_PRIORITY = 1
-        0x01, 0x01, 0x00, // delta 1 -> type 0x21 FILTER, len 1, NONE
+        0x01, 0x01, 0x02, // delta 1 -> type 0x21 FILTER, len 1, LARGEST_OBJECT
         0x01, 0x01, // delta 1 -> type 0x22 GROUP_ORDER = ASCENDING
+      ]);
+    });
+
+    it('should omit the defaults that have no legal value', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE,
+        requestId: BigInt(1),
+        namespace: ['ns1', 'ns2'],
+        name: 'track1',
+        subscriberPriority: 1,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        forward: true,
+        filterType: shaka.config.MsfFilterType.NONE,
+        params: [],
+      };
+      writer.marshalSubscribe(msg);
+
+      // Neither 0 is a legal GROUP_ORDER value nor a legal Filter Type in
+      // draft-16; leaving the parameters out is what asks for the publisher's
+      // order and for an unfiltered subscription.
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE, [
+        0x01, // requestId
+        0x02, 0x03, 0x6e, 0x73, 0x31, 0x03, 0x6e, 0x73, 0x32, // ['ns1','ns2']
+        0x06, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x31, // 'track1'
+        0x02, // param count
+        0x10, 0x01, // type 0x10 FORWARD = 1
+        0x10, 0x01, // delta 0x10 -> type 0x20 SUBSCRIBER_PRIORITY = 1
       ]);
     });
 
@@ -110,7 +137,17 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalSubscribeOk(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      // Draft-16 SUBSCRIBE_OK is Request ID, Track Alias, parameters and
+      // Track Extensions; the old fixed fields are all in the latter two.
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_OK, [
+        0x01, // requestId
+        0x02, // trackAlias
+        0x02, // param count
+        0x08, 0x40, 0x64, // type 0x08 EXPIRES = 100
+        0x01, 0x02, 0x01, 0x02, // delta 1 -> type 0x09 LARGEST_OBJECT {1, 2}
+        0x22, 0x01, // extension 0x22 DEFAULT_PUBLISHER_GROUP_ORDER = ASCENDING
+      ]);
     });
 
     it('should throw if largest is missing when contentExists is true', () => {
@@ -195,7 +232,49 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalFetch(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      // Draft-16 has no fixed priority or group order fields in FETCH; both
+      // are parameters.
+      expectMessage(shaka.msf.Utils.MessageTypeId.FETCH, [
+        0x01, // requestId
+        0x01, // fetchType STANDALONE
+        0x02, 0x03, 0x6e, 0x73, 0x31, 0x03, 0x6e, 0x73, 0x32, // ['ns1','ns2']
+        0x09, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x4e, 0x61, 0x6d, 0x65,
+        0x0a, 0x0a, // start location {10, 10}
+        0x0a, 0x0a, // end location {10, 10}
+        0x02, // param count
+        0x20, 0x01, // type 0x20 SUBSCRIBER_PRIORITY = 1
+        0x02, 0x01, // delta 2 -> type 0x22 GROUP_ORDER = ASCENDING
+      ]);
+    });
+
+    it('should omit GROUP_ORDER to ask for the default order', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.FETCH,
+        requestId: BigInt(1),
+        subscriberPriority: 0,
+        groupOrder: shaka.msf.Utils.GroupOrder.PUBLISHER,
+        fetchType: shaka.msf.Utils.FetchType.STANDALONE,
+        namespace: ['ns'],
+        trackName: 't',
+        startGroup: BigInt(0),
+        startObject: BigInt(0),
+        endGroup: BigInt(0),
+        endObject: BigInt(0),
+        params: [],
+      };
+      writer.marshalFetch(msg);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.FETCH, [
+        0x01, // requestId
+        0x01, // fetchType STANDALONE
+        0x01, 0x02, 0x6e, 0x73, // ['ns']
+        0x01, 0x74, // 't'
+        0x00, 0x00, // start location {0, 0}
+        0x00, 0x00, // end location {0, 0}
+        0x01, // param count
+        0x20, 0x00, // type 0x20 SUBSCRIBER_PRIORITY = 0
+      ]);
     });
   });
 
@@ -204,14 +283,20 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.FETCH_OK,
         requestId: BigInt(1),
-        groupOrder: shaka.msf.Utils.GroupOrder.ASCENDING,
+        groupOrder: undefined,
         endOfTrack: 1,
         endGroup: BigInt(10),
         endObject: BigInt(10),
         params: [],
       };
       writer.marshalFetchOk(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.FETCH_OK, [
+        0x01, // requestId
+        0x01, // endOfTrack
+        0x0a, 0x0a, // end location {10, 10}
+        0x00, // param count
+      ]);
     });
   });
 
@@ -297,10 +382,15 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     it('should marshal an PublishNamespaceDone message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_DONE,
-        namespace: ['ns'],
+        requestId: BigInt(6),
+        namespace: undefined,
       };
       writer.marshalPublishNamespaceDone(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      // Draft-16 names the PUBLISH_NAMESPACE by its Request ID.
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH_NAMESPACE_DONE, [
+        0x06, // requestId
+      ]);
     });
   });
 
@@ -411,7 +501,8 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     it('should marshal a valid SubscribeUpdate message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
-        requestId: BigInt(1),
+        requestId: BigInt(4),
+        subscriptionRequestId: BigInt(2),
         startLocation: {group: BigInt(10), object: BigInt(20)},
         endGroup: BigInt(30),
         subscriberPriority: 2,
@@ -419,8 +510,60 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalSubscribeUpdate(msg);
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBeGreaterThan(0);
+
+      // Draft-16 REQUEST_UPDATE: Request ID, Existing Request ID, params.
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_UPDATE, [
+        0x04, // requestId
+        0x02, // existing requestId
+        0x03, // param count
+        0x10, 0x01, // type 0x10 FORWARD = 1
+        0x10, 0x02, // delta 0x10 -> type 0x20 SUBSCRIBER_PRIORITY = 2
+        // delta 1 -> type 0x21 FILTER, len 4, AbsoluteRange from {10, 20}
+        // to group 29: endGroup is draft-14's last group plus 1.
+        0x01, 0x04, 0x04, 0x0a, 0x14, 0x1d,
+      ]);
+    });
+
+    it('should leave out what does not change', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+        requestId: BigInt(4),
+        subscriptionRequestId: BigInt(2),
+        startLocation: undefined,
+        endGroup: undefined,
+        subscriberPriority: undefined,
+        forward: false,
+        params: [],
+      };
+      writer.marshalSubscribeUpdate(msg);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_UPDATE, [
+        0x04, // requestId
+        0x02, // existing requestId
+        0x01, // param count
+        0x10, 0x00, // type 0x10 FORWARD = 0
+      ]);
+    });
+
+    it('should send an open ended update as AbsoluteStart', () => {
+      const msg = {
+        kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
+        requestId: BigInt(4),
+        subscriptionRequestId: BigInt(2),
+        startLocation: {group: BigInt(10), object: BigInt(0)},
+        endGroup: BigInt(0),
+        subscriberPriority: undefined,
+        forward: undefined,
+        params: [],
+      };
+      writer.marshalSubscribeUpdate(msg);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_UPDATE, [
+        0x04, // requestId
+        0x02, // existing requestId
+        0x01, // param count
+        0x21, 0x03, 0x03, 0x0a, 0x00, // FILTER, len 3, AbsoluteStart {10, 0}
+      ]);
     });
   });
 
@@ -439,8 +582,17 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalPublish(msg);
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH, [
+        0x01, // requestId
+        0x01, 0x03, 0x6e, 0x73, 0x31, // ['ns1']
+        0x06, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x31, // 'track1'
+        0x02, // trackAlias
+        0x02, // param count
+        0x09, 0x02, 0x0a, 0x14, // type 0x09 LARGEST_OBJECT {10, 20}
+        0x07, 0x01, // delta 7 -> type 0x10 FORWARD = 1
+        0x22, 0x01, // extension 0x22 DEFAULT_PUBLISHER_GROUP_ORDER = ASCENDING
+      ]);
     });
 
     it('should marshal a Publish with contentExists false', () => {
@@ -457,8 +609,16 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalPublish(msg);
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH, [
+        0x01, // requestId
+        0x01, 0x03, 0x6e, 0x73, 0x31, // ['ns1']
+        0x06, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x31, // 'track1'
+        0x02, // trackAlias
+        0x01, // param count
+        0x10, 0x00, // type 0x10 FORWARD = 0
+        0x22, 0x01, // extension 0x22 DEFAULT_PUBLISHER_GROUP_ORDER = ASCENDING
+      ]);
     });
   });
 
@@ -475,8 +635,17 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         params: [],
       };
       writer.marshalPublishOk(msg);
-      const bytes = writer.getBytes();
-      expect(bytes.length).toBeGreaterThan(0);
+
+      // Draft-16 PUBLISH_OK is just a Request ID and parameters.
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH_OK, [
+        0x01, // requestId
+        0x04, // param count
+        0x10, 0x01, // type 0x10 FORWARD = 1
+        0x10, 0x01, // delta 0x10 -> type 0x20 SUBSCRIBER_PRIORITY = 1
+        // delta 1 -> type 0x21 FILTER, len 3, AbsoluteStart from {5, 6}
+        0x01, 0x03, 0x03, 0x05, 0x06,
+        0x01, 0x01, // delta 1 -> type 0x22 GROUP_ORDER = ASCENDING
+      ]);
     });
 
     it('should marshal with ABSOLUTE_RANGE filter', () => {
@@ -606,12 +775,18 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
     it('should marshal a PublishNamespaceCancel message', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.PUBLISH_NAMESPACE_CANCEL,
-        namespace: ['ns1'],
-        code: BigInt(404),
-        reason: 'Cancelled',
+        requestId: BigInt(6),
+        namespace: undefined,
+        code: BigInt(2),
+        reason: 'x',
       };
       writer.marshalPublishNamespaceCancel(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH_NAMESPACE_CANCEL, [
+        0x06, // requestId
+        0x02, // code
+        0x01, 0x78, // reason 'x'
+      ]);
     });
   });
 
@@ -621,39 +796,104 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE,
         requestId: BigInt(1),
         namespace: ['ns1'],
+        subscribeOptions: 1,
         params: [],
       };
       writer.marshalSubscribeNamespace(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.SUBSCRIBE_NAMESPACE, [
+        0x01, // requestId
+        0x01, 0x03, 0x6e, 0x73, 0x31, // ['ns1']
+        0x01, // subscribe options: NAMESPACE
+        0x00, // param count
+      ]);
     });
 
-    it('should marshal SubscribeNamespaceOk', () => {
+    it('should marshal SubscribeNamespaceOk as REQUEST_OK', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_OK,
         requestId: BigInt(1),
       };
       writer.marshalSubscribeNamespaceOk(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.REQUEST_OK, [
+        0x01, // requestId
+        0x00, // param count
+      ]);
     });
 
-    it('should marshal SubscribeNamespaceError', () => {
+    it('should marshal SubscribeNamespaceError as REQUEST_ERROR', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_NAMESPACE_ERROR,
         requestId: BigInt(1),
-        code: BigInt(500),
-        reason: 'Error',
+        code: BigInt(3),
+        reason: 'x',
       };
       writer.marshalSubscribeNamespaceError(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.REQUEST_ERROR, [
+        0x01, // requestId
+        0x03, // code
+        0x00, // retryInterval
+        0x01, 0x78, // reason 'x'
+      ]);
     });
 
-    it('should marshal UnsubscribeNamespace', () => {
+    it('should refuse UnsubscribeNamespace', () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.UNSUBSCRIBE_NAMESPACE,
         namespace: ['ns1'],
       };
-      writer.marshalUnsubscribeNamespace(msg);
-      expect(writer.getBytes().length).toBeGreaterThan(0);
+      // Draft-16 ends a namespace subscription by closing its stream.
+      expect(() => writer.marshalUnsubscribeNamespace(msg)).toThrow();
+    });
+
+    it('should marshal every error as REQUEST_ERROR', () => {
+      const errorOf = (kind) => ({
+        kind,
+        requestId: BigInt(2),
+        code: BigInt(3),
+        retryInterval: BigInt(4),
+        reason: 'x',
+      });
+      const expected = [
+        0x02, // requestId
+        0x03, // code
+        0x04, // retryInterval
+        0x01, 0x78, // reason 'x'
+      ];
+      const MessageType = shaka.msf.Utils.MessageType;
+
+      writer.marshalFetchError(
+          errorOf(MessageType.FETCH_ERROR));
+      expectMessage(shaka.msf.Utils.MessageTypeId.REQUEST_ERROR, expected);
+
+      writer.reset();
+      writer.marshalPublishError(
+          errorOf(MessageType.PUBLISH_ERROR));
+      expectMessage(shaka.msf.Utils.MessageTypeId.REQUEST_ERROR, expected);
+
+      writer.reset();
+      writer.marshalPublishNamespaceError(
+          errorOf(MessageType.PUBLISH_NAMESPACE_ERROR));
+      expectMessage(shaka.msf.Utils.MessageTypeId.REQUEST_ERROR, expected);
+    });
+
+    it('should marshal PublishDone in the draft-16 field order', () => {
+      writer.marshalPublishDone({
+        kind: shaka.msf.Utils.MessageType.PUBLISH_DONE,
+        requestId: BigInt(2),
+        code: BigInt(2),
+        streamCount: 5,
+        reason: 'x',
+      });
+
+      expectMessage(shaka.msf.Utils.MessageTypeId.PUBLISH_DONE, [
+        0x02, // requestId
+        0x02, // status code
+        0x05, // stream count
+        0x01, 0x78, // reason 'x'
+      ]);
     });
   });
 
@@ -719,6 +959,7 @@ filterDescribe('shaka.msf.BufferControlWriter', isMSFSupported, () => {
       const msg = {
         kind: shaka.msf.Utils.MessageType.SUBSCRIBE_UPDATE,
         requestId: BigInt(1),
+        subscriptionRequestId: BigInt(0),
         startLocation: {group: BigInt(1), object: BigInt(2)},
         endGroup: BigInt(5),
         subscriberPriority: 1,
