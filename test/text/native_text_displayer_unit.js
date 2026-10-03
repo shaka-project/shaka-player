@@ -258,6 +258,41 @@ describe('NativeTextDisplayer', () => {
     });
   });
 
+  describe('regions', () => {
+    const regionsSupported = () => !!originalVTTCue && !!window.VTTRegion &&
+        // eslint-disable-next-line no-restricted-syntax
+        'region' in originalVTTCue.prototype;
+
+    filterDescribe('with VTTRegion support', regionsSupported, () => {
+      beforeEach(() => {
+        window.VTTCue = originalVTTCue;
+      });
+
+      it('shares the VTTRegion of a region across appends', () => {
+        /**
+         * @param {number} startTime
+         * @return {!shaka.text.Cue}
+         */
+        const createCue = (startTime) => {
+          const cue = new shaka.text.Cue(startTime, startTime + 1, 'Test');
+          // An equal region for each cue, as parsed from different segments.
+          cue.region.id = 'fred';
+          cue.region.height = 3;
+          cue.region.heightUnits = shaka.text.CueRegion.units.LINES;
+          return cue;
+        };
+
+        displayer.append([createCue(0)]);
+        displayer.append([createCue(1)]);
+
+        const cues = mockTrack.addCue.calls.allArgs().map((args) => args[0]);
+        expect(cues.length).toBe(2);
+        expect(cues[0].region).toEqual(jasmine.any(VTTRegion));
+        expect(cues[1].region).toBe(cues[0].region);
+      });
+    });
+  });
+
   describe('remove', () => {
     it('removes cues which overlap the range', () => {
       const cue1 = new shaka.text.Cue(0, 1, 'Test');
