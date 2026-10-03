@@ -23,17 +23,13 @@
     "description": "Label for a button used to select an audio track which contains audio description.",
     "message": "Audio description"
   },
+  "AUTOPLAY": {
+    "description": "The text content of a name label for the autoplay button.  When autoplay is enabled, the next item in the playback queue starts playing automatically when the current one ends.",
+    "message": "Autoplay"
+  },
   "AUTO_GENERATED": {
     "description": "Label for a button used to select an auto generated text track.",
     "message": "Auto generated"
-  },
-  "MACHINE_GENERATED": {
-    "description": "Suffix appended to a track's language name to indicate it was programmatically generated (e.g. 'English Generated').",
-    "message": "Generated"
-  },
-  "MACHINE_TRANSLATED": {
-    "description": "Suffix appended to a track's language name to indicate it was programmatically translated (e.g. 'Spanish Translated').",
-    "message": "Translated"
   },
   "AUTO_QUALITY": {
     "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically.",
@@ -93,9 +89,17 @@
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Default"
   },
+  "DISABLE_AUTOPLAY": {
+    "description": "Label for a button that turns off autoplay, so that the next item in the playback queue no longer starts playing automatically when the current one ends.",
+    "message": "Stop playing the next item automatically"
+  },
   "DOWNLOAD_VIDEO_FRAME": {
     "description": "Label for a button used to download the current video frame.",
     "message": "Save video frame"
+  },
+  "ENABLE_AUTOPLAY": {
+    "description": "Label for a button that turns on autoplay, so that the next item in the playback queue starts playing automatically when the current one ends.",
+    "message": "Play the next item automatically"
   },
   "ENTER_LOOP_MODE": {
     "description": "Label for a button that controls the loop mode of a video player. This mode will loop (play over and over) currently selected video.",
@@ -137,6 +141,14 @@
     "description": "The text content of a name label for the loop button.",
     "message": "Loop"
   },
+  "MACHINE_GENERATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically generated (e.g. 'English Generated').",
+    "message": "Generated"
+  },
+  "MACHINE_TRANSLATED": {
+    "description": "Suffix appended to a track's language name to indicate it was programmatically translated (e.g. 'Spanish Translated').",
+    "message": "Translated"
+  },
   "MORE_SETTINGS": {
     "description": "Label for a button used to open a menu with additional settings in the video player.",
     "message": "More settings"
@@ -173,18 +185,26 @@
     "description": "Label for a button used to control the Picture-in-Picture mode of a video player.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications.",
     "message": "Picture-in-Picture"
   },
+  "PIP_WINDOW_ACTIVE": {
+    "description": "Text shown in the video player's original location while the video is playing in a separate Picture-in-Picture window.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications.",
+    "message": "Playing in picture-in-picture mode"
+  },
   "PLAY": {
     "description": "Label for a button used to play or unpause video in a video player.",
     "message": "Play"
   },
   "PLAYBACK_RATE": {
-    "message": "Playback speed",
-    "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
+    "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player.",
+    "message": "Playback speed"
   },
   "QUALITY": {
     "description": "Label for a button used to open a submenu to choose audio quality in the video player.",
     "meaning": "Audio quality",
     "message": "Quality"
+  },
+  "QUEUE": {
+    "description": "Label for a button used to open a submenu that shows the list of items queued for playback.",
+    "message": "Queue"
   },
   "RECENTER_VR": {
     "description": "Label for a button used to recenter the VR view.",
@@ -219,10 +239,6 @@
     "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",
     "message": "Skip Ad"
   },
-  "SKIP_TO_LIVE": {
-    "description": "Label for a button used to skip ahead to the live broadcast.",
-    "message": "Skip ahead to live"
-  },
   "SKIP_NEXT": {
     "description": "Label for a button used to skip next.",
     "message": "Next"
@@ -231,17 +247,21 @@
     "description": "Label for a button used to skip previous.",
     "message": "Previous"
   },
+  "SKIP_TO_LIVE": {
+    "description": "Label for a button used to skip ahead to the live broadcast.",
+    "message": "Skip ahead to live"
+  },
   "STATISTICS": {
     "description": "Label for a button that displays statistics of the video.",
     "message": "Statistics"
   },
-  "SUBTITLE_FORCED": {
-    "description": "Label used to identify a subtitle track that is forced to be shown.",
-    "message": "Forced"
-  },
   "SUBTITLES_EXAMPLE": {
     "description": "Example subtitle text shown while previewing subtitle style settings when no subtitle is currently visible.",
     "message": "Subtitles example"
+  },
+  "SUBTITLE_FORCED": {
+    "description": "Label used to identify a subtitle track that is forced to be shown.",
+    "message": "Forced"
   },
   "SUBTITLE_POSITION": {
     "description": "Label for a button used to indicate a subtitle position.",

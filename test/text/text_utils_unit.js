@@ -84,6 +84,113 @@ describe('TextUtils', () => {
     });
   });
 
+  describe('mapShakaCueToNativeCue regions', () => {
+    const regionsSupported = () => !!window.VTTCue && !!window.VTTRegion &&
+        // eslint-disable-next-line no-restricted-syntax
+        'region' in VTTCue.prototype;
+
+    beforeEach(() => {
+      if (!window.VTTCue) {
+        pending('VTTCue not available');
+      }
+    });
+
+    /**
+     * @return {!shaka.text.CueRegion}
+     */
+    function createVttRegion() {
+      const region = new shaka.text.CueRegion();
+      region.id = 'fred';
+      region.width = 40;
+      region.height = 2;
+      region.heightUnits = shaka.text.CueRegion.units.LINES;
+      region.regionAnchorX = 0;
+      region.regionAnchorY = 100;
+      region.viewportAnchorX = 10;
+      region.viewportAnchorY = 90;
+      region.scroll = shaka.text.CueRegion.scrollMode.UP;
+      return region;
+    }
+
+    /**
+     * @param {!shaka.text.CueRegion} region
+     * @param {Map<string, !VTTRegion>=} nativeRegions
+     * @return {!VTTCue}
+     */
+    function mapCue(region, nativeRegions) {
+      const cue = new shaka.text.Cue(10, 20, 'foo');
+      cue.region = region;
+      return /** @type {!VTTCue} */ (
+        shaka.text.Utils.mapShakaCueToNativeCue(cue, nativeRegions));
+    }
+
+    it('does not set a region where VTTRegion is not supported', () => {
+      if (regionsSupported()) {
+        pending('VTTRegion is supported');
+      }
+      const nativeRegions = new Map();
+      expect(mapCue(createVttRegion(), nativeRegions).region).toBeFalsy();
+      expect(nativeRegions.size).toBe(0);
+    });
+
+    filterDescribe('with VTTRegion support', regionsSupported, () => {
+      it('maps WebVTT regions to VTTRegions', () => {
+        const region = mapCue(createVttRegion(), new Map()).region;
+        expect(region).toEqual(jasmine.any(VTTRegion));
+        expect(region.id).toBe('fred');
+        expect(region.width).toBe(40);
+        expect(region.lines).toBe(2);
+        expect(region.regionAnchorX).toBe(0);
+        expect(region.regionAnchorY).toBe(100);
+        expect(region.viewportAnchorX).toBe(10);
+        expect(region.viewportAnchorY).toBe(90);
+        expect(region.scroll).toBe('up');
+      });
+
+      it('shares the VTTRegion of equal regions', () => {
+        const nativeRegions = new Map();
+        // Equal regions, as parsed from different segments.
+        const region1 = mapCue(createVttRegion(), nativeRegions).region;
+        const region2 = mapCue(createVttRegion(), nativeRegions).region;
+        const otherRegion = mapCue(createVttRegion(), new Map()).region;
+        const differentRegion = createVttRegion();
+        differentRegion.width = 50;
+        const region3 = mapCue(differentRegion, nativeRegions).region;
+
+        expect(region1).toBeTruthy();
+        expect(region2).toBe(region1);
+        expect(otherRegion).not.toBe(region1);
+        expect(region3).not.toBe(region1);
+        expect(region3.width).toBe(50);
+        expect(nativeRegions.size).toBe(2);
+      });
+
+      it('does not map regions that are not WebVTT regions', () => {
+        const nativeRegions = new Map();
+
+        // TTML-like region, sized as a percentage.
+        const ttmlRegion = createVttRegion();
+        ttmlRegion.height = 20;
+        ttmlRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+        expect(mapCue(ttmlRegion, nativeRegions).region).toBeFalsy();
+
+        // CEA-708-like region, sized in lines and columns.
+        const ceaRegion = createVttRegion();
+        ceaRegion.widthUnits = shaka.text.CueRegion.units.LINES;
+        expect(mapCue(ceaRegion, nativeRegions).region).toBeFalsy();
+
+        // Default region of a cue without a region.
+        expect(mapCue(new shaka.text.CueRegion(), nativeRegions).region)
+            .toBeFalsy();
+        expect(nativeRegions.size).toBe(0);
+      });
+
+      it('does not set a region without native regions', () => {
+        expect(mapCue(createVttRegion()).region).toBeFalsy();
+      });
+    });
+  });
+
   describe('shaka.text.Cue.resetCuePositioning', () => {
     /** @type {shaka.text.Cue} */
     let defaultCue;

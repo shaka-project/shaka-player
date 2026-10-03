@@ -158,6 +158,46 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           await expectAsync(parser.start('moqt://relay.example/live',
               playerInterface)).toBeRejectedWith(expected);
         });
+
+    it('subscribes to the catalog joining its current group', async () => {
+      // MSF requires it: a subscription alone starts after the latest catalog
+      // Object and may never see a complete catalog.
+      const calls = [];
+      shaka.msf['MSFTransport'] = class {
+        /** @return {!Promise} */
+        connect() {
+          return Promise.resolve({});
+        }
+
+        /**
+         * @param {...*} args
+         * @return {!Promise}
+         */
+        subscribeTrack(...args) {
+          calls.push(args);
+          return new Promise(() => {});
+        }
+
+        /** @return {!Promise<string>} */
+        waitForSessionEnd() {
+          return Promise.resolve('done');
+        }
+
+        /** */
+        configure() {}
+
+        /** */
+        release() {}
+      };
+
+      await expectAsync(parser.start('moqt://relay.example/live',
+          playerInterface)).toBeRejected();
+
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual(['msf', 'clear']);
+      expect(calls[0][1]).toBe('catalog');
+      expect(calls[0][4]).toBe(true);
+    });
   });
 
   describe('accessibility descriptors', () => {
@@ -346,7 +386,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           getDraftNumber: () => draftNumber,
           release: () => {},
         }));
-      return parser.createCatalogCallback_();
+      return parser.createCatalogCallback_(
+          new shaka.msf.CatalogStore('cmsf/clear'));
     }
 
     /**
@@ -422,6 +463,113 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       catalogCallback()(catalogObject(plainCatalog(), compressionProperty(2)));
       expect(await catalog()).toEqual(
           /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
+    });
+  });
+
+  describe('catalog track', () => {
+    /**
+     * @return {shaka.extern.MsfObjectCallback}
+     * @suppress {visibility}
+     */
+    function catalogCallback() {
+      const codec = new shaka.msf.draft18.Codec();
+      parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
+        /** @type {?} */ ({
+          getCodec: () => codec,
+          getDraftNumber: () => 18,
+          release: () => {},
+        }));
+      return parser.createCatalogCallback_(
+          new shaka.msf.CatalogStore('cmsf/clear'));
+    }
+
+    /**
+     * @return {!Promise<msfCatalog.Catalog>}
+     * @suppress {visibility}
+     */
+    function catalog() {
+      return parser.catalogPromise_.promise;
+    }
+
+    /**
+     * @param {number} group
+     * @param {number} object
+     * @param {!Object} document
+     * @return {!shaka.extern.MsfObject}
+     */
+    function catalogObject(group, object, document) {
+      return {
+        trackAlias: BigInt(1),
+        location: {
+          group: BigInt(group),
+          object: BigInt(object),
+          subgroup: null,
+        },
+        data: shaka.util.BufferUtils.toUint8(
+            shaka.util.StringUtils.toUTF8(JSON.stringify(document))),
+        extensions: null,
+        trackProperties: null,
+        status: null,
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 0,
+      };
+    }
+
+    const INDEPENDENT = {
+      version: 'draft-01',
+      tracks: [{name: 'video', packaging: 'loc', isLive: true}],
+    };
+
+    const ADD_AUDIO = {
+      generatedAt: 1,
+      deltaUpdate: [{
+        op: 'add',
+        tracks: [{name: 'audio', packaging: 'loc', isLive: true}],
+      }],
+    };
+
+    it('applies a delta that arrives before its independent catalog',
+        async () => {
+          // The joining FETCH and the subscription race, so object 1 of the
+          // current group can be read before object 0.
+          const callback = catalogCallback();
+          callback(catalogObject(5, 1, ADD_AUDIO));
+          callback(catalogObject(5, 0, INDEPENDENT));
+
+          const result = await catalog();
+          expect(result.tracks.map((t) => t.name)).toEqual(['video', 'audio']);
+        });
+
+    it('only logs the updates that follow the first catalog', async () => {
+      const warnSpy = spyOn(shaka.log, 'alwaysWarn');
+      const callback = catalogCallback();
+      callback(catalogObject(5, 0, INDEPENDENT));
+      const result = await catalog();
+
+      callback(catalogObject(5, 1, ADD_AUDIO));
+
+      expect(result.tracks.map((t) => t.name)).toEqual(['video']);
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report a republished catalog as an update', () => {
+      const warnSpy = spyOn(shaka.log, 'alwaysWarn');
+      const callback = catalogCallback();
+      callback(catalogObject(5, 0, INDEPENDENT));
+      callback(catalogObject(6, 0, Object.assign(
+          {generatedAt: 2}, INDEPENDENT)));
+
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('fails on a catalog version it does not understand', async () => {
+      catalogCallback()(catalogObject(0, 0, {version: 'v9', tracks: []}));
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.MSF_UNSUPPORTED_CATALOG_VERSION,
+          'v9'));
+      await expectAsync(catalog()).toBeRejectedWith(expected);
     });
   });
 
