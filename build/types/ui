@@ -59,6 +59,7 @@
 +../../ui/text_selection.js
 +../../ui/text_size.js
 +../../ui/text_style_preview.js
++../../ui/text_style_reset_button.js
 +../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

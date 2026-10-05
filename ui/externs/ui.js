@@ -357,6 +357,7 @@ shaka.extern.UITrackLabelCallback;
  *   mediaSession: shaka.extern.UIMediaSession,
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
+ *   captionsStyleElements: !Array<string>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
  *   showMenusOnTheRight: boolean,
@@ -671,6 +672,11 @@ shaka.extern.UITrackLabelCallback;
  *   The ordered list of font scale factor selection.
  *   <br>
  *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {!Array<string>} captionsStyleElements
+ *   The ordered list of elements in the subtitle style menu.
+ *   <br>
+ *   Defaults to <code>['captions-size', 'captions-position',
+ *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.
  *   <br>

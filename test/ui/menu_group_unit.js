@@ -714,6 +714,106 @@ describe('MenuGroup', () => {
       expect(Icons['CLOSED_CAPTIONS_SIZE'])
           .not.toBe(Icons['CLOSED_CAPTIONS_POSITION']);
     });
+
+    it('creates the configured style elements', async () => {
+      videoContainer['ui'].configure('captionsStyleElements',
+          ['captions-position', 'captions-size']);
+      await setTextTracks([createTextTrack(false)]);
+      const styleMenu = /** @type {!HTMLElement} */ (getFirst(
+          'shaka-captions-settings-button').parentElement.querySelector(
+          '.shaka-menu-group .shaka-menu-group'));
+      const buttons = Array.from(styleMenu.querySelectorAll(
+          ':scope > button:not(.shaka-back-to-overflow-button)'));
+      expect(buttons.length).toBe(2);
+      expect(buttons[0].classList.contains('shaka-caption-position-button'))
+          .toBe(true);
+      expect(buttons[1].classList.contains('shaka-caption-size-button'))
+          .toBe(true);
+    });
+
+    describe('reset', () => {
+      /**
+       * @return {!HTMLElement}
+       */
+      function getStyleMenu() {
+        return /** @type {!HTMLElement} */ (
+          get('shaka-caption-style-reset-button').parentElement);
+      }
+
+      /**
+       * @param {string} className
+       * @return {string}
+       */
+      function getStyleSelection(className) {
+        return getStyleMenu().querySelector(
+            '.' + className + ' .shaka-current-selection-span').textContent;
+      }
+
+      async function openStyleMenu() {
+        get('shaka-captions-settings-button').click();
+        await Util.shortDelay();
+        get('shaka-caption-style-button').click();
+        await Util.shortDelay();
+      }
+
+      it('is shown with the style options', async () => {
+        const reset = get('shaka-caption-style-reset-button');
+        expect(getStyleMenu().classList.contains('shaka-menu-group'))
+            .toBe(true);
+        expect(isDisplayed(reset)).toBe(false);
+
+        // Like the style options, it does not need the text to be enabled.
+        // It is also offered when the style is already the default one.
+        await setTextTracks([createTextTrack(false)]);
+        expect(isDisplayed(reset)).toBe(true);
+        expect(reset.hasAttribute('disabled')).toBe(false);
+        expect(reset.getAttribute('aria-label')).toBe(
+            controls.getLocalization().resolve(shaka.ui.Locales.Ids.RESET));
+        expect(getIconPath(reset))
+            .toBe(shaka.ui.Enums.MaterialDesignSVGIcons['RESET']);
+
+        // It comes after the style options.
+        expect(getStyleMenu().lastElementChild).toBe(reset);
+      });
+
+      it('does not show the style group on its own', async () => {
+        videoContainer['ui'].configure('captionsStyles', false);
+        await setTextTracks([createTextTrack(false)]);
+        expect(isDisplayed(get('shaka-caption-style-reset-button')))
+            .toBe(false);
+        expect(isDisplayed(get('shaka-caption-style-button'))).toBe(false);
+      });
+
+      it('restores the default style', async () => {
+        await setTextTracks([createTextTrack(false)]);
+        player.configure({
+          textDisplayer: {
+            fontScaleFactor: 1.5,
+            positionArea: shaka.config.PositionArea.TOP_LEFT,
+            subtitleDelay: 2,
+          },
+        });
+        await openStyleMenu();
+        expect(getStyleSelection('shaka-caption-size-button')).toBe('150%');
+
+        get('shaka-caption-style-reset-button').click();
+        await Util.shortDelay();
+
+        const config = player.getConfiguration().textDisplayer;
+        expect(config.fontScaleFactor).toBe(1);
+        expect(config.positionArea).toBe(shaka.config.PositionArea.DEFAULT);
+        // The subtitle delay is not part of the style.
+        expect(config.subtitleDelay).toBe(2);
+
+        // The style options show the restored values, and the style group
+        // stays open.
+        const localization = controls.getLocalization();
+        expect(getStyleSelection('shaka-caption-size-button')).toBe('100%');
+        expect(getStyleSelection('shaka-caption-position-button')).toBe(
+            localization.resolve(shaka.ui.Locales.Ids.DEFAULT));
+        expect(isDisplayed(getStyleMenu())).toBe(true);
+      });
+    });
   });
 
   it('uses the subtitle groups by default', async () => {
