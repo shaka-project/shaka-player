@@ -636,6 +636,51 @@ describe('VttTextParser', () => {
         /* hls= */ true, /* sequenceMode= */ true);
   });
 
+  it('handles absolute cue times with fragmented MP4 HLS', () => {
+    // Live CMAF streams whose media timestamps are wall-clock based can
+    // carry cue times as absolute wall-clock time with MPEGTS:0. No
+    // rollover applies; the cues line up with the media through
+    // periodStart alone.
+    verifyHelper(
+        [
+          {startTime: 2051.5, endTime: 2054, payload: 'Test'},
+        ],
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=LOCAL:00:00:00.000,MPEGTS:0\n\n' +
+        '13505268\n' +
+        '497527:29:17.750 --> 497527:29:20.250\n' +
+        'Test',
+        {
+          periodStart: -1791096906.25,
+          segmentStart: 2050.56,
+          segmentEnd: 2056.32,
+          vttOffset: -1791096906.25,
+          isMpegTs: false,
+        },
+        /* hls= */ true);
+  });
+
+  it('does not add a rollover just before the MPEG-TS boundary', () => {
+    // The segment starts a few seconds after the rollover point but the
+    // MPEGTS value has not wrapped yet, so no rollover must be added.
+    verifyHelper(
+        [
+          {startTime: 95445, endTime: 95447, payload: 'Test'},
+        ],
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:8589600000,LOCAL:00:00:00.000\n\n' +
+        '00:00:05.000 --> 00:00:07.000\n' +
+        'Test',
+        {
+          periodStart: 0,
+          segmentStart: 95444,
+          segmentEnd: 95450,
+          vttOffset: 0,
+          isMpegTs: true,
+        },
+        /* hls= */ true);
+  });
+
   it('supports global style blocks', () => {
     const textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black';
     verifyHelper(
