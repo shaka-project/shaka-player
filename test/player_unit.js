@@ -2754,6 +2754,93 @@ describe('Player', () => {
       expect(variant.id).toBe(newTrack.id);
     });
 
+    it('offers video tracks paired with their own audio group', async () => {
+      // Like HLS content with a different AUDIO group per video quality: the
+      // same "English" audio, but HE-AAC for the low resolution and AAC-LC
+      // for the high one, and the low one's playlist not loaded yet (so its
+      // channel count is unknown).
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(201, (variant) => {
+          variant.bandwidth = 464000;
+          variant.language = 'en';
+          variant.addVideo(1, (stream) => {
+            stream.codecs = 'avc1.4d401e';
+            stream.size(640, 360);
+          });
+          variant.addAudio(11, (stream) => {
+            stream.codecs = 'mp4a.40.5';
+            stream.label = 'English';
+            stream.channelsCount = null;
+          });
+        });
+        manifest.addVariant(202, (variant) => {
+          variant.bandwidth = 1328000;
+          variant.language = 'en';
+          variant.addVideo(2, (stream) => {
+            stream.codecs = 'avc1.640028';
+            stream.size(1280, 720);
+          });
+          variant.addAudio(12, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+            stream.label = 'English';
+            stream.channelsCount = 2;
+          });
+        });
+        // Other audio tracks, which should not add video tracks.
+        manifest.addVariant(203, (variant) => {
+          variant.bandwidth = 1328000;
+          variant.language = 'en';
+          variant.addExistingStream(2);
+          variant.addAudio(13, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+            stream.label = 'English (AD)';
+            stream.channelsCount = 2;
+          });
+        });
+        manifest.addVariant(204, (variant) => {
+          variant.bandwidth = 2000000;
+          variant.language = 'en';
+          variant.addVideo(3, (stream) => {
+            stream.size(1920, 1080);
+          });
+          variant.addAudio(14, (stream) => {
+            stream.codecs = 'ec-3';
+            stream.label = 'English';
+            stream.channelsCount = 6;
+          });
+        });
+      });
+
+      player.configure({
+        preferredAudio: [{language: 'en', label: 'English', channelCount: 2}],
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const active = player.getVariantTracks().find((t) => t.active);
+      expect(active.id).toBe(202);
+
+      const heights = player.getVideoTracks().map((t) => t.height).sort();
+      expect(heights).toEqual([360, 720]);
+
+      // Selecting the audio again keeps both qualities for adaptation.
+      const englishAudio = player.getAudioTracks().find((t) => t.active);
+      goog.asserts.assert(englishAudio, 'Must have an active audio track');
+      player.selectAudioTrack(englishAudio);
+      expect(abrManager.variants.map((v) => v.id).sort()).toEqual([201, 202]);
+
+      const track360 = player.getVideoTracks().find((t) => t.height == 360);
+      goog.asserts.assert(track360, 'Must have a 360p track');
+      player.configure('abr.enabled', false);
+      player.selectVideoTrack(track360);
+      const selectedVariant =
+          streamingEngine.switchVariant.calls.mostRecent().args[0];
+      expect(selectedVariant.id).toBe(201);
+
+      // Going back to automatic selection doesn't keep adaptation to the
+      // codecs of the manually chosen quality.
+      player.configure('abr.enabled', true);
+      expect(abrManager.variants.map((v) => v.id).sort()).toEqual([201, 202]);
+    });
+
     it('switching audio doesn\'t change selected text track', () => {
       player.configure({
         preferredText: [

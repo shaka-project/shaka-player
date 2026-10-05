@@ -1762,6 +1762,133 @@ describe('AdaptationSetCriteria', () => {
       expect(set).toBe(builder.getLastAdaptationSet());
     });
 
+    it('chooses variants of the same codec family as the audio codec', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.40.29';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(20, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addAudio(30, (stream) => {
+            stream.codecs = 'ec-3';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria();
+      builder.configure({
+        preferredAudio: [{
+          language: 'en',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }],
+        preferredVideo: [],
+        language: '',
+        role: '',
+        videoRole: '',
+        channelCount: 0,
+        hdrLevel: '',
+        spatialAudio: false,
+        videoLayout: '',
+        audioLabel: '',
+        videoLabel: '',
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
+        codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
+        audioCodec: 'mp4a.40.2',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        keySystem: '',
+      });
+
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
+        manifest.variants[1],
+      ]);
+    });
+
+    it('chooses the video codec with the most variants when codecs can\'t ' +
+        'be switched smoothly', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10);
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.64001f';
+            stream.size(544, 306);
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addExistingStream(10);
+          variant.addVideo(21, (stream) => {
+            stream.codecs = 'hvc1.2.20000000.L123.B0';
+            stream.size(480, 270);
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addExistingStream(10);
+          variant.addVideo(31, (stream) => {
+            stream.codecs = 'hvc1.2.20000000.L123.B0';
+            stream.size(1280, 720);
+          });
+        });
+        manifest.addVariant(4, (variant) => {
+          variant.addExistingStream(10);
+          variant.addVideo(41, (stream) => {
+            stream.codecs = 'hvc1.2.20000000.H150.B0';
+            stream.size(3840, 2160);
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria();
+      builder.configure({
+        preferredAudio: [{
+          language: 'en',
+          role: '',
+          label: '',
+          channelCount: 0,
+          codec: '',
+          spatialAudio: false,
+        }],
+        preferredVideo: [],
+        language: '',
+        role: '',
+        videoRole: '',
+        channelCount: 0,
+        hdrLevel: '',
+        spatialAudio: false,
+        videoLayout: '',
+        audioLabel: '',
+        videoLabel: '',
+        preferredAudioCodecs: [],
+        preferredAudioChannelCount: 0,
+        codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
+        audioCodec: '',
+        activeAudioCodec: '',
+        activeAudioChannelCount: 0,
+        keySystem: '',
+      });
+
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[1],
+        manifest.variants[2],
+        manifest.variants[3],
+      ]);
+    });
+
     it('chooses variants with audio codec over active audio codec', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
