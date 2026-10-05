@@ -3025,6 +3025,116 @@ describe('Player', () => {
       expect(abrManager.variants.map((v) => v.id).sort()).toEqual([201, 202]);
     });
 
+    describe('with surround audio only paired with high qualities', () => {
+      /** @type {jasmine.Spy} */
+      let audioTracksChanged;
+
+      beforeEach(async () => {
+        // Stereo HE-AAC for 360p, stereo AAC-LC and E-AC-3 5.1 for 720p, and
+        // E-AC-3 5.1 for 1080p.
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(301, (variant) => {
+            variant.bandwidth = 500;
+            variant.language = 'en';
+            variant.addVideo(1, (stream) => {
+              stream.size(640, 360);
+            });
+            variant.addAudio(11, (stream) => {
+              stream.codecs = 'mp4a.40.5';
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(302, (variant) => {
+            variant.bandwidth = 1500;
+            variant.language = 'en';
+            variant.addVideo(2, (stream) => {
+              stream.size(1280, 720);
+            });
+            variant.addAudio(12, (stream) => {
+              stream.codecs = 'mp4a.40.2';
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(303, (variant) => {
+            variant.bandwidth = 1700;
+            variant.language = 'en';
+            variant.addExistingStream(2);
+            variant.addAudio(13, (stream) => {
+              stream.codecs = 'ec-3';
+              stream.channelsCount = 6;
+            });
+          });
+          manifest.addVariant(304, (variant) => {
+            variant.bandwidth = 3000;
+            variant.language = 'en';
+            variant.addVideo(3, (stream) => {
+              stream.size(1920, 1080);
+            });
+            variant.addExistingStream(13);
+          });
+        });
+
+        player.configure({
+          preferredAudio: [{language: 'en', channelCount: 2}],
+        });
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        selectVariant(301);
+
+        audioTracksChanged = jasmine.createSpy('audioTracksChanged');
+        player.addEventListener('audiotrackschanged',
+            Util.spyFunc(audioTracksChanged));
+      });
+
+      it('offers every audio track whatever the quality', () => {
+        const audioTracks = player.getAudioTracks();
+        expect(audioTracks.map((t) => t.channelsCount).sort()).toEqual([2, 6]);
+        expect(audioTracks.find((t) => t.active).channelsCount).toBe(2);
+      });
+
+      it('changes the quality to select the audio', () => {
+        const surround = player.getAudioTracks().find(
+            (t) => t.channelsCount == 6);
+        goog.asserts.assert(surround, 'Must have a 5.1 track');
+        player.configure('abr.enabled', true);
+        player.selectAudioTrack(surround);
+        const selectedVariant =
+            streamingEngine.switchVariant.calls.mostRecent().args[0];
+        expect(selectedVariant.audio.channelsCount).toBe(6);
+        // ABR may fall back to the cheaper stereo variants.
+        expect(abrManager.variants.map((v) => v.id).sort())
+            .toEqual([301, 302, 303, 304]);
+      });
+
+      it('doesn\'t fall back if not allowed', () => {
+        player.configure('abr.allowAudioFallback', false);
+        const surround = player.getAudioTracks().find(
+            (t) => t.channelsCount == 6);
+        goog.asserts.assert(surround, 'Must have a 5.1 track');
+        player.selectAudioTrack(surround);
+        expect(abrManager.variants.map((v) => v.id).sort())
+            .toEqual([303, 304]);
+      });
+
+      it('doesn\'t fire audiotrackschanged for the same audio', async () => {
+        // HE-AAC to AAC-LC: the same stereo audio track.
+        selectVariant(302);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).not.toHaveBeenCalled();
+
+        selectVariant(303);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).toHaveBeenCalled();
+      });
+
+      /** @param {number} id */
+      function selectVariant(id) {
+        const track = player.getVariantTracks().find((t) => t.id == id);
+        goog.asserts.assert(track, 'Must have the variant track');
+        player.selectVariantTrack(track);
+      }
+    });
+
     it('switching audio doesn\'t change selected text track', () => {
       player.configure({
         preferredText: [
@@ -4892,6 +5002,8 @@ describe('Player', () => {
             codec: '',
           },
         ],
+        // Otherwise the cheaper stereo variant is a fallback for adaptation.
+        abr: {allowAudioFallback: false},
       });
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();

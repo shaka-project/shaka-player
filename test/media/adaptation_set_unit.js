@@ -242,6 +242,104 @@ describe('AdaptationSet', () => {
     });
   });
 
+  describe('getAudioFallbacks', () => {
+    const AdaptationSet = shaka.media.AdaptationSet;
+
+    /**
+     * @param {number} id
+     * @param {number} bandwidth
+     * @param {number} channelsCount
+     * @param {string=} codec
+     * @param {boolean=} spatialAudio
+     * @param {?string=} label
+     * @return {shaka.extern.Variant}
+     */
+    function makeAudioVariant(id, bandwidth, channelsCount, codec = 'ec-3',
+        spatialAudio = false, label = null) {
+      const audio = makeStream(
+          id * 10, 'a', [codec], [], channelsCount, spatialAudio);
+      audio.label = label;
+      const variant = makeVariant(
+          id, audio, makeStream(id * 10 + 1, 'v', ['avc1.4d401e'], [], null));
+      variant.bandwidth = bandwidth;
+      return variant;
+    }
+
+    it('falls back one channel tier at a time below the cheapest', () => {
+      const atmos = [
+        makeAudioVariant(1, 5000, 16, 'ec-3', /* spatialAudio= */ true),
+        makeAudioVariant(2, 8000, 16, 'ec-3', /* spatialAudio= */ true),
+      ];
+      const surround51 = [
+        makeAudioVariant(3, 4000, 6),
+        makeAudioVariant(4, 6000, 6),  // Not cheaper than Atmos.
+      ];
+      const stereo = [
+        makeAudioVariant(5, 1000, 2),
+        makeAudioVariant(6, 3000, 2),
+        makeAudioVariant(7, 4500, 2),  // Not cheaper than 5.1.
+      ];
+      const mono = [
+        makeAudioVariant(8, 500, 1),
+        makeAudioVariant(9, 1200, 1),  // Not cheaper than stereo.
+      ];
+      const all = [...atmos, ...surround51, ...stereo, ...mono];
+
+      const fallbacks = AdaptationSet.getAudioFallbacks(
+          atmos, all, /* compareCodecs= */ false);
+      expect(fallbacks.map((v) => v.id)).toEqual([3, 5, 6, 8]);
+    });
+
+    it('only falls back to the same audio', () => {
+      const surround = [makeAudioVariant(1, 4000, 6, 'ec-3', false, 'en')];
+      const all = [
+        ...surround,
+        makeAudioVariant(2, 1000, 2, 'ec-3', false, 'en'),
+        makeAudioVariant(3, 900, 2, 'ec-3', false, 'commentary'),
+      ];
+
+      const fallbacks = AdaptationSet.getAudioFallbacks(
+          surround, all, /* compareCodecs= */ false);
+      expect(fallbacks.map((v) => v.id)).toEqual([2]);
+    });
+
+    it('uses a single codec family per tier, preferring the current', () => {
+      const surround = [makeAudioVariant(1, 4000, 6, 'ec-3')];
+      const all = [
+        ...surround,
+        makeAudioVariant(2, 1000, 2, 'mp4a.40.2'),
+        makeAudioVariant(3, 1500, 2, 'mp4a.40.5'),
+        makeAudioVariant(4, 2000, 2, 'ec-3'),
+      ];
+
+      expect(AdaptationSet.getAudioFallbacks(surround, all, false)
+          .map((v) => v.id)).toEqual([4]);
+
+      // Without the current family, the one with the most variants.
+      expect(AdaptationSet.getAudioFallbacks(surround, all.slice(0, 3), false)
+          .map((v) => v.id)).toEqual([2, 3]);
+    });
+
+    it('needs the same codec without smooth codec switching', () => {
+      const surround = [makeAudioVariant(1, 4000, 6, 'ec-3')];
+      const all = [...surround, makeAudioVariant(2, 1000, 2, 'mp4a.40.2')];
+
+      expect(AdaptationSet.getAudioFallbacks(surround, all, true)).toEqual([]);
+    });
+
+    it('does nothing for the lowest tier or unknown channels', () => {
+      const stereo = [makeAudioVariant(1, 1000, 2)];
+      const unknown = [makeAudioVariant(2, 4000, 0)];
+      const all = [...stereo, ...unknown, makeAudioVariant(3, 500, 1)];
+
+      expect(AdaptationSet.getAudioFallbacks(stereo, all, false)
+          .map((v) => v.id)).toEqual([3]);
+      expect(AdaptationSet.getAudioFallbacks(unknown, all, false)).toEqual([]);
+      expect(AdaptationSet.getAudioFallbacks([all[2]], all, false))
+          .toEqual([]);
+    });
+  });
+
   it('rejects misaligned spatial audio', () => {
     const variants = [
       makeVariant(

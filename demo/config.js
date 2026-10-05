@@ -396,6 +396,8 @@ shakaDemo.Config = class {
             'abr.preferNetworkInformationBandwidth')
         .addBoolInput_('Dropped Frames Protection Enabled',
             'abr.droppedFrames')
+        .addBoolInput_('Allow audio fallback to fewer channels',
+            'abr.allowAudioFallback')
         .addNumberInput_('Dropped Frames Threshold',
             'abr.advanced.droppedFramesThreshold',
             /* canBeDecimal= */ true)
