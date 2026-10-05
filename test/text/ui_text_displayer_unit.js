@@ -517,17 +517,16 @@ describe('UITextDisplayer', () => {
       expect(Object.keys(cueCssObj)).not.toContain('left');
     }
 
-    // Only WebVTT regions get the WebVTT region styles.
-    expect(regionElement.style.backgroundColor).toBe('');
+    // Regions with a fixed height don't clip their cues.
     expect(regionElement.style.overflow).toBe('');
   });
 
-  describe('WebVTT regions', () => {
+  describe('regions sized in lines', () => {
     /**
      * @param {number} lines
      * @return {!shaka.text.CueRegion}
      */
-    function createVttRegion(lines) {
+    function createLinesRegion(lines) {
       const region = new shaka.text.CueRegion();
       region.id = 'fred';
       region.width = 40;
@@ -582,12 +581,11 @@ describe('UITextDisplayer', () => {
 
     it('sizes and anchors the region box', async () => {
       textDisplayer.setTextVisibility(true);
-      textDisplayer.append([createCue(0, createVttRegion(3))]);
+      textDisplayer.append([createCue(0, createLinesRegion(3))]);
       await updateCaptions();
 
       const regionElement = getRegionElement();
-      expect(regionElement.style.overflow).toBe('hidden');
-      expect(regionElement.style.backgroundColor).toBe('rgba(0, 0, 0, 0.8)');
+      // From the default displayAlign of the cue.
       expect(regionElement.style.justifyContent).toBe('flex-end');
 
       // The region is 3 lines tall, with the line height of its cues.
@@ -613,7 +611,7 @@ describe('UITextDisplayer', () => {
       config.fontScaleFactor = 2;
       textDisplayer.configure(config);
       textDisplayer.setTextVisibility(true);
-      textDisplayer.append([createCue(0, createVttRegion(2))]);
+      textDisplayer.append([createCue(0, createLinesRegion(2))]);
       await updateCaptions();
 
       const regionElement = getRegionElement();
@@ -622,8 +620,28 @@ describe('UITextDisplayer', () => {
       expect(box.height).toBeCloseTo(2 * 1.4 * 2 * fontSize, 0);
     });
 
+    it('sizes regions with a width in columns', async () => {
+      // As CEA-708 windows are.
+      const region = createLinesRegion(2);
+      region.width = 32;
+      region.widthUnits = shaka.text.CueRegion.units.LINES;
+
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([createCue(0, region)]);
+      await updateCaptions();
+
+      const regionElement = getRegionElement();
+      const lineHeight =
+          parseFloat(getComputedStyle(regionElement).lineHeight);
+      positionTextContainer();
+      const box = regionElement.getBoundingClientRect();
+      expect(box.height).toBeCloseTo(2 * lineHeight, 0);
+      // The text that doesn't fit is shown, not hidden.
+      expect(regionElement.style.overflow).toBe('');
+    });
+
     it('keeps apart regions of the same size in other units', async () => {
-      const vttRegion = createVttRegion(3);
+      const vttRegion = createLinesRegion(3);
       const pixelRegion = vttRegion.clone();
       pixelRegion.heightUnits = shaka.text.CueRegion.units.PX;
 
@@ -652,7 +670,7 @@ describe('UITextDisplayer', () => {
       });
 
       it('scrolls up the lines when a cue is added', async () => {
-        const region = createVttRegion(2);
+        const region = createLinesRegion(2);
         region.scroll = shaka.text.CueRegion.scrollMode.UP;
 
         textDisplayer.setTextVisibility(true);
@@ -684,7 +702,7 @@ describe('UITextDisplayer', () => {
         }
       });
 
-      it('scrolls up regions of other formats', async () => {
+      it('scrolls up regions with a fixed height', async () => {
         const region = new shaka.text.CueRegion();
         region.id = 'window';
         region.height = 20;
@@ -701,13 +719,11 @@ describe('UITextDisplayer', () => {
         const regionElement = getRegionElement();
         expect(regionElement.style.justifyContent).toBe('flex-end');
         expect(regionElement.style.overflow).toBe('hidden');
-        // But not the WebVTT region background.
-        expect(regionElement.style.backgroundColor).toBe('');
         expect(animateSpy).toHaveBeenCalledTimes(2);
       });
 
       it('does not scroll regions without scroll:up', async () => {
-        const region = createVttRegion(2);
+        const region = createLinesRegion(2);
 
         textDisplayer.setTextVisibility(true);
         textDisplayer.append([createCue(0, region)]);
