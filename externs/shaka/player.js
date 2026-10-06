@@ -2709,6 +2709,7 @@ shaka.extern.AdsConfiguration;
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
+ *   allowAudioFallback: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -2803,6 +2804,14 @@ shaka.extern.AdsConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} droppedFrames
  *   Enable or disable dropped frames protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} allowAudioFallback
+ *   If true, when the bandwidth can't sustain any variant with the selected
+ *   audio (e.g. 5.1 or spatial audio only paired with high video qualities),
+ *   adaptation may temporarily use the same audio with fewer channels
+ *   (e.g. 5.1, then stereo, then mono), going back to the selected audio as
+ *   soon as the bandwidth allows it.
  *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc
