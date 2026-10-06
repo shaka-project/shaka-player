@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CBCS subsample IV reproduction</title>
+<style>
+  body { max-width: 850px; margin: 2rem auto; padding: 0 1rem; font: 16px system-ui; }
+  video { display: block; width: 100%; margin: 1rem 0; background: #111; }
+  button, select { font: inherit; padding: .5rem; margin: .25rem 0; }
+  pre { padding: 1rem; background: #eee; white-space: pre-wrap; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<h1>CBCS subsample IV reproduction</h1>
+<p>Two seconds of synthetic AV1 with multiple protected ranges per sample.
+  Compare the clear reference with CBCS in Safari on an AV1-capable device.</p>
+<p id="bundle">Loading Shaka Player…</p>
+<label>Manifest <select id="format"><option value="master.m3u8">HLS</option>
+  <option value="manifest.mpd">DASH</option></select></label>
+<button id="clear" disabled>Play clear reference</button>
+<button id="cbcs" disabled>Play CBCS sample</button>
+<video controls muted playsinline></video>
+<pre id="status" aria-live="polite"></pre>
+<script>
+'use strict';
+const query = new URLSearchParams(location.search);
+// When copied to test/test/assets/cbcs-subsamples, this loads a repo build.
+const bundle = query.get('bundle') === 'local' ? '../../../../dist/shaka-player.compiled.js' :
+    query.get('bundle') || 'https://cdn.jsdelivr.net/npm/shaka-player@5.2.12/dist/shaka-player.compiled.js';
+const script = document.createElement('script');
+script.src = bundle;
+script.onerror = () => {
+  document.querySelector('#bundle').textContent = `Could not load ${bundle}`;
+};
+script.onload = async () => {
+  shaka.polyfill.installAll();
+  document.querySelector('#bundle').textContent = `Shaka ${shaka.Player.version}: ${bundle}`;
+  const video = document.querySelector('video');
+  let player;
+  let configuration = null;
+  let mode = '';
+  let errors = [];
+  let loading = false;
+  const update = () => {
+    for (const control of document.querySelectorAll('button, select')) {
+      control.disabled = loading;
+    }
+    const quality = video.getVideoPlaybackQuality?.();
+    const state = {
+      version: shaka.Player.version, mode, loading,
+      time: video.currentTime, duration: video.duration,
+      width: video.videoWidth, height: video.videoHeight,
+      decodedFrames: quality?.totalVideoFrames,
+      droppedFrames: quality?.droppedVideoFrames,
+      mediaKeysAttached: Boolean(video.mediaKeys),
+      mediaError: video.error ? {code: video.error.code, message: video.error.message} : null,
+      errors, configuration,
+    };
+    window.reproductionState = state;
+    document.querySelector('#status').textContent = JSON.stringify(state, null, 2);
+  };
+  const load = async (selection) => {
+    mode = selection;
+    errors = [];
+    loading = true;
+    configuration = null;
+    update();
+    try {
+      if (player) await player.destroy();
+      player = new shaka.Player();
+      await player.attach(video);
+      player.configure({
+        abr: {enabled: false},
+        drm: {clearKeys: selection === 'cbcs' ? {
+          '000102030405060708090a0b0c0d0e0f': '00112233445566778899aabbccddeeff',
+        } : {}},
+      });
+      configuration = player.getNonDefaultConfiguration();
+      player.addEventListener('error', (event) => {
+        errors.push({code: event.detail.code, category: event.detail.category,
+          data: event.detail.data});
+        update();
+      });
+      await player.load(`${selection}/${document.querySelector('#format').value}`);
+      await video.play();
+    } catch (error) {
+      errors.push({name: error.name, message: error.message, code: error.code});
+    } finally {
+      loading = false;
+      update();
+    }
+  };
+  for (const selection of ['clear', 'cbcs']) {
+    const button = document.getElementById(selection);
+    button.onclick = () => load(selection);
+  }
+  for (const event of ['timeupdate', 'ended', 'error', 'loadedmetadata']) {
+    video.addEventListener(event, update);
+  }
+  update();
+};
+document.head.append(script);
+</script>
+</body>
+</html>
