@@ -30,21 +30,6 @@ const player = new shaka.Player(/* mediaElement= */ null, container);
 player.setVideoContainer(container);
 ```
 
-##### Font size scaling for readability
-
-For improved readability the option to scale text size is provided via player
-config.
-
-```js
-player.configure({
-   textDisplayer: {
-      fontScaleFactor: 1.5,
-   },
-});
-```
-
-Note: Only supported on UITextDisplayer.
-
 ##### Subtitle timing offset
 
 Shaka Player allows applications to manually adjust subtitle timing using the `textDisplayer.subtitleDelay` configuration option.
@@ -68,17 +53,55 @@ Notes:
 - With UITextDisplayer, the subtitle delay is applied dynamically.
 - With NativeTextDisplayer, the delay is applied by modifying cue timings when they are added to the video element.
 
-##### Overriding Subtitle Position
+##### Overriding Subtitle Style
 
-Shaka Player allows applications to override the default subtitle placement and render captions in predefined regions of the video viewport. This is useful when subtitles need to avoid UI overlays, follow accessibility guidelines, or provide a consistent layout across different content.
+Applications can override the style defined by the subtitles with the
+following configuration options.  Their default values keep the style defined
+by the subtitles, so only the options that are changed override it.
 
-By setting the `textDisplayer.positionArea` configuration option, applications can:
+| Option | Values | Default |
+|--------|--------|---------|
+| `fontScaleFactor` | The factor used to increase or decrease the font size | `1` |
+| `positionArea` | `shaka.config.PositionArea` (see below) | `DEFAULT` |
+| `fontFamily` | `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF` or `PROPORTIONAL_SANS_SERIF` | `DEFAULT` |
+| `fontColor` | A CSS color | `''` |
+| `fontOpacity` | Between 0 and 1 | `NaN` |
+| `backgroundColor` | A CSS color | `''` |
+| `backgroundOpacity` | Between 0 and 1 | `NaN` |
+| `characterEdgeStyle` | `shaka.config.CharacterEdgeStyle`: `NONE`, `DROP_SHADOW`, `RAISED`, `DEPRESSED` or `OUTLINE` | `DEFAULT` |
+
+Example configuration:
+
+```js
+player.configure({
+  textDisplayer: {
+    fontScaleFactor: 1.5,
+    positionArea: shaka.config.PositionArea.BOTTOM_CENTER,
+    fontColor: '#ff0',
+    backgroundColor: '#080808',
+    backgroundOpacity: 0.5,
+    characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
+  },
+});
+```
+
+Note: Only supported on UITextDisplayer.
+
+###### Size
+
+For improved readability, `fontScaleFactor` scales the font size of the
+subtitles.  For example, `1.5` makes them 50% bigger.
+
+###### Position
+
+By setting `positionArea`, applications can:
 
 - Explicitly control where subtitles are rendered on the screen
 - Override the automatic or cue-defined positioning
 - Update subtitle placement dynamically at runtime
 
-The following enum defines the supported subtitle placement areas:
+This is useful when subtitles need to avoid UI overlays, follow accessibility
+guidelines, or provide a consistent layout across different content.
 
 | Value | Screen Position |
 |------|-----------------|
@@ -93,17 +116,20 @@ The following enum defines the supported subtitle placement areas:
 | `BOTTOM_CENTER` | Bottom center |
 | `BOTTOM_RIGHT` | Bottom right |
 
-Example configuration:
+###### Colors and opacities
 
-```js
-player.configure({
-  textDisplayer: {
-    positionArea: shaka.config.PositionArea.BOTTOM_CENTER,
-  },
-});
-```
+`fontColor` and `backgroundColor` replace the colors of the subtitles.
+`fontOpacity` and `backgroundOpacity` replace the opacity of the color in use,
+whether it is the one defined by the subtitles or the one given in the
+configuration.  The opacities are only applied to hexadecimal, `rgb()`,
+`rgba()` and basic named colors.
 
-Note: Only supported on UITextDisplayer.
+###### Character edge style
+
+`characterEdgeStyle` draws an edge around the characters, which makes the
+subtitles easier to read over bright video: a drop shadow, a raised or
+depressed look, or an outline.  `NONE` removes the edges defined by the
+subtitles.
 
 ### Text displayer configuration
 

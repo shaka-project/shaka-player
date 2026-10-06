@@ -892,4 +892,208 @@ describe('UITextDisplayer', () => {
       expect(getNextBoundary(cues, 5)).toBe(10);
     });
   });
+
+  describe('style overrides', () => {
+    /** @type {!shaka.extern.TextDisplayerConfiguration} */
+    let config;
+
+    beforeEach(() => {
+      config = shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+      config.suspendRenderingWhenHidden = false;
+      textDisplayer.setTextVisibility(true);
+    });
+
+    /**
+     * Normalizes a CSS color the way the browser serializes it.
+     *
+     * @param {string} color
+     * @return {string}
+     */
+    function normalizeColor(color) {
+      const element = document.createElement('div');
+      element.style.color = color;
+      return element.style.color;
+    }
+
+    /**
+     * @param {!Array<!shaka.text.Cue>} cues
+     * @return {!Promise<!Element>} The text container.
+     */
+    async function render(cues) {
+      textDisplayer.configure(config);
+      textDisplayer.append(cues);
+      await updateCaptions();
+      return /** @type {!Element} */(
+        videoContainer.querySelector('.shaka-text-container'));
+    }
+
+    /** @return {!shaka.text.Cue} */
+    function createStyledCue() {
+      const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+      cue.color = 'green';
+      cue.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+      cue.fontFamily = 'Arial';
+      cue.textShadow = 'red 1px 1px';
+      return cue;
+    }
+
+    it('keeps the style of the subtitle by default', async () => {
+      const textContainer = await render([createStyledCue()]);
+      const cueElement = textContainer.querySelector('div');
+      const textElement = textContainer.querySelector('span');
+
+      expect(cueElement.style.color).toBe(normalizeColor('green'));
+      expect(cueElement.style.fontFamily).toBe('Arial');
+      expect(cueElement.style.textShadow).toContain('1px 1px');
+      expect(textElement.style.backgroundColor)
+          .toBe(normalizeColor('rgba(255, 0, 0, 0.5)'));
+    });
+
+    it('keeps the default background by default', async () => {
+      const textContainer =
+          await render([new shaka.text.Cue(0, 100, 'Captain\'s log.')]);
+      const textElement = textContainer.querySelector('span');
+      expect(textElement.style.backgroundColor)
+          .toBe(normalizeColor('rgba(0, 0, 0, 0.8)'));
+    });
+
+    it('overrides the font color', async () => {
+      config.fontColor = '#ff0';
+      const cue = createStyledCue();
+      const nestedCue = new shaka.text.Cue(0, 100, 'Nested');
+      nestedCue.color = 'cyan';
+      cue.nestedCues = [nestedCue];
+      const textContainer = await render([cue]);
+
+      expect(textContainer.querySelector('div').style.color)
+          .toBe(normalizeColor('#ff0'));
+      const nestedElement =
+          textContainer.querySelector('span:not(.shaka-text-wrapper)');
+      expect(nestedElement.style.color).toBe(normalizeColor('#ff0'));
+    });
+
+    it('applies the font opacity to the font color of the subtitle',
+        async () => {
+          config.fontOpacity = 0.5;
+          const textContainer = await render([createStyledCue()]);
+          expect(textContainer.querySelector('div').style.color)
+              .toBe(normalizeColor('rgba(0, 128, 0, 0.5)'));
+        });
+
+    it('applies the font opacity to the font color of the container',
+        async () => {
+          config.fontOpacity = 0.25;
+          const textContainer =
+              await render([new shaka.text.Cue(0, 100, 'Captain\'s log.')]);
+          const containerColor = getComputedStyle(textContainer).color;
+          const expected = shaka.text.Utils.setColorOpacity(
+              containerColor, 0.25);
+          expect(textContainer.querySelector('div').style.color)
+              .toBe(normalizeColor(/** @type {string} */(expected)));
+        });
+
+    it('applies the font opacity to the configured font color', async () => {
+      config.fontColor = '#f00';
+      config.fontOpacity = 0.75;
+      const textContainer = await render([createStyledCue()]);
+      expect(textContainer.querySelector('div').style.color)
+          .toBe(normalizeColor('rgba(255, 0, 0, 0.75)'));
+    });
+
+    it('overrides the background color', async () => {
+      config.backgroundColor = '#00f';
+      const textContainer = await render([createStyledCue()]);
+      expect(textContainer.querySelector('span').style.backgroundColor)
+          .toBe(normalizeColor('#00f'));
+    });
+
+    it('applies the background opacity to the background of the subtitle',
+        async () => {
+          config.backgroundOpacity = 1;
+          const textContainer = await render([createStyledCue()]);
+          expect(textContainer.querySelector('span').style.backgroundColor)
+              .toBe(normalizeColor('rgb(255, 0, 0)'));
+        });
+
+    it('applies the background opacity to the default background',
+        async () => {
+          config.backgroundOpacity = 0.25;
+          const textContainer =
+              await render([new shaka.text.Cue(0, 100, 'Captain\'s log.')]);
+          expect(textContainer.querySelector('span').style.backgroundColor)
+              .toBe(normalizeColor('rgba(0, 0, 0, 0.25)'));
+        });
+
+    it('paints a customized background only behind the text', async () => {
+      config.backgroundColor = '#080808';
+      config.backgroundOpacity = 0.5;
+      const cue = new shaka.text.Cue(0, 100, '');
+      cue.backgroundColor = 'black';
+      const nestedCue = new shaka.text.Cue(0, 100, 'Nested');
+      cue.nestedCues = [nestedCue];
+      const textContainer = await render([cue]);
+
+      const wrapper = textContainer.querySelector('.shaka-text-wrapper');
+      expect(wrapper.style.backgroundColor).toBe('');
+      // Only the element with the text has a background.
+      const nestedElement = wrapper.querySelector('span');
+      const textElement = nestedElement.querySelector('span');
+      expect(nestedElement.style.backgroundColor).toBe('');
+      expect(textElement.textContent).toBe('Nested');
+      expect(textElement.style.backgroundColor)
+          .toBe(normalizeColor('rgba(8, 8, 8, 0.5)'));
+    });
+
+    it('overrides the font family', async () => {
+      config.fontFamily = shaka.config.FontFamily.MONOSPACED_SERIF;
+      const textContainer = await render([createStyledCue()]);
+      const fontFamily = textContainer.querySelector('div').style.fontFamily;
+      expect(fontFamily).toContain('Courier New');
+      expect(fontFamily).toContain('monospace');
+    });
+
+    it('removes the edges of the characters', async () => {
+      config.characterEdgeStyle = shaka.config.CharacterEdgeStyle.NONE;
+      const cue = createStyledCue();
+      cue.textStrokeColor = 'black';
+      cue.textStrokeWidth = '2px';
+      const textContainer = await render([cue]);
+      const cueElement = textContainer.querySelector('div');
+      expect(cueElement.style.textShadow).toBe('none');
+      expect(cueElement.style.webkitTextStrokeWidth).toBe('0px');
+    });
+
+    for (const edgeStyle of [
+      'DROP_SHADOW', 'RAISED', 'DEPRESSED', 'OUTLINE',
+    ]) {
+      it(`draws the ${edgeStyle} character edge style`, async () => {
+        config.characterEdgeStyle =
+            shaka.config.CharacterEdgeStyle[edgeStyle];
+        const textContainer = await render([createStyledCue()]);
+        const textShadow = textContainer.querySelector('div').style.textShadow;
+        expect(textShadow).toContain('em');
+        expect(textShadow).not.toContain('1px 1px');
+      });
+    }
+
+    it('previews the style without changing the configuration', async () => {
+      const textContainer = await render([createStyledCue()]);
+
+      const previewConfig =
+      /** @type {!shaka.extern.TextDisplayerConfiguration} */(
+          Object.assign({}, config, {
+            'fontColor': '#0ff',
+            'backgroundColor': '#f0f',
+          }));
+      textDisplayer.setTextStylePreview(previewConfig, 'Subtitles example');
+      expect(textContainer.querySelector('div').style.color)
+          .toBe(normalizeColor('#0ff'));
+      expect(textContainer.querySelector('span').style.backgroundColor)
+          .toBe(normalizeColor('#f0f'));
+
+      textDisplayer.clearTextStylePreview();
+      expect(textContainer.querySelector('div').style.color)
+          .toBe(normalizeColor('green'));
+    });
+  });
 });
