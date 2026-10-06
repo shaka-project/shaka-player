@@ -422,6 +422,14 @@ describe('HlsParser', () => {
   });
 
   it('plays MP3 audio-only with codec metadata', async () => {
+    if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+      pending('Codec MP3 is not supported by the platform.');
+    }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (deviceDetected.getDeviceName() === 'Tizen') {
+      pending('Disabled on Tizen.');
+    }
     // This asset has mp3 audio only, with explicit codecs.
     const url =
         '/base/test/test/assets/hls-raw-mp3/playlist.m3u8';
@@ -442,6 +450,14 @@ describe('HlsParser', () => {
   });
 
   it('plays MP3 audio-only without codec metadata', async () => {
+    if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+      pending('Codec MP3 is not supported by the platform.');
+    }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (deviceDetected.getDeviceName() === 'Tizen') {
+      pending('Disabled on Tizen.');
+    }
     // This asset has mp3 audio only, without explicit codecs.
     const url =
         '/base/test/test/assets/hls-raw-mp3/playlist-no-codecs.m3u8';
