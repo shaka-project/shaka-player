@@ -286,8 +286,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   /**
    * Formats a preset rate for display inside a pill button.
    * Rules
-   *   - Comma as decimal separator.
-   *   - Always at least one decimal place (e.g. 1 to "1,0", 3 to "3,0").
+   *   - Period as decimal separator.
+   *   - Always at least one decimal place (e.g. 1 to "1.0", 3 to "3.0").
    *
    * @param {number} rate
    * @return {string}
@@ -299,7 +299,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     const dotIndex = str.indexOf('.');
     const decimals = dotIndex === -1 ? 0 : str.length - dotIndex - 1;
     // Show at least one decimal place.
-    return rate.toFixed(Math.max(1, decimals)).replace('.', ',');
+    return rate.toFixed(Math.max(1, decimals));
   }
 
   /** @private */
