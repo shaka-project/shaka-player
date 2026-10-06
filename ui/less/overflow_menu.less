@@ -301,6 +301,12 @@
   }
 }
 
+/* The elements inside a menu group look like those in the overflow menu, so
+ * their labels don't take the offset of the submenu items. */
+.shaka-menu-group > button span {
+  margin-left: 0;
+}
+
 /* This is a button within each submenu that takes you back to the main overflow
  * menu. */
 .shaka-back-to-overflow-button {

@@ -162,6 +162,86 @@ describe('AdaptationSet', () => {
     expect(set.canInclude(variants[1])).toBeFalsy();
   });
 
+  it('accepts an unknown channelsCount with the same codec family', () => {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['mp4a.40.2'], [], 2),
+          makeStream(12, 'a', ['b.12'], [], null)),
+      makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['mp4a.40.5'], [], null),
+          makeStream(22, 'a', ['b.12'], [], null)),
+    ];
+
+    const set = new shaka.media.AdaptationSet(variants[0]);
+    expect(set.canInclude(variants[1])).toBeTruthy();
+  });
+
+  it('rejects an unknown channelsCount with another codec family', () => {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['ec-3'], [], 6),
+          makeStream(12, 'a', ['b.12'], [], null)),
+      makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['mp4a.40.2'], [], null),
+          makeStream(22, 'a', ['b.12'], [], null)),
+    ];
+
+    const set = new shaka.media.AdaptationSet(
+        variants[0], [], /* compareCodecs= */ false);
+    expect(set.canInclude(variants[1], /* compareCodecs= */ false))
+        .toBeFalsy();
+  });
+
+  describe('haveSameAudio', () => {
+    it('ignores the codec profile within a codec family', () => {
+      const a = makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['mp4a.40.29'], [], 2),
+          makeStream(12, 'a', ['b.12'], [], null));
+      const b = makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['mp4a.40.2'], [], 2),
+          makeStream(22, 'a', ['b.13'], [], null));
+
+      expect(shaka.media.AdaptationSet.haveSameAudio(a, b)).toBe(true);
+    });
+
+    it('matches an unknown channelsCount', () => {
+      const a = makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['mp4a.40.5'], [], null),
+          makeStream(12, 'a', ['b.12'], [], null));
+      const b = makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['mp4a.40.2'], [], 1),
+          makeStream(22, 'a', ['b.13'], [], null));
+
+      expect(shaka.media.AdaptationSet.haveSameAudio(a, b)).toBe(true);
+    });
+
+    it('rejects different codec families and channel counts', () => {
+      const aac = makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['mp4a.40.2'], [], 2),
+          makeStream(12, 'a', ['b.12'], [], null));
+      const ec3 = makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['ec-3'], [], 2),
+          makeStream(22, 'a', ['b.13'], [], null));
+      const mono = makeVariant(
+          3,  // variant id
+          makeStream(31, 'a', ['mp4a.40.2'], [], 1),
+          makeStream(32, 'a', ['b.14'], [], null));
+
+      expect(shaka.media.AdaptationSet.haveSameAudio(aac, ec3)).toBe(false);
+      expect(shaka.media.AdaptationSet.haveSameAudio(aac, mono)).toBe(false);
+    });
+  });
+
   it('rejects misaligned spatial audio', () => {
     const variants = [
       makeVariant(

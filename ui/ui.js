@@ -309,8 +309,7 @@ shaka.ui.Overlay = class {
       ],
       bigButtons: [],
       overflowMenuButtons: [
-        'captions',
-        'captions-position',
+        'captions-settings',
         'quality',
         'video_type',
         'language',
@@ -358,8 +357,6 @@ shaka.ui.Overlay = class {
         'errors',
       ],
       contextMenuElements: [
-        'captions-position',
-        'captions-size',
         'loop',
         'picture_in_picture',
         'copy_video_frame',
@@ -461,6 +458,11 @@ shaka.ui.Overlay = class {
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      captionsStyleElements: [
+        'captions-size',
+        'captions-position',
+        'captions-style-reset',
+      ],
       documentPictureInPicture: {
         enabled: true,
         preferInitialWindowPlacement: false,

@@ -133,9 +133,13 @@ shaka.extern.AdaptationSetCriteria.Factory;
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
  *   The codec switching strategy used to filter variants.
  * @property {string} audioCodec
- *   The audio codec used to filter variants.
+ *   The codec of the audio track selected at runtime (e.g. with
+ *   <code>selectAudioTrack()</code>), used to filter variants.  Unlike the
+ *   <code>codec</code> of an audio preference, which must match exactly, any
+ *   codec of the same family matches (e.g. HE-AAC and AAC-LC).
  * @property {string} activeAudioCodec
- *   The active audio codec used to filter variants.
+ *   The codec of the audio being played, used to filter variants.  Any codec
+ *   of the same family matches.
  * @property {number} activeAudioChannelCount
  *   The active audio channel count used to filter variants.
  * @property {string} keySystem

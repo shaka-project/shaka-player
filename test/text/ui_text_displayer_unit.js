@@ -516,6 +516,226 @@ describe('UITextDisplayer', () => {
       expect(Object.keys(cueCssObj)).not.toContain('top');
       expect(Object.keys(cueCssObj)).not.toContain('left');
     }
+
+    // Regions with a fixed height don't clip their cues.
+    expect(regionElement.style.overflow).toBe('');
+  });
+
+  describe('regions sized in lines', () => {
+    /**
+     * @param {number} lines
+     * @return {!shaka.text.CueRegion}
+     */
+    function createLinesRegion(lines) {
+      const region = new shaka.text.CueRegion();
+      region.id = 'fred';
+      region.width = 40;
+      region.height = lines;
+      region.heightUnits = shaka.text.CueRegion.units.LINES;
+      region.regionAnchorX = 50;
+      region.regionAnchorY = 100;
+      region.viewportAnchorX = 50;
+      region.viewportAnchorY = 80;
+      return region;
+    }
+
+    /**
+     * @param {number} startTime
+     * @param {!shaka.text.CueRegion} region
+     * @return {!shaka.text.Cue}
+     */
+    function createCue(startTime, region) {
+      const cue = new shaka.text.Cue(startTime, 100, 'Test ' + startTime);
+      cue.region = region;
+      return cue;
+    }
+
+    /**
+     * Positions the text container over the video container, as the UI styles
+     * do, which the unit tests don't load.
+     * @return {!DOMRect}
+     */
+    function positionTextContainer() {
+      videoContainer.style.position = 'relative';
+      const textContainer = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container'));
+      textContainer.style.position = 'absolute';
+      textContainer.style.top = '0';
+      textContainer.style.left = '0';
+      textContainer.style.width = '100%';
+      textContainer.style.height = '100%';
+      return textContainer.getBoundingClientRect();
+    }
+
+    afterEach(() => {
+      videoContainer.style.position = '';
+    });
+
+    /** @return {!HTMLElement} */
+    function getRegionElement() {
+      const regionElements =
+          videoContainer.querySelectorAll('.shaka-text-region');
+      expect(regionElements.length).toBe(1);
+      return /** @type {!HTMLElement} */ (regionElements[0]);
+    }
+
+    it('sizes and anchors the region box', async () => {
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([createCue(0, createLinesRegion(3))]);
+      await updateCaptions();
+
+      const regionElement = getRegionElement();
+      // From the default displayAlign of the cue.
+      expect(regionElement.style.justifyContent).toBe('flex-end');
+
+      // The region is 3 lines tall, with the line height of its cues.
+      const fontSize = parseFloat(getComputedStyle(regionElement).fontSize);
+      const lineHeight =
+          parseFloat(getComputedStyle(regionElement).lineHeight);
+      expect(lineHeight).toBeCloseTo(1.4 * fontSize, 1);
+      const container = positionTextContainer();
+      const box = regionElement.getBoundingClientRect();
+      expect(box.height).toBeCloseTo(3 * lineHeight, 0);
+      expect(box.width).toBeCloseTo(0.4 * container.width, 0);
+      // The bottom center of the region is anchored at 50%,80% of the
+      // viewport.
+      expect(box.left - container.left)
+          .toBeCloseTo(0.5 * container.width - box.width / 2, 0);
+      expect(box.bottom - container.top).toBeCloseTo(0.8 * container.height, 0);
+    });
+
+    it('scales the lines with the font scale factor', async () => {
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+      config.suspendRenderingWhenHidden = false;
+      config.fontScaleFactor = 2;
+      textDisplayer.configure(config);
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([createCue(0, createLinesRegion(2))]);
+      await updateCaptions();
+
+      const regionElement = getRegionElement();
+      const fontSize = parseFloat(getComputedStyle(regionElement).fontSize);
+      const box = regionElement.getBoundingClientRect();
+      expect(box.height).toBeCloseTo(2 * 1.4 * 2 * fontSize, 0);
+    });
+
+    it('sizes regions with a width in columns', async () => {
+      // As CEA-708 windows are.
+      const region = createLinesRegion(2);
+      region.width = 32;
+      region.widthUnits = shaka.text.CueRegion.units.LINES;
+
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([createCue(0, region)]);
+      await updateCaptions();
+
+      const regionElement = getRegionElement();
+      const lineHeight =
+          parseFloat(getComputedStyle(regionElement).lineHeight);
+      positionTextContainer();
+      const box = regionElement.getBoundingClientRect();
+      expect(box.height).toBeCloseTo(2 * lineHeight, 0);
+      // The text that doesn't fit is shown, not hidden.
+      expect(regionElement.style.overflow).toBe('');
+    });
+
+    it('keeps apart regions of the same size in other units', async () => {
+      const vttRegion = createLinesRegion(3);
+      const pixelRegion = vttRegion.clone();
+      pixelRegion.heightUnits = shaka.text.CueRegion.units.PX;
+
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([
+        createCue(0, vttRegion),
+        createCue(0, pixelRegion),
+      ]);
+      await updateCaptions();
+
+      expect(videoContainer.querySelectorAll('.shaka-text-region').length)
+          .toBe(2);
+    });
+
+    describe('scroll', () => {
+      /** @type {!jasmine.Spy} */
+      let animateSpy;
+
+      beforeEach(() => {
+        // eslint-disable-next-line no-restricted-syntax
+        const prototype = HTMLElement.prototype;
+        if (!prototype.animate) {
+          pending('Element.animate() is not supported');
+        }
+        animateSpy = spyOn(prototype, 'animate').and.callThrough();
+      });
+
+      it('scrolls up the lines when a cue is added', async () => {
+        const region = createLinesRegion(2);
+        region.scroll = shaka.text.CueRegion.scrollMode.UP;
+
+        textDisplayer.setTextVisibility(true);
+        textDisplayer.append([createCue(0, region)]);
+        await updateCaptions();
+        // Nothing to scroll for the first cue.
+        expect(animateSpy).not.toHaveBeenCalled();
+
+        textDisplayer.append([createCue(1, region)]);
+        video.currentTime = 1;
+        await updateCaptions();
+
+        const regionElement = getRegionElement();
+        const children = /** @type {!Array<!HTMLElement>} */ (
+          Array.from(regionElement.childNodes));
+        expect(children.length).toBe(2);
+        const newLineHeight = children[1].offsetHeight;
+        expect(newLineHeight).toBeGreaterThan(0);
+        // Both lines move up from one line below.
+        expect(animateSpy).toHaveBeenCalledTimes(2);
+        for (const call of animateSpy.calls.all()) {
+          expect(children).toContain(call.object);
+          expect(call.args[0]).toEqual([
+            {transform: `translateY(${newLineHeight}px)`},
+            {transform: 'translateY(0)'},
+          ]);
+          expect(call.args[1]).toEqual(
+              jasmine.objectContaining({duration: 433}));
+        }
+      });
+
+      it('scrolls up regions with a fixed height', async () => {
+        const region = new shaka.text.CueRegion();
+        region.id = 'window';
+        region.height = 20;
+        region.width = 80;
+        region.scroll = shaka.text.CueRegion.scrollMode.UP;
+
+        textDisplayer.setTextVisibility(true);
+        textDisplayer.append([createCue(0, region)]);
+        await updateCaptions();
+        textDisplayer.append([createCue(1, region)]);
+        video.currentTime = 1;
+        await updateCaptions();
+
+        const regionElement = getRegionElement();
+        expect(regionElement.style.justifyContent).toBe('flex-end');
+        expect(regionElement.style.overflow).toBe('hidden');
+        expect(animateSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not scroll regions without scroll:up', async () => {
+        const region = createLinesRegion(2);
+
+        textDisplayer.setTextVisibility(true);
+        textDisplayer.append([createCue(0, region)]);
+        await updateCaptions();
+        textDisplayer.append([createCue(1, region)]);
+        video.currentTime = 1;
+        await updateCaptions();
+
+        expect(getRegionElement().childNodes.length).toBe(2);
+        expect(animateSpy).not.toHaveBeenCalled();
+      });
+    });
   });
 
   it('does not lose second item in a region', async () => {
@@ -751,6 +971,28 @@ describe('UITextDisplayer', () => {
 
     expect(videoContainer.querySelector('.shaka-text-container')).toBe(null);
   });
+
+  it('shows example text over a hidden cue while visibility is off',
+      async () => {
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+        config.suspendRenderingWhenHidden = false;
+
+        textDisplayer.configure(config);
+        textDisplayer.append([new shaka.text.Cue(0, 100, 'Real subtitle')]);
+        await updateCaptions();
+
+        textDisplayer.setTextStylePreview(config, 'Subtitles example');
+
+        const textContainer =
+            videoContainer.querySelector('.shaka-text-container');
+        expect(textContainer.textContent).toBe('Subtitles example');
+
+        textDisplayer.clearTextStylePreview();
+
+        expect(videoContainer.querySelector('.shaka-text-container'))
+            .toBe(null);
+      });
 
   it('replaces example text during repeated preview updates', () => {
     const config =

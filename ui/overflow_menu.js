@@ -99,6 +99,14 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
   }
 
   /**
+   * @param {string} name
+   * @return {?shaka.extern.IUIElement.Factory}
+   */
+  static getElementFactory(name) {
+    return shaka.ui.OverflowMenu.elementNamesToFactories_.get(name) || null;
+  }
+
+  /**
    * @private
    */
   addOverflowMenu_() {

@@ -70,7 +70,9 @@ shaka.ui.TextPosition = class extends shaka.ui.TextStyleMenu {
 
     this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
 
-    const label = this.localization.resolve(LocIds.SUBTITLE_POSITION);
+    // Inside a menu group, the group already names the context.
+    const label = this.localization.resolve(
+        this.isInMenuGroup ? LocIds.POSITION : LocIds.SUBTITLE_POSITION);
     this.button.ariaLabel = label;
     this.nameSpan.textContent = label;
     this.backSpan.textContent = label;

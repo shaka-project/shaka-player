@@ -357,6 +357,7 @@ shaka.extern.UITrackLabelCallback;
  *   mediaSession: shaka.extern.UIMediaSession,
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
+ *   captionsStyleElements: !Array<string>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
  *   showMenusOnTheRight: boolean,
@@ -671,6 +672,11 @@ shaka.extern.UITrackLabelCallback;
  *   The ordered list of font scale factor selection.
  *   <br>
  *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {!Array<string>} captionsStyleElements
+ *   The ordered list of elements in the subtitle style menu.
+ *   <br>
+ *   Defaults to <code>['captions-size', 'captions-position',
+ *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.
  *   <br>
@@ -782,6 +788,12 @@ shaka.extern.IUIElement = class {
      * @exportInterface
      */
     this.isSubMenuOpened;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isInMenuGroup;
   }
 
   /**
@@ -971,6 +983,42 @@ shaka.extern.IUISettingsMenu = class {
      */
     this.backSpan;
   }
+};
+
+/**
+ * Interface for UI menu groups: a menu button that opens a submenu holding
+ * other UI elements, which may be menu groups too.  UI menu groups should
+ * inherit from the abstract base class shaka.ui.MenuGroup.  The methods
+ * defined here are defined to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUISettingsMenu}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIMenuGroup = class {
+  /**
+   * Returns the localized name of the group, shown on its button and as the
+   * title of its submenu.
+   *
+   * @return {string}
+   */
+  getName() {}
+
+  /**
+   * Returns the names of the elements inside the group, as registered with
+   * shaka.ui.OverflowMenu.registerElement.
+   *
+   * @return {!Array<string>}
+   */
+  getChildElementNames() {}
+
+  /**
+   * Returns the name of the element, among getChildElementNames(), whose
+   * current selection is shown on the group button, or null to show none.
+   *
+   * @return {?string}
+   */
+  getSummaryElementName() {}
 };
 
 /**
