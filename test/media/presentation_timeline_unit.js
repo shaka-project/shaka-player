@@ -413,6 +413,55 @@ describe('PresentationTimeline', () => {
     });
   });
 
+  describe('setSegmentAvailabilityDuration', () => {
+    it('sets duration for live', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
+
+      timeline.setSegmentAvailabilityDuration(40);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(40);
+    });
+
+    it('is not set when not live (IPR)', () => {
+      const timeline = makeIprTimeline(/* duration= */ 60);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+
+      timeline.setSegmentAvailabilityDuration(20);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+      expect(() => timeline.assertIsValid()).not.toThrow();
+    });
+
+    it('is not set when not live (VOD)', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+
+      timeline.setSegmentAvailabilityDuration(20);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+      expect(() => timeline.assertIsValid()).not.toThrow();
+    });
+
+    it('resets to Infinity when transitioned from live by setDuration', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
+
+      timeline.setDuration(60);
+      expect(timeline.isInProgress()).toBe(true);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+      expect(() => timeline.assertIsValid()).not.toThrow();
+    });
+
+    it('resets to Infinity when transitioned from live by setStatic', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
+
+      timeline.setDuration(60);
+      timeline.setStatic(true);
+      expect(timeline.isLive()).toBe(false);
+      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
+      expect(() => timeline.assertIsValid()).not.toThrow();
+    });
+  });
+
   describe('clockOffset', () => {
     it('offsets availability calculations', () => {
       const timeline = makeLiveTimeline(/* availability= */ 10);
