@@ -262,7 +262,6 @@ module.exports = (config) => {
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/audio-iamf/*', included: false},
-      {pattern: 'test/test/assets/cbcs-subsamples/**/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},
       {pattern: 'test/test/assets/dash-event-callback/*', included: false},
