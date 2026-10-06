@@ -132,11 +132,6 @@ describe('HlsParser', () => {
           forced: false,
         }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
-    await video.play();
-
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // All text segments are fetched while filling the buffering goal, so
     // there is no need to play the presentation through to see every cue.
@@ -144,6 +139,9 @@ describe('HlsParser', () => {
     // content has a small gap in the media timeline at the discontinuity,
     // and some older WebKit versions fail to resume playback after jumping
     // it.  Playing through gaps is covered by "supports playback with gaps".
+    // Wait before playing: the content also starts with a small gap, and
+    // where gapPadding is set (e.g. Tizen) jumping it skips the first cue's
+    // segment if the text has not been buffered yet.
     const textTrack = video.textTracks[0];
     const deadline = Date.now() + 20 * 1000;
     while ((textTrack.cues || []).length < 3 && Date.now() < deadline) {
@@ -159,6 +157,12 @@ describe('HlsParser', () => {
     expect(cues[1].endTime).toBeCloseTo(4, 0);
     expect(cues[2].startTime).toBeCloseTo(6, 0);
     expect(cues[2].endTime).toBeCloseTo(8, 0);
+
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     await player.unload();
   });
