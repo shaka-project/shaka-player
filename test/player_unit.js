@@ -883,6 +883,155 @@ describe('Player', () => {
       });
     });
 
+    describe('native HLS fallback on MSE errors', () => {
+      const mimeType = 'application/x-mpegurl';
+      const Code = shaka.util.Error.Code;
+      /** @type {!shaka.test.FakeManifestParser} */
+      let parser;
+      /** @type {!shaka.util.Error} */
+      let error;
+
+      beforeEach(() => {
+        parser = new shaka.test.FakeManifestParser(manifest);
+        shaka.media.ManifestParser.registerParserByMime(mimeType, () => parser);
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+            (mediaElement, readyState, eventManager, callback) => callback());
+        player.configure({
+          streaming: {
+            useNativeHlsForFairPlay: false,
+            preferNativeHls: false,
+            fallbackToNativeHlsOnMseError: true,
+          },
+        });
+        error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MANIFEST,
+            Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
+        parser.start.and.callFake(() => Promise.reject(error));
+      });
+
+      afterEach(() => {
+        shaka.media.ManifestParser.registerParserByMime(
+            mimeType, () => new shaka.hls.HlsParser());
+      });
+
+      for (const code of [
+        Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED,
+        Code.HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED,
+      ]) {
+        it('retries error ' + code + ' with native playback', async () => {
+          error.code = code;
+          await player.load(fakeManifestUri, 7, mimeType);
+
+          expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+          expect(video.src).toBe(fakeManifestUri);
+          expect(video.currentTime).toBe(7);
+          expect(parser.stop).toHaveBeenCalled();
+          expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+          expect(parser.start).toHaveBeenCalledTimes(1);
+          expect(onError).not.toHaveBeenCalled();
+          expect(player.getConfiguration().streaming.preferNativeHls)
+              .toBe(false);
+          expect(player.getConfiguration().streaming.useNativeHlsForFairPlay)
+              .toBe(false);
+        });
+      }
+
+      it('handles errors creating the initial segment index', async () => {
+        parser.start.and.callFake(() => Promise.resolve(manifest));
+        manifest.type = shaka.media.ManifestParser.HLS;
+        for (const variant of manifest.variants) {
+          variant.video.segmentIndex = null;
+          variant.video.createSegmentIndex = () => Promise.reject(error);
+        }
+        await player.load(fakeManifestUri, 0, mimeType);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+        expect(parser.stop).toHaveBeenCalled();
+      });
+
+      it('does not force native playback on the next load', async () => {
+        await player.load(fakeManifestUri, 0, mimeType);
+        parser.start.and.callFake(() => Promise.resolve(manifest));
+        await player.load(fakeManifestUri, 0, mimeType);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
+      });
+
+      it('defaults to enabled only on WebKit', () => {
+        const engine = spyOn(deviceDetected, 'getBrowserEngine');
+        for (const browserEngine of [
+          shaka.device.IDevice.BrowserEngine.WEBKIT,
+          shaka.device.IDevice.BrowserEngine.CHROMIUM,
+          shaka.device.IDevice.BrowserEngine.GECKO,
+        ]) {
+          engine.and.returnValue(browserEngine);
+          const config = shaka.util.PlayerConfiguration.createDefault();
+          expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(
+              browserEngine === shaka.device.IDevice.BrowserEngine.WEBKIT);
+        }
+      });
+
+      it('can be disabled', async () => {
+        player.configure('streaming.fallbackToNativeHlsOnMseError', false);
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('requires native HLS support', async () => {
+        video.canPlayType.and.returnValue('');
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('does not retry other errors', async () => {
+        error.code = Code.HLS_REQUIRED_ATTRIBUTE_MISSING;
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('does not retry non-HLS loads', async () => {
+        shaka.media.ManifestParser.registerParserByMime(fakeMimeType,
+            () => parser);
+        await expectAsync(player.load(fakeManifestUri, 0, fakeMimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('retries a failed preload when it is loaded', async () => {
+        const preload = await player.preload(fakeManifestUri, 9, mimeType);
+        await expectAsync(preload.waitForFinish()).toBeRejectedWith(error);
+        await player.load(preload);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+        expect(video.currentTime).toBe(9);
+        expect(preload.isDestroyed()).toBe(true);
+      });
+
+      it('propagates a native failure without retrying again', async () => {
+        drmEngine.initForPlayback.and.callFake(() => Promise.reject(error));
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(parser.start).toHaveBeenCalledTimes(1);
+        expect(drmEngine.initForPlayback).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not retry if unloading interrupts cleanup', async () => {
+        parser.stop.and.callFake(async () => {
+          // Start another operation while the failed preload is destroyed.
+          await player.unload(false);
+        });
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(Util.jasmineError(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.PLAYER,
+                Code.LOAD_INTERRUPTED)));
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+    });
+
     it('fires keystatuschanged events', async () => {
       const keyStatusChanged = jasmine.createSpy('keyStatusChanged');
       player.addEventListener(

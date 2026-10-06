@@ -703,6 +703,8 @@ shakaDemo.Config = class {
             'streaming.preferNativeDash')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')
+        .addBoolInput_('Fall back to native HLS on unsupported MSE encryption',
+            'streaming.fallbackToNativeHlsOnMseError')
         .addNumberInput_('Update interval seconds',
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)

@@ -2054,6 +2054,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   lowLatencyMode: boolean,
  *   preferNativeDash: boolean,
  *   preferNativeHls: boolean,
+ *   fallbackToNativeHlsOnMseError: boolean,
  *   updateIntervalSeconds: number,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
@@ -2215,6 +2216,15 @@ shaka.extern.SpeechToTextConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} fallbackToNativeHlsOnMseError
+ *   Retry an HLS load using native playback when MSE fails with
+ *   HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED or
+ *   HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED, if native HLS is
+ *   supported. The retry applies only to that load and does not change the
+ *   native playback preferences. Native media requests bypass Shaka's
+ *   networking filters.
+ *   <br>
+ *   Defaults to <code>true</code> on WebKit and <code>false</code> elsewhere.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>

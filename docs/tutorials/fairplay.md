@@ -25,6 +25,24 @@ The support in each case would be the following:
 |MSE (TS)    | -         | -                     |
 
 
+When an HLS load fails with `HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED` or
+`HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED`, Shaka can retry that
+load using native `src=` playback if the media element supports HLS. This
+fallback is enabled by default on WebKit and disabled elsewhere. It does not
+change the native playback preferences for subsequent loads and does not
+apply to errors after loading has completed.
+
+To disable the fallback:
+```js
+player.configure('streaming.fallbackToNativeHlsOnMseError', false);
+```
+
+Native playback downloads playlists and segments outside Shaka's networking
+engine, so request and response filters for these requests do not apply.
+FairPlay license requests still use Shaka's networking engine, and the
+application must provide the required DRM configuration for native playback.
+
+
 Adding FairPlay support involves a bit more work than other key systems.
 
 Note: If you are using an older version of Safari that doesn't support
