@@ -3169,11 +3169,11 @@ describe('UI', () => {
         mouseEvent('mousedown', positionOfBar(0.25));
         const dragTime = parseFloat(seekBar.value);
 
-        // The test video element is created muted.
-        expect(video.muted).toBe(true);
+        // The test video element is not created muted on every platform.
+        const wasMuted = video.muted;
         pressKey(controls.getConfig().shortcuts.mute);
 
-        expect(video.muted).toBe(false);
+        expect(video.muted).toBe(!wasMuted);
         // Muting does not interrupt the drag.
         expect(controls.isSeeking()).toBe(true);
         expect(parseFloat(seekBar.value)).toBe(dragTime);

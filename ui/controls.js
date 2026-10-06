@@ -1038,7 +1038,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   static canTakeFocus_(element) {
-    return element.isConnected && !element.matches(':disabled') &&
+    // An element outside the document has no client rects.  Element.isConnected
+    // is not available on every platform (e.g. Tizen 3).
+    return !element.matches(':disabled') &&
         !element.closest('.shaka-hidden') &&
         element.getClientRects().length > 0;
   }
