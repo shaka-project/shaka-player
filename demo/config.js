@@ -1278,6 +1278,8 @@ shakaDemo.Config = class {
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
             'captionsFontScaleFactors')
+        .addUIArrayStringInput_('Captions Style Elements',
+            'captionsStyleElements')
         .addUIBoolInput_('Show buffering spinner', 'showBufferingSpinner');
   }
 

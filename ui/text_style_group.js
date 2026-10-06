@@ -16,7 +16,8 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * Groups the subtitle style options: size and position.
+ * Groups the subtitle style options given by the captionsStyleElements
+ * configuration.
  *
  * @extends {shaka.ui.MenuGroup}
  * @final
@@ -44,7 +45,7 @@ shaka.ui.TextStyleGroup = class extends shaka.ui.MenuGroup {
 
   /** @override */
   getChildElementNames() {
-    return ['captions-size', 'captions-position'];
+    return this.controls.getConfig().captionsStyleElements;
   }
 };
 
