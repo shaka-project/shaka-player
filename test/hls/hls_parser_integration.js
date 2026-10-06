@@ -325,6 +325,10 @@ describe('HlsParser', () => {
   });
 
   it('plays muxed TS audio in video', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 throws 3016 with this content');
+    }
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
     const url =
