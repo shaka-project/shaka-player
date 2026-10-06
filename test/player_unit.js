@@ -3093,6 +3093,11 @@ describe('Player', () => {
       });
 
       it('changes the quality to select the audio', () => {
+        // Falling back from E-AC-3 to AAC needs a codec switch.
+        spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+            .and.returnValue(true);
+        player.configure('mediaSource.codecSwitchingStrategy',
+            shaka.config.CodecSwitchingStrategy.SMOOTH);
         const surround = player.getAudioTracks().find(
             (t) => t.channelsCount == 6);
         goog.asserts.assert(surround, 'Must have a 5.1 track');
@@ -3105,6 +3110,19 @@ describe('Player', () => {
         expect(abrManager.variants.map((v) => v.id).sort())
             .toEqual([301, 302, 303, 304]);
       });
+
+      it('doesn\'t fall back to another codec without smooth switching',
+          () => {
+            spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+                .and.returnValue(false);
+            const surround = player.getAudioTracks().find(
+                (t) => t.channelsCount == 6);
+            goog.asserts.assert(surround, 'Must have a 5.1 track');
+            player.selectAudioTrack(surround);
+            // E-AC-3 can't transition to the AAC of the stereo variants.
+            expect(abrManager.variants.map((v) => v.id).sort())
+                .toEqual([303, 304]);
+          });
 
       it('doesn\'t fall back if not allowed', () => {
         player.configure('abr.allowAudioFallback', false);
