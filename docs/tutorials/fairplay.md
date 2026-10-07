@@ -28,7 +28,7 @@ The support in each case would be the following:
 When an HLS load fails with `HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED` or
 `HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED`, Shaka can retry that
 load using native `src=` playback if the media element supports HLS. This
-fallback is enabled by default on WebKit and disabled elsewhere. It does not
+fallback is enabled by default on Apple browsers and disabled elsewhere. It does
 change the native playback preferences for subsequent loads and does not
 apply to errors after loading has completed.
 

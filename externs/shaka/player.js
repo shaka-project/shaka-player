@@ -2224,7 +2224,8 @@ shaka.extern.SpeechToTextConfiguration;
  *   native playback preferences. Native media requests bypass Shaka's
  *   networking filters.
  *   <br>
- *   Defaults to <code>true</code> on WebKit and <code>false</code> elsewhere.
+ *   Defaults to <code>true</code> on Apple browsers and <code>false</code>
+ *   elsewhere.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>

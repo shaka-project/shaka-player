@@ -958,8 +958,17 @@ describe('Player', () => {
         expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
       });
 
-      it('defaults to enabled only on WebKit', () => {
-        const engine = spyOn(deviceDetected, 'getBrowserEngine');
+      it('defaults to enabled on Apple browsers', () => {
+        spyOn(shaka.device.DeviceFactory, 'getDevice').and.returnValue(
+            new shaka.device.AppleBrowser());
+        const config = shaka.util.PlayerConfiguration.createDefault();
+        expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(true);
+      });
+
+      it('defaults to disabled on other devices, including WebKit', () => {
+        const device = new shaka.device.DefaultBrowser();
+        spyOn(shaka.device.DeviceFactory, 'getDevice').and.returnValue(device);
+        const engine = spyOn(device, 'getBrowserEngine');
         for (const browserEngine of [
           shaka.device.IDevice.BrowserEngine.WEBKIT,
           shaka.device.IDevice.BrowserEngine.CHROMIUM,
@@ -967,8 +976,7 @@ describe('Player', () => {
         ]) {
           engine.and.returnValue(browserEngine);
           const config = shaka.util.PlayerConfiguration.createDefault();
-          expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(
-              browserEngine === shaka.device.IDevice.BrowserEngine.WEBKIT);
+          expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(false);
         }
       });
 
