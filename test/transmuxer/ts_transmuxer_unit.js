@@ -348,10 +348,10 @@ describe('TsTransmuxer', () => {
   describe('GOPs that span segments', () => {
     // Generated with FFmpeg from 4 seconds of a test pattern at 25 fps
     // (128x72 for H.264, 320x180 for H.265), with a fixed 2-second GOP cut
-    // into 1-second segments (-hls_flags split_by_time).  Parameter sets only
-    // ride with key frames (repeat-headers=0 for x265), so segments 0 and 2
-    // start with them and a key frame, while 1 and 3 start in the middle of a
-    // GOP and carry neither.
+    // into 1-second segments (-hls_flags split_by_time).  GOPs are closed, and
+    // parameter sets only ride with key frames (open-gop=0 and
+    // repeat-headers=0 for x265), so segments 0 and 2 start with them and an
+    // IDR frame, while 1 and 3 start in the middle of a GOP and carry neither.
     const cases = [
       {
         name: 'H.264',
