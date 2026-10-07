@@ -674,7 +674,10 @@ shaka.extern.UITrackLabelCallback;
  * @property {!Array<string>} captionsStyleElements
  *   The ordered list of elements in the subtitle style menu.
  *   <br>
- *   Defaults to <code>['captions-size', 'captions-position',
+ *   Defaults to <code>['captions-font-family', 'captions-font-color',
+ *   'captions-size', 'captions-background-color',
+ *   'captions-background-opacity', 'captions-character-edge-style',
+ *   'captions-font-opacity', 'captions-position',
  *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.

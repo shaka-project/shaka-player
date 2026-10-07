@@ -108,6 +108,12 @@ shaka.ui.TextStyleResetButton = class extends shaka.ui.Element {
 shaka.ui.TextStyleResetButton.STYLE_SETTINGS_ = [
   'fontScaleFactor',
   'positionArea',
+  'fontFamily',
+  'fontColor',
+  'fontOpacity',
+  'backgroundColor',
+  'backgroundOpacity',
+  'characterEdgeStyle',
 ];
 
 
