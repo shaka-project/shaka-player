@@ -147,7 +147,6 @@ describe('Player', () => {
 
     it('multi period and shifted period start', async () => {
       const netEngine = player.getNetworkingEngine();
-      shaka.log.setLevel(shaka.log.Level.V1);
       const startTime = Date.now();
       netEngine.registerRequestFilter((type, request) => {
         if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {

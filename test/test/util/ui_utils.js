@@ -112,22 +112,28 @@ shaka.test.UiUtils = class {
 
     const destroys = [];
     for (const container of containers) {
-      const ui = /** @type {shaka.ui.Overlay} */(container['ui']);
+      const ui = /** @type {?shaka.ui.Overlay} */(container['ui']);
 
-      // Destroying the UI destroys the controls and player inside.
-      destroys.push(ui.destroy());
+      // Destroying the UI destroys the controls and player inside.  A test
+      // that failed before the UI was set up leaves a container without one.
+      if (ui) {
+        destroys.push(ui.destroy());
+      }
     }
 
-    const allDestroyed = Promise.all(destroys);
-    // 10 seconds should be more than enough to tear down the UI.
-    // Adding this silent timeout fixes several tests that inconsistently hang
-    // during teardown and cause failures in afterEach() clauses.
-    await Promise.race([allDestroyed, shaka.test.Util.delay(10)]);
-
-    // Now remove all the containers from the DOM.
-    for (const container of containers) {
-      if (container.parentElement) {
-        container.parentElement.removeChild(container);
+    try {
+      const allDestroyed = Promise.all(destroys);
+      // 10 seconds should be more than enough to tear down the UI.
+      // Adding this silent timeout fixes several tests that inconsistently
+      // hang during teardown and cause failures in afterEach() clauses.
+      await Promise.race([allDestroyed, shaka.test.Util.delay(10)]);
+    } finally {
+      // Now remove all the containers from the DOM, even if the teardown
+      // failed.  Otherwise their videos would linger for every later test.
+      for (const container of containers) {
+        if (container.parentElement) {
+          container.parentElement.removeChild(container);
+        }
       }
     }
   }
