@@ -860,6 +860,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // box.  Make the box hug the time in that case, so that the time itself,
     // and not the empty space around it, is what gets centered on the pointer
     // and clamped to the edges of the bar.
+    // Size the image independently so the caption can make the preview wider.
+    const thumbnailWidth = Math.max(150, barWidth * 0.15);
+    const wasPortrait =
+        this.thumbnailContainer_.classList.contains('portrait-thumbnail');
+    this.thumbnailImageContainer_.style.width =
+        (wasPortrait ? thumbnailWidth / 2 : thumbnailWidth) + 'px';
     this.thumbnailImageContainer_.style.display = showImage ? '' : 'none';
     this.thumbnailContainer_.classList.toggle('time-only', !showImage);
 
@@ -894,7 +900,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         aspectRatio = videoTrack.width / videoTrack.height;
       }
       const height =
-          Math.floor(this.thumbnailContainer_.clientWidth / aspectRatio);
+          Math.floor(this.thumbnailImageContainer_.clientWidth / aspectRatio);
       this.thumbnailImageContainer_.style.height = height + 'px';
     }
 
@@ -909,11 +915,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (!thumbnail) {
       return;
     }
-    if (thumbnail.width < thumbnail.height) {
-      this.thumbnailContainer_.classList.add('portrait-thumbnail');
-    } else {
-      this.thumbnailContainer_.classList.remove('portrait-thumbnail');
-    }
+    const isPortrait = thumbnail.width < thumbnail.height;
+    this.thumbnailContainer_.classList.toggle('portrait-thumbnail', isPortrait);
+    this.thumbnailImageContainer_.style.width =
+        (isPortrait ? thumbnailWidth / 2 : thumbnailWidth) + 'px';
     let uri = thumbnail.uris[0].split('#xywh=')[0];
     if (!this.lastThumbnail_ ||
         uri !== this.lastThumbnail_.uris[0].split('#xywh=')[0] ||

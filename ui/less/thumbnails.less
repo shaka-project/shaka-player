@@ -1,10 +1,11 @@
 .shaka-player-ui-thumbnail-container {
   bottom: 15px;
-  min-width: 150px;
+  min-width: 0;
+  max-width: 100%;
   pointer-events: none;
   position: absolute;
   visibility: hidden;
-  width: 15%;
+  width: auto;
   z-index: 1;
 
   // Position of child elements
@@ -13,11 +14,6 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
-
-  &.portrait-thumbnail {
-    min-width: 75px;
-    width: 7.5%;
-  }
 
   // When there is no thumbnail to show, the box must hug the time, instead of
   // reserving the width of an image that is not being displayed. Otherwise the
@@ -31,10 +27,12 @@
   .shaka-player-ui-thumbnail-image-container {
     background-color: var(--shaka-bg-solid);
     border: 1px solid var(--shaka-bg-solid);
+    box-sizing: border-box;
     box-shadow: 0 8px 8px 0 var(--shaka-bg);
     overflow: hidden;
     position: relative;
     width: 100%;
+    max-width: 100%;
 
     .shaka-player-ui-thumbnail-image {
       position: absolute;
@@ -44,6 +42,8 @@
   .shaka-player-ui-thumbnail-time-container {
     display: flex;
     justify-content: center;
+    max-width: 100%;
+    min-width: 0;
 
     .shaka-player-ui-thumbnail-time {
       background-color: var(--shaka-bg);
@@ -51,6 +51,11 @@
       color: var(--shaka-font-color);
       font-size: var(--shaka-font-size);
       padding: 0 5px;
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      text-align: center;
 
       @media (prefers-reduced-transparency) {
         background-color: var(--shaka-bg-90);
