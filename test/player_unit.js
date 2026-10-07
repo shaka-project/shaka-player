@@ -1410,6 +1410,48 @@ describe('Player', () => {
       shaka.media.ManifestParser.registerParserByMime(fakeMimeType, fail);
       await player.load(preloadManager);
     });
+
+    describe('prefetches the segment that contains the start time', () => {
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      beforeEach(() => {
+        const timeline = new shaka.media.PresentationTimeline(300, 0);
+        timeline.setStatic(true);
+        // This duration is used by useSegmentTemplate below to decide how many
+        // references to generate.
+        timeline.setDuration(300);
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.presentationTimeline = timeline;
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.useSegmentTemplate(
+                  'video-%d.mp4', /* segmentDuration= */ 10);
+            });
+          });
+        });
+      });
+
+      it('when starting from the beginning', async () => {
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        networkingEngine.expectRequest('video-0.mp4', segmentType);
+        networkingEngine.expectNoRequest('video-1.mp4', segmentType);
+        await preloadManager.destroy();
+      });
+
+      it('when starting mid-stream', async () => {
+        // The segment at index 2 covers [20, 30).
+        const preloadManager = await player.preload(
+            fakeManifestUri, 25, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        networkingEngine.expectRequest('video-2.mp4', segmentType);
+        networkingEngine.expectNoRequest('video-1.mp4', segmentType);
+        await preloadManager.destroy();
+      });
+    });
   });
 
   describe('resetConfiguration', () => {
