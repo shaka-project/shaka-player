@@ -58,7 +58,6 @@
   "SEEK": "البحث بالتمرير",
   "SEEK_BACKWARD": "الترجيع بمقدار [SECONDS] ثانية",
   "SEEK_FORWARD": "التقديم بمقدار [SECONDS] ثانية",
-  "SIZE": "الحجم",
   "SKIP_AD": "تخطّي الإعلان",
   "SKIP_NEXT": "التالي",
   "SKIP_PREVIOUS": "السابق",

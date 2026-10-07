@@ -58,7 +58,6 @@
   "SEEK": "Chercher",
   "SEEK_BACKWARD": "Reculer de [SECONDS] secondes",
   "SEEK_FORWARD": "Avancer de [SECONDS] secondes",
-  "SIZE": "Taille",
   "SKIP_AD": "Passer l'annonce",
   "SKIP_NEXT": "Suivante",
   "SKIP_PREVIOUS": "Précédente",

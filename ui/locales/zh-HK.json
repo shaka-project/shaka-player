@@ -58,7 +58,6 @@
   "SEEK": "進度",
   "SEEK_BACKWARD": "倒帶 [SECONDS] 秒",
   "SEEK_FORWARD": "快轉 [SECONDS] 秒",
-  "SIZE": "大小",
   "SKIP_AD": "略過廣告",
   "SKIP_NEXT": "下一個",
   "SKIP_PREVIOUS": "上一個",

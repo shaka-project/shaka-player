@@ -58,7 +58,6 @@
   "SEEK": "Ugrás",
   "SEEK_BACKWARD": "Visszatekerés [SECONDS] másodperccel",
   "SEEK_FORWARD": "Előretekerés [SECONDS] másodperccel",
-  "SIZE": "Méret",
   "SKIP_AD": "Hirdetés átugrása",
   "SKIP_NEXT": "Következő",
   "SKIP_PREVIOUS": "Előző",

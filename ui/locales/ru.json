@@ -58,7 +58,6 @@
   "SEEK": "Перемотка",
   "SEEK_BACKWARD": "Перемотать назад на [SECONDS] сек.",
   "SEEK_FORWARD": "Перемотать вперед на [SECONDS] сек.",
-  "SIZE": "Размер",
   "SKIP_AD": "Пропустить",
   "SKIP_NEXT": "Следующее",
   "SKIP_PREVIOUS": "Предыдущее",

@@ -697,7 +697,7 @@ describe('MenuGroup', () => {
       expect(label(get('shaka-caption-style-button')))
           .toBe(localization.resolve(LocIds.STYLE));
       expect(label(styleMenu.querySelector('.shaka-caption-size-button')))
-          .toBe(localization.resolve(LocIds.SIZE));
+          .toBe(localization.resolve(LocIds.FONT_SIZE));
       expect(label(styleMenu.querySelector('.shaka-caption-position-button')))
           .toBe(localization.resolve(LocIds.POSITION));
 

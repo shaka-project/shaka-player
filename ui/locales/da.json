@@ -58,7 +58,6 @@
   "SEEK": "Hop",
   "SEEK_BACKWARD": "Spol [SECONDS] sekunder tilbage",
   "SEEK_FORWARD": "Spol [SECONDS] sekunder frem",
-  "SIZE": "Størrelse",
   "SKIP_AD": "Spring annonce over",
   "SKIP_NEXT": "Næste",
   "SKIP_PREVIOUS": "Forrige",

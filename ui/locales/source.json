@@ -169,6 +169,10 @@
     "description": "Label for a button used to select the font opacity of the subtitles, inside the subtitle style menu.",
     "message": "Font opacity"
   },
+  "FONT_SIZE": {
+    "description": "Label for a button used to navigate to a submenu to choose the font size of the subtitles, when it is already inside the subtitle style submenu.",
+    "message": "Font size"
+  },
   "FULL_SCREEN": {
     "description": "Label for a button used to enter full screen mode in the video player.",
     "message": "Full screen"
@@ -326,10 +330,6 @@
   "SEEK_FORWARD": {
     "description": "Label for a button used to seek forward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
     "message": "Seek forward [SECONDS] seconds"
-  },
-  "SIZE": {
-    "description": "Label for a button used to navigate to a submenu to choose the subtitle size, when it is already inside the subtitle style submenu.",
-    "message": "Size"
   },
   "SKIP_AD": {
     "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",

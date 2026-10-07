@@ -58,7 +58,6 @@
   "SEEK": "ค้นหา",
   "SEEK_BACKWARD": "ย้อนกลับ [SECONDS] วินาที",
   "SEEK_FORWARD": "ข้ามไปข้างหน้า [SECONDS] วินาที",
-  "SIZE": "ขนาด",
   "SKIP_AD": "ข้ามโฆษณา",
   "SKIP_NEXT": "ถัดไป",
   "SKIP_PREVIOUS": "ก่อนหน้า",

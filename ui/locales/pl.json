@@ -58,7 +58,6 @@
   "SEEK": "Szukaj",
   "SEEK_BACKWARD": "Przewiń do tyłu o [SECONDS] s",
   "SEEK_FORWARD": "Przewiń do przodu o [SECONDS] s",
-  "SIZE": "Rozmiar",
   "SKIP_AD": "Pomiń reklamę",
   "SKIP_NEXT": "Dalej",
   "SKIP_PREVIOUS": "Poprzedni",
