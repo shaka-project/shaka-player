@@ -113,6 +113,16 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
   getCurrentValueLabel() { return ''; }
 
   /**
+   * Returns the CSS color of the swatch shown next to the item, or null to
+   * not show a swatch.
+   *
+   * @param {T} item
+   * @return {?string}
+   * @protected
+   */
+  getSwatchColorForItem(item) { return null; }
+
+  /**
    * Clears and rebuilds the menu items, then refreshes the selection indicator.
    * Call from the subclass constructor and from updateLocalizedStrings() when
    * item labels are localized strings.
@@ -128,6 +138,15 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = this.getLabelForItem(item);
       button.appendChild(span);
+
+      const swatchColor = this.getSwatchColorForItem(item);
+      if (swatchColor) {
+        // Not a span, because the chosen item is looked up by its span.
+        const swatch = shaka.util.Dom.createHTMLElement('div');
+        swatch.classList.add('shaka-color-swatch');
+        swatch.style.backgroundColor = swatchColor;
+        button.appendChild(swatch);
+      }
 
       this.eventManager.listen(button, 'click', () => {
         this.onItemSelected(item);
