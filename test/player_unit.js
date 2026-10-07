@@ -144,6 +144,7 @@ describe('Player', () => {
         getTextDisplayer: () => textDisplayer,
         getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),
+        addSecondarySource: jasmine.createSpy('addSecondarySource'),
       };
 
       player.createDrmEngine = () => {
