@@ -131,6 +131,9 @@ describe('UI', () => {
     eventManager.release();
     waiter = null;
     await UiUtils.cleanupUI();
+    // cleanupUI() only finds containers that got a UI.  Remove this one even
+    // if the test failed before setting one up.
+    videoContainer.remove();
   });
 
   afterAll(() => {

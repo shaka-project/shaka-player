@@ -692,8 +692,10 @@ describe('Playhead', () => {
     setMockDate(10);
     video.currentTime = 20;
     video.on['seeking']();
-    expect(video.currentTime).toBe(30);
-    expect(playhead.getTime()).toBe(30);
+    // The hole is also a buffered gap, so the gap jumper may get there first,
+    // with its padding on some platforms.
+    expect(video.currentTime).toBe(calculateGap(30));
+    expect(playhead.getTime()).toBe(calculateGap(30));
 
     // A seek outside any range is left alone.
     onSeek.calls.reset();
