@@ -205,7 +205,7 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 ## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
- - Media over QUIC Transport [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/), [draft-20](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/20/) and [draft-21](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/21/) (plus [draft-14](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/14/) and [draft-16](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/16/), deprecated and removed in v6)
+ - Media over QUIC Transport [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/), [draft-20](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/20/) and [draft-21](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/21/)
  - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
@@ -216,7 +216,7 @@ Features supported:
  - MPEG-2 TS [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/) support
  - Live
  - Media timeline tracks and templates, with DVR and seeking behind the live edge
- - MSF_COMPRESSION (GZIP) for the catalog, media timeline and event timeline tracks (draft-18 and later)
+ - MSF_COMPRESSION (GZIP) for the catalog, media timeline and event timeline tracks
  - SCTE-35 over event timeline tracks, as defined in [draft-wilaw-moq-scte35-event-timeline-00](https://datatracker.ietf.org/doc/draft-wilaw-moq-scte35-event-timeline/00/) (see [SCTE-35 messages](docs/tutorials/scte35.md))
  - For browsers that support WebTransport certificate fingerprints (e.g., Chrome), you can use self-signed certificates without installing them.
 

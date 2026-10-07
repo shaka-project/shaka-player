@@ -60,23 +60,17 @@ filterDescribe('shaka.msf.packaging.Locmaf', isMSFSupported, () => {
   }
 
   /**
-   * Encodes a QUIC variable-length integer (RFC 9000 section 16), which is the
-   * vi64 every MOQT draft up to 16 uses.
+   * Encodes a draft-18 variable-length integer, the vi64 every supported MOQT
+   * draft uses.
    *
    * @param {number} value
    * @return {!Uint8Array}
    */
   function varint(value) {
-    if (value < 64) {
-      return new Uint8Array([value]);
-    }
-    if (value < 16384) {
-      return new Uint8Array([0x40 | (value >> 8), value & 0xff]);
-    }
-    return new Uint8Array([
-      0x80 | (value >>> 24), (value >>> 16) & 0xff,
-      (value >>> 8) & 0xff, value & 0xff,
-    ]);
+    const writer = new shaka.util.DataViewWriter(
+        16, shaka.util.DataViewWriter.Endianness.BIG_ENDIAN);
+    new shaka.msf.draft18.Codec().encodeVarInt(writer, BigInt(value));
+    return writer.getBytes();
   }
 
   /**

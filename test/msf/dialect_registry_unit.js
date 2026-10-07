@@ -36,8 +36,6 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
 
   it('should have every shipped draft registered by default', () => {
     const registered = shaka.msf.DialectRegistry.getRegisteredDialects();
-    expect(registered).toContain(shaka.config.MsfVersion.DRAFT_14);
-    expect(registered).toContain(shaka.config.MsfVersion.DRAFT_16);
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_18);
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_20);
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_21);
@@ -50,12 +48,9 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
       shaka.config.MsfVersion.DRAFT_21,
       shaka.config.MsfVersion.DRAFT_20,
       shaka.config.MsfVersion.DRAFT_18,
-      shaka.config.MsfVersion.DRAFT_16,
-      shaka.config.MsfVersion.DRAFT_14,
     ]);
-    // Draft-14 predates the moqt- ALPN scheme and uses moq-00.
     expect(offered.map((d) => d.getSubprotocol())).toEqual(
-        ['moqt-21', 'moqt-20', 'moqt-18', 'moqt-16', 'moq-00']);
+        ['moqt-21', 'moqt-20', 'moqt-18']);
   });
 
   it('should serve draft-20 and draft-21 from one implementation', () => {
@@ -82,18 +77,19 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
         .toBe(shaka.config.MsfVersion.DRAFT_21);
   });
 
-  it('should select draft-14 only when the server echoes moq-00', () => {
+  it('should select draft-18 when the server echoes moqt-18', () => {
     const offered = shaka.msf.DialectRegistry.getForVersion(
         shaka.config.MsfVersion.AUTO);
-    expect(shaka.msf.DialectRegistry.select(offered, 'moq-00').getName())
-        .toBe(shaka.config.MsfVersion.DRAFT_14);
+    expect(shaka.msf.DialectRegistry.select(offered, 'moqt-18').getName())
+        .toBe(shaka.config.MsfVersion.DRAFT_18);
   });
 
-  it('should select draft-16 when the server echoes moqt-16', () => {
+  it('should not offer the removed drafts', () => {
     const offered = shaka.msf.DialectRegistry.getForVersion(
         shaka.config.MsfVersion.AUTO);
-    expect(shaka.msf.DialectRegistry.select(offered, 'moqt-16').getName())
-        .toBe(shaka.config.MsfVersion.DRAFT_16);
+    const subprotocols = offered.map((d) => d.getSubprotocol());
+    expect(subprotocols).not.toContain('moqt-16');
+    expect(subprotocols).not.toContain('moq-00');
   });
 
   it('should not guess a draft when no subprotocol is echoed', () => {
@@ -113,7 +109,7 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
         shaka.config.MsfVersion.AUTO);
     expect(offered.map((d) => d.getName())).toContain('draft-99');
     expect(offered.map((d) => d.getName()))
-        .toContain(shaka.config.MsfVersion.DRAFT_16);
+        .toContain(shaka.config.MsfVersion.DRAFT_18);
   });
 
   it('should order dialects by draft number, newest first', () => {
@@ -134,9 +130,9 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
 
   it('should offer only the requested dialect for an explicit version', () => {
     const offered = shaka.msf.DialectRegistry.getForVersion(
-        shaka.config.MsfVersion.DRAFT_16);
+        shaka.config.MsfVersion.DRAFT_18);
     expect(offered.length).toBe(1);
-    expect(offered[0].getName()).toBe(shaka.config.MsfVersion.DRAFT_16);
+    expect(offered[0].getName()).toBe(shaka.config.MsfVersion.DRAFT_18);
   });
 
   it('should throw for an unregistered version', () => {
@@ -146,25 +142,25 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
 
   it('should stop offering an unregistered dialect', () => {
     shaka.msf.DialectRegistry.unregisterDialect(
-        shaka.config.MsfVersion.DRAFT_16);
+        shaka.config.MsfVersion.DRAFT_18);
     expect(shaka.msf.DialectRegistry.getRegisteredDialects())
-        .not.toContain(shaka.config.MsfVersion.DRAFT_16);
+        .not.toContain(shaka.config.MsfVersion.DRAFT_18);
   });
 
   describe('select', () => {
     it('should honor the subprotocol echoed by the server', () => {
       const offered = [
         fakeDialect('draft-99', 99),
-        fakeDialect('draft-16', 16),
+        fakeDialect('draft-18', 18),
       ];
-      expect(shaka.msf.DialectRegistry.select(offered, 'moqt-16').getName())
-          .toBe('draft-16');
+      expect(shaka.msf.DialectRegistry.select(offered, 'moqt-18').getName())
+          .toBe('draft-18');
     });
 
     it('should report an ambiguous choice when nothing is echoed', () => {
       const offered = [
         fakeDialect('draft-99', 99),
-        fakeDialect('draft-16', 16),
+        fakeDialect('draft-18', 18),
       ];
       expect(shaka.msf.DialectRegistry.select(offered, '')).toBeNull();
     });
@@ -172,15 +168,15 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
     it('should take a lone offer that the server did not echo', () => {
       // A server that did not speak it would have rejected the handshake, so
       // there is nothing to be ambiguous about.
-      const offered = [fakeDialect('draft-16', 16)];
+      const offered = [fakeDialect('draft-18', 18)];
       expect(shaka.msf.DialectRegistry.select(offered, '').getName())
-          .toBe('draft-16');
+          .toBe('draft-18');
     });
 
     it('should fall back when the server echoes something unoffered', () => {
-      const offered = [fakeDialect('draft-16', 16)];
+      const offered = [fakeDialect('draft-18', 18)];
       expect(shaka.msf.DialectRegistry.select(offered, 'moqt-42').getName())
-          .toBe('draft-16');
+          .toBe('draft-18');
     });
   });
 });
