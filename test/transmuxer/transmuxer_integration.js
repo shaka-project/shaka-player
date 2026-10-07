@@ -307,6 +307,28 @@ describe('Transmuxer Player', () => {
 
       await player.unload();
     });
+
+    it('AV1 in TS', async () => {
+      if (!await Util.isTypeSupported('video/mp4; codecs="av01.0.01M.08"',
+          /* width= */ 640, /* height= */ 360)) {
+        pending('Codec AV1 is not supported by the platform.');
+      }
+      await player.load('/base/test/test/assets/hls-ts-av1/av1.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getAudioTracks().length).toBe(0);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 14 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 14, 45);
+
+      await player.unload();
+    });
   });
 
   describe('for muxed content', () => {

@@ -347,6 +347,17 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
   }
 
   /** @override */
+  static async supported() {
+    // Native rendering depends on the browser's own cue layout, which is not
+    // stable in the VMs used by GitHub Actions.  We only run these in our lab.
+    if (getClientArg('runningInVM')) {
+      return false;
+    }
+
+    return super.supported();
+  }
+
+  /** @override */
   async beforeAll() {
     /** @type {!Array<shaka.extern.TextTrack>} */
     const textTracks= [{

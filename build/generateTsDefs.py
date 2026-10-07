@@ -37,10 +37,15 @@ def GenerateTsDefs(inputs, output):
   """
   clutz = shakaBuildHelpers.get_node_binary('@teppeis/clutz', 'clutz')
 
+  # Clutz bundles an old Closure Compiler, whose externs lack some newer
+  # built-in types we use.  This file defines them for Clutz.
+  shims_path = os.path.join(
+      shakaBuildHelpers.get_source_base(), 'build/clutz-shims.externs.js')
+
   command = clutz + [
       '--closure_env', 'BROWSER',
       '--externs',
-  ] + inputs + [
+  ] + [shims_path] + inputs + [
       '-o', '-',
   ]
 
@@ -89,11 +94,17 @@ def GenerateTsDefs(inputs, output):
   # TODO: This only covers one very specific pattern, and could be brittle.
   contents = contents.replace(
       b'implements shaka.util.IReleasable , ', b'implements ')
+  # Closure's "IteratorLike" is the iterator protocol, which TypeScript calls
+  # "Iterator".
+  contents = re.sub(br'\bIteratorLike\b', b'Iterator', contents)
   # Finally, Clutz includes a bunch of basic defs for a browser environment
-  # generated from Closure compiler's builtins.  Remove these.
+  # generated from Closure compiler's builtins.  Remove these, along with the
+  # defs generated from our shims.
+  shims_header = b'// Generated from ' + shims_path.encode()
   sections = re.split(br'\n(?=// Generated from .*)', contents)
   sections = filter(
-      lambda s: not s.startswith(b'// Generated from externs.zip'),
+      lambda s: not s.startswith(b'// Generated from externs.zip') and
+                not s.startswith(shims_header),
       sections)
   contents = b'\n'.join(sections) + b'\n'
 

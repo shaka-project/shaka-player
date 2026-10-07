@@ -153,18 +153,4 @@ filterDescribe('shaka.msf.draft18.Codec', isMSFSupported, () => {
       expect(third.bytesRead).toBe(1);
     });
   });
-
-  describe('differences from draft-16', () => {
-    it('should encode small values differently than draft-16', () => {
-      // 0x40 is two bytes under the QUIC encoding and one byte here, so the
-      // two codecs are not interchangeable even for tiny values.
-      const draft16 = new shaka.msf.QuicVarIntCodec();
-      const writer = new shaka.util.DataViewWriter(
-          16, shaka.util.DataViewWriter.Endianness.BIG_ENDIAN);
-      draft16.encodeVarInt(writer, BigInt(0x40));
-
-      expect(writer.getBytes()).toEqual(bytes('40 40'));
-      expect(encode(BigInt(0x40))).toEqual(bytes('40'));
-    });
-  });
 });

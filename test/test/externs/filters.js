@@ -45,3 +45,6 @@ var offlineSupported = function() {};
 
 /** @return {boolean} */
 var isMSFSupported = function() {};
+
+/** @return {boolean} */
+var isDecompressionStreamSupported = function() {};

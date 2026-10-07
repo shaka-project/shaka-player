@@ -20,10 +20,12 @@ This checks:
  * All files in lib/ appear in +@complete or another standalone build type
  * Runs a compiler pass over the test code to check for type errors
  * Run the linter to check for style violations.
+ * Translation files in ui/locales/ are sorted by key.
 """
 
 import argparse
 import ast
+import json
 import logging
 import os
 import re
@@ -120,6 +122,57 @@ def check_html_lint(args):
 
   htmllinter = compiler.HtmlLinter(file_paths, config_path)
   return htmllinter.lint(force=args.force)
+
+
+@_Check('locales')
+def check_locales(args):
+  """Checks that the translation files are valid and sorted by key.
+
+  Sorted keys keep diffs small and make the files easy to compare.  The
+  expected format is exactly what json.dumps produces with sorted keys and
+  2-space indentation, which is also what ui/locales/dashboard.html writes.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Checking translation files...')
+
+  base = shakaBuildHelpers.get_source_base()
+  locales_dir = os.path.join(base, 'ui', 'locales')
+  bad_files = []
+  for name in sorted(os.listdir(locales_dir)):
+    if not name.endswith('.json'):
+      continue
+    path = os.path.join(locales_dir, name)
+    with shakaBuildHelpers.open_file(path, 'r') as f:
+      text = f.read()
+    try:
+      data = json.loads(text)
+    except ValueError as e:
+      logging.error('%s is not valid JSON: %s', os.path.relpath(path, base), e)
+      return False
+
+    # Keep escaped files escaped (sjn uses \u escapes for Tengwar glyphs).
+    ensure_ascii = re.search(r'\\u[0-9a-fA-F]{4}', text) is not None
+    expected = json.dumps(
+        data, indent=2, sort_keys=True, ensure_ascii=ensure_ascii) + '\n'
+    if text == expected:
+      continue
+
+    if args.fix:
+      with shakaBuildHelpers.open_file(path, 'w', newline='\n') as f:
+        f.write(expected)
+    else:
+      bad_files.append(os.path.relpath(path, base))
+
+  if bad_files:
+    logging.error('These translation files are not sorted or not formatted '
+                  'as expected:')
+    for path in bad_files:
+      logging.error('  ' + path)
+    logging.error('Run "python3 build/check.py --fix" to fix them.')
+    return False
+  return True
 
 
 @_Check('complete')

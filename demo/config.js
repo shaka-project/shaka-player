@@ -328,9 +328,9 @@ shakaDemo.Config = class {
     const msfVersionOptions = shaka.config.MsfVersion;
     const msfVersionOptionNames = {
       'AUTO': 'Auto',
-      'DRAFT_14': 'draft-14 (deprecated)',
-      'DRAFT_16': 'draft-16',
       'DRAFT_18': 'draft-18',
+      'DRAFT_20': 'draft-20',
+      'DRAFT_21': 'draft-21',
     };
 
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
@@ -345,8 +345,6 @@ shakaDemo.Config = class {
             'manifest.msf.subscribeFilterType',
             msfFilterTypeOptions,
             msfFilterTypeOptionNames)
-        .addBoolInput_('Use FETCH to retrieve the catalog',
-            'manifest.msf.useFetchCatalog')
         .addSelectInput_('MoQ version used in the connection',
             'manifest.msf.version',
             msfVersionOptions,
@@ -396,6 +394,8 @@ shakaDemo.Config = class {
             'abr.preferNetworkInformationBandwidth')
         .addBoolInput_('Dropped Frames Protection Enabled',
             'abr.droppedFrames')
+        .addBoolInput_('Allow audio fallback to fewer channels',
+            'abr.allowAudioFallback')
         .addNumberInput_('Dropped Frames Threshold',
             'abr.advanced.droppedFramesThreshold',
             /* canBeDecimal= */ true)
@@ -450,7 +450,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false)
         .addNumberInput_('RTP safety Factor', 'cmcd.rtpSafetyFactor',
             /* canBeDecimal= */ true)
-        .addBoolInput_('Use Headers', 'cmcd.useHeaders');
+        .addBoolInput_('Use Headers', 'cmcd.useHeaders')
+        .addBoolInput_('Apply Parameters From Manifest',
+            'cmcd.applyParametersFromManifest');
 
     // CMCD v2 event-mode targets. JSON because the typedef is an
     // array of objects with several fields each; a per-field UI would
@@ -475,6 +477,23 @@ shakaDemo.Config = class {
       shakaDemoMain.getCurrentConfigValue('cmcd.eventTargets'));
     this.latestInput_.input().value =
         (current && current.length) ? JSON.stringify(current) : '';
+
+    // includeInRequests is an array of request-type tokens; a single
+    // space-separated text field mirrors the MPD attribute syntax.
+    const includeInRequestsTooltip =
+        'Space-separated ISO/IEC 23009-1 request types that carry CMCD, ' +
+        'e.g. "segment mpd steering" or "*". Leave empty for the default set.';
+    const onIncludeInRequestsChange = (input) => {
+      const tokens = input.value.trim().split(/\s+/).filter((t) => t);
+      shakaDemoMain.configure('cmcd.includeInRequests', tokens);
+      shakaDemoMain.remakeHash();
+    };
+    this.addCustomTextInput_('Include In Requests', onIncludeInRequestsChange,
+        includeInRequestsTooltip);
+    const currentTokens = /** @type {Array<string>} */ (
+      shakaDemoMain.getCurrentConfigValue('cmcd.includeInRequests'));
+    this.latestInput_.input().value =
+        (currentTokens && currentTokens.length) ? currentTokens.join(' ') : '';
   }
 
   /** @private */
@@ -684,6 +703,8 @@ shakaDemo.Config = class {
             'streaming.preferNativeDash')
         .addBoolInput_('Prefer native HLS playback when available',
             'streaming.preferNativeHls')
+        .addBoolInput_('Fall back to native HLS on unsupported MSE encryption',
+            'streaming.fallbackToNativeHlsOnMseError')
         .addNumberInput_('Update interval seconds',
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)
@@ -1202,6 +1223,8 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Seek On Taps', 'seekOnTaps')
         .addUINumberInput_('Tap Seek Distance (sec)', 'tapSeekDistance',
             /* canBeDecimal= */ false)
+        .addUINumberInput_('Seek Button Distance (sec)', 'seekButtonDistance',
+            /* canBeDecimal= */ false)
         .addUINumberInput_('Refresh Tick (sec)', 'refreshTickInSeconds',
             /* canBeDecimal= */ true)
         .addUIBoolInput_('Show Audio Codec', 'showAudioCodec')
@@ -1217,7 +1240,6 @@ shakaDemo.Config = class {
         .addUIBoolInput_('Show UI Always On Audio Only',
             'showUIAlwaysOnAudioOnly')
         .addUIBoolInput_('Show UI On Paused', 'showUIOnPaused')
-        .addUIBoolInput_('Show menus on the right', 'showMenusOnTheRight')
         .addUIBoolInput_('Prefer Intl Display Names', 'preferIntlDisplayNames')
         .addUIBoolInput_('Captions Styles', 'captionsStyles')
         .addUIBoolInput_('Display In VR Mode', 'displayInVrMode')
@@ -1257,6 +1279,8 @@ shakaDemo.Config = class {
         .addUIArrayNumberInput_('Rewind Rates', 'rewindRates')
         .addUIArrayNumberInput_('Captions Font Scale Factors',
             'captionsFontScaleFactors')
+        .addUIArrayStringInput_('Captions Style Elements',
+            'captionsStyleElements')
         .addUIBoolInput_('Show buffering spinner', 'showBufferingSpinner');
   }
 

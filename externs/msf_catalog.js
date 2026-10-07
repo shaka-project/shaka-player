@@ -99,9 +99,11 @@ msfCatalog.Accessibility;
  *   initData: (string|undefined),
  *   initRef: (string|undefined),
  *   depends: (Array<string>|undefined),
+ *   template: (Array<*>|undefined),
  *   temporalId: (number|undefined),
  *   spatialId: (number|undefined),
  *   codec: (string|undefined),
+ *   locmafVersion: (string|undefined),
  *   mimeType: (string|undefined),
  *   framerate: (number|undefined),
  *   timescale: (number|undefined),
@@ -117,6 +119,7 @@ msfCatalog.Accessibility;
  *   trackDuration: (number|undefined),
  *   eventType: (string|undefined),
  *   parentName: (string|undefined),
+ *   parentNamespace: (string|undefined),
  *   contentProtectionRefIDs: (Array<string>|undefined),
  *   accessibility: (Array<!msfCatalog.Accessibility>|undefined),
  *   m2tsPacketSize: (number|undefined),
@@ -134,16 +137,28 @@ msfCatalog.Track;
 
 
 /**
+ * One operation of a delta update (draft-ietf-moq-msf, "Delta update").
+ *
  * @typedef {{
- *   version: number,
+ *   op: string,
+ *   tracks: !Array<!msfCatalog.Track>,
+ * }}
+ */
+msfCatalog.DeltaOperation;
+
+
+/**
+ * A catalog document as it arrives on the catalog track. An independent
+ * catalog carries `tracks`; a delta update carries `deltaUpdate` and
+ * `generatedAt` and nothing else.
+ *
+ * @typedef {{
+ *   version: (string|number|undefined),
  *   generatedAt: (number|undefined),
  *   isComplete: (boolean|undefined),
- *   deltaUpdate: (boolean|undefined),
+ *   deltaUpdate: (Array<!msfCatalog.DeltaOperation>|undefined),
  *   contentProtections: (Array<!msfCatalog.ContentProtection>|undefined),
  *   initDataList: (Array<!msfCatalog.InitDataList>|undefined),
- *   addTracks: (Array<!msfCatalog.Track>|undefined),
- *   removeTracks: (Array<!msfCatalog.Track>|undefined),
- *   cloneTracks: (Array<!msfCatalog.Track>|undefined),
  *   tracks: !Array<!msfCatalog.Track>
  * }}
  */

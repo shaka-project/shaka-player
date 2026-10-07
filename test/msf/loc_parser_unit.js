@@ -11,44 +11,49 @@ filterDescribe('LOCParser', isMSFSupported, () => {
   /**
    * @param {number} frameDuration
    * @param {string=} normalizedCodec
-   * @param {shaka.extern.MsfCodec=} codec Defaults to the encoding every
-   *   draft up to 16 used.
+   * @param {shaka.extern.MsfCodec=} codec Defaults to the draft-18
+   *   encoding.
    * @return {!shaka.msf.LOCParser}
    */
   function locParser(frameDuration, normalizedCodec, codec) {
     return new shaka.msf.LOCParser(
-        codec || new shaka.msf.QuicVarIntCodec(), frameDuration,
+        codec || new shaka.msf.draft18.Codec(), frameDuration,
         normalizedCodec);
   }
 
   /**
-   * Encodes a QUIC variable-length integer (RFC 9000 §16).
+   * Encodes a draft-18 variable-length integer, whose length is the count of
+   * leading 1 bits of the first byte plus one (draft-18 section 1.4.1).
    *
    * @param {bigint} value
    * @return {!Uint8Array}
    */
   function varint(value) {
-    if (value < BigInt(64)) {
-      return new Uint8Array([Number(value)]);
+    let length = 1;
+    while (length < 9 && value >= (BigInt(1) << BigInt(7 * length))) {
+      length++;
     }
-    if (value < BigInt(16384)) {
-      const v = Number(value);
-      return new Uint8Array([0x40 | (v >> 8), v & 0xff]);
+    const bytes = new Uint8Array(length);
+    for (let i = length - 1; i >= 0; i--) {
+      bytes[i] = Number((value >> BigInt(8 * (length - 1 - i))) &
+          BigInt(0xff));
     }
-    if (value < BigInt(1073741824)) {
-      const v = Number(value);
-      return new Uint8Array([
-        0x80 | (v >>> 24), (v >>> 16) & 0xff, (v >>> 8) & 0xff, v & 0xff,
-      ]);
+    if (length == 9) {
+      return shaka.util.Uint8ArrayUtils.concat(
+          new Uint8Array([0xff]), bytes.subarray(1));
     }
-    const bytes = new Uint8Array(8);
-    let v = value;
-    for (let i = 7; i >= 0; i--) {
-      bytes[i] = Number(v & BigInt(0xff));
-      v >>= BigInt(8);
-    }
-    bytes[0] |= 0xc0;
+    bytes[0] |= (0xff << (9 - length)) & 0xff;
     return bytes;
+  }
+
+  /**
+   * @param {!Uint8Array} extensions
+   * @return {!shaka.msf.Utils.MOQObject}
+   */
+  function objectWith(extensions) {
+    const obj = moqObject([]);
+    obj.extensions = extensions;
+    return obj;
   }
 
   /**
@@ -135,41 +140,6 @@ filterDescribe('LOCParser', isMSFSupported, () => {
 
   describe('variable-length integer encoding', () => {
     /**
-     * Encodes a draft-18 variable-length integer, whose length is the count of
-     * leading 1 bits of the first byte plus one (draft-18 section 1.4.1).
-     *
-     * @param {bigint} value
-     * @return {!Uint8Array}
-     */
-    function varint18(value) {
-      let length = 1;
-      while (length < 9 && value >= (BigInt(1) << BigInt(7 * length))) {
-        length++;
-      }
-      const bytes = new Uint8Array(length);
-      for (let i = length - 1; i >= 0; i--) {
-        bytes[i] = Number((value >> BigInt(8 * (length - 1 - i))) &
-            BigInt(0xff));
-      }
-      if (length == 9) {
-        return shaka.util.Uint8ArrayUtils.concat(
-            new Uint8Array([0xff]), bytes.subarray(1));
-      }
-      bytes[0] |= (0xff << (9 - length)) & 0xff;
-      return bytes;
-    }
-
-    /**
-     * @param {!Uint8Array} extensions
-     * @return {!shaka.msf.Utils.MOQObject}
-     */
-    function objectWith(extensions) {
-      const obj = moqObject([]);
-      obj.extensions = extensions;
-      return obj;
-    }
-
-    /**
      * A Timestamp property holding wall-clock microseconds, and the draft-18
      * block that carries it.
      *
@@ -187,32 +157,13 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     beforeEach(() => {
       timestampUs = BigInt(1788270271000000);
       block18 = shaka.util.Uint8ArrayUtils.concat(
-          varint18(BigInt(0x10)), varint18(timestampUs));
+          varint(BigInt(0x10)), varint(timestampUs));
     });
 
     it('reads draft-18 properties with the draft-18 codec', () => {
       const parser =
           locParser(FRAME, undefined, new shaka.msf.draft18.Codec());
       const result = parser.parse(objectWith(block18));
-      expect(result.startTime).toBeCloseTo(1788270271, 3);
-    });
-
-    it('misreads draft-18 properties with the draft-16 codec', () => {
-      // Not a wish, a warning: both codecs decode these bytes without
-      // complaint, so nothing but the negotiated draft says which is right.
-      // The QUIC reader takes 0xfe as a two-bit length tag of 0b11 and keeps
-      // 62 bits of a byte that is all prefix, and the timeline lands three
-      // orders of magnitude away.
-      const parser = locParser(FRAME);
-      const result = parser.parse(objectWith(block18));
-      expect(result.startTime).not.toBeCloseTo(1788270271, 3);
-    });
-
-    it('reads draft-16 properties with the draft-16 codec', () => {
-      const block16 = shaka.util.Uint8ArrayUtils.concat(
-          varint(BigInt(0x10)), varint(timestampUs));
-      const parser = locParser(FRAME);
-      const result = parser.parse(objectWith(block16));
       expect(result.startTime).toBeCloseTo(1788270271, 3);
     });
   });
@@ -567,7 +518,7 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     it('falls back to the group number when the block is truncated', () => {
       const obj = moqObject([{type: 0x10, value: 1000000}],
           undefined, /* group= */ 3);
-      // Cut the value short so readVi64At_ underflows.
+      // Cut the value short so readVi64At underflows.
       obj.extensions = obj.extensions.subarray(0, 1);
       const parser = locParser(FRAME);
       const result = parser.parse(obj);

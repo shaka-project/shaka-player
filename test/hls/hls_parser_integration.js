@@ -132,11 +132,6 @@ describe('HlsParser', () => {
           forced: false,
         }]);
     await player.load('/base/test/test/assets/hls-text-offset/index.m3u8');
-    await video.play();
-
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // All text segments are fetched while filling the buffering goal, so
     // there is no need to play the presentation through to see every cue.
@@ -144,6 +139,9 @@ describe('HlsParser', () => {
     // content has a small gap in the media timeline at the discontinuity,
     // and some older WebKit versions fail to resume playback after jumping
     // it.  Playing through gaps is covered by "supports playback with gaps".
+    // Wait before playing: the content also starts with a small gap, and
+    // where gapPadding is set (e.g. Tizen) jumping it skips the first cue's
+    // segment if the text has not been buffered yet.
     const textTrack = video.textTracks[0];
     const deadline = Date.now() + 20 * 1000;
     while ((textTrack.cues || []).length < 3 && Date.now() < deadline) {
@@ -159,6 +157,12 @@ describe('HlsParser', () => {
     expect(cues[1].endTime).toBeCloseTo(4, 0);
     expect(cues[2].startTime).toBeCloseTo(6, 0);
     expect(cues[2].endTime).toBeCloseTo(8, 0);
+
+    await video.play();
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     await player.unload();
   });
@@ -321,6 +325,10 @@ describe('HlsParser', () => {
   });
 
   it('plays muxed TS audio in video', async () => {
+    if (deviceDetected.getDeviceName() === 'Tizen' &&
+        deviceDetected.getVersion() === 3) {
+      pending('Tizen 3 throws 3016 with this content');
+    }
     // This asset has muxed audio in the video stream (no separate audio URI
     // for the default audio group).
     const url =
@@ -339,6 +347,62 @@ describe('HlsParser', () => {
 
     // Play for a few seconds.
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 40);
+  });
+
+  it('switches from muxed TS audio to a separate TS audio', async () => {
+    // This live asset mimics a real one: the default audio is muxed in the
+    // video (a URI-less EXT-X-MEDIA) and the alternative one is a separate
+    // audio-only TS whose audio uses the PID of the video in the muxed TS.
+    // The separate audio playlist starts two segments later, as if the live
+    // window had slid before it was selected.
+    const url =
+        '/base/test/test/assets/hls-ts-muxed-and-separate-audio/master.m3u8';
+
+    await player.load(url, /* startTime= */ 4);
+    expect(player.isLive()).toBe(true);
+
+    // Two videos by two audios, with no duplicates of the muxed audio.
+    expect(player.getVariantTracks().length).toBe(4);
+
+    await video.play();
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    const separateAudio =
+        player.getAudioTracks().find((track) => track.language == 'qaa');
+    goog.asserts.assert(separateAudio, 'audio track must be non-null');
+    player.selectAudioTrack(separateAudio);
+
+    // Playback must go on with the new audio.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(
+        video, video.currentTime + 3, 20);
+    const activeTrack = player.getVariantTracks().find((t) => t.active);
+    expect(activeTrack.language).toBe('qaa');
+
+    // The same media sequence number must start at the same time in the
+    // audio and the video, otherwise they are out of sync.
+    const activeVariant = player.getManifest().variants.find(
+        (variant) => variant.id == activeTrack.id);
+    const getStartTimesBySequence = (stream) => {
+      const startTimes = new Map();
+      const segmentIndex = stream.segmentIndex;
+      const firstPosition = segmentIndex.getNumEvicted();
+      const endPosition = firstPosition + segmentIndex.getNumReferences();
+      for (let position = firstPosition; position < endPosition; position++) {
+        const reference = segmentIndex.get(position);
+        const sequence = reference.getUris()[0].match(/_(\d+)\.ts$/)[1];
+        startTimes.set(sequence, reference.getStartTime());
+      }
+      return startTimes;
+    };
+    const videoStartTimes = getStartTimesBySequence(activeVariant.video);
+    const audioStartTimes = getStartTimesBySequence(activeVariant.audio);
+    expect(audioStartTimes.size).toBeGreaterThan(0);
+    for (const [sequence, startTime] of audioStartTimes) {
+      expect(startTime).withContext('sequence ' + sequence)
+          .toBe(videoStartTimes.get(sequence));
+    }
+
+    await player.unload();
   });
 
   it('plays an EXT-X-I-FRAMES-ONLY playlist with broken segments', async () => {
@@ -366,6 +430,14 @@ describe('HlsParser', () => {
   });
 
   it('plays MP3 audio-only with codec metadata', async () => {
+    if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+      pending('Codec MP3 is not supported by the platform.');
+    }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (deviceDetected.getDeviceName() === 'Tizen') {
+      pending('Disabled on Tizen.');
+    }
     // This asset has mp3 audio only, with explicit codecs.
     const url =
         '/base/test/test/assets/hls-raw-mp3/playlist.m3u8';
@@ -386,6 +458,14 @@ describe('HlsParser', () => {
   });
 
   it('plays MP3 audio-only without codec metadata', async () => {
+    if (!await Util.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !await Util.isTypeSupported('audio/mpeg')) {
+      pending('Codec MP3 is not supported by the platform.');
+    }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (deviceDetected.getDeviceName() === 'Tizen') {
+      pending('Disabled on Tizen.');
+    }
     // This asset has mp3 audio only, without explicit codecs.
     const url =
         '/base/test/test/assets/hls-raw-mp3/playlist-no-codecs.m3u8';

@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-/* .shaka-tooltips-on enables the tooltips and is only added to the
- * control panel when the 'enableTooltips' option is set to true */
+/* .shaka-tooltips-on enables the tooltips on control panels and big buttons
+ * when the 'enableTooltips' option is set to true. */
 .shaka-tooltips-on {
   overflow: visible;
 
@@ -95,25 +95,39 @@
     }
   }
 
-  /* The first tooltip of the panel is not centered on top of the button
-   * but rather aligned with the left border of the control panel */
-  button:first-child {
-    &:hover::after,
-    &:focus-visible::after,
-    &:active::after {
-      left: 0;
-      transform: translateX(0);
+  &.shaka-big-buttons-container {
+    & > .shaka-tooltip,
+    & > .shaka-tooltip-status {
+      &:hover::after,
+      &:focus-visible::after,
+      &:active::after {
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
     }
   }
 
-  /* The last tooltip of the panel is not centered on top of the button
-   * but rather aligned with the right border of the control panel */
-  button:last-child {
-    &:hover::after,
-    &:focus-visible::after,
-    &:active::after {
-      left: var(--shaka-icon-size);
-      transform: translateX(-100%);
+  &.shaka-controls-button-panel,
+  &.shaka-controls-top-button-panel {
+    /* Keep the first and last tooltips inside the control panel. */
+    button:first-child {
+      &:hover::after,
+      &:focus-visible::after,
+      &:active::after {
+        left: 0;
+        transform: translateX(0);
+      }
+    }
+
+    button:last-child {
+      &:hover::after,
+      &:focus-visible::after,
+      &:active::after {
+        left: var(--shaka-icon-size);
+        transform: translateX(-100%);
+      }
     }
   }
 }

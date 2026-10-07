@@ -432,6 +432,7 @@ shaka.extern.Track;
 
 /**
  * @typedef {{
+ *   id: (number|undefined),
  *   active: boolean,
  *   language: string,
  *   label: ?string,
@@ -450,6 +451,8 @@ shaka.extern.Track;
  * An object describing a audio track.  This object should be treated as
  * read-only as changing any values does not have any effect.
  *
+ * @property {(number|undefined)} id
+ *   The unique ID of the track, if available. Only available for src=.
  * @property {boolean} active
  *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
@@ -1694,7 +1697,6 @@ shaka.extern.HlsManifestConfiguration;
  *   namespaces: !Array<string>,
  *   authorizationToken: string,
  *   subscribeFilterType: shaka.config.MsfFilterType,
- *   useFetchCatalog: boolean,
  *   version: shaka.config.MsfVersion,
  *   catalogPreprocessor: function(!msfCatalog.Catalog),
  * }}
@@ -1726,10 +1728,6 @@ shaka.extern.HlsManifestConfiguration;
  *   delivers data to the subscriber.
  *   <br>
  *   Defaults to <code>shaka.config.MsfFilterType.LARGEST_OBJECT</code>.
- * @property {boolean} useFetchCatalog
- *   Use FETCH to retrieve the catalog instead of SUBSCRIBE.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.config.MsfVersion} version
  *   MoQ version used in the connection.
  *   <br>
@@ -1738,6 +1736,14 @@ shaka.extern.HlsManifestConfiguration;
  *   Called immediately after the CMSF/MSF catalog has been parsed.
  *   Provides a way for applications to perform efficient preprocessing of the
  *   catalog.
+ *   <br>
+ *   Dropping tracks is one use. A catalog may offer one rendition more than
+ *   once, packaged differently -- CMSF publishers commonly offer every
+ *   rendition as both a <code>cmaf</code> and a <code>locmaf</code> track
+ *   sharing one initialization-data entry. Those are one stream described
+ *   twice, and exposing both doubles the variant list with pairs identical in
+ *   resolution and bitrate. Which one to keep is the application's call, and
+ *   is made by splicing <code>catalog.tracks</code> here.
  * @exportDoc
  */
 shaka.extern.MsfManifestConfiguration;
@@ -2058,6 +2064,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   lowLatencyMode: boolean,
  *   preferNativeDash: boolean,
  *   preferNativeHls: boolean,
+ *   fallbackToNativeHlsOnMseError: boolean,
  *   updateIntervalSeconds: number,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
@@ -2219,6 +2226,16 @@ shaka.extern.SpeechToTextConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} fallbackToNativeHlsOnMseError
+ *   Retry an HLS load using native playback when MSE fails with
+ *   HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED or
+ *   HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED, if native HLS is
+ *   supported. The retry applies only to that load and does not change the
+ *   native playback preferences. Native media requests bypass Shaka's
+ *   networking filters.
+ *   <br>
+ *   Defaults to <code>true</code> on Apple browsers and <code>false</code>
+ *   elsewhere.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>
@@ -2703,6 +2720,7 @@ shaka.extern.AdsConfiguration;
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
+ *   allowAudioFallback: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -2797,6 +2815,14 @@ shaka.extern.AdsConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} droppedFrames
  *   Enable or disable dropped frames protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} allowAudioFallback
+ *   If true, when the bandwidth can't sustain any variant with the selected
+ *   audio (e.g. 5.1 or spatial audio only paired with high video qualities),
+ *   adaptation may temporarily use the same audio with fewer channels
+ *   (e.g. 5.1, then stereo, then mono), going back to the selected audio as
+ *   soon as the bandwidth allows it.
  *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc
@@ -2935,8 +2961,10 @@ shaka.extern.CmcdTarget;
  *   contentId: string,
  *   rtpSafetyFactor: number,
  *   includeKeys: !Array<string>,
+ *   includeInRequests: !Array<string>,
  *   version: number,
- *   eventTargets: ?Array<shaka.extern.CmcdTarget>
+ *   eventTargets: ?Array<shaka.extern.CmcdTarget>,
+ *   applyParametersFromManifest: boolean
  * }}
  *
  * @description
@@ -2957,8 +2985,12 @@ shaka.extern.CmcdTarget;
  *   Maximum length is 64 characters. It is RECOMMENDED to conform to the UUID
  *   specification.
  *   <br>
- *   By default the sessionId is automatically generated on each
- *   <code>load()</code> call.
+ *   Defaults to <code>''</code>. When empty, a random session id is
+ *   generated for each playback session, that is, for each
+ *   <code>load()</code> call. The generated id is not written back into the
+ *   configuration, so <code>getConfiguration().cmcd.sessionId</code> stays
+ *   empty. A <code>sessionID</code> signaled by the manifest overrides both
+ *   the configured and the generated id.
  * @property {string} contentId
  *   A unique string identifying the current content. Maximum length is 64
  *   characters. This value is consistent across multiple different sessions and
@@ -2975,6 +3007,18 @@ shaka.extern.CmcdTarget;
  *   will be included.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {!Array<string>} includeInRequests
+ *   Request types that carry CMCD data, using the ISO/IEC 23009-1 Table I.4
+ *   vocabulary: <code>'segment'</code>, <code>'init'</code>,
+ *   <code>'mpd'</code>, <code>'mpdpatch'</code>, <code>'xlink'</code>,
+ *   <code>'mpdlink'</code>, <code>'steering'</code>,
+ *   <code>'callback'</code>, or <code>'*'</code> for every request shaka can
+ *   decorate (including license, key, certificate and timing requests).
+ *   <code>'segment'</code> also covers initialization segments.
+ *   <br>
+ *   Defaults to <code>[]</code>, which keeps the historical set: manifests,
+ *   media and initialization segments, sidecar text, license, key,
+ *   certificate and timing requests.
  * @property {number} version
  *   The CMCD version.
  *   CMCD version 1 is fully supported. CMCD version 2 is an unfinished,
@@ -2990,6 +3034,20 @@ shaka.extern.CmcdTarget;
  *   (e.g., <code>'ps'</code>, <code>'rr'</code>) for the configured
  *   <code>events</code>.
  *   <br>
+ * @property {boolean} applyParametersFromManifest
+ *   If <code>true</code>, CMCD parameters signaled by the manifest (DASH
+ *   <code>ServiceDescription/ClientDataReporting/CMCDParameters</code>,
+ *   ISO/IEC 23009-1:2026 Annex K) enable CMCD reporting for that
+ *   presentation and override <code>version</code>,
+ *   <code>useHeaders</code>, <code>includeKeys</code>,
+ *   <code>includeInRequests</code>, <code>contentId</code> and
+ *   <code>sessionId</code>. Attributes the manifest omits take the spec
+ *   defaults (version 1, query mode, segment requests only). Header mode
+ *   requested by a manifest triggers CORS preflights, so CDNs listed in
+ *   <code>serviceLocations</code> must allow the <code>CMCD-*</code>
+ *   headers. Set to <code>false</code> to ignore manifest signaling.
+ *   <br>
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.CmcdConfiguration;

@@ -95,11 +95,20 @@ shaka.ui.Element = class {
     }
 
     /**
+     * True when the element is a child of a shaka.ui.MenuGroup.
+     *
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isInMenuGroup = this.parent.classList.contains('shaka-menu-group');
+
+    /**
      * @protected {boolean}
      * @exportInterface
      */
     this.isSubMenu = this.parent.classList.contains('shaka-overflow-menu') ||
-        this.parent.classList.contains('shaka-context-menu');
+        this.parent.classList.contains('shaka-context-menu') ||
+        this.isInMenuGroup;
 
     /**
      * @protected {boolean}
@@ -108,13 +117,23 @@ shaka.ui.Element = class {
     this.isSubMenuOpened = false;
 
     if (this.isSubMenu) {
-      this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.isSubMenuOpened = true;
-        this.checkAvailability();
+      // Only the siblings of the submenu, which share its container, react.
+      // Events without a container reset every menu level.
+      const affectsThisElement = (event) => {
+        const container = event['container'];
+        return !container || container == this.parent;
+      };
+      this.eventManager.listen(this.controls, 'submenuopen', (event) => {
+        if (affectsThisElement(event)) {
+          this.isSubMenuOpened = true;
+          this.checkAvailability();
+        }
       });
-      this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.isSubMenuOpened = false;
-        this.checkAvailability();
+      this.eventManager.listen(this.controls, 'submenuclose', (event) => {
+        if (affectsThisElement(event)) {
+          this.isSubMenuOpened = false;
+          this.checkAvailability();
+        }
       });
     }
   }

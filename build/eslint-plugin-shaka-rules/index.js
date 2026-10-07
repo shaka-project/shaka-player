@@ -7,6 +7,7 @@
 import argCommentSpacing from './arg-comment-spacing.js';
 import arrayNoInstanceof from './array-no-instanceof.js';
 import buffersourceNoInstanceof from './buffersource-no-instanceof.js';
+import noIteratorType from './no-iterator-type.js';
 import privateRule from './private.js';
 
 const index = {
@@ -14,6 +15,7 @@ const index = {
     'arg-comment-spacing': argCommentSpacing,
     'array-no-instanceof': arrayNoInstanceof,
     'buffersource-no-instanceof': buffersourceNoInstanceof,
+    'no-iterator-type': noIteratorType,
     'private': privateRule,
   },
   configs: {

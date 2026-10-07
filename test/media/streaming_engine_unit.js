@@ -71,6 +71,8 @@ describe('StreamingEngine', () => {
   let getPlaybackRate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!HTMLVideoElement} */
+  let video;
   /** @type {!shaka.media.SkipRangeController} */
   let skipRangeController;
   /** @type {!jasmine.Spy} */
@@ -462,6 +464,9 @@ describe('StreamingEngine', () => {
       // test them.
       config.evictionGoal = 30;
       config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.KEEP;
+      // Device-specific config may change the tolerance (Apple sets it to
+      // 0), but these tests expect the default.
+      config.inaccurateManifestTolerance = 2;
     }
 
     if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
@@ -471,11 +476,12 @@ describe('StreamingEngine', () => {
     goog.asserts.assert(
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
+    video = shaka.test.UiUtils.createVideoElement();
     const playerInterface = {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       getPlaybackRate: Util.spyFunc(getPlaybackRate),
-      video: shaka.test.UiUtils.createVideoElement(),
+      video: video,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onError: Util.spyFunc(onError),
@@ -512,6 +518,87 @@ describe('StreamingEngine', () => {
 
   afterAll(() => {
     jasmine.clock().uninstall();
+  });
+
+  describe('live seekable range', () => {
+    beforeEach(async () => {
+      setupVod();
+      manifest.type = 'HLS';
+      timeline.isDynamic.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      segmentAvailability.start = 10;
+      segmentAvailability.end = 35;
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      spyOn(shaka.media.Capabilities, 'isInfiniteLiveStreamDurationSupported')
+          .and.returnValue(true);
+      createStreamingEngine();
+      await streamingEngine.updateDuration();
+      video.dispatchEvent(new Event('timeupdate'));
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      mediaSourceEngine.setDuration.calls.reset();
+    });
+
+    function endBroadcast() {
+      timeline.isDynamic.and.returnValue(false);
+      timeline.getDuration.and.returnValue(40);
+      segmentAvailability.end = 40;
+    }
+
+    it('preserves the final HLS range while MSE duration is infinite', () => {
+      endBroadcast();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.setLiveSeekableRange)
+          .toHaveBeenCalledWith(10, 40);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.setDuration).not.toHaveBeenCalled();
+    });
+
+    it('clears the range after MSE duration becomes finite', async () => {
+      endBroadcast();
+      jasmine.clock().tick(500);
+      expect(mediaSourceEngine.setLiveSeekableRange)
+          .toHaveBeenCalledWith(10, 40);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      await Util.spyFunc(mediaSourceEngine.setDuration)(40);
+      jasmine.clock().tick(500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      jasmine.clock().tick(1000);
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('keeps existing behavior for other manifest types', () => {
+      manifest.type = 'DASH';
+      endBroadcast();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('clears the range without a finite presentation duration', () => {
+      timeline.isDynamic.and.returnValue(false);
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.clearLiveSeekableRange).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+    });
+
+    it('stops updating after destruction', async () => {
+      endBroadcast();
+      jasmine.clock().tick(500);
+      await streamingEngine.destroy();
+      mediaSourceEngine.setLiveSeekableRange.calls.reset();
+      mediaSourceEngine.clearLiveSeekableRange.calls.reset();
+      jasmine.clock().tick(1500);
+      expect(mediaSourceEngine.setLiveSeekableRange).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.clearLiveSeekableRange).not.toHaveBeenCalled();
+    });
   });
 
   // This test initializes the StreamingEngine (SE) and allows it to play
@@ -5239,6 +5326,30 @@ describe('StreamingEngine', () => {
       expect(result).toBe(true);
     });
 
+    // https://github.com/shaka-project/shaka-player/issues/10647
+    it('does not overwrite a RESET_TO_ENCRYPTED configuration', () => {
+      const CrossBoundaryStrategy = shaka.config.CrossBoundaryStrategy;
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.crossBoundaryStrategy = CrossBoundaryStrategy.RESET_TO_ENCRYPTED;
+      streamingEngine.configure(config);
+
+      const lastInitRef = makeInitRef(MIME_AVC, 0);
+      lastInitRef.encrypted = true;
+      const initRef = makeInitRef(MIME_AVC, 10);
+      const mediaState = makeMediaState(lastInitRef);
+      const segRef = makeSegmentRef(initRef);
+      const engine = /** @type {?} */(streamingEngine);
+
+      // Once initialized with an encrypted init segment, the buffer is kept.
+      expect(engine.discardReferenceByBoundary_(mediaState, segRef))
+          .toBe(false);
+      expect(engine.getCrossBoundaryStrategy_())
+          .toBe(CrossBoundaryStrategy.KEEP);
+      // But the app's configuration is left untouched for later loads.
+      expect(config.crossBoundaryStrategy)
+          .toBe(CrossBoundaryStrategy.RESET_TO_ENCRYPTED);
+    });
+
     it('still resets an incompatible boundary after an internal seek', () => {
       const lastInitRef = makeInitRef(MIME_AVC, 0);
       const initRef = makeInitRef(MIME_HEVC, 10);
@@ -5256,6 +5367,64 @@ describe('StreamingEngine', () => {
 
       expect(result).toBe(true);
       expect(resetSpy).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('forwardTimeForCrossBoundary_', () => {
+    /** @type {?} */
+    let engine;
+
+    beforeEach(() => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.RESET;
+      streamingEngine.configure(config);
+
+      const lastInitRef = new shaka.media.InitSegmentReference(
+          () => ['init.mp4'], 0, null);
+      lastInitRef.boundaryEnd = 10;
+
+      engine = /** @type {?} */(streamingEngine);
+      engine.mediaStates_.set(ContentType.VIDEO, {
+        type: ContentType.VIDEO,
+        stream: {id: 1},
+        lastInitSegmentReference: lastInitRef,
+        seeked: false,
+      });
+    });
+
+    it('crosses the boundary when the playhead overshoots it', () => {
+      // Approaching the boundary schedules the crossing.
+      presentationTimeInSeconds = 9.9;
+      engine.forwardTimeForCrossBoundary_();
+
+      // The buffer runs dry and the platform reports a playhead slightly past
+      // the boundary before the timer fires.  This must not cancel the
+      // crossing.
+      presentationTimeInSeconds = 10.005;
+      engine.forwardTimeForCrossBoundary_();
+
+      jasmine.clock().tick(1);
+
+      expect(engine.crossBoundaryResetPending_).toBe(true);
+      expect(engine.crossBoundarySeekTarget_).toBeCloseTo(10.1, 5);
+    });
+
+    it('ignores a playhead well past the boundary', () => {
+      presentationTimeInSeconds = 9.9;
+      engine.forwardTimeForCrossBoundary_();
+
+      // A seek forward, away from the boundary.
+      presentationTimeInSeconds = 12;
+      engine.forwardTimeForCrossBoundary_();
+
+      jasmine.clock().tick(1000);
+
+      expect(engine.crossBoundaryResetPending_).toBe(false);
+      expect(engine.crossBoundarySeekTarget_).toBeNull();
     });
   });
 });

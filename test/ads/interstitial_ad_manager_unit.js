@@ -104,6 +104,29 @@ describe('Interstitial Ad manager', () => {
           jasmine.objectContaining(eventValue1));
     });
 
+    it('supports legacy X-CUE', async () => {
+      const metadata = {
+        type: 'com.apple.hls.interstitial',
+        startTime: 0,
+        endTime: null,
+        values: [
+          {key: 'ID', data: 'PREROLL'},
+          {key: 'X-CUE', data: 'PRE,ONCE'},
+          {key: 'X-ASSET-URI', data: 'http://foo.bar/test.m3u8'},
+        ],
+      };
+
+      await interstitialAdManager.addMetadata(metadata);
+
+      expect(interstitialAdManager.getInterstitials()).toEqual([
+        jasmine.objectContaining({
+          pre: true,
+          post: false,
+          once: true,
+        }),
+      ]);
+    });
+
     it('supports multiple interstitials', async () => {
       const metadata = {
         type: 'com.apple.quicktime.HLS',

@@ -103,6 +103,60 @@ describe('Player', () => {
     });
   });
   describe('Live to VOD', () => {
+    it('seeks beyond the buffer after HLS ends with infinite MSE duration',
+        async () => {
+          if (!shaka.media.Capabilities
+              .isInfiniteLiveStreamDurationSupported() ||
+              !('setLiveSeekableRange' in new MediaSource())) {
+            pending('Requires infinite MSE duration and live seekable ranges');
+          }
+          const uri =
+              '/base/test/test/assets/hls-ts-muxed-aac-h264/chunk.m3u8';
+          let ended = false;
+          const netEngine = player.getNetworkingEngine();
+          netEngine.registerResponseFilter((type, response) => {
+            if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+              return;
+            }
+            if (!ended) {
+              // Initially publish five segments, then publish the last segment
+              // and ENDLIST together when the broadcast ends.
+              const text = shaka.util.StringUtils.fromUTF8(response.data)
+                  .replace('#EXTINF:6,\nn_5_0_0.ts\n', '')
+                  .replace('#EXT-X-ENDLIST', '');
+              response.data = shaka.util.StringUtils.toUTF8(text);
+            }
+          });
+          player.configure({streaming: {
+            bufferingGoal: 2,
+            rebufferingGoal: 1,
+            preferNativeHls: false,
+          }});
+          await player.load(uri, 3);
+          await video.play();
+          await waiter.waitForMovement(video);
+          video.pause();
+          expect(player.isLive()).toBe(true);
+          ended = true;
+          await waiter.timeoutAfter(20).waitUntilVodTransition(video);
+          // Allow the live seekable range timer to observe the transition.
+          await Util.delay(1);
+          const target = 26;
+          expect(player.seekRange().start).toBeLessThan(target);
+          expect(player.seekRange().end).toBeGreaterThan(target);
+          expect(video.duration).toBe(Infinity);
+          expect(video.buffered.end(video.buffered.length - 1))
+              .toBeLessThan(target);
+          expect(video.seekable.end(video.seekable.length - 1))
+              .toBeGreaterThan(target);
+          const seeked = waiter.waitForEvent(video, 'seeked');
+          video.currentTime = target;
+          await seeked;
+          expect(video.currentTime).toBeCloseTo(target, 1);
+          await video.play();
+          await waiter.waitForMovement(video);
+        });
+
     it('playback transition when current time is in the past', async () => {
       const netEngine = player.getNetworkingEngine();
       const startTime = Date.now();
@@ -147,7 +201,6 @@ describe('Player', () => {
 
     it('multi period and shifted period start', async () => {
       const netEngine = player.getNetworkingEngine();
-      shaka.log.setLevel(shaka.log.Level.V1);
       const startTime = Date.now();
       netEngine.registerRequestFilter((type, request) => {
         if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
@@ -1446,6 +1499,55 @@ describe('Player', () => {
       // Delay needed to load the next URL.
       await shaka.test.Util.delay(1);
       expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    });
+  });
+
+  describe('IAMF', () => {
+    const iamfMimeType = 'audio/mp4; codecs="iamf.000.000.Opus"';
+
+    /**
+     * Loads the given asset and plays a second of it, then returns the audio
+     * track that was selected.
+     *
+     * @param {string} uri
+     * @return {!Promise<shaka.extern.AudioTrack>}
+     */
+    async function loadAndPlay(uri) {
+      await player.load(uri);
+      await video.play();
+      await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 1);
+
+      const audioTracks = player.getAudioTracks();
+      expect(audioTracks.length).toBe(1);
+      return audioTracks[0];
+    }
+
+    beforeEach(() => {
+      if (!window.MediaSource ||
+          !window.MediaSource.isTypeSupported(iamfMimeType)) {
+        pending('IAMF is not supported by this platform.');
+      }
+    });
+
+    it('plays DASH content', async () => {
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/dash.mpd');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
+      expect(track.channelsCount).toBe(2);
+    });
+
+    it('plays HLS content from a master playlist', async () => {
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/master.m3u8');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
+    });
+
+    it('plays HLS content from a media playlist', async () => {
+      // A media playlist has no CODECS attribute, so the codec is read out of
+      // the init segment instead.
+      const track =
+          await loadAndPlay('/base/test/test/assets/audio-iamf/media.m3u8');
+      expect(track.codecs).toBe('iamf.000.000.Opus');
     });
   });
 

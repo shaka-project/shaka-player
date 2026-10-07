@@ -88,7 +88,7 @@ describe('Playhead', () => {
   let timeline;
   /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {!shaka.media.Playhead} */
+  /** @type {?shaka.media.Playhead} */
   let playhead;
   /** @type {shaka.extern.StreamingConfiguration} */
   let config;
@@ -120,6 +120,7 @@ describe('Playhead', () => {
   });
 
   beforeEach(() => {
+    playhead = null;
     video = new shaka.test.FakeVideo();
     timeline = new shaka.test.FakePresentationTimeline();
 
@@ -169,7 +170,9 @@ describe('Playhead', () => {
   });
 
   afterEach(() => {
-    playhead.release();
+    if (playhead) {
+      playhead.release();
+    }
   });
 
   function calculateGap(time) {
@@ -689,8 +692,10 @@ describe('Playhead', () => {
     setMockDate(10);
     video.currentTime = 20;
     video.on['seeking']();
-    expect(video.currentTime).toBe(30);
-    expect(playhead.getTime()).toBe(30);
+    // The hole is also a buffered gap, so the gap jumper may get there first,
+    // with its padding on some platforms.
+    expect(video.currentTime).toBe(calculateGap(30));
+    expect(playhead.getTime()).toBe(calculateGap(30));
 
     // A seek outside any range is left alone.
     onSeek.calls.reset();
@@ -1557,4 +1562,71 @@ describe('Playhead', () => {
       return HTMLMediaElement.HAVE_METADATA;
     }
   });  // gap jumping
+
+  describe('PlayheadMover', () => {
+    it('enforces pause when moving playhead from ended state while paused',
+        () => {
+          const mover = new shaka.media.VideoWrapper.PlayheadMover(
+              /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+              /* maxAttempts= */ 10);
+          video.ended = true;
+          video.paused = true;
+          mover.moveTo(10);
+          expect(video.currentTime).toBe(10);
+          expect(video.pause).toHaveBeenCalled();
+          mover.release();
+        });
+
+    it('does not enforce pause when moving playhead while not ended', () => {
+      const mover = new shaka.media.VideoWrapper.PlayheadMover(
+          /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+          /* maxAttempts= */ 10);
+      video.ended = false;
+      video.paused = true;
+      mover.moveTo(10);
+      expect(video.currentTime).toBe(10);
+      expect(video.pause).not.toHaveBeenCalled();
+      mover.release();
+    });
+  });
+
+  describe('VideoWrapper seeking from ended state', () => {
+    it('enforces pause when seeking from ended state while paused', () => {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      video.currentTime = 0;
+      let onSeekCalled = false;
+      const wrapper = new shaka.media.VideoWrapper(
+          /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+          () => { onSeekCalled = true; },
+          () => {},
+          () => 0);
+      video.ended = true;
+      video.paused = true;
+      video.on['ended']();
+      video.on['seeking']();
+      expect(video.pause).toHaveBeenCalled();
+      expect(onSeekCalled).toBe(true);
+      wrapper.release();
+    });
+
+    it('does not enforce pause when seeking after play event', () => {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      video.currentTime = 0;
+      let onSeekCalled = false;
+      const wrapper = new shaka.media.VideoWrapper(
+          /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)),
+          () => { onSeekCalled = true; },
+          () => {},
+          () => 0);
+      video.ended = true;
+      video.on['ended']();
+      video.ended = false;
+      video.paused = false;
+      video.on['play']();
+      video.on['seeking']();
+      expect(video.pause).not.toHaveBeenCalled();
+      expect(onSeekCalled).toBe(true);
+      wrapper.release();
+    });
+  });
 });

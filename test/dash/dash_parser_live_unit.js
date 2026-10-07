@@ -30,6 +30,7 @@ describe('DashParser Live', () => {
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onScte35Event: fail,
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
@@ -49,6 +50,54 @@ describe('DashParser Live', () => {
     // Dash parser stop is synchronous.
     parser.stop();
     Date.now = oldNow;
+  });
+
+  describe('ServiceDescription refresh', () => {
+    /**
+     * @param {!Array<string>} mpdChildren
+     * @return {string}
+     */
+    function makeLiveText(mpdChildren) {
+      return [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        ...mpdChildren,
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '            duration="2"/>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+    }
+
+    it('re-parses ServiceDescription on manifest refresh', async () => {
+      const withoutReporting = makeLiveText([]);
+      const withReporting = makeLiveText([
+        '  <ServiceDescription id="0">',
+        '    <ClientDataReporting schemeIdUri="urn:mpeg:dash:cta-5004:2023">',
+        '      <CMCDParameters keys="br" contentID="refreshed"/>',
+        '    </ClientDataReporting>',
+        '  </ServiceDescription>',
+      ]);
+
+      fakeNetEngine.setResponseText('dummy://foo', withoutReporting);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.serviceDescription).toBeNull();
+
+      fakeNetEngine.setResponseText('dummy://foo', withReporting);
+      await updateManifest();
+      const reporting = manifest.serviceDescription.clientDataReporting;
+      expect(reporting.cmcdParameters.contentId).toBe('refreshed');
+
+      fakeNetEngine.setResponseText('dummy://foo', withoutReporting);
+      await updateManifest();
+      expect(manifest.serviceDescription).toBeNull();
+    });
   });
 
   /**
@@ -1322,6 +1371,34 @@ describe('DashParser Live', () => {
           shaka.test.Util.spyFunc(onTimelineRegionAddedSpy);
     });
 
+    it('places SCTE-35 events on the timeline with period timing', async () => {
+      const onScte35 = jasmine.createSpy('onScte35');
+      playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+      const base64 = shaka.test.Scte35.base64();
+      const manifest = originalManifest.replace(
+          '<Event duration="5000" />',
+          '<Event id="xml" presentationTime="300" duration="1000">' +
+          '<SpliceInfoSection ptsAdjustment="0"/></Event>')
+          .replace('http://example.com', 'urn:scte:scte35:2013:xml')
+          .replace('<Event id="abc" presentationTime="300" duration="1000" />',
+              '<Event id="bin" presentationTime="400" duration="1000">' +
+              '<Signal><Binary>' + base64 + '</Binary></Signal></Event>');
+      fakeNetEngine.setResponseText('https://foo', manifest);
+      await parser.start('https://foo', playerInterface);
+      expect(onScte35).toHaveBeenCalledTimes(2);
+      // The XML-only message has no binary form; the xml+bin one does.
+      expect(onScte35.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({
+        startTime: 13, endTime: 23, source: 'dash', data: null,
+      }));
+      expect(onScte35.calls.argsFor(0)[0].node).not.toBeNull();
+      expect(onScte35.calls.argsFor(1)[0]).toEqual(jasmine.objectContaining({
+        startTime: 14, endTime: 24, source: 'dash', node: null,
+      }));
+      expect(onScte35.calls.argsFor(1)[0].data)
+          .toEqual(shaka.test.Scte35.section());
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('will parse EventStream nodes', async () => {
       fakeNetEngine.setResponseText('https://foo', originalManifest);
       await parser.start('https://foo', playerInterface);
@@ -1988,5 +2065,122 @@ describe('DashParser Live', () => {
               'https://foo.example.com/manifest.mpd?session=123',
               manifestRequest, manifestContext);
         });
+  });
+
+  describe('key ID from the init segment', () => {
+    const clearInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+    const encryptedInitSegmentUri =
+        '/base/test/test/assets/encrypted-sintel-video-init.mp4';
+    // The default_KID of the 'tenc' box in the encrypted asset above.
+    const initSegmentKeyId = '68accc06d6ac535898886c1e31e0bf39';
+    const initSegmentUri = 'http://example.com/init.mp4';
+
+    /** @type {!ArrayBuffer} */
+    let clearInitSegmentData;
+    /** @type {!ArrayBuffer} */
+    let encryptedInitSegmentData;
+
+    const manifestText = [
+      '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+      '    xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:cenc="urn:mpeg:cenc:2013"',
+      '    availabilityStartTime="1970-01-01T00:00:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <ContentProtection value="cenc"',
+      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" />',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com/</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" startNumber="1"',
+      '            duration="5" initialization="init.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    /**
+     * Makes the init segment request fail.
+     */
+    function failInitSegmentRequest() {
+      fakeNetEngine.setResponse(initSegmentUri, () => {
+        return Promise.reject(new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS));
+      });
+    }
+
+    /**
+     * @return {number} The number of requests made for the init segment.
+     */
+    function countInitSegmentRequests() {
+      return fakeNetEngine.request.calls.all().filter((call) => {
+        return call.args[1].uris[0] == initSegmentUri;
+      }).length;
+    }
+
+    beforeAll(async () => {
+      const responses = await Promise.all([
+        shaka.test.Util.fetch(clearInitSegmentUri),
+        shaka.test.Util.fetch(encryptedInitSegmentUri),
+      ]);
+      clearInitSegmentData = responses[0];
+      encryptedInitSegmentData = responses[1];
+    });
+
+    beforeEach(() => {
+      fakeNetEngine.setResponseText('https://foo', manifestText);
+    });
+
+    it('is read from the init segment', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+
+      const manifest = await parser.start('https://foo', playerInterface);
+
+      expect(manifest.variants[0].video.keyIds)
+          .toEqual(new Set([initSegmentKeyId]));
+    });
+
+    it('is not read again after a successful read', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+
+      await parser.start('https://foo', playerInterface);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+
+      expect(countInitSegmentRequests()).toBe(0);
+    });
+
+    it('is not read again when the init segment has no key ID', async () => {
+      fakeNetEngine.setResponseValue(initSegmentUri, clearInitSegmentData);
+
+      const manifest = await parser.start('https://foo', playerInterface);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+
+      // Finding no key ID is a permanent answer, so it is not requested again.
+      expect(countInitSegmentRequests()).toBe(0);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+    });
+
+    it('is read again on update after a failed read', async () => {
+      failInitSegmentRequest();
+
+      const manifest = await parser.start('https://foo', playerInterface);
+      expect(manifest.variants[0].video.keyIds).toEqual(new Set());
+      fakeNetEngine.request.calls.reset();
+
+      // A failure is not cached, so the next update tries again.
+      fakeNetEngine.setResponseValue(initSegmentUri, encryptedInitSegmentData);
+      await updateManifest();
+
+      expect(countInitSegmentRequests()).toBe(1);
+      expect(manifest.variants[0].video.keyIds)
+          .toEqual(new Set([initSegmentKeyId]));
+    });
   });
 });

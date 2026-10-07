@@ -62,6 +62,10 @@ goog.requireType('shaka.cast.CastReceiver');
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuopen'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 
@@ -72,6 +76,10 @@ goog.requireType('shaka.cast.CastReceiver');
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuclose'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 
@@ -223,6 +231,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array<!HTMLElement>} */
     this.menus_ = [];
 
+    /** @private {?HTMLElement} */
+    this.settingsMenuOpener_ = null;
+
     /** @private {!Array<!HTMLElement>} */
     this.contextMenus_ = [];
 
@@ -288,8 +299,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      const focusIsInMenu = this.menus_.some(
+          (menu) => menu.contains(activeElement));
       for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+      }
+      if (focusIsInMenu) {
+        this.restoreFocus(this.settingsMenuOpener_);
       }
       this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
       this.hideTextStylePreview();
@@ -298,12 +315,42 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
       if (this.config_.enableTooltips) {
         this.topControlsButtonPanel_.classList.add('shaka-tooltips-on');
+        this.bigButtonsContainer_?.classList.add('shaka-tooltips-on');
       }
     });
 
     /** @private {shaka.util.Timer} */
     this.hideUITimer_ = new shaka.util.Timer(() => {
       this.hideUI();
+    });
+
+    /**
+     * The element inside the player that lost the focus without handing it to
+     * another element.
+     * @private {?Element}
+     */
+    this.lostFocusElement_ = null;
+
+    /**
+     * Checks whether the focus was lost because |lostFocusElement_| can no
+     * longer have it.  That is only known once the browser has finished
+     * moving the focus: a removed element, for example, is only detached
+     * after it loses the focus.
+     * @private {shaka.util.Timer}
+     */
+    this.lostFocusTimer_ = new shaka.util.Timer(() => {
+      const element = this.lostFocusElement_;
+      this.lostFocusElement_ = null;
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      // If the focus went anywhere else, or if the element can still take it
+      // (for example, because the user clicked somewhere else on the page),
+      // this was not a lost focus.
+      if (!element || (activeElement &&
+          activeElement != this.videoContainer_.ownerDocument.body) ||
+          shaka.ui.Controls.canTakeFocus_(element)) {
+        return;
+      }
+      this.restoreFocus();
     });
 
     /**
@@ -319,8 +366,30 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Suppress timer-based updates if the controls are hidden.
       if (this.isOpaque()) {
         this.updateTimeAndSeekRange_();
+        // The bottom controls can change height while they are shown.
+        this.computeShakaTextContainerSize_();
       }
     });
+
+    /**
+     * Places the text containers as soon as the text displayer adds them,
+     * e.g. when the text style preview is shown while the text is disabled.
+     * Otherwise they would slide up from the bottom of the video.
+     *
+     * @private {MutationObserver}
+     */
+    this.textContainerObserver_ = new MutationObserver((mutations) => {
+      const isTextContainer = (node) => node instanceof HTMLElement &&
+          (node.classList.contains('shaka-text-container') ||
+           node.classList.contains('shaka-speech-to-text-container'));
+      const added = mutations.some(
+          (mutation) => Array.from(mutation.addedNodes).some(isTextContainer));
+      if (added) {
+        this.computeShakaTextContainerSize_(/* animate= */ false);
+      }
+    });
+    this.textContainerObserver_.observe(
+        this.videoContainer_, {childList: true});
 
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
@@ -338,6 +407,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {!Array<!shaka.extern.IUIElement>} */
     this.elements_ = [];
+
+    /** @private {?HTMLElement} */
+    this.bigButtonsContainer_ = null;
 
     /** @private {shaka.ui.Localization} */
     this.localization_ = shaka.ui.Controls.createLocalization_();
@@ -449,6 +521,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.textStylePreview_?.release();
     this.textStylePreview_ = null;
 
+    this.textContainerObserver_?.disconnect();
+    this.textContainerObserver_ = null;
+
     this.eventManager_?.release();
     this.eventManager_ = null;
 
@@ -463,6 +538,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.hideUITimer_?.stop();
     this.hideUITimer_ = null;
+
+    this.lostFocusTimer_?.stop();
+    this.lostFocusTimer_ = null;
 
     this.timeAndSeekRangeTimer_?.stop();
     this.timeAndSeekRangeTimer_ = null;
@@ -607,6 +685,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
       this.releaseChildElements_();
+      this.bigButtonsContainer_ = null;
     } else {
       this.addControlsContainer_();
       // The ad container is only created once, and is never
@@ -639,6 +718,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           if (!this.isOpaque()) {
             return;
           }
+          // Stopping the event keeps it from reaching onMouseMove_ on the
+          // video container, which is what restarts the hide timer after a
+          // touchmove stopped it.  Restart it here, or a drag that starts on
+          // a panel while the controls are hidden (for example the swipe
+          // that shows the Android status bar in fullscreen) leaves the
+          // controls on screen until the next tap.
+          this.onMouseMove_(event);
           event.stopPropagation();
         };
         this.eventManager_.listen(element, 'touchend', touchCb);
@@ -892,6 +978,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {boolean}
+   */
+  isSeekBarShowing() {
+    return !!this.seekBar_ && this.seekBar_.isShowing();
+  }
+
+  /**
    * @param {?number} time
    * @param {boolean} container
    * @export
@@ -909,6 +1002,47 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   anySettingsMenusAreOpen() {
     return this.menus_.some(
         (menu) => !menu.classList.contains('shaka-hidden'));
+  }
+
+  /**
+   * Remembers the root menu's opening button for keyboard focus restoration.
+   * @param {!HTMLElement} button
+   */
+  setSettingsMenuOpener(button) {
+    this.settingsMenuOpener_ = button;
+  }
+
+  /**
+   * Gives the focus back to the player after the focused element was hidden,
+   * disabled or removed.  The keyboard controls only act while the player has
+   * the focus, so they would stop working until the user clicked on it again.
+   * While navigating with the keyboard, |keyboardTarget| gets the focus, if it
+   * can take it, so that Tab navigation continues from there.
+   *
+   * @param {?HTMLElement=} keyboardTarget
+   */
+  restoreFocus(keyboardTarget = null) {
+    const keyboardNavigation = this.controlsContainer_.classList.contains(
+        'shaka-keyboard-navigation');
+    if (keyboardNavigation && keyboardTarget &&
+        shaka.ui.Controls.canTakeFocus_(keyboardTarget)) {
+      keyboardTarget.focus();
+    } else {
+      this.videoContainer_.focus({preventScroll: true});
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  static canTakeFocus_(element) {
+    // An element outside the document has no client rects.  Element.isConnected
+    // is not available on every platform (e.g. Tizen 3).
+    return !element.matches(':disabled') &&
+        !element.closest('.shaka-hidden') &&
+        element.getClientRects().length > 0;
   }
 
   /** @export */
@@ -1160,6 +1294,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Open a Picture-in-Picture window.
     const pipPlayer = this.videoContainer_;
+    const focusedElement = pipPlayer.ownerDocument.activeElement;
     const rectPipPlayer = pipPlayer.getBoundingClientRect();
     const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: rectPipPlayer.width,
@@ -1256,13 +1391,42 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     pipWindow.document.body.append(pipPlayer);
 
     pipPlayer.classList.add('pip-mode');
+    this.pressedKeys_.clear();
+    if (focusedElement && pipPlayer.contains(focusedElement)) {
+      // Moving the player between documents drops the browser's focus.
+      /** @type {!HTMLElement} */ (focusedElement).focus();
+    }
+
+    // Window keyboard listeners do not move with the player container.
+    const onKeyDown = (event) => {
+      this.onWindowKeyDown_(/** @type {!KeyboardEvent} */ (event));
+      if (this.config_.enableKeyboardPlaybackControlsInWindow ||
+          this.isFullScreenEnabled()) {
+        this.onControlsKeyDown_(/** @type {!KeyboardEvent} */ (event));
+      }
+    };
+    const onKeyUp = (event) => {
+      this.onControlsKeyUp_(/** @type {!KeyboardEvent} */ (event));
+    };
+    this.eventManager_.listen(pipWindow, 'keydown', onKeyDown);
+    this.eventManager_.listen(pipWindow, 'keyup', onKeyUp);
 
     // Listen for the PiP closing event to move the player back.
     this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      const pipFocusedElement = pipWindow.document.activeElement;
       posterObserver.disconnect();
       this.eventManager_.unlisten(pipIcon, 'click', pipAction);
+      this.eventManager_.unlisten(pipWindow, 'keydown', onKeyDown);
+      this.eventManager_.unlisten(pipWindow, 'keyup', onKeyUp);
+      this.pressedKeys_.clear();
       pipPlayer.classList.remove('pip-mode');
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
+      const returnFocus = pipFocusedElement &&
+          pipPlayer.contains(pipFocusedElement) ?
+          pipFocusedElement : focusedElement;
+      if (returnFocus && pipPlayer.contains(returnFocus)) {
+        /** @type {!HTMLElement} */ (returnFocus).focus();
+      }
     });
   }
 
@@ -1386,6 +1550,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
+    // Keyboard controls only act while the player has the focus.  Let the
+    // container take it, without making it a tab stop, so that clicking on the
+    // video or on any non-focusable part of the controls keeps them working.
+    if (!this.videoContainer_.hasAttribute('tabindex')) {
+      this.videoContainer_.tabIndex = -1;
+    }
     this.localVideo_.classList.add('shaka-video');
 
     this.addScrimContainer_();
@@ -1475,6 +1645,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   addBigButtons_() {
     const bigButtonsContainer = shaka.util.Dom.createHTMLElement('div');
     bigButtonsContainer.classList.add('shaka-big-buttons-container');
+    if (this.config_.enableTooltips) {
+      bigButtonsContainer.classList.add('shaka-tooltips-on');
+    }
+    this.bigButtonsContainer_ = bigButtonsContainer;
     this.controlsContainer_.appendChild(bigButtonsContainer);
 
     const elementNamesToFactories =
@@ -1746,7 +1920,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Listen for key down events to detect tab and enable outline
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => {
-      this.onWindowKeyDown_(/** @type {!KeyboardEvent} */(e));
+      if (this.videoContainer_.ownerDocument.defaultView == window) {
+        this.onWindowKeyDown_(/** @type {!KeyboardEvent} */(e));
+      }
+    });
+
+    // Browsers may consume Escape to exit fullscreen without a key event.
+    // Handle the transition as well so an open menu cannot lose its focus.
+    let wasFullscreen = this.isFullScreenEnabled();
+    this.eventManager_.listen(document, 'fullscreenchange', () => {
+      const isFullscreen = this.isFullScreenEnabled();
+      if (wasFullscreen && !isFullscreen) {
+        this.closeSettingsMenusAndRestoreFocus_();
+      }
+      wasFullscreen = isFullscreen;
     });
 
     // Listen for click events to dismiss the settings menus.
@@ -1783,12 +1970,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
     });
 
+    // Hiding, disabling or removing the focused element moves the focus to
+    // the body, and the keyboard controls go with it.  See restoreFocus().
+    this.eventManager_.listen(this.videoContainer_, 'focusout', (e) => {
+      const event = /** @type {!FocusEvent} */ (e);
+      if (!event.relatedTarget && event.target != this.videoContainer_) {
+        this.lostFocusElement_ = /** @type {Element} */ (event.target);
+        this.lostFocusTimer_.tickAfter(/* seconds= */ 0);
+      }
+    });
+
     this.listenForControlsKeyEvents_(this.videoContainer_,
         () => !this.config_.enableKeyboardPlaybackControlsInWindow &&
               !this.isFullScreenEnabled());
     this.listenForControlsKeyEvents_(window,
-        () => this.config_.enableKeyboardPlaybackControlsInWindow ||
-              this.isFullScreenEnabled());
+        () => this.videoContainer_.ownerDocument.defaultView == window &&
+              (this.config_.enableKeyboardPlaybackControlsInWindow ||
+               this.isFullScreenEnabled()));
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.Utils.AD_STARTED, () => {
@@ -1955,9 +2153,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {boolean=} animate Whether the text containers move with their
+   *   CSS transition.
    * @private
    */
-  computeShakaTextContainerSize_() {
+  computeShakaTextContainerSize_(animate = true) {
     const elements = [];
     const shakaTextContainer = this.videoContainer_.getElementsByClassName(
         'shaka-text-container')[0];
@@ -1976,7 +2176,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         bottom = this.bottomControls_.clientHeight + 'px';
       }
       for (const element of elements) {
-        element.style.bottom = bottom;
+        if (animate) {
+          element.style.bottom = bottom;
+        } else {
+          element.style.transition = 'none';
+          element.style.bottom = bottom;
+          // Apply the position before the transition comes back.
+          element.getBoundingClientRect();
+          element.style.transition = '';
+        }
       }
     }
   }
@@ -1999,14 +2207,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.recentMouseMovement_ ||
         keyboardNavigationMode ||
         this.isHovered_()) {
-      // Make sure the state is up-to-date before showing it.
-      this.updateTimeAndSeekRange_();
-
+      // Only refresh when the controls actually become visible. While they
+      // are shown, timeAndSeekRangeTimer_ is what keeps them up-to-date;
+      // repeating that here would run it on every mouse move.
       if (this.controlsContainer_.getAttribute('shown') == null) {
+        this.updateTimeAndSeekRange_();
         this.controlsContainer_.setAttribute('shown', 'true');
         this.dispatchVisibilityEvent_();
+        this.computeShakaTextContainerSize_();
       }
-      this.computeShakaTextContainerSize_();
       this.fadeControlsTimer_.stop();
     } else {
       this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
@@ -2014,6 +2223,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.anySettingsMenusAreOpen()) {
       this.topControlsButtonPanel_.classList.remove('shaka-tooltips-on');
       this.controlsButtonPanel_.classList.remove('shaka-tooltips-on');
+      this.bigButtonsContainer_?.classList.remove('shaka-tooltips-on');
     }
   }
 
@@ -2165,7 +2375,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    const activeElement = document.activeElement;
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
     if (activeElement) {
       const tagName = activeElement.tagName.toLowerCase();
       if (tagName == 'input' &&
@@ -2191,12 +2401,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    const isVolumeBar = isControlsFocused && activeElement.classList ?
-        activeElement.classList.contains('shaka-volume-bar') : false;
     const isSeekBar = isControlsFocused && activeElement.classList ?
         activeElement.classList.contains('shaka-seek-bar') : false;
-    const isFullscreenOrControlsInWindow = isFullscreen ||
-        this.config_.enableKeyboardPlaybackControlsInWindow;
+    // Other sliders, such as the volume bar, use the arrow keys themselves.
+    const isOtherRange = isControlsFocused && activeElement.classList ?
+        activeElement.classList.contains('shaka-range-element') &&
+        !isSeekBar : false;
+
+    // From here on, the player either has the focus or the app asked for the
+    // keys of the whole window, so the shortcuts act the same way in and out
+    // of fullscreen.  Only the focused control may need a key for itself.
 
     // Show the control panel if it is on focus or any button is pressed.
     if (isControlsFocused) {
@@ -2208,63 +2422,51 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     switch (event.key.toLowerCase()) {
       case this.config_.shortcuts.small_rewind.toLowerCase():
-        // If it's not focused on the volume bar, or if it's in fullscreen,
-        // move the seek time backward for a few sec.
-        // Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
-              !isVolumeBar) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() - keyboardSeekDistance);
-          }
+        // Move the seek time backward for a few sec, unless another slider is
+        // focused.  That one will be adjusted automatically instead.
+        if (this.seekBar_ && keyboardSeekDistance > 0 && !isOtherRange) {
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() - keyboardSeekDistance);
         }
         break;
       case this.config_.shortcuts.small_fast_forward.toLowerCase():
-        // If it's not focused on the volume bar, or if it's in fullscreen,
-        // move the seek time forward for a few sec.
-        // Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && keyboardSeekDistance > 0) {
-          if ((isSeekBar || isFullscreenOrControlsInWindow) &&
-              !isVolumeBar) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() + keyboardSeekDistance);
-          }
+        // Move the seek time forward for a few sec, unless another slider is
+        // focused.  That one will be adjusted automatically instead.
+        if (this.seekBar_ && keyboardSeekDistance > 0 && !isOtherRange) {
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() + keyboardSeekDistance);
         }
         break;
       case this.config_.shortcuts.large_rewind.toLowerCase():
         // PageDown is like ArrowLeft, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
-          if (isSeekBar || isFullscreenOrControlsInWindow) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
-          }
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() - keyboardLargeSeekDistance);
         }
         break;
       case this.config_.shortcuts.large_fast_forward.toLowerCase():
         // PageDown is like ArrowRight, but has a larger jump distance, and does
         // nothing to volume.
         if (this.seekBar_ && keyboardLargeSeekDistance > 0) {
-          if (isSeekBar || isFullscreenOrControlsInWindow) {
-            event.preventDefault();
-            this.updateTimeAndSeekRange_();
-            this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
-          }
+          event.preventDefault();
+          this.updateTimeAndSeekRange_();
+          this.seek_(this.getDisplayTime() + keyboardLargeSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.
       case this.config_.shortcuts.home.toLowerCase():
-        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (this.seekBar_) {
           event.preventDefault();
           this.seek_(this.player_.seekRange().start);
         }
         break;
       // Jump to the end of the video's seek range.
       case this.config_.shortcuts.end.toLowerCase():
-        if (this.seekBar_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (this.seekBar_) {
           event.preventDefault();
           this.seek_(this.player_.seekRange().end);
         }
@@ -2317,17 +2519,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
       }
-      // Pause or play by pressing space on the seek bar.
       case ' ':
       // older browsers might return spacebar instead of a space character
       case 'spacebar':
-      case this.config_.shortcuts.play.toLowerCase():
-        if (isSeekBar ||
-            (isFullscreenOrControlsInWindow && !isControlsFocused)) {
+      case this.config_.shortcuts.play.toLowerCase(): {
+        // A focused control handles the space key itself, except for the seek
+        // bar, which does nothing with it.
+        const key = event.key.toLowerCase();
+        const isSpace = key == ' ' || key == 'spacebar';
+        if (!isSpace || isSeekBar || !isControlsFocused) {
           event.preventDefault();
           this.playPausePresentation();
         }
         break;
+      }
       case this.config_.shortcuts.take_screenshot.toLowerCase():
         this.takeScreenshot();
         break;
@@ -2350,7 +2555,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case '8':
       case '9': {
         // Jump to percentage in the video
-        if (!this.ad_ && (isSeekBar || isFullscreenOrControlsInWindow)) {
+        if (!this.ad_) {
           const seekRange = this.player_.seekRange();
           const length = seekRange.end - seekRange.start;
           if (length > 0) {
@@ -2651,73 +2856,106 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // If escape key was pressed, close any open settings menus.
     if (event.key == 'Escape') {
-      this.hideSettingsMenusTimer_.tickNow();
+      this.closeSettingsMenusAndRestoreFocus_();
     }
 
-    if (anySettingsMenusAreOpen && this.pressedKeys_.has('Tab')) {
-      // If Tab key or Shift+Tab keys are pressed when navigating through
-      // an overflow settings menu, keep the focus to loop inside the
-      // overflow menu.
-      this.keepFocusInMenu_(event);
+    if (event.key == 'Tab') {
+      // An active menu has its own tab cycle, even in fullscreen.
+      if (anySettingsMenusAreOpen && this.keepFocusInMenu_(event)) {
+        return;
+      }
+      const fullscreenElement =
+          this.videoContainer_.ownerDocument.fullscreenElement;
+      if (fullscreenElement && this.isFullScreenEnabled()) {
+        this.keepFocusInContainer_(event, fullscreenElement,
+            /* recoverOutsideFocus= */ true);
+      }
     }
   }
 
   /**
-   * When the user is using keyboard to navigate inside the overflow settings
-   * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
-   * backward), make sure it's focused only on the elements of the overflow
-   * panel.
-   *
-   * This is called by onWindowKeyDown_() function, when there's a settings
-   * overflow menu open, and the Tab key / Shift+Tab keys are pressed.
-   *
+   * Closes settings menus and restores focus to their root opening button.
+   * @private
+   */
+  closeSettingsMenusAndRestoreFocus_() {
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
+    const focusIsInMenu = activeElement && this.menus_.some(
+        (menu) => !menu.classList.contains('shaka-hidden') &&
+                  menu.contains(activeElement));
+    this.hideSettingsMenusTimer_.tickNow();
+    if (focusIsInMenu && this.settingsMenuOpener_ &&
+        shaka.ui.Controls.canTakeFocus_(this.settingsMenuOpener_)) {
+      this.settingsMenuOpener_.setAttribute('aria-expanded', 'false');
+      this.settingsMenuOpener_.focus();
+    }
+  }
+
+  /**
+   * Keeps keyboard focus within the open menu containing the active element.
    * @param {!Event} event
+   * @return {boolean} Whether the focus is inside an open settings menu.
    * @private
    */
   keepFocusInMenu_(event) {
-    const openSettingsMenus = this.menus_.filter(
-        (menu) => !menu.classList.contains('shaka-hidden'));
-    if (!openSettingsMenus.length) {
-      // For example, this occurs when you hit escape to close the menu.
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
+    // The overflow menu stays open while a nested submenu is displayed.
+    // Use the nearest registered menu containing the focus, rather than the
+    // first open menu, so each submenu has its own tab cycle.
+    let settingsMenu = activeElement;
+    while (settingsMenu &&
+           !this.menus_.some((menu) => menu == settingsMenu)) {
+      settingsMenu = settingsMenu.parentElement;
+    }
+    if (!settingsMenu || settingsMenu.classList.contains('shaka-hidden')) {
+      return false;
+    }
+    this.keepFocusInContainer_(event, settingsMenu);
+    return true;
+  }
+
+  /**
+   * Loops Tab navigation at a container's first and last visible control.
+   * @param {!Event} event
+   * @param {!Element} container
+   * @param {boolean=} recoverOutsideFocus
+   * @private
+   */
+  keepFocusInContainer_(event, container, recoverOutsideFocus = false) {
+    const activeElement = this.videoContainer_.ownerDocument.activeElement;
+    // Some menus put their controls inside non-focusable containers.  Include
+    // their descendants, excluding hidden or disabled controls and controls
+    // with a negative tabIndex.
+    const children = Array.from(container.querySelectorAll(
+        'button, input, select, textarea, a[href], [tabindex]'));
+    const shownChildren = children.filter((child) => {
+      const element = /** @type {!HTMLElement} */ (child);
+      return element.tabIndex >= 0 && shaka.ui.Controls.canTakeFocus_(child);
+    });
+    if (!shownChildren.length) {
       return;
     }
 
-    const settingsMenu = openSettingsMenus[0];
-    if (settingsMenu.childNodes.length) {
-      // Get the first and the last displaying child element from the overflow
-      // menu.
-      let firstShownChild = settingsMenu.firstElementChild;
-      while (firstShownChild &&
-             firstShownChild.classList.contains('shaka-hidden')) {
-        firstShownChild = firstShownChild.nextElementSibling;
-      }
-
-      let lastShownChild = settingsMenu.lastElementChild;
-      while (lastShownChild &&
-             lastShownChild.classList.contains('shaka-hidden')) {
-        lastShownChild = lastShownChild.previousElementSibling;
-      }
-
-      const activeElement = document.activeElement;
-      // When only Tab key is pressed, navigate to the next element.
-      // If it's currently focused on the last shown child element of the
-      // overflow menu, let the focus move to the first child element of the
-      // menu.
-      // When Tab + Shift keys are pressed at the same time, navigate to the
-      // previous element. If it's currently focused on the first shown child
-      // element of the overflow menu, let the focus move to the last child
-      // element of the menu.
+    const firstShownChild = /** @type {!HTMLElement} */ (shownChildren[0]);
+    const lastShownChild =
+    /** @type {!HTMLElement} */ (shownChildren[shownChildren.length - 1]);
+    if (recoverOutsideFocus &&
+        !shownChildren.some((child) => child == activeElement)) {
+      event.preventDefault();
       if (this.pressedKeys_.has('Shift')) {
-        if (activeElement == firstShownChild) {
-          event.preventDefault();
-          lastShownChild.focus();
-        }
+        lastShownChild.focus();
       } else {
-        if (activeElement == lastShownChild) {
-          event.preventDefault();
-          firstShownChild.focus();
-        }
+        firstShownChild.focus();
       }
+      return;
+    }
+    if (this.pressedKeys_.has('Shift')) {
+      if (activeElement == firstShownChild) {
+        event.preventDefault();
+        lastShownChild.focus();
+      }
+    } else if (activeElement == lastShownChild) {
+      event.preventDefault();
+      firstShownChild.focus();
     }
   }
 
@@ -3001,6 +3239,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
  *   'submenuopen'
+ * @property {HTMLElement} container
+ *   The element holding the submenu: the overflow menu, the context menu, or
+ *   the submenu of a menu group.  Only the elements in this container are
+ *   affected.  Not set when every submenu is affected.
  * @exportDoc
  */
 

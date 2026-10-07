@@ -15,6 +15,8 @@ describe('HlsParser', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
   const videoTsSegmentUri = '/base/test/test/assets/video.ts';
+  const iamfInitSegmentUri = '/base/test/test/assets/audio-iamf/init.mp4';
+  const iamfSegmentUri = '/base/test/test/assets/audio-iamf/segment-1.mp4';
 
   const vttText = [
     'WEBVTT\n',
@@ -46,7 +48,13 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let tsSegmentData;
   /** @type {!Uint8Array} */
+  let iamfInitSegmentData;
+  /** @type {!Uint8Array} */
+  let iamfSegmentData;
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
+  /** @type {!Uint8Array} */
+  let packedAudioSegmentData;
   /** @type {!Uint8Array} */
   let aesKey;
   /** @type {!Uint8Array} */
@@ -64,6 +72,8 @@ describe('HlsParser', () => {
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(videoTsSegmentUri),
+      shaka.test.Util.fetch(iamfInitSegmentUri),
+      shaka.test.Util.fetch(iamfSegmentUri),
     ]);
     initSegmentData = responses[0];
     segmentData = responses[1];
@@ -72,6 +82,24 @@ describe('HlsParser', () => {
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     tsSegmentData = responses[2];
+
+    // Packed audio: an empty ID3v2 tag followed by two silent ADTS frames of
+    // AAC-LC, 44100 Hz, stereo.
+    const adtsFrame = [
+      0xff, 0xf1, // sync word, MPEG-4, layer 0, no CRC
+      0x50, // AAC-LC, sampling frequency index 4 (44100 Hz)
+      0x80, // channel configuration 2 (stereo), frame length bits 12-11
+      0x02, 0x1f, // frame length 16, buffer fullness
+      0xfc, // buffer fullness, 1 raw data block
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // payload
+    ];
+    packedAudioSegmentData = new Uint8Array([
+      0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ID3v2
+      ...adtsFrame,
+      ...adtsFrame,
+    ]);
+    iamfInitSegmentData = responses[3];
+    iamfSegmentData = responses[4];
 
     aesKey = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -107,6 +135,7 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: shaka.test.Util.spyFunc(onTimelineRegionAddedSpy),
+      onScte35Event: fail,
       isLowLatencyMode: () => false,
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
@@ -6304,6 +6333,129 @@ describe('HlsParser', () => {
     expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
   });
 
+  it('detects IAMF audio from a master playlist', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="6",SAMPLE-RATE="48000",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,iamf.000.000.Opus",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.bandwidth = 200;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.frameRate = 60;
+          stream.mime('video/mp4', 'avc1');
+          stream.size(960, 540);
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.originalLanguage = 'eng';
+          stream.channelsCount = 6;
+          stream.audioSamplingRate = 48000;
+          stream.mime('audio/mp4', 'iamf.000.000.Opus');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+  });
+
+  it('detects IAMF audio from a media playlist', async () => {
+    // A media playlist carries no CODECS attribute, so the codec has to be
+    // read out of the init segment.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'iamf.000.000.Opus');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/media', media)
+        .setResponseValue('test:/init.mp4', iamfInitSegmentData)
+        .setResponseValue('test:/main.mp4', iamfSegmentData);
+
+    const actual = await parser.start('test:/media', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+  });
+
+  it('detects packed audio published with a .ts extension', async () => {
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/10619
+    // Some packagers publish packed audio (a containerless audio elementary
+    // stream) with a container extension, so the extension can't be trusted.
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.ts',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/aac');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/media', media)
+        .setResponseValue('test:/main.ts', packedAudioSegmentData);
+
+    const actual = await parser.start('test:/media', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+
+    const audio = actual.variants[0].audio;
+    goog.asserts.assert(audio.segmentIndex, 'Segment index should exist!');
+    const references = Array.from(audio.segmentIndex);
+    // The reference must not keep the MIME type guessed from the extension,
+    // or MediaSourceEngine would switch the source buffer to video/mp2t.
+    expect(references[0].mimeType).toBe('audio/aac');
+  });
+
   it('throw error when no segments', async () => {
     const media = [
       '#EXTM3U\n',
@@ -6804,6 +6956,86 @@ describe('HlsParser', () => {
   });
 
   describe('EXT-X-DATERANGE', () => {
+    describe('SCTE-35', () => {
+      /** @type {!jasmine.Spy} */
+      let onScte35;
+      const hex = shaka.test.Scte35.hex();
+
+      beforeEach(() => {
+        onScte35 = jasmine.createSpy('onScte35');
+        playerInterface.onScte35Event = shaka.test.Util.spyFunc(onScte35);
+      });
+
+      /**
+       * @param {string} ranges
+       * @return {string}
+       */
+      function playlist(ranges) {
+        return '#EXTM3U\n#EXT-X-TARGETDURATION:5\n' +
+            '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n' +
+            '#EXTINF:5,\nvideo1.ts\n' + ranges;
+      }
+
+      it('reports an OUT at the start of its range', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",DURATION=60,' +
+            'SCTE35-OUT=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          schemeIdUri: 'urn:scte:scte35:2013:bin',
+          startTime: 1, endTime: 61, kind: 'out', source: 'hls',
+          id: 'splice', node: null,
+        }));
+        expect(onScte35.calls.argsFor(0)[0].data)
+            .toEqual(shaka.test.Scte35.section());
+        // The generic date-range paths keep working alongside it.
+        expect(onTimelineRegionAddedSpy).toHaveBeenCalled();
+        expect(onMetadataSpy).toHaveBeenCalled();
+      });
+
+      it('reports an IN at the end of the range it closes', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="splice",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-OUT=' + hex + '\n' +
+            '#EXT-X-DATERANGE:ID="splice-in",' +
+            'START-DATE="2000-01-01T00:00:01Z",' +
+            'END-DATE="2000-01-01T00:00:03Z",SCTE35-IN=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        // An OUT with no duration is a point in time.
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 1, endTime: 1, kind: 'out',
+        }));
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 3, endTime: 3, kind: 'in',
+        }));
+      });
+
+      it('reports a standalone CMD', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="cmd",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-CMD=' + hex + '\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).toHaveBeenCalledWith(jasmine.objectContaining({
+          startTime: 1, endTime: 1, kind: 'cmd', id: 'cmd',
+        }));
+      });
+
+      it('skips malformed payloads without failing playback', async () => {
+        fakeNetEngine.setResponseText('test:/master', playlist(
+            '#EXT-X-DATERANGE:ID="cmd",' +
+            'START-DATE="2000-01-01T00:00:01Z",SCTE35-CMD=0xINVALID\n'))
+            .setResponseValue('test:/video1.ts', tsSegmentData);
+        await parser.start('test:/master', playerInterface);
+        expect(onScte35).not.toHaveBeenCalled();
+        // The range is still surfaced through the generic metadata path.
+        expect(onMetadataSpy).toHaveBeenCalled();
+      });
+    });
+
     it('supports multiples tags', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',
@@ -7119,6 +7351,35 @@ describe('HlsParser', () => {
       expect(onMetadataSpy).toHaveBeenCalledWith(metadataType, 5, 35, values);
     });
 
+    it('supports legacy X-CUE for interstitials', async () => {
+      const mediaPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00.00Z\n',
+        '#EXTINF:5,\n',
+        'video1.ts\n',
+        '#EXT-X-DATERANGE:ID="1",CLASS="com.apple.hls.interstitial",',
+        'START-DATE="2000-01-01T00:00:05.00Z",',
+        'X-ASSET-URI="fake",X-CUE="PRE,ONCE"\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', mediaPlaylist)
+          .setResponseValue('test:/video1.ts', tsSegmentData);
+
+      await parser.start('test:/master', playerInterface);
+
+      expect(onMetadataSpy).toHaveBeenCalledOnceWith(
+          'com.apple.hls.interstitial', 5, null, [
+            jasmine.objectContaining({key: 'ID', data: '1'}),
+            jasmine.objectContaining({
+              key: 'X-ASSET-URI',
+              data: 'test:/fake',
+            }),
+            jasmine.objectContaining({key: 'X-CUE', data: 'PRE,ONCE'}),
+          ]);
+    });
+
     it('supports 1970-01-01T00:00:00.000Z', async () => {
       const mediaPlaylist = [
         '#EXTM3U\n',
@@ -7234,6 +7495,40 @@ describe('HlsParser', () => {
 
     const video2 = manifest.variants[1] && manifest.variants[1].video;
     expect(video2.codecs).toBe('dav1.10.01');
+  });
+
+  it('shares one muxed audio placeholder across variants', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="es",',
+      'NAME="Muxed",DEFAULT=YES\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="qaa",',
+      'NAME="Original",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=1280x720\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=1024x576\n',
+      'video2\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=100,CODECS="avc1,mp4a",AUDIO="aud",',
+      'RESOLUTION=640x360\n',
+      'video3\n',
+    ].join('');
+
+    fakeNetEngine.setResponseText('test:/master', master);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('test:/master', playerInterface);
+
+    // One variant per video and audio rendition, no more.
+    expect(manifest.variants.length).toBe(6);
+    const muxedAudios = new Set();
+    for (const variant of manifest.variants) {
+      if (variant.audio.isAudioMuxedInVideo) {
+        muxedAudios.add(variant.audio);
+      }
+    }
+    expect(muxedAudios.size).toBe(1);
   });
 
   it('supports SUPPLEMENTAL-CODECS with muxed audio', async () => {

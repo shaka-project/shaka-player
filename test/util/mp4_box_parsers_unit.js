@@ -424,6 +424,150 @@ describe('Mp4BoxParsers', () => {
     });
   });
 
+  describe('parseIACB', () => {
+    /**
+     * Builds an OBU with the given type and payload.  All the flags in the
+     * header are left at 0.
+     *
+     * @param {number} type
+     * @param {!Array<number>} payload
+     * @return {!Array<number>}
+     */
+    const obu = (type, payload) => [type << 3, payload.length].concat(payload);
+
+    /**
+     * Builds an IA Sequence Header OBU.
+     *
+     * @param {number} primaryProfile
+     * @param {number} additionalProfile
+     * @return {!Array<number>}
+     */
+    const sequenceHeaderObu = (primaryProfile, additionalProfile) => obu(31, [
+      0x69, 0x61, 0x6d, 0x66, // ia_code ('iamf')
+      primaryProfile,
+      additionalProfile,
+    ]);
+
+    /**
+     * Builds a Codec Config OBU for the given codec_id.
+     *
+     * @param {string} codecId
+     * @return {!Array<number>}
+     */
+    const codecConfigObu = (codecId) => obu(0, [
+      0x00, // codec_config_id
+      codecId.charCodeAt(0), codecId.charCodeAt(1),
+      codecId.charCodeAt(2), codecId.charCodeAt(3),
+      0xc0, 0x07, // num_samples_per_frame (960)
+      0xff, 0xfc, // audio_roll_distance (-4)
+    ]);
+
+    /**
+     * Wraps the given OBUs in an iacb payload.
+     *
+     * @param {!Array<number>} configOBUs
+     * @param {number=} configurationVersion
+     * @return {!shaka.util.DataViewReader}
+     */
+    const makeReader = (configOBUs, configurationVersion = 1) => {
+      const data = new Uint8Array(
+          [configurationVersion, configOBUs.length].concat(configOBUs));
+      return new shaka.util.DataViewReader(
+          data, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+    };
+
+    it('parses the profiles and the codec of each codec_id', () => {
+      const cases = {
+        'Opus': 'iamf.000.000.Opus',
+        // IAMF only allows AAC-LC, so mp4a always maps to mp4a.40.2.
+        'mp4a': 'iamf.000.000.mp4a.40.2',
+        'fLaC': 'iamf.000.000.fLaC',
+        'ipcm': 'iamf.000.000.ipcm',
+      };
+      for (const codecId in cases) {
+        const reader = makeReader(
+            sequenceHeaderObu(0, 0).concat(codecConfigObu(codecId)));
+        expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+            .toBe(cases[codecId]);
+      }
+    });
+
+    it('pads the profiles to three digits', () => {
+      let reader = makeReader(
+          sequenceHeaderObu(1, 2).concat(codecConfigObu('Opus')));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+          .toBe('iamf.001.002.Opus');
+
+      reader = makeReader(
+          sequenceHeaderObu(255, 255).concat(codecConfigObu('Opus')));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+          .toBe('iamf.255.255.Opus');
+    });
+
+    it('skips reserved OBUs between the descriptors', () => {
+      const reservedObu = obu(24, [0x01, 0x02, 0x03]);
+      const reader = makeReader(sequenceHeaderObu(0, 0)
+          .concat(reservedObu, codecConfigObu('Opus')));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+          .toBe('iamf.000.000.Opus');
+    });
+
+    it('skips the optional fields of the OBU header', () => {
+      // obu_extension_flag is set, so extension_header_size and the extension
+      // header bytes precede the payload and count towards obu_size.
+      const sequenceHeader = [
+        (31 << 3) | 0x01, // obu_type, obu_extension_flag
+        0x09, // obu_size
+        0x02, // extension_header_size
+        0xaa, 0xbb, // extension_header_bytes
+        0x69, 0x61, 0x6d, 0x66, // ia_code ('iamf')
+        0x00, 0x00, // profiles
+      ];
+      const reader = makeReader(
+          sequenceHeader.concat(codecConfigObu('Opus')));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+          .toBe('iamf.000.000.Opus');
+    });
+
+    it('reads multi-byte leb128 values', () => {
+      // A codec_config_id of 300 takes two bytes as a leb128().
+      const codecConfig = obu(0, [
+        0xac, 0x02, // codec_config_id (300)
+        0x4f, 0x70, 0x75, 0x73, // codec_id ('Opus')
+        0xc0, 0x07, // num_samples_per_frame (960)
+        0xff, 0xfc, // audio_roll_distance (-4)
+      ]);
+      const reader = makeReader(
+          sequenceHeaderObu(0, 0).concat(codecConfig));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec)
+          .toBe('iamf.000.000.Opus');
+    });
+
+    it('ignores an unknown configurationVersion', () => {
+      const reader = makeReader(
+          sequenceHeaderObu(0, 0).concat(codecConfigObu('Opus')),
+          /* configurationVersion= */ 2);
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec).toBeNull();
+    });
+
+    it('returns null without a Codec Config OBU', () => {
+      const reader = makeReader(sequenceHeaderObu(0, 0));
+      expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec).toBeNull();
+    });
+
+    it('returns null on truncated descriptors', () => {
+      const configOBUs =
+          sequenceHeaderObu(0, 0).concat(codecConfigObu('Opus'));
+      for (let length = 0; length < configOBUs.length; length++) {
+        const data = new Uint8Array(
+            [1, configOBUs.length].concat(configOBUs.slice(0, length)));
+        const reader = new shaka.util.DataViewReader(
+            data, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+        expect(shaka.util.Mp4BoxParsers.parseIACB(reader).codec).toBeNull();
+      }
+    });
+  });
+
   describe('parseSENC', () => {
     it('parses senc box without subsamples or parameter overrides', () => {
       const sencBox = new Uint8Array([

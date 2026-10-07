@@ -61,6 +61,10 @@ The following elements can be added to the UI bar using this configuration value
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
+* seek_backward: adds a button that seeks backward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
+* seek_forward: adds a button that seeks forward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
 * spacer: adds a chunk of empty space between the adjacent elements.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the
@@ -84,6 +88,13 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a menu group with the elements listed in the
+  `captionsStyleElements` configuration, by default captions-size,
+  captions-position and captions-style-reset. The group is visible only if one
+  of them is.
+* captions-settings: adds a menu group with the captions and captions-style
+  elements. The group is visible only if one of them is, and shows the current
+  text track.
 * skip_next: adds a button to skip to next element in the queue. The button
   is visible only if there is next.
 * skip_previous: adds a button to skip to previous element in the queue. The button
@@ -134,6 +145,16 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-style: adds a menu group with the elements listed in the
+  `captionsStyleElements` configuration, by default captions-size,
+  captions-position and captions-style-reset. The group is visible only if one
+  of them is.
+* captions-settings: adds a menu group with the captions and captions-style
+  elements. The group is visible only if one of them is, and shows the current
+  text track.
+* captions-style-reset: adds a button that restores the default size and
+  position of the captions. The button is visible only if the content has at
+  least one text track.
 * queue: adds a button that opens a menu listing all items in the playback queue.
   Each item displays its title and, if available, a poster thumbnail. The currently
   playing item is highlighted with a checkmark. The button is visible only if there
@@ -165,6 +186,10 @@ The following elements can be added as big buttons using this configuration valu
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
+* seek_backward: adds a button that seeks backward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
+* seek_forward: adds a button that seeks forward `seekButtonDistance` seconds on
+  click. The button is visible only when the seek bar is.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers. Note that it will use the
   [Document Picture-in-Picture API]() if supported.
@@ -188,14 +213,16 @@ const config = {
 ui.configure(config);
 ```
 
-#### Adding tooltips to control panel buttons
+#### Adding tooltips to control panel and big buttons
 
-Tooltips can be enabled to display the function of every button in the control panel. Where applicable, they will also contain the current selection in parenthesis.
+Tooltips can be enabled to display the function of buttons in the control panels
+and the big buttons. Where applicable, they also contain the current selection
+in parentheses. Big button tooltips appear above the buttons.
 
 Example:
 ```js
 const config = {
-  'enableTooltips' : true
+  'enableTooltips': true,
 }
 ui.configure(config);
 ```
@@ -293,6 +320,21 @@ const config = {
 ui.configure(config);
 ```
 
+#### Configuring the seek backward and forward buttons
+The `seek_backward` and `seek_forward` buttons seek by the number of seconds set
+in `seekButtonDistance` (10 by default), which is also shown inside their icon.
+They can be used both in the control panel and as big buttons, and they are
+hidden when the seek bar is hidden (e.g. live content without a DVR window, or
+while a linear ad is playing) or not added.
+
+```js
+const config = {
+  'bigButtons': ['seek_backward', 'play_pause', 'seek_forward'],
+  'seekButtonDistance': 15,
+}
+ui.configure(config);
+```
+
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.
 Each element has to have it's own class that implements the {@linksource shaka.extern.IUIElement}
@@ -354,6 +396,58 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 ```
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
+
+#### Grouping elements in a submenu
+The overflow menu fills up quickly.  Elements can be grouped in a submenu with
+a menu group, like `captions-settings` and `captions-style` do.  A menu group is
+a button that opens a submenu holding other elements registered with
+{@linksource shaka.ui.OverflowMenu}, which may be menu groups too.  The group is
+only shown while at least one of its elements is shown, and keeps the keyboard
+focus inside each level of the menu.
+
+To create one, extend {@linksource shaka.ui.MenuGroup} and register it like any
+other element:
+
+```js
+myapp.PlaybackGroup = class extends shaka.ui.MenuGroup {
+  constructor(parent, controls) {
+    // The icon of the group.
+    super(parent, controls, 'M320-200v-560l440 280-440 280Z');
+  }
+
+  // The name shown on the group button and as the title of its submenu.
+  getName() {
+    return 'Playback';
+  }
+
+  // The elements inside the group, in order.
+  getChildElementNames() {
+    return ['playback_rate', 'loop'];
+  }
+
+  // Optional: the element whose current selection is shown on the group
+  // button.  By default, none is shown.
+  getSummaryElementName() {
+    return 'playback_rate';
+  }
+};
+
+myapp.PlaybackGroup.Factory = class {
+  create(rootElement, controls) {
+    return new myapp.PlaybackGroup(rootElement, controls);
+  }
+};
+
+shaka.ui.OverflowMenu.registerElement(
+    'playback_group', new myapp.PlaybackGroup.Factory());
+
+uiConfig['overflowMenuButtons'] = ['captions-settings', 'playback_group'];
+```
+
+Elements can check `this.isInMenuGroup` to use a shorter label, since the
+group already names the context: inside `captions-settings`, the `captions`
+element is labeled "Language" instead of "Captions".
+
 
 #### Customizing the UI with CSS variables
 

@@ -148,11 +148,100 @@ shaka.extern.Period;
 
 /**
  * @typedef {{
+ *   version: number,
+ *   mode: string,
+ *   includeInRequests: !Array<string>,
+ *   keys: ?Array<string>,
+ *   contentId: ?string,
+ *   sessionId: ?string
+ * }}
+ *
+ * @description
+ * CMCD reporting parameters signaled by the manifest
+ * (ISO/IEC 23009-1:2026 Annex K, <code>CMCDParameters</code>). Values are
+ * validated and the spec defaults are already applied.
+ *
+ * @property {number} version
+ *   Highest CMCD version accepted by the reporting server, clamped to the
+ *   versions shaka supports (<code>1</code> or <code>2</code>).
+ *   Defaults to <code>1</code>.
+ * @property {string} mode
+ *   Data transmission mode, <code>'query'</code> or <code>'header'</code>.
+ *   Defaults to <code>'query'</code>.
+ * @property {!Array<string>} includeInRequests
+ *   Request types that carry CMCD data, using the ISO/IEC 23009-1 Table I.4
+ *   tokens (for example <code>'segment'</code>, <code>'mpd'</code>,
+ *   <code>'steering'</code>, <code>'*'</code>).
+ *   Defaults to <code>['segment']</code>.
+ * @property {?Array<string>} keys
+ *   CMCD keys to report, or <code>null</code> when the manifest did not
+ *   specify any.
+ * @property {?string} contentId
+ *   Value for the <code>cid</code> key, or <code>null</code>.
+ * @property {?string} sessionId
+ *   Value for the <code>sid</code> key, or <code>null</code>.
+ * @exportDoc
+ */
+shaka.extern.CmcdParameters;
+
+/**
+ * @typedef {{
+ *   serviceLocation: string,
+ *   uri: string
+ * }}
+ *
+ * @description
+ * One manifest-level <code>BaseURL</code> or <code>Location</code> element
+ * that carries a <code>serviceLocation</code> attribute, resolved to an
+ * absolute URI.
+ *
+ * @property {string} serviceLocation
+ *   The <code>serviceLocation</code> attribute value.
+ * @property {string} uri
+ *   The absolute URI prefix served by this service location.
+ * @exportDoc
+ */
+shaka.extern.ServiceLocationBaseUri;
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   serviceLocations: ?Array<string>,
+ *   adaptationSets: ?Array<string>,
+ *   serviceLocationBaseUris: !Array<shaka.extern.ServiceLocationBaseUri>,
+ *   cmcdParameters: ?shaka.extern.CmcdParameters
+ * }}
+ *
+ * @description
+ * Client data reporting configuration signaled by the manifest
+ * (ISO/IEC 23009-1:2026 Annex K, <code>ClientDataReporting</code>).
+ *
+ * @property {string} schemeIdUri
+ *   The reporting scheme, <code>urn:mpeg:dash:cta-5004:2023</code>.
+ * @property {?Array<string>} serviceLocations
+ *   Service locations for which reporting is enabled, or <code>null</code>
+ *   for all of them.
+ * @property {?Array<string>} adaptationSets
+ *   AdaptationSet ids for which reporting is enabled, or <code>null</code>
+ *   for all of them.
+ * @property {!Array<shaka.extern.ServiceLocationBaseUri>
+ *           } serviceLocationBaseUris
+ *   Resolved manifest-level base URIs per service location, used to decide
+ *   which service location a request belongs to.
+ * @property {?shaka.extern.CmcdParameters} cmcdParameters
+ *   The CMCD parameters, or <code>null</code> when the element carried none.
+ * @exportDoc
+ */
+shaka.extern.ClientDataReporting;
+
+/**
+ * @typedef {{
  *   targetLatency:?number,
  *   maxLatency: ?number,
  *   maxPlaybackRate: ?number,
  *   minLatency: ?number,
- *   minPlaybackRate: ?number
+ *   minPlaybackRate: ?number,
+ *   clientDataReporting: ?shaka.extern.ClientDataReporting
  * }}
  *
  * @description
@@ -172,6 +261,9 @@ shaka.extern.Period;
  *  Minimum latency in seconds.
  * @property {?number} minPlaybackRate
  *  Minimum playback rate.
+ * @property {?shaka.extern.ClientDataReporting} clientDataReporting
+ *  Client data reporting (CMCD) configuration signaled by the manifest, or
+ *  <code>null</code>.
  *
  * @exportDoc
  */

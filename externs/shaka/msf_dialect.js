@@ -33,7 +33,7 @@
 shaka.extern.MsfDialect = class {
   /**
    * The WebTransport subprotocol string that selects this draft, e.g.
-   * 'moqt-16'.
+   * 'moqt-18'.
    *
    * @return {string}
    * @exportDoc
@@ -42,7 +42,7 @@ shaka.extern.MsfDialect = class {
 
   /**
    * The draft name, matching the shaka.config.MsfVersion value this dialect is
-   * registered under, e.g. 'draft-16'.
+   * registered under, e.g. 'draft-18'.
    *
    * @return {string}
    * @exportDoc
@@ -107,10 +107,25 @@ shaka.extern.MsfSession = class {
    * @param {Array<string>} namespace
    * @param {string} trackName
    * @param {shaka.extern.MsfObjectCallback} callback
+   * @param {?shaka.extern.MsfLocation=} startLocation Where delivery should
+   *   begin, for a subscription that is not meant to start at the live edge,
+   *   which is what a seek into published-but-not-yet-received content needs.
+   *   Every draft carries it, though not alike: draft-18 in the
+   *   SUBSCRIPTION_FILTER parameter, draft-20 in LOCATION_FILTER. A publisher
+   *   may still refuse it, in which case the subscription fails rather than
+   *   silently starting somewhere else.
+   * @param {boolean=} joinCurrentGroup Also deliver the Group the live edge
+   *   is in from its first Object, rather than only what comes after the
+   *   subscription starts. MSF requires it of the catalog, whose current
+   *   state is the first Object of the latest Group plus the ones after it.
+   *   Draft-18 does it with a Joining FETCH and draft-20 with FILL_PARAMETERS;
+   *   the Objects arrive on the same callback as the subscription's, not
+   *   necessarily in order, and one may arrive twice. A session that cannot
+   *   do it delivers only what the subscription does.
    * @return {!Promise<bigint>}
    * @exportDoc
    */
-  subscribe(namespace, trackName, callback) {}
+  subscribe(namespace, trackName, callback, startLocation, joinCurrentGroup) {}
 
   /**
    * Stops delivery for a subscription.
@@ -176,13 +191,40 @@ shaka.extern.MsfSession = class {
  *   },
  *   data: !Uint8Array,
  *   extensions: ?(Uint8Array|undefined),
+ *   trackProperties: ?(Uint8Array|undefined),
  *   status: ?(bigint|undefined),
  *   payloadReadStartMs: number,
  *   receiveTimestampMs: number,
  * }}
+ *
+ * @property {?(Uint8Array|undefined)} extensions
+ *   The Object Properties block, without its length prefix, or null when the
+ *   Object carries none.
+ * @property {?(Uint8Array|undefined)} trackProperties
+ *   The Track Properties block of the SUBSCRIBE_OK or FETCH_OK that answered
+ *   the request this Object was delivered on, or null when there were none.
+ *   Sessions for drafts that have no Track Properties leave it unset.
  * @exportDoc
  */
 shaka.extern.MsfObject;
+
+
+/**
+ * Where an Object sits in a track: the MoQT Location, a Group ID and an
+ * Object ID within that Group.
+ *
+ * Defined here for the same reason as shaka.extern.MsfObject: it is part of
+ * the dialect plugin contract, and externs are compiled into every build,
+ * including the ones that leave the MSF parser out.
+ *
+ * @typedef {{
+ *   group: bigint,
+ *   object: bigint,
+ *   subgroup: ?(bigint|undefined),
+ * }}
+ * @exportDoc
+ */
+shaka.extern.MsfLocation;
 
 
 /**

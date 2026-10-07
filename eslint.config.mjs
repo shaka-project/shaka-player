@@ -364,6 +364,7 @@ export default [
       'ui/externs/*.js',
       'externs/**/*.js',
       'test/test/externs/*.js',
+      'build/clutz-shims.externs.js',
       // Use var in load.js so it works in old browsers.  We'll use
       // compiled mode for the main library and the demo.
       'demo/load.js',

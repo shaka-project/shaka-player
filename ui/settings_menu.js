@@ -133,8 +133,13 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     this.backButton.classList.add('shaka-back-to-overflow-button');
     this.menu.appendChild(this.backButton);
     this.eventManager.listen(this.backButton, 'click', () => {
-      this.controls.hideSettingsMenus();
-      this.backButton.focus();
+      // Submenus return to their parent through the menu click listener.
+      // A standalone menu closes and returns focus to its opening button.
+      if (!this.isSubMenu) {
+        this.controls.hideSettingsMenus();
+        this.button.setAttribute('aria-expanded', 'false');
+        this.button.focus();
+      }
     });
 
     /** @private {shaka.ui.Icon} */
@@ -161,11 +166,24 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     if (this.isSubMenu) {
       this.backIcon_.use(shaka.ui.Enums.MaterialDesignSVGIcons['BACK']);
 
-      this.eventManager.listen(this.menu, 'click', () => {
+      this.eventManager.listen(this.menu, 'click', (event) => {
+        if (!this.shouldCloseOnMenuClick(event)) {
+          return;
+        }
+        const activeElement = this.menu.ownerDocument.activeElement;
+        const focusIsInMenu = this.menu.contains(activeElement);
         this.notifyMenuClose_();
-        this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
+        this.dispatchSubMenuEvent_('submenuclose');
         shaka.ui.Utils.setDisplay(this.menu, false);
         shaka.ui.Utils.setDisplay(this.parent, true);
+        this.button.setAttribute('aria-expanded', 'false');
+        if (this.backButton.contains(/** @type {?Node} */ (event.target))) {
+          // Restore focus after the parent buttons have become visible.
+          this.button.focus();
+        } else if (focusIsInMenu) {
+          // An item was chosen, and it was hidden along with the menu.
+          this.controls.restoreFocus(this.button);
+        }
       });
 
       let prevHidden = this.parent.classList.contains('shaka-hidden');
@@ -181,8 +199,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
               if (!this.menu.classList.contains('shaka-hidden')) {
                 this.notifyMenuClose_();
               }
-              this.controls.dispatchEvent(
-                  new shaka.util.FakeEvent('submenuclose'));
+              this.dispatchSubMenuEvent_('submenuclose');
               shaka.ui.Utils.setDisplay(this.menu, false);
             }
             prevHidden = newHidden;
@@ -201,7 +218,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
 
   /** @private */
   onButtonClick_() {
-    if (!this.parent.classList.contains('shaka-context-menu')) {
+    if (!this.parent.closest('.shaka-context-menu')) {
       this.controls.hideContextMenus();
       this.button.setAttribute('aria-expanded', 'false');
     }
@@ -210,11 +227,14 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     } else {
       if (this.menu.classList.contains('shaka-hidden')) {
         if (this.isSubMenu) {
-          this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
+          this.dispatchSubMenuEvent_('submenuopen');
+        }
+        if (!this.isSubMenu) {
+          this.controls.setSettingsMenuOpener(this.button);
         }
         shaka.ui.Utils.setDisplay(this.menu, true);
         this.notifyMenuOpen_();
-        shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+        this.focusOnMenuOpen();
         this.adjustCustomStyle();
         this.button.setAttribute('aria-expanded', 'true');
       } else {
@@ -224,6 +244,18 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
         this.button.focus();
       }
     }
+  }
+
+  /**
+   * Notifies the elements that share this submenu's container, so they hide
+   * or show their buttons.  Other menu levels are not affected.
+   *
+   * @param {string} type
+   * @private
+   */
+  dispatchSubMenuEvent_(type) {
+    this.controls.dispatchEvent(new shaka.util.FakeEvent(
+        type, new Map([['container', this.parent]])));
   }
 
   /** @private */
@@ -251,6 +283,27 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
 
   /** @protected */
   onMenuClose() {}
+
+  /**
+   * Moves the focus into the menu after it is opened.
+   *
+   * @protected
+   */
+  focusOnMenuOpen() {
+    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+  }
+
+  /**
+   * Whether a click inside a submenu closes it and returns to its parent.
+   * By default any click does, since it usually chooses an item.
+   *
+   * @param {!Event} event
+   * @return {boolean}
+   * @protected
+   */
+  shouldCloseOnMenuClick(event) {
+    return true;
+  }
 
   /** @override */
   adjustCustomStyle() {

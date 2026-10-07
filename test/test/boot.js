@@ -193,6 +193,24 @@ function installPromiseWithResolversPolyfill() {
 }
 
 /**
+ * Install a polyfill for structuredClone if needed.
+ *
+ * Old platforms such as Chromecast lack it, and the MSF parser uses it to log
+ * a snapshot of the catalog in debug builds.  MSF needs WebTransport, which
+ * those platforms don't have, so only the tests reach that code there.  The
+ * catalog is plain JSON, so a JSON round-trip is a faithful copy.
+ */
+function installStructuredClonePolyfill() {
+  // A declaration rather than an arrow function, to stay ES5 for Chrome 38.
+  function cloneViaJson(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+  if (!window.structuredClone) {
+    window.structuredClone = cloneViaJson;
+  }
+}
+
+/**
  * Work around lab crashes by flagging if we're running in the lab.  This lets
  * us add lab-specific workarounds for our unique lab environment.  This won't
  * affect local test runs on developer machines or GitHub Actions workflows.
@@ -612,6 +630,23 @@ window.isMSFSupported = () => {
 };
 
 /**
+ * Check if DecompressionStream is supported with the GZIP format, which MSF
+ * uses to compress its JSON tracks. It arrived later than everything else MSF
+ * needs (Chromium 80, Firefox 113, Safari 16.4), so platforms such as Tizen
+ * 5.5 and 6 pass isMSFSupported() without it.
+ * @return {boolean}
+ */
+window.isDecompressionStreamSupported = () => {
+  try {
+    new DecompressionStream('gzip'); // eslint-disable-line no-new
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+/**
  * Check if ReadableStream is supported.
  * @return {boolean}
  */
@@ -681,6 +716,7 @@ async function setupTestEnvironment() {
   }
 
   installPromiseWithResolversPolyfill();
+  installStructuredClonePolyfill();
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly

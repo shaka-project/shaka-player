@@ -335,6 +335,7 @@ shaka.extern.UITrackLabelCallback;
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
  *   tapSeekDistance: number,
+ *   seekButtonDistance: number,
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
@@ -356,9 +357,9 @@ shaka.extern.UITrackLabelCallback;
  *   mediaSession: shaka.extern.UIMediaSession,
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
+ *   captionsStyleElements: !Array<string>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
- *   showMenusOnTheRight: boolean,
  *   customTrackLabel: shaka.extern.UITrackLabelCallback,
  *   showBufferingSpinner: boolean,
  * }}
@@ -528,8 +529,8 @@ shaka.extern.UITrackLabelCallback;
  *   Defaults to <code>false</code> except on mobile where the default value
  *   is <code>true</code>
  * @property {boolean} enableTooltips
- *   Whether or not buttons in the control panel display tooltips that contain
- *   information about their function.
+ *   Whether or not buttons in the control panels and big buttons display
+ *   tooltips that contain information about their function.
  *   <br>
  *   Defaults to <code>true</code> except on mobile, cast and smart TV whose
  *   default value is <code>false</code>.
@@ -565,6 +566,12 @@ shaka.extern.UITrackLabelCallback;
  *   The time interval, in seconds, to seek when the user presses the left or
  *   right part of the video. If less than or equal to 0,
  *   no seeking will occur.
+ *   <br>
+ *   Defaults to <code>10</code>.
+ * @property {number} seekButtonDistance
+ *   The time interval, in seconds, to seek when the user presses the
+ *   <code>seek_backward</code> or <code>seek_forward</code> buttons. If less
+ *   than or equal to 0, the buttons are hidden.
  *   <br>
  *   Defaults to <code>10</code>.
  * @property {number} refreshTickInSeconds
@@ -664,6 +671,11 @@ shaka.extern.UITrackLabelCallback;
  *   The ordered list of font scale factor selection.
  *   <br>
  *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {!Array<string>} captionsStyleElements
+ *   The ordered list of elements in the subtitle style menu.
+ *   <br>
+ *   Defaults to <code>['captions-size', 'captions-position',
+ *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.
  *   <br>
@@ -674,11 +686,6 @@ shaka.extern.UITrackLabelCallback;
  *   Whether to show the UI whenever the video is paused.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} showMenusOnTheRight
- *   It always displays the menus on the right side of the container regardless
- *   of where the button that opens the menu is located.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.extern.UITrackLabelCallback} customTrackLabel
  *   A callback for customizing track labels in the UI.  The callback receives
  *   the default label (or <code>null</code> if the language was unrecognized),
@@ -775,6 +782,12 @@ shaka.extern.IUIElement = class {
      * @exportInterface
      */
     this.isSubMenuOpened;
+
+    /**
+     * @protected {boolean}
+     * @exportInterface
+     */
+    this.isInMenuGroup;
   }
 
   /**
@@ -964,6 +977,42 @@ shaka.extern.IUISettingsMenu = class {
      */
     this.backSpan;
   }
+};
+
+/**
+ * Interface for UI menu groups: a menu button that opens a submenu holding
+ * other UI elements, which may be menu groups too.  UI menu groups should
+ * inherit from the abstract base class shaka.ui.MenuGroup.  The methods
+ * defined here are defined to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUISettingsMenu}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIMenuGroup = class {
+  /**
+   * Returns the localized name of the group, shown on its button and as the
+   * title of its submenu.
+   *
+   * @return {string}
+   */
+  getName() {}
+
+  /**
+   * Returns the names of the elements inside the group, as registered with
+   * shaka.ui.OverflowMenu.registerElement.
+   *
+   * @return {!Array<string>}
+   */
+  getChildElementNames() {}
+
+  /**
+   * Returns the name of the element, among getChildElementNames(), whose
+   * current selection is shown on the group button, or null to show none.
+   *
+   * @return {?string}
+   */
+  getSummaryElementName() {}
 };
 
 /**

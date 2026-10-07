@@ -80,6 +80,7 @@ shaka.test.FakeDemoMain = class {
       showAudioChannelCountVariants: true,
       seekOnTaps: false,
       tapSeekDistance: 10,
+      seekButtonDistance: 10,
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
@@ -125,13 +126,17 @@ shaka.test.FakeDemoMain = class {
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      captionsStyleElements: [
+        'captions-size',
+        'captions-position',
+        'captions-style-reset',
+      ],
       documentPictureInPicture: {
         enabled: true,
         preferInitialWindowPlacement: false,
         disallowReturnToOpener: false,
       },
       showUIOnPaused: true,
-      showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
       showBufferingSpinner: true,
     };
