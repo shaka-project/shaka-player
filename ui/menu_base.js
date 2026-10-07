@@ -124,11 +124,6 @@ shaka.ui.MenuBase = class extends shaka.ui.Element {
 
     menuElement.style.maxHeight = heightIntersection + 'px';
 
-    if (this.config.showMenusOnTheRight) {
-      menuElement.style.right = '15px';
-      return;
-    }
-
     // --- Horizontal position ---
     const bottomControlsPos = controlsContainer.getBoundingClientRect();
     const buttonPos = buttonElement.getBoundingClientRect();

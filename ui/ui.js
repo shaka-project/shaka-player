@@ -10,6 +10,7 @@ goog.provide('shaka.ui.Overlay.FailReasonCode');
 goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
+goog.require('shaka.Deprecate');
 goog.require('shaka.Player');
 goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
@@ -188,6 +189,14 @@ shaka.ui.Overlay = class {
     }
 
     goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
+
+    // Deprecate 'showMenusOnTheRight' configuration.
+    if ('showMenusOnTheRight' in config) {
+      shaka.Deprecate.deprecateFeature(6,
+          'showMenusOnTheRight configuration',
+          'Menus are now positioned next to the button that opens them.');
+      delete config['showMenusOnTheRight'];
+    }
 
     const newConfig = /** @type {!shaka.extern.UIConfiguration} */(
       Object.assign({}, this.config_));
@@ -469,7 +478,6 @@ shaka.ui.Overlay = class {
         disallowReturnToOpener: false,
       },
       showUIOnPaused: true,
-      showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
       showBufferingSpinner: true,
     };
