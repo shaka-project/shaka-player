@@ -119,4 +119,31 @@ describe('TsParser', () => {
     expect(tsParser.getAudioData().length).toBeGreaterThan(0);
     expect(tsParser.getVideoData().length).toBe(0);
   });
+
+  describe('startsWithVideoKeyframe', () => {
+    // Segments 0 and 2 start a GOP; 1 and 3 carry on the one before them.
+    for (const assets of [
+      'hls-ts-h264-gop-spans-segments',
+      'hls-ts-h265-gop-spans-segments',
+    ]) {
+      it(`tells which segments start a GOP in ${assets}`, async () => {
+        const responses = await Promise.all([0, 1, 2, 3].map((index) => {
+          return Util.fetch(`/base/test/test/assets/${assets}/${index}.ts`);
+        }));
+        const startsWithKeyframe = responses.map((response) => {
+          return new shaka.util.TsParser()
+              .parse(BufferUtils.toUint8(response))
+              .startsWithVideoKeyframe();
+        });
+        expect(startsWithKeyframe).toEqual([true, false, true, false]);
+      });
+    }
+
+    it('cannot tell without video', async () => {
+      const audioSegment = BufferUtils.toUint8(
+          await Util.fetch('/base/test/test/assets/audio.ts'));
+      const tsParser = new shaka.util.TsParser().parse(audioSegment);
+      expect(tsParser.startsWithVideoKeyframe()).toBeNull();
+    });
+  });
 });

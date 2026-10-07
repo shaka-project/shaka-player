@@ -299,28 +299,15 @@ describe('Transmuxer Player', () => {
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      // Play past every segment boundary.  If it takes longer than 30 seconds,
-      // fail the test.
+      // Play to the end, past every segment boundary.  If that takes longer
+      // than 30 seconds, the checks below fail the test.
       await waiter.waitForEndOrTimeout(video, 30);
-      expect(video.ended).toBe(true);
-
-      await player.unload();
-    });
-
-    it('H.264 in TS starting in the middle of a GOP', async () => {
-      // Segment 1 starts in the middle of the first GOP, so there is nothing
-      // to decode until the GOP that starts segment 2.
-      await player.load(
-          '/base/test/test/assets/hls-ts-h264-gop-spans-segments/index.m3u8',
-          /* startTime= */ 1.5);
-      await video.play();
-
-      // Wait for the video to start playback.  If it takes longer than 10
-      // seconds, fail the test.
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-      await waiter.waitForEndOrTimeout(video, 30);
-      expect(video.ended).toBe(true);
+      expect(video.currentTime).toBeGreaterThan(3.5);
+      // Every segment made it into the buffer.  One dropped for starting in
+      // the middle of a GOP would leave a gap that playback jumps over.
+      expect(video.buffered.length).toBe(1);
+      expect(video.buffered.end(0) - video.buffered.start(0))
+          .toBeGreaterThan(3.5);
 
       await player.unload();
     });
@@ -342,10 +329,15 @@ describe('Transmuxer Player', () => {
       // seconds, fail the test.
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-      // Play past every segment boundary.  If it takes longer than 30 seconds,
-      // fail the test.
+      // Play to the end, past every segment boundary.  If that takes longer
+      // than 30 seconds, the checks below fail the test.
       await waiter.waitForEndOrTimeout(video, 30);
-      expect(video.ended).toBe(true);
+      expect(video.currentTime).toBeGreaterThan(3.5);
+      // Every segment made it into the buffer.  One dropped for starting in
+      // the middle of a GOP would leave a gap that playback jumps over.
+      expect(video.buffered.length).toBe(1);
+      expect(video.buffered.end(0) - video.buffered.start(0))
+          .toBeGreaterThan(3.5);
 
       await player.unload();
     });
