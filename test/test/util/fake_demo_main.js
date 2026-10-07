@@ -137,7 +137,6 @@ shaka.test.FakeDemoMain = class {
         disallowReturnToOpener: false,
       },
       showUIOnPaused: true,
-      showMenusOnTheRight: false,
       customTrackLabel: (defaultLabel, track, type) => '',
       showBufferingSpinner: true,
     };
