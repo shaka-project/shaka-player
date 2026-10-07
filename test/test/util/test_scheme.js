@@ -52,6 +52,7 @@ let ExtraMetadataType;
  *   duration: number,
  *   licenseServers: (!Object<string, string>|undefined),
  *   licenseRequestHeaders: (!Object<string, string>|undefined),
+ *   preferredKeySystems: (!Array<string>|undefined),
  *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
  *   sequenceMode: (boolean|undefined),
  *   nextUrl: (string|undefined)
@@ -165,6 +166,9 @@ shaka.test.TestScheme = class {
     if (asset.licenseServers) {
       const config = {drm: {servers: asset.licenseServers}};
       player.configure(config);
+    }
+    if (asset.preferredKeySystems) {
+      player.configure('drm.preferredKeySystems', asset.preferredKeySystems);
     }
   }
 
@@ -687,6 +691,9 @@ shaka.test.TestScheme.DATA = {
       initData: undefined,
     }),
     licenseServers: multiDrmServers,
+    // PlayReady's test server sometimes fails with HTTP 500, so platforms
+    // that support both key systems (e.g. Tizen) use Widevine instead.
+    preferredKeySystems: ['com.widevine.alpha'],
     duration: 30,
   },
 

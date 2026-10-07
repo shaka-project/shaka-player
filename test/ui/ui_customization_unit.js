@@ -23,6 +23,9 @@ describe('UI Customization', () => {
 
   afterEach(async () => {
     await UiUtils.cleanupUI();
+    // cleanupUI() only finds containers that got a UI.  Remove this one even
+    // if the test failed before setting one up.
+    container.remove();
   });
 
   afterAll(() => {
