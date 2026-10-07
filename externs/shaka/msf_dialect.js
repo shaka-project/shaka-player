@@ -33,7 +33,7 @@
 shaka.extern.MsfDialect = class {
   /**
    * The WebTransport subprotocol string that selects this draft, e.g.
-   * 'moqt-16'.
+   * 'moqt-18'.
    *
    * @return {string}
    * @exportDoc
@@ -42,7 +42,7 @@ shaka.extern.MsfDialect = class {
 
   /**
    * The draft name, matching the shaka.config.MsfVersion value this dialect is
-   * registered under, e.g. 'draft-16'.
+   * registered under, e.g. 'draft-18'.
    *
    * @return {string}
    * @exportDoc
@@ -110,11 +110,10 @@ shaka.extern.MsfSession = class {
    * @param {?shaka.extern.MsfLocation=} startLocation Where delivery should
    *   begin, for a subscription that is not meant to start at the live edge,
    *   which is what a seek into published-but-not-yet-received content needs.
-   *   Every draft carries it, though not alike: draft-14 as fields of the
-   *   SUBSCRIBE message, draft-16 and draft-18 in the SUBSCRIPTION_FILTER
-   *   parameter, draft-20 in LOCATION_FILTER. A publisher may still refuse
-   *   it, in which case the subscription fails rather than silently starting
-   *   somewhere else.
+   *   Every draft carries it, though not alike: draft-18 in the
+   *   SUBSCRIPTION_FILTER parameter, draft-20 in LOCATION_FILTER. A publisher
+   *   may still refuse it, in which case the subscription fails rather than
+   *   silently starting somewhere else.
    * @param {boolean=} joinCurrentGroup Also deliver the Group the live edge
    *   is in from its first Object, rather than only what comes after the
    *   subscription starts. MSF requires it of the catalog, whose current

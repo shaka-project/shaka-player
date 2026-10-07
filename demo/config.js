@@ -328,8 +328,6 @@ shakaDemo.Config = class {
     const msfVersionOptions = shaka.config.MsfVersion;
     const msfVersionOptionNames = {
       'AUTO': 'Auto',
-      'DRAFT_14': 'draft-14 (deprecated)',
-      'DRAFT_16': 'draft-16 (deprecated)',
       'DRAFT_18': 'draft-18',
       'DRAFT_20': 'draft-20',
       'DRAFT_21': 'draft-21',

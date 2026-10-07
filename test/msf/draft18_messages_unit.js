@@ -181,32 +181,16 @@ filterDescribe('shaka.msf.draft18.MessageWriter', isMSFSupported, () => {
     });
   });
 
-  describe('differences from draft-16', () => {
-    it('should place SUBSCRIBE_NAMESPACE at 0x50, not 0x11', () => {
+  describe('SUBSCRIBE_NAMESPACE', () => {
+    it('should place SUBSCRIBE_NAMESPACE at 0x50', () => {
       writer.marshalSubscribeNamespace({
         requestId: BigInt(0),
         namespace: [],
         params: [],
       });
       // 80 fits in draft-18's 7-bit single-byte range, so the type is one
-      // byte. Under draft-16's QUIC encoding the same value would have
-      // needed two, which is a good illustration of why the codec cannot be
-      // shared between the drafts.
+      // byte.
       expectMessage([0x50], [0x00, 0x00, 0x00]);
-    });
-
-    it('should not share message ids with draft-16', () => {
-      // 0x7 was PUBLISH_NAMESPACE_OK in draft-16 and is the generic
-      // REQUEST_OK here; 0x8 was PUBLISH_NAMESPACE_ERROR and is now
-      // NAMESPACE. Sharing an enum across drafts would mis-parse silently.
-      const d16 = shaka.msf.Utils.MessageTypeId;
-      const d18 = shaka.msf.draft18.MessageTypeId;
-      expect(d16.PUBLISH_NAMESPACE_OK).toBe(0x7);
-      expect(d18.REQUEST_OK).toBe(0x7);
-      expect(d16.PUBLISH_NAMESPACE_ERROR).toBe(0x8);
-      expect(d18.NAMESPACE).toBe(0x8);
-      expect(d16.SUBSCRIBE_NAMESPACE).toBe(0x11);
-      expect(d18.SUBSCRIBE_NAMESPACE).toBe(0x50);
     });
   });
 
