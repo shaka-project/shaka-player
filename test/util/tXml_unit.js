@@ -14,6 +14,109 @@ describe('tXml', () => {
     TXml.setKnownNameSpace('urn:scte:scte35:2014:xml+bin', 'scte35');
   });
 
+  describe('TTML element names', () => {
+    const ns = 'http://www.w3.org/ns/ttml';
+    const xml = '<t:tt xmlns:t="http://www.w3.org/ns/ttml">' +
+        '<t:body><t:div/></t:body></t:tt>';
+
+    it('resolves names without parent links', () => {
+      const root = TXml.parseXmlString(xml, 't:tt');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const body = TXml.findChildNS(root, ns, 'body');
+      goog.asserts.assert(body, 'findChild should succeed');
+      expect(TXml.findChildNS(body, ns, 'div')).toBeTruthy();
+      expect(body.parent).toBeNull();
+    });
+
+    it('keeps qualified names for other callers', () => {
+      const root = TXml.parseXmlString(xml, 't:tt');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      expect(root.tagName).toBe('t:tt');
+      expect(TXml.findChild(root, 't:body')).toBeTruthy();
+      expect(TXml.parse(xml, false)[0].tagName).toBe('t:tt');
+    });
+
+    it('keeps foreign metadata qualified', () => {
+      const root = TXml.parseXmlString(
+          '<t:tt xmlns:t="http://www.w3.org/ns/ttml" ' +
+          'xmlns:smpte="http://www.smpte-ra.org/schemas/' +
+          '2052-1/2010/smpte-tt">' +
+          '<t:head><t:metadata><smpte:image/></t:metadata>' +
+          '</t:head></t:tt>', 't:tt');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const metadata = TXml.getElementsByTagNameNS(root, ns, 'metadata')[0];
+      expect(TXml.findChild(metadata, 'smpte:image')).toBeTruthy();
+    });
+
+    it('preserves spaces before reading child nodes', () => {
+      const root = TXml.parseXmlString(
+          '<t:tt xml:space="preserve" xmlns:t="http://www.w3.org/ns/ttml">' +
+          '<t:body>\n  <t:div/>\n  </t:body></t:tt>', 't:tt');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const body = TXml.findChildNS(root, ns, 'body');
+      goog.asserts.assert(body, 'findChild should succeed');
+      expect(body.children[0]).toBe('\n  ');
+      expect(body.children[2]).toBe('\n  ');
+    });
+  });
+
+  describe('namespace queries', () => {
+    const xml = '<Root xmlns:a="urn:match" xmlns:b="urn:match">' +
+        '<a:Item id="one"/><Wrap xmlns:a="urn:other">' +
+        '<a:Item id="foreign"/></Wrap><b:Item id="two"/>' +
+        '<a:Item id="three"/><Container xmlns="urn:match">' +
+        '<Item id="four"/><Item xmlns="" id="none"/>' +
+        '</Container><c:Item/></Root>';
+
+    it('matches aliases in document order', () => {
+      const root = TXml.parseXmlString(xml, 'Root');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const children = TXml.findChildrenNS(root, 'urn:match', 'Item');
+      expect(children.map((node) => node.attributes['id']))
+          .toEqual(['one', 'two', 'three']);
+      expect(children.map((node) => node.tagName))
+          .toEqual(['a:Item', 'b:Item', 'a:Item']);
+    });
+
+    it('resolves nested declarations and default namespaces', () => {
+      const root = TXml.parseXmlString(xml, 'Root');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const matches = TXml.getElementsByTagNameNS(root, 'urn:match', 'Item');
+      expect(matches.map((node) => node.attributes['id']))
+          .toEqual(['one', 'two', 'three', 'four']);
+      const unqualified = TXml.getElementsByTagNameNS(root, '', 'Item');
+      expect(unqualified.map((node) => node.attributes['id']))
+          .toEqual(['none']);
+    });
+
+    it('keeps namespace resolution independent of other documents', () => {
+      const root = TXml.parseXmlString(xml, 'Root');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      TXml.parseXmlString('<Other xmlns:a="urn:other"/>', 'Other');
+      expect(TXml.findChildrenNS(root, 'urn:match', 'Item').length).toBe(3);
+    });
+
+    it('preserves inherited namespaces when cloning a subtree', () => {
+      const root = TXml.parseXmlString(xml, 'Root');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const child = TXml.findChildrenNS(root, 'urn:match', 'Item')[0];
+      const clone = TXml.cloneNode(child);
+      goog.asserts.assert(clone, 'cloneNode should succeed');
+      expect(clone.parent).toBeNull();
+      expect(TXml.isElementNS(clone, 'urn:match', 'Item')).toBe(true);
+      expect(clone.tagName).toBe('a:Item');
+    });
+
+    it('accepts a list of namespaces', () => {
+      const root = TXml.parseXmlString(xml, 'Root');
+      goog.asserts.assert(root, 'parseXmlString should succeed');
+      const matches = TXml.getElementsByTagNameNS(
+          root, ['urn:match', 'urn:other'], 'Item');
+      expect(matches.map((node) => node.attributes['id']))
+          .toEqual(['one', 'foreign', 'two', 'three', 'four']);
+    });
+  });
+
   describe('findChild', () => {
     it('finds a child node', () => {
       const xmlString = [
