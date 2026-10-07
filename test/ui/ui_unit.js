@@ -298,6 +298,13 @@ describe('UI', () => {
         delete document['activeElement'];
         activeElementIsForced = false;
       }
+      // Tests that don't create a UI on videoContainer won't have the
+      // data-shaka-player-container attribute set, so cleanupUI() won't
+      // remove it. Clean it up here in that case.
+      if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+          videoContainer.parentElement) {
+        videoContainer.remove();
+      }
     });
 
     beforeEach(() => {
