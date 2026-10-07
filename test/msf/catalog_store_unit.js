@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('shaka.msf.CatalogStore', () => {
+filterDescribe('shaka.msf.CatalogStore', isMSFSupported, () => {
   const NAMESPACE = 'mlm/cmsf/clear';
 
   /** @type {!shaka.msf.CatalogStore} */

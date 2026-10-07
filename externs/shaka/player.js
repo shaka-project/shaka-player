@@ -2054,6 +2054,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   lowLatencyMode: boolean,
  *   preferNativeDash: boolean,
  *   preferNativeHls: boolean,
+ *   fallbackToNativeHlsOnMseError: boolean,
  *   updateIntervalSeconds: number,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
@@ -2215,6 +2216,16 @@ shaka.extern.SpeechToTextConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} fallbackToNativeHlsOnMseError
+ *   Retry an HLS load using native playback when MSE fails with
+ *   HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED or
+ *   HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED, if native HLS is
+ *   supported. The retry applies only to that load and does not change the
+ *   native playback preferences. Native media requests bypass Shaka's
+ *   networking filters.
+ *   <br>
+ *   Defaults to <code>true</code> on Apple browsers and <code>false</code>
+ *   elsewhere.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
  *   <br>
@@ -2699,6 +2710,7 @@ shaka.extern.AdsConfiguration;
  *   minTimeToSwitch: number,
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
+ *   allowAudioFallback: boolean,
  * }}
  *
  * @property {boolean} enabled
@@ -2793,6 +2805,14 @@ shaka.extern.AdsConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} droppedFrames
  *   Enable or disable dropped frames protection.
+ *   <br>
+ *   Defaults to <code>true</code>.
+ * @property {boolean} allowAudioFallback
+ *   If true, when the bandwidth can't sustain any variant with the selected
+ *   audio (e.g. 5.1 or spatial audio only paired with high video qualities),
+ *   adaptation may temporarily use the same audio with fewer channels
+ *   (e.g. 5.1, then stereo, then mono), going back to the selected audio as
+ *   soon as the bandwidth allows it.
  *   <br>
  *   Defaults to <code>true</code>.
  * @exportDoc

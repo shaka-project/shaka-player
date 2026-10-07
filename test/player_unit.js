@@ -883,6 +883,163 @@ describe('Player', () => {
       });
     });
 
+    describe('native HLS fallback on MSE errors', () => {
+      const mimeType = 'application/x-mpegurl';
+      const Code = shaka.util.Error.Code;
+      /** @type {!shaka.test.FakeManifestParser} */
+      let parser;
+      /** @type {!shaka.util.Error} */
+      let error;
+
+      beforeEach(() => {
+        parser = new shaka.test.FakeManifestParser(manifest);
+        shaka.media.ManifestParser.registerParserByMime(mimeType, () => parser);
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(deviceDetected, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+            (mediaElement, readyState, eventManager, callback) => callback());
+        player.configure({
+          streaming: {
+            useNativeHlsForFairPlay: false,
+            preferNativeHls: false,
+            fallbackToNativeHlsOnMseError: true,
+          },
+        });
+        error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MANIFEST,
+            Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
+        parser.start.and.callFake(() => Promise.reject(error));
+      });
+
+      afterEach(() => {
+        shaka.media.ManifestParser.registerParserByMime(
+            mimeType, () => new shaka.hls.HlsParser());
+      });
+
+      for (const code of [
+        Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED,
+        Code.HLS_MSE_ENCRYPTED_LEGACY_APPLE_MEDIA_KEYS_NOT_SUPPORTED,
+      ]) {
+        it('retries error ' + code + ' with native playback', async () => {
+          error.code = code;
+          await player.load(fakeManifestUri, 7, mimeType);
+
+          expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+          expect(video.src).toBe(fakeManifestUri);
+          expect(video.currentTime).toBe(7);
+          expect(parser.stop).toHaveBeenCalled();
+          expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+          expect(parser.start).toHaveBeenCalledTimes(1);
+          expect(onError).not.toHaveBeenCalled();
+          expect(player.getConfiguration().streaming.preferNativeHls)
+              .toBe(false);
+          expect(player.getConfiguration().streaming.useNativeHlsForFairPlay)
+              .toBe(false);
+        });
+      }
+
+      it('handles errors creating the initial segment index', async () => {
+        parser.start.and.callFake(() => Promise.resolve(manifest));
+        manifest.type = shaka.media.ManifestParser.HLS;
+        for (const variant of manifest.variants) {
+          variant.video.segmentIndex = null;
+          variant.video.createSegmentIndex = () => Promise.reject(error);
+        }
+        await player.load(fakeManifestUri, 0, mimeType);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+        expect(parser.stop).toHaveBeenCalled();
+      });
+
+      it('does not force native playback on the next load', async () => {
+        await player.load(fakeManifestUri, 0, mimeType);
+        parser.start.and.callFake(() => Promise.resolve(manifest));
+        await player.load(fakeManifestUri, 0, mimeType);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
+      });
+
+      it('defaults to enabled on Apple browsers', () => {
+        spyOn(shaka.device.DeviceFactory, 'getDevice').and.returnValue(
+            new shaka.device.AppleBrowser());
+        const config = shaka.util.PlayerConfiguration.createDefault();
+        expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(true);
+      });
+
+      it('defaults to disabled on other devices, including WebKit', () => {
+        const device = new shaka.device.DefaultBrowser();
+        spyOn(shaka.device.DeviceFactory, 'getDevice').and.returnValue(device);
+        const engine = spyOn(device, 'getBrowserEngine');
+        for (const browserEngine of [
+          shaka.device.IDevice.BrowserEngine.WEBKIT,
+          shaka.device.IDevice.BrowserEngine.CHROMIUM,
+          shaka.device.IDevice.BrowserEngine.GECKO,
+        ]) {
+          engine.and.returnValue(browserEngine);
+          const config = shaka.util.PlayerConfiguration.createDefault();
+          expect(config.streaming.fallbackToNativeHlsOnMseError).toBe(false);
+        }
+      });
+
+      it('can be disabled', async () => {
+        player.configure('streaming.fallbackToNativeHlsOnMseError', false);
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('requires native HLS support', async () => {
+        video.canPlayType.and.returnValue('');
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('does not retry other errors', async () => {
+        error.code = Code.HLS_REQUIRED_ATTRIBUTE_MISSING;
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('does not retry non-HLS loads', async () => {
+        shaka.media.ManifestParser.registerParserByMime(fakeMimeType,
+            () => parser);
+        await expectAsync(player.load(fakeManifestUri, 0, fakeMimeType))
+            .toBeRejectedWith(error);
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+
+      it('retries a failed preload when it is loaded', async () => {
+        const preload = await player.preload(fakeManifestUri, 9, mimeType);
+        await expectAsync(preload.waitForFinish()).toBeRejectedWith(error);
+        await player.load(preload);
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+        expect(video.currentTime).toBe(9);
+        expect(preload.isDestroyed()).toBe(true);
+      });
+
+      it('propagates a native failure without retrying again', async () => {
+        drmEngine.initForPlayback.and.callFake(() => Promise.reject(error));
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(error);
+        expect(parser.start).toHaveBeenCalledTimes(1);
+        expect(drmEngine.initForPlayback).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not retry if unloading interrupts cleanup', async () => {
+        parser.stop.and.callFake(async () => {
+          // Start another operation while the failed preload is destroyed.
+          await player.unload(false);
+        });
+        await expectAsync(player.load(fakeManifestUri, 0, mimeType))
+            .toBeRejectedWith(Util.jasmineError(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.PLAYER,
+                Code.LOAD_INTERRUPTED)));
+        expect(drmEngine.setSrcEquals).not.toHaveBeenCalled();
+      });
+    });
+
     it('fires keystatuschanged events', async () => {
       const keyStatusChanged = jasmine.createSpy('keyStatusChanged');
       player.addEventListener(
@@ -1825,6 +1982,48 @@ describe('Player', () => {
       await preloadManager.waitForFinish();
       shaka.media.ManifestParser.registerParserByMime(fakeMimeType, fail);
       await player.load(preloadManager);
+    });
+
+    describe('prefetches the segment that contains the start time', () => {
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      beforeEach(() => {
+        const timeline = new shaka.media.PresentationTimeline(300, 0);
+        timeline.setStatic(true);
+        // This duration is used by useSegmentTemplate below to decide how many
+        // references to generate.
+        timeline.setDuration(300);
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.presentationTimeline = timeline;
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.useSegmentTemplate(
+                  'video-%d.mp4', /* segmentDuration= */ 10);
+            });
+          });
+        });
+      });
+
+      it('when starting from the beginning', async () => {
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        networkingEngine.expectRequest('video-0.mp4', segmentType);
+        networkingEngine.expectNoRequest('video-1.mp4', segmentType);
+        await preloadManager.destroy();
+      });
+
+      it('when starting mid-stream', async () => {
+        // The segment at index 2 covers [20, 30).
+        const preloadManager = await player.preload(
+            fakeManifestUri, 25, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        networkingEngine.expectRequest('video-2.mp4', segmentType);
+        networkingEngine.expectNoRequest('video-1.mp4', segmentType);
+        await preloadManager.destroy();
+      });
     });
   });
 
@@ -3023,6 +3222,134 @@ describe('Player', () => {
       // codecs of the manually chosen quality.
       player.configure('abr.enabled', true);
       expect(abrManager.variants.map((v) => v.id).sort()).toEqual([201, 202]);
+    });
+
+    describe('with surround audio only paired with high qualities', () => {
+      /** @type {jasmine.Spy} */
+      let audioTracksChanged;
+
+      beforeEach(async () => {
+        // Stereo HE-AAC for 360p, stereo AAC-LC and E-AC-3 5.1 for 720p, and
+        // E-AC-3 5.1 for 1080p.
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(301, (variant) => {
+            variant.bandwidth = 500;
+            variant.language = 'en';
+            variant.addVideo(1, (stream) => {
+              stream.size(640, 360);
+            });
+            variant.addAudio(11, (stream) => {
+              stream.codecs = 'mp4a.40.5';
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(302, (variant) => {
+            variant.bandwidth = 1500;
+            variant.language = 'en';
+            variant.addVideo(2, (stream) => {
+              stream.size(1280, 720);
+            });
+            variant.addAudio(12, (stream) => {
+              stream.codecs = 'mp4a.40.2';
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(303, (variant) => {
+            variant.bandwidth = 1700;
+            variant.language = 'en';
+            variant.addExistingStream(2);
+            variant.addAudio(13, (stream) => {
+              stream.codecs = 'ec-3';
+              stream.channelsCount = 6;
+            });
+          });
+          manifest.addVariant(304, (variant) => {
+            variant.bandwidth = 3000;
+            variant.language = 'en';
+            variant.addVideo(3, (stream) => {
+              stream.size(1920, 1080);
+            });
+            variant.addExistingStream(13);
+          });
+        });
+
+        player.configure({
+          preferredAudio: [{language: 'en', channelCount: 2}],
+        });
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        player.configure('abr.enabled', false);
+        selectVariant(301);
+
+        audioTracksChanged = jasmine.createSpy('audioTracksChanged');
+        player.addEventListener('audiotrackschanged',
+            Util.spyFunc(audioTracksChanged));
+      });
+
+      it('offers every audio track whatever the quality', () => {
+        const audioTracks = player.getAudioTracks();
+        expect(audioTracks.map((t) => t.channelsCount).sort()).toEqual([2, 6]);
+        expect(audioTracks.find((t) => t.active).channelsCount).toBe(2);
+      });
+
+      it('changes the quality to select the audio', () => {
+        // Falling back from E-AC-3 to AAC needs a codec switch.
+        spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+            .and.returnValue(true);
+        player.configure('mediaSource.codecSwitchingStrategy',
+            shaka.config.CodecSwitchingStrategy.SMOOTH);
+        const surround = player.getAudioTracks().find(
+            (t) => t.channelsCount == 6);
+        goog.asserts.assert(surround, 'Must have a 5.1 track');
+        player.configure('abr.enabled', true);
+        player.selectAudioTrack(surround);
+        const selectedVariant =
+            streamingEngine.switchVariant.calls.mostRecent().args[0];
+        expect(selectedVariant.audio.channelsCount).toBe(6);
+        // ABR may fall back to the cheaper stereo variants.
+        expect(abrManager.variants.map((v) => v.id).sort())
+            .toEqual([301, 302, 303, 304]);
+      });
+
+      it('doesn\'t fall back to another codec without smooth switching',
+          () => {
+            spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+                .and.returnValue(false);
+            const surround = player.getAudioTracks().find(
+                (t) => t.channelsCount == 6);
+            goog.asserts.assert(surround, 'Must have a 5.1 track');
+            player.selectAudioTrack(surround);
+            // E-AC-3 can't transition to the AAC of the stereo variants.
+            expect(abrManager.variants.map((v) => v.id).sort())
+                .toEqual([303, 304]);
+          });
+
+      it('doesn\'t fall back if not allowed', () => {
+        player.configure('abr.allowAudioFallback', false);
+        const surround = player.getAudioTracks().find(
+            (t) => t.channelsCount == 6);
+        goog.asserts.assert(surround, 'Must have a 5.1 track');
+        player.selectAudioTrack(surround);
+        expect(abrManager.variants.map((v) => v.id).sort())
+            .toEqual([303, 304]);
+      });
+
+      it('doesn\'t fire audiotrackschanged for the same audio', async () => {
+        // HE-AAC to AAC-LC: the same stereo audio track.
+        selectVariant(302);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).not.toHaveBeenCalled();
+
+        selectVariant(303);
+        await shaka.test.Util.shortDelay();
+        expect(audioTracksChanged).toHaveBeenCalled();
+      });
+
+      /** @param {number} id */
+      function selectVariant(id) {
+        const track = player.getVariantTracks().find((t) => t.id == id);
+        goog.asserts.assert(track, 'Must have the variant track');
+        player.selectVariantTrack(track);
+      }
     });
 
     it('switching audio doesn\'t change selected text track', () => {
@@ -4892,6 +5219,8 @@ describe('Player', () => {
             codec: '',
           },
         ],
+        // Otherwise the cheaper stereo variant is a fallback for adaptation.
+        abr: {allowAudioFallback: false},
       });
       await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.setVariants).toHaveBeenCalled();

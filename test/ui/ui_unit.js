@@ -329,6 +329,13 @@ describe('UI', () => {
         delete document['activeElement'];
         activeElementIsForced = false;
       }
+      // Tests that don't create a UI on videoContainer won't have the
+      // data-shaka-player-container attribute set, so cleanupUI() won't
+      // remove it. Clean it up here in that case.
+      if (!('shakaPlayerContainer' in videoContainer.dataset) &&
+          videoContainer.parentElement) {
+        videoContainer.remove();
+      }
     });
 
     beforeEach(() => {
@@ -1315,16 +1322,6 @@ describe('UI', () => {
       let setPreviewSpy;
       /** @type {!jasmine.Spy} */
       let clearPreviewSpy;
-
-      afterEach(() => {
-        // Tests that don't call createUIThroughAPI won't have the
-        // data-shaka-player-container attribute set, so cleanupUI() won't
-        // remove their videoContainer. Clean it up here in that case.
-        if (!('shakaPlayerContainer' in videoContainer.dataset) &&
-            videoContainer.parentElement) {
-          videoContainer.remove();
-        }
-      });
 
       /**
        * @param {!HTMLElement} menu
@@ -3169,11 +3166,11 @@ describe('UI', () => {
         mouseEvent('mousedown', positionOfBar(0.25));
         const dragTime = parseFloat(seekBar.value);
 
-        // The test video element is created muted.
-        expect(video.muted).toBe(true);
+        // The test video element is not created muted on every platform.
+        const wasMuted = video.muted;
         pressKey(controls.getConfig().shortcuts.mute);
 
-        expect(video.muted).toBe(false);
+        expect(video.muted).toBe(!wasMuted);
         // Muting does not interrupt the drag.
         expect(controls.isSeeking()).toBe(true);
         expect(parseFloat(seekBar.value)).toBe(dragTime);
