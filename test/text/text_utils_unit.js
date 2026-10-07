@@ -288,4 +288,54 @@ describe('TextUtils', () => {
       expect(cue.positionAlign).toBe(defaultCue.positionAlign);
     });
   });
+
+  describe('parseColor', () => {
+    const parseColor = (color) => shaka.text.Utils.parseColor(color);
+
+    it('parses hexadecimal colors', () => {
+      expect(parseColor('#ff0')).toEqual([255, 255, 0, 1]);
+      expect(parseColor('#FF08')).toEqual([255, 255, 0, 136 / 255]);
+      expect(parseColor('#080808')).toEqual([8, 8, 8, 1]);
+      expect(parseColor('#ffff0080')).toEqual([255, 255, 0, 128 / 255]);
+    });
+
+    it('parses rgb() and rgba() colors', () => {
+      expect(parseColor('rgb(255, 0, 0)')).toEqual([255, 0, 0, 1]);
+      expect(parseColor('rgba(255,0,0,0.5)')).toEqual([255, 0, 0, 0.5]);
+      expect(parseColor('rgb(255 0 0 / 50%)')).toEqual([255, 0, 0, 0.5]);
+      expect(parseColor('rgb(100%, 0%, 0%)')).toEqual([255, 0, 0, 1]);
+    });
+
+    it('parses named colors', () => {
+      expect(parseColor('white')).toEqual([255, 255, 255, 1]);
+      expect(parseColor('Lime')).toEqual([0, 255, 0, 1]);
+      expect(parseColor('green')).toEqual([0, 128, 0, 1]);
+      expect(parseColor('transparent')).toEqual([0, 0, 0, 0]);
+    });
+
+    it('does not parse other colors', () => {
+      expect(parseColor('')).toBe(null);
+      expect(parseColor('orange')).toBe(null);
+      expect(parseColor('#ff')).toBe(null);
+      expect(parseColor('rgb(255, 0)')).toBe(null);
+      expect(parseColor('rgb(red, 0, 0)')).toBe(null);
+      expect(parseColor('hsl(0, 100%, 50%)')).toBe(null);
+    });
+  });
+
+  describe('setColorOpacity', () => {
+    it('replaces the opacity of the color', () => {
+      expect(shaka.text.Utils.setColorOpacity('#ff0', 0.5))
+          .toBe('rgba(255, 255, 0, 0.5)');
+      expect(shaka.text.Utils.setColorOpacity('rgba(0, 0, 0, 0.8)', 1))
+          .toBe('rgba(0, 0, 0, 1)');
+      expect(shaka.text.Utils.setColorOpacity('transparent', 0.75))
+          .toBe('rgba(0, 0, 0, 0.75)');
+    });
+
+    it('returns null for colors that can not be parsed', () => {
+      expect(shaka.text.Utils.setColorOpacity('orange', 0.5))
+          .toBe(null);
+    });
+  });
 });
