@@ -287,6 +287,10 @@ describe('Transmuxer Player', () => {
     });
 
     it('H.264 in TS with GOPs that span segments', async () => {
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Tizen 3 throws 3016 with this content');
+      }
       // Every other segment starts in the middle of a GOP, without parameter
       // sets or a key frame.
       await player.load(
@@ -316,6 +320,10 @@ describe('Transmuxer Player', () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 640, /* height= */ 360)) {
         pending('Codec H.265 is not supported by the platform.');
+      }
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Tizen 3 throws 3016 with this content');
       }
       // Every other segment starts in the middle of a GOP, without parameter
       // sets or a key frame.
