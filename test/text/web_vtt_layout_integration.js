@@ -406,7 +406,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('classes-with-styles');
     });
 
-    // FIXME: regions not supported
     it('region without anchors', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -421,7 +420,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('region-no-anchors');
     });
 
-    // FIXME: regions not supported
     it('region anchored at top center', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -439,7 +437,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('region-anchor-top-center');
     });
 
-    // FIXME: regions not supported
     it('region anchored at top left', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -457,7 +454,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('region-anchor-top-left');
     });
 
-    // FIXME: regions not supported
     it('region with complex anchors', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -475,7 +471,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('region-complex-anchors');
     });
 
-    // FIXME: regions not supported
     it('region 2 lines scroll up', async () => {
       parseAndDisplay([
         'WEBVTT\n',
