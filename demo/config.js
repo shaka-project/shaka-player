@@ -331,6 +331,7 @@ shakaDemo.Config = class {
       'DRAFT_18': 'draft-18',
       'DRAFT_20': 'draft-20',
       'DRAFT_21': 'draft-21',
+      'DRAFT_22': 'draft-22',
     };
 
     const docLink = this.resolveExternLink_('.ManifestConfiguration');

@@ -34,6 +34,7 @@ goog.require('shaka.metadata.VorbisUtils');
 goog.require('shaka.msf.MSFParser');
 goog.require('shaka.msf.draft18.Dialect');
 goog.require('shaka.msf.draft20.Dialect');
+goog.require('shaka.msf.draft22.Dialect');
 goog.require('shaka.msf.packaging.Cmaf');
 goog.require('shaka.msf.packaging.Loc');
 goog.require('shaka.msf.packaging.Locmaf');

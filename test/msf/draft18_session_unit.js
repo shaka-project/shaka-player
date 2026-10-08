@@ -466,6 +466,44 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
           expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(true);
         });
 
+    describe('in draft-22', () => {
+      beforeEach(() => {
+        session.release();
+        session = createSession(
+            () => new shaka.msf.draft22.MessageWriter(codec));
+      });
+
+      it('are found after a LOCATION_FILTER, which has no length',
+          async () => {
+            // Next Object carries no fields. Read with the draft-20 framing,
+            // its Filter Type would be a length of 5 and swallow the Track
+            // Properties.
+            const obj = await subscribeAndDeliver(subscribeOkWith(
+                [0x01, 0x21, 0x05], // LOCATION_FILTER = Next Object
+                COMPRESSION));
+            expect(obj.trackProperties).toEqual(new Uint8Array(COMPRESSION));
+          });
+
+      it('are found after a LOCATION_FILTER that carries fields',
+          async () => {
+            const obj = await subscribeAndDeliver(subscribeOkWith(
+                [
+                  0x01, // Parameter count
+                  0x21, 0x03, 0x07, 0x00, 0x02, // Absolute Start, Group End
+                ],
+                COMPRESSION));
+            expect(obj.trackProperties).toEqual(new Uint8Array(COMPRESSION));
+          });
+
+      it('are given up on after an unknown Location Filter Type',
+          async () => {
+            const obj = await subscribeAndDeliver(subscribeOkWith(
+                [0x01, 0x21, 0x06], // no such Location Filter Type
+                COMPRESSION));
+            expect(obj.trackProperties).toBeNull();
+          });
+    });
+
     it('are handed on with the Objects of a fetch', async () => {
       const received = [];
       const fetched = session.fetch(
@@ -706,6 +744,35 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
         expect(received.length).toBe(1);
         expect(received[0].location.group).toBe(BigInt(5));
+      });
+    });
+
+    describe('in draft-22', () => {
+      beforeEach(() => {
+        session.release();
+        session = createSession(
+            () => new shaka.msf.draft22.MessageWriter(codec));
+      });
+
+      it('writes the nested LOCATION_FILTER as Relative Start', async () => {
+        // Draft-22 replaced the filter's length with a Location Filter Type.
+        // Relative Start is 0x01 and carries one field, so the bytes happen to
+        // match what draft-20 writes for a one-byte value; the nested writer
+        // has to be a draft-22 one for that to hold by design and not luck.
+        await subscribeJoining();
+
+        const payload = subscribePayload();
+        const params = payload.subarray(
+            1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+        expect(Array.from(params)).toEqual([
+          0x03, // Parameter count
+          0x10, 0x01, // FORWARD = 1
+          0x10, 0x00, // delta 0x10 -> SUBSCRIBER_PRIORITY = 0
+          0x03, 0x04, // delta 0x03 -> FILL_PARAMETERS, 4 bytes:
+          0x01, // Parameter count
+          0x21, // LOCATION_FILTER, no length:
+          0x01, 0x01, // Relative Start, StartGroup = 1
+        ]);
       });
     });
   });
