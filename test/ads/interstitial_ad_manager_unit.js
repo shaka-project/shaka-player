@@ -54,6 +54,35 @@ describe('Interstitial Ad manager', () => {
     await player.destroy();
   });
 
+  /** @type {!shaka.ads.HlsInterstitialParser} */
+  let hlsParser;
+  beforeEach(() => {
+    hlsParser = new shaka.ads.HlsInterstitialParser();
+  });
+
+  /**
+   * Reproduces the wiring of shaka.ads.AdManager.onHLSMetadata.
+   *
+   * @param {shaka.extern.HLSMetadata} metadata
+   */
+  async function addMetadata(metadata) {
+    const result = hlsParser.parse(metadata, player.isLive(),
+        networkingEngine, /* insertion= */ true, /* measurement= */ true);
+    if (result.playoutLimitUpdate) {
+      interstitialAdManager.updateInterstitial(result.playoutLimitUpdate.id,
+          result.playoutLimitUpdate.playoutLimit);
+    }
+    if (result.preloadHint) {
+      interstitialAdManager.addPreloadHint(result.preloadHint.targetId,
+          result.preloadHint.startTime);
+    }
+    for (const deferred of result.deferred) {
+      // eslint-disable-next-line no-await-in-loop
+      await interstitialAdManager.addDeferredInterstitial(deferred);
+    }
+    await interstitialAdManager.addInterstitials(result.interstitials);
+  }
+
   describe('HLS', () => {
     it('basic interstitial support', async () => {
       const metadata = {
@@ -83,7 +112,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).toHaveBeenCalledTimes(2);
       const eventValuePreload = {
@@ -116,7 +145,7 @@ describe('Interstitial Ad manager', () => {
         ],
       };
 
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(interstitialAdManager.getInterstitials()).toEqual([
         jasmine.objectContaining({
@@ -155,7 +184,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const metadata2 = {
         type: 'com.apple.quicktime.HLS',
@@ -184,7 +213,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata2);
+      await addMetadata(metadata2);
 
       const calls = onEventSpy.calls.count();
       expect(calls).toBeLessThanOrEqual(5);
@@ -249,8 +278,8 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).toHaveBeenCalledTimes(2);
       const eventValuePreload = {
@@ -296,13 +325,15 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
 
     it('supports X-ASSET-LIST', async () => {
       spyOn(window.crypto, 'randomUUID').and.returnValue('1');
+      spyOn(interstitialAdManager.getPlayer(), 'preload')
+          .and.returnValue(Promise.resolve(null));
 
       const assetsList = JSON.stringify({
         ASSETS: [
@@ -342,7 +373,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).toHaveBeenCalledTimes(2);
       const eventValuePreload = {
@@ -370,6 +401,7 @@ describe('Interstitial Ad manager', () => {
         ASSETS: [
           {
             'URI': 'ad.m3u8',
+            'DURATION': 8,
             'X-AD-CREATIVE-SIGNALING': {
               version: 2,
               type: 'slot',
@@ -379,7 +411,7 @@ describe('Interstitial Ad manager', () => {
                   start: 0,
                   duration: 8,
                   media: [],
-                  identifiers: [],
+                  identifiers: [{scheme: 'test', value: 'creative'}],
                   tracking: [
                     {
                       type: 'impression',
@@ -477,11 +509,10 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
-      /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'PREROLL_shaka_asset_0',
         groupId: 'PREROLL',
@@ -505,21 +536,14 @@ describe('Interstitial Ad manager', () => {
         currentVideo: null,
         background: null,
         clickThroughUrl: 'clickThrough',
-        tracking: {
-          impression: ['impression'],
-          clickTracking: ['clickTracking'],
-          start: ['start'],
-          firstQuartile: ['firstQuartile', 'firstQuartile_alt'],
-          midpoint: ['midpoint', 'midpoint_alt'],
-          thirdQuartile: ['thirdQuartile'],
-          complete: ['complete'],
-          skip: ['skip'],
-          error: ['error'],
-          resume: ['resume'],
-          pause: ['pause'],
-          mute: ['mute'],
-          unmute: ['unmute'],
-        },
+        tracking: null,
+        adCreativeSignaling: jasmine.objectContaining({
+          type: 'linear', duration: 8,
+        }),
+        pod: null,
+        podOffset: 0,
+        sequenceLength: 1,
+        position: 1,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
@@ -546,7 +570,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -605,7 +629,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -660,7 +684,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -715,7 +739,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -770,7 +794,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -825,7 +849,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -880,7 +904,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -935,7 +959,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -1001,7 +1025,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -1080,7 +1104,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).not.toHaveBeenCalled();
 
@@ -1195,7 +1219,7 @@ describe('Interstitial Ad manager', () => {
           },
         ],
       };
-      await interstitialAdManager.addMetadata(metadata);
+      await addMetadata(metadata);
 
       expect(onEventSpy).not.toHaveBeenCalled();
 
@@ -1309,7 +1333,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
               interstitialAdManager.getInterstitials();
@@ -1352,7 +1376,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1391,7 +1415,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1440,7 +1464,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1494,7 +1518,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1544,7 +1568,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1587,7 +1611,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1630,7 +1654,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1680,7 +1704,7 @@ describe('Interstitial Ad manager', () => {
             },
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         const interstitials =
             interstitialAdManager.getInterstitials();
@@ -1726,7 +1750,7 @@ describe('Interstitial Ad manager', () => {
             {key: 'X-ASSET-LIST', data: 'test:/test.json'},
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
         expect(interstitialAdManager.getInterstitials().length).toBe(1);
         networkingEngine.expectRequest(
             'test:/test.json?_HLS_primary_id=1',
@@ -1790,7 +1814,7 @@ describe('Interstitial Ad manager', () => {
             {key: 'X-ASSET-LIST', data: 'test:/test.json'},
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         expect(interstitialAdManager.getInterstitials().length).toBe(0);
         // No ad decision request should have been made yet.
@@ -1824,7 +1848,7 @@ describe('Interstitial Ad manager', () => {
             {key: 'X-ASSET-LIST', data: 'test:/test.json'},
           ],
         };
-        await interstitialAdManager.addMetadata(metadata);
+        await addMetadata(metadata);
 
         expect(interstitialAdManager.getInterstitials().length).toBe(1);
       });
@@ -1858,7 +1882,7 @@ describe('Interstitial Ad manager', () => {
                 {key: 'X-ASSET-LIST', data: 'test:/test.json'},
               ],
             };
-            await interstitialAdManager.addMetadata(metadata);
+            await addMetadata(metadata);
             expect(interstitialAdManager.getInterstitials().length).toBe(0);
 
             // Advance the playhead into the look-ahead window and let the poll
@@ -1921,13 +1945,13 @@ describe('Interstitial Ad manager', () => {
 
       it('sets resolutionTimeOffset on an already known interstitial',
           async () => {
-            await interstitialAdManager.addMetadata(midRollAssetUri());
+            await addMetadata(midRollAssetUri());
             let interstitials = interstitialAdManager.getInterstitials();
             expect(interstitials.length).toBe(1);
             expect(interstitials[0].resolutionTimeOffset).toBeUndefined();
 
             // Preload Date Range starts 10s before the interstitial (100).
-            interstitialAdManager.addPreloadMetadata(preloadMetadata(90));
+            await addMetadata(preloadMetadata(90));
 
             interstitials = interstitialAdManager.getInterstitials();
             expect(interstitials[0].resolutionTimeOffset).toBe(10);
@@ -1935,9 +1959,9 @@ describe('Interstitial Ad manager', () => {
 
       it('sets resolutionTimeOffset when the preload arrives first',
           async () => {
-            interstitialAdManager.addPreloadMetadata(preloadMetadata(90));
+            await addMetadata(preloadMetadata(90));
 
-            await interstitialAdManager.addMetadata(midRollAssetUri());
+            await addMetadata(midRollAssetUri());
 
             const interstitials = interstitialAdManager.getInterstitials();
             expect(interstitials.length).toBe(1);
@@ -1959,7 +1983,7 @@ describe('Interstitial Ad manager', () => {
             // the resolution offset (100) covers the whole gap and the asset
             // list is resolved immediately even though the default ahead time
             // (10s) would have deferred it.
-            interstitialAdManager.addPreloadMetadata(preloadMetadata(0));
+            await addMetadata(preloadMetadata(0));
 
             const metadata = {
               type: 'com.apple.quicktime.HLS',
@@ -1970,7 +1994,7 @@ describe('Interstitial Ad manager', () => {
                 {key: 'X-ASSET-LIST', data: 'test:/test.json'},
               ],
             };
-            await interstitialAdManager.addMetadata(metadata);
+            await addMetadata(metadata);
 
             const interstitials = interstitialAdManager.getInterstitials();
             expect(interstitials.length).toBe(1);
@@ -1997,13 +2021,13 @@ describe('Interstitial Ad manager', () => {
 
       it('augments a known interstitial with a new X-PLAYOUT-LIMIT',
           async () => {
-            await interstitialAdManager.addMetadata(midRoll([]));
+            await addMetadata(midRoll([]));
             let interstitials = interstitialAdManager.getInterstitials();
             expect(interstitials.length).toBe(1);
             expect(interstitials[0].playoutLimit).toBe(null);
 
             // A subsequent EXT-X-DATERANGE with the same ID adds the attribute.
-            await interstitialAdManager.addMetadata(midRoll([
+            await addMetadata(midRoll([
               {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
             ]));
 
@@ -2014,7 +2038,7 @@ describe('Interstitial Ad manager', () => {
 
       it('does not change an X-PLAYOUT-LIMIT already present (spec rule)',
           async () => {
-            await interstitialAdManager.addMetadata(midRoll([
+            await addMetadata(midRoll([
               {key: 'X-PLAYOUT-LIMIT', data: '30.0'},
             ]));
             let interstitials = interstitialAdManager.getInterstitials();
@@ -2023,7 +2047,7 @@ describe('Interstitial Ad manager', () => {
 
             // The spec requires shared attributes to keep the same value, so a
             // conflicting update must be ignored.
-            await interstitialAdManager.addMetadata(midRoll([
+            await addMetadata(midRoll([
               {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
             ]));
 
@@ -2033,8 +2057,8 @@ describe('Interstitial Ad manager', () => {
           });
 
       it('does not create a duplicate interstitial on update', async () => {
-        await interstitialAdManager.addMetadata(midRoll([]));
-        await interstitialAdManager.addMetadata(midRoll([
+        await addMetadata(midRoll([]));
+        await addMetadata(midRoll([
           {key: 'X-PLAYOUT-LIMIT', data: '12.0'},
         ]));
         expect(interstitialAdManager.getInterstitials().length).toBe(1);
@@ -2082,7 +2106,7 @@ describe('Interstitial Ad manager', () => {
 
             // (1) HLS preload Date Range (Appendix F): preload starts 30s
             // before the interstitial (100), widening its window to 30s.
-            interstitialAdManager.addPreloadMetadata({
+            await addMetadata({
               type: 'com.apple.hls.preload',
               startTime: 70,
               endTime: 71,
@@ -2096,7 +2120,7 @@ describe('Interstitial Ad manager', () => {
 
             // (2) The mid-roll asset list is signaled while the playhead (0) is
             // still outside the (widened) window, so it is deferred.
-            await interstitialAdManager.addMetadata({
+            await addMetadata({
               type: 'com.apple.quicktime.HLS',
               startTime: 100,
               endTime: 130,
@@ -2125,7 +2149,7 @@ describe('Interstitial Ad manager', () => {
 
             // (4) A later EXT-X-DATERANGE with the same ID augments it with a
             // playout limit.
-            await interstitialAdManager.addMetadata({
+            await addMetadata({
               type: 'com.apple.quicktime.HLS',
               startTime: 100,
               endTime: 130,
@@ -2950,7 +2974,7 @@ describe('Interstitial Ad manager', () => {
         },
       ],
     };
-    await interstitialAdManager.addMetadata(metadata);
+    await addMetadata(metadata);
 
     video.play();
     video.dispatchEvent(new Event('timeupdate'));
@@ -3016,7 +3040,7 @@ describe('Interstitial Ad manager', () => {
         },
       ],
     };
-    await interstitialAdManager.addMetadata(metadata);
+    await addMetadata(metadata);
 
     video.play();
     video.dispatchEvent(new Event('timeupdate'));
@@ -3087,7 +3111,7 @@ describe('Interstitial Ad manager', () => {
         },
       ],
     };
-    await interstitialAdManager.addMetadata(metadata);
+    await addMetadata(metadata);
 
     video.currentTime = 0;
     video.play();
@@ -3174,7 +3198,7 @@ describe('Interstitial Ad manager', () => {
 
     it('skips an interstitial while within the cooldown window', async () => {
       configureCooldown(60);
-      await interstitialAdManager.addMetadata(prerollMetadata());
+      await addMetadata(prerollMetadata());
 
       // Pretend an ad break just finished, so the cooldown window is active.
       interstitialAdManager.lastAdCompleteTime_ = Date.now();
@@ -3192,7 +3216,7 @@ describe('Interstitial Ad manager', () => {
 
     it('plays an interstitial after the cooldown expires', async () => {
       configureCooldown(60);
-      await interstitialAdManager.addMetadata(prerollMetadata());
+      await addMetadata(prerollMetadata());
 
       // Pretend an ad break finished longer ago than the cooldown window.
       interstitialAdManager.lastAdCompleteTime_ = Date.now() - 61 * 1000;
@@ -3210,7 +3234,7 @@ describe('Interstitial Ad manager', () => {
 
     it('does not skip when the cooldown is disabled', async () => {
       configureCooldown(0);
-      await interstitialAdManager.addMetadata(prerollMetadata());
+      await addMetadata(prerollMetadata());
 
       // Even with a recent ad break, a zero cooldown must not suppress ads.
       interstitialAdManager.lastAdCompleteTime_ = Date.now();
