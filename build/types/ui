@@ -55,6 +55,14 @@
 +../../ui/statistics_button.js
 +../../ui/text_style.js
 +../../ui/text_style_group.js
++../../ui/text_background_color.js
++../../ui/text_background_opacity.js
++../../ui/text_character_edge_style.js
++../../ui/text_color_menu.js
++../../ui/text_font_color.js
++../../ui/text_font_family.js
++../../ui/text_font_opacity.js
++../../ui/text_opacity_menu.js
 +../../ui/text_position.js
 +../../ui/text_selection.js
 +../../ui/text_size.js

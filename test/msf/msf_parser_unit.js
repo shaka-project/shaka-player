@@ -367,13 +367,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
   });
 
   describe('catalog compression', () => {
-    /** @type {number} */
-    let draftNumber;
-
-    beforeEach(() => {
-      draftNumber = 18;
-    });
-
     /**
      * @return {shaka.extern.MsfObjectCallback}
      * @suppress {visibility}
@@ -383,7 +376,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
           getCodec: () => codec,
-          getDraftNumber: () => draftNumber,
           release: () => {},
         }));
       return parser.createCatalogCallback_(
@@ -456,14 +448,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(await catalog()).toEqual(
           /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
     });
-
-    it('leaves the deprecated drafts as they were', async () => {
-      // Only draft-18 and later are read for MSF_COMPRESSION.
-      draftNumber = 16;
-      catalogCallback()(catalogObject(plainCatalog(), compressionProperty(2)));
-      expect(await catalog()).toEqual(
-          /** @type {msfCatalog.Catalog} */ ({version: 1, tracks: []}));
-    });
   });
 
   describe('catalog track', () => {
@@ -476,7 +460,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
           getCodec: () => codec,
-          getDraftNumber: () => 18,
           release: () => {},
         }));
       return parser.createCatalogCallback_(
@@ -813,15 +796,12 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let refuseAbsoluteStart;
     /** @type {?shaka.extern.MsfCodec} */
     let codec;
-    /** @type {number} */
-    let draftNumber;
 
     beforeEach(() => {
       nextSegments = [];
       subscribes = [];
       refuseAbsoluteStart = false;
       codec = null;
-      draftNumber = 0;
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
 
@@ -852,7 +832,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
           getCodec: () => codec,
-          getDraftNumber: () => draftNumber,
           subscribeTrack: (namespace, trackName, callback, startLocation) => {
             subscribes.push({
               trackName,
@@ -1064,7 +1043,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     describe('compression', () => {
       beforeEach(() => {
         codec = new shaka.msf.draft18.Codec();
-        draftNumber = 18;
       });
 
       filterDescribe('with GZIP', isDecompressionStreamSupported, () => {
@@ -1103,22 +1081,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             expect(unsubscribeSpy).toHaveBeenCalled();
             expect(timelineOf('video0').getStartTime()).toBeNull();
           });
-
-      it('leaves the deprecated drafts as they were', async () => {
-        draftNumber = 16;
-        givenAStartedParser();
-        await processCatalog([videoTrack(), timelineTrack()]);
-        const subscription = lastSubscribeTo('history');
-
-        // Not read for MSF_COMPRESSION, so the unsupported value does not
-        // stop an uncompressed document from being used.
-        subscription.callback(timelineObject(
-            [[0, [0, 0], 0], [2002, [1, 0], 0]], /* object= */ 0,
-            compressionProperty(2)));
-
-        expect(unsubscribeSpy).not.toHaveBeenCalled();
-        expect(timelineOf('video0').getEndTime()).toBe(2.002);
-      });
     });
 
     it('reads a template off the media track itself', async () => {
@@ -1389,7 +1351,6 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       it('unsubscribes from a track compressed in a way it cannot undo',
           async () => {
             codec = new shaka.msf.draft18.Codec();
-            draftNumber = 18;
             givenAStartedParser();
             await processCatalog([videoTrack(), scte35Track()]);
 

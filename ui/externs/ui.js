@@ -360,7 +360,6 @@ shaka.extern.UITrackLabelCallback;
  *   captionsStyleElements: !Array<string>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
- *   showMenusOnTheRight: boolean,
  *   customTrackLabel: shaka.extern.UITrackLabelCallback,
  *   showBufferingSpinner: boolean,
  * }}
@@ -675,7 +674,10 @@ shaka.extern.UITrackLabelCallback;
  * @property {!Array<string>} captionsStyleElements
  *   The ordered list of elements in the subtitle style menu.
  *   <br>
- *   Defaults to <code>['captions-size', 'captions-position',
+ *   Defaults to <code>['captions-font-family', 'captions-font-color',
+ *   'captions-size', 'captions-background-color',
+ *   'captions-background-opacity', 'captions-character-edge-style',
+ *   'captions-font-opacity', 'captions-position',
  *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.
@@ -687,11 +689,6 @@ shaka.extern.UITrackLabelCallback;
  *   Whether to show the UI whenever the video is paused.
  *   <br>
  *   Defaults to <code>true</code>.
- * @property {boolean} showMenusOnTheRight
- *   It always displays the menus on the right side of the container regardless
- *   of where the button that opens the menu is located.
- *   <br>
- *   Defaults to <code>false</code>.
  * @property {shaka.extern.UITrackLabelCallback} customTrackLabel
  *   A callback for customizing track labels in the UI.  The callback receives
  *   the default label (or <code>null</code> if the language was unrecognized),

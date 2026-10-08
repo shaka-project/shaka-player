@@ -1461,6 +1461,154 @@ describe('UI', () => {
             .toBe(shaka.config.PositionArea.DEFAULT);
       });
 
+      /**
+       * @typedef {{
+       *   element: string,
+       *   buttonClass: string,
+       *   configName: string,
+       *   defaultValue: *,
+       *   optionLabel: (string|undefined),
+       *   optionLabelId: (string|undefined),
+       *   value: *,
+       *   hasSwatches: boolean,
+       * }}
+       */
+      let StyleMenuInfo;
+
+      /** @type {!Array<StyleMenuInfo>} */
+      const styleMenus = [
+        {
+          element: 'captions-font-family',
+          buttonClass: 'shaka-caption-font-family-button',
+          configName: 'fontFamily',
+          defaultValue: shaka.config.FontFamily.DEFAULT,
+          optionLabelId: 'MONOSPACED_SERIF',
+          value: shaka.config.FontFamily.MONOSPACED_SERIF,
+          hasSwatches: false,
+        },
+        {
+          element: 'captions-font-color',
+          buttonClass: 'shaka-caption-font-color-button',
+          configName: 'fontColor',
+          defaultValue: '',
+          optionLabelId: 'YELLOW',
+          value: '#ff0',
+          hasSwatches: true,
+        },
+        {
+          element: 'captions-font-opacity',
+          buttonClass: 'shaka-caption-font-opacity-button',
+          configName: 'fontOpacity',
+          defaultValue: NaN,
+          optionLabel: '50%',
+          value: 0.5,
+          hasSwatches: false,
+        },
+        {
+          element: 'captions-background-color',
+          buttonClass: 'shaka-caption-background-color-button',
+          configName: 'backgroundColor',
+          defaultValue: '',
+          optionLabelId: 'BLACK',
+          value: '#080808',
+          hasSwatches: true,
+        },
+        {
+          element: 'captions-background-opacity',
+          buttonClass: 'shaka-caption-background-opacity-button',
+          configName: 'backgroundOpacity',
+          defaultValue: NaN,
+          optionLabel: '0%',
+          value: 0,
+          hasSwatches: false,
+        },
+        {
+          element: 'captions-character-edge-style',
+          buttonClass: 'shaka-caption-character-edge-style-button',
+          configName: 'characterEdgeStyle',
+          defaultValue: shaka.config.CharacterEdgeStyle.DEFAULT,
+          optionLabelId: 'OUTLINE',
+          value: shaka.config.CharacterEdgeStyle.OUTLINE,
+          hasSwatches: false,
+        },
+      ];
+
+      for (const styleMenu of styleMenus) {
+        it(`previews and selects the ${styleMenu.element} options`,
+            async () => {
+              const config = {
+                controlPanelElements: [
+                  styleMenu.element,
+                ],
+                customContextMenu: false,
+              };
+              const ui = await UiUtils.createUIThroughAPI(
+                  videoContainer, video, config);
+              controls = ui.getControls();
+              player = controls.getLocalPlayer();
+              usePreviewTextDisplayer(player);
+              controls.showUI();
+
+              const localization = controls.getLocalization();
+              const LocIds = /** @type {!Object<string, string>} */(
+                shaka.ui.Locales.Ids);
+              const button = UiUtils.getElementByClassName(
+                  videoContainer, styleMenu.buttonClass);
+              const menu = UiUtils.getElementByClassName(
+                  videoContainer, 'shaka-settings-menu');
+              button.click();
+
+              // The values are compared as strings, so NaN equals NaN.
+              /** @return {string} */
+              const previewValue = () => {
+                const previewConfig =
+                /** @type {!Object} */(latestPreviewConfig());
+                return String(previewConfig[styleMenu.configName]);
+              };
+              /** @return {string} */
+              const configValue = () => {
+                const textDisplayer = /** @type {!Object} */(
+                  player.getConfiguration().textDisplayer);
+                return String(textDisplayer[styleMenu.configName]);
+              };
+              const defaultValue = String(styleMenu.defaultValue);
+              const value = String(styleMenu.value);
+
+              // The first option keeps the style of the subtitle, and is the
+              // chosen one by default.
+              const defaultLabel = localization.resolve(LocIds['DEFAULT']);
+              const options = menu.querySelectorAll(
+                  'button[role="menuitemradio"]');
+              expect(options[0].querySelector('span').textContent)
+                  .toBe(defaultLabel);
+              expect(options[0].getAttribute('aria-checked')).toBe('true');
+              expect(previewValue()).toBe(defaultValue);
+
+              // Only the color menus have swatches, and not for the default.
+              expect(options[0].querySelector('.shaka-color-swatch'))
+                  .toBe(null);
+              expect(options[1].querySelector('.shaka-color-swatch') != null)
+                  .toBe(styleMenu.hasSwatches);
+
+              const optionLabel = styleMenu.optionLabel ||
+                  localization.resolve(LocIds[styleMenu.optionLabelId || '']);
+              const option = getStyleOption(menu, optionLabel);
+              UiUtils.simulateEvent(option, 'mouseenter');
+              expect(previewValue()).toBe(value);
+
+              UiUtils.simulateEvent(option, 'mouseleave');
+              expect(previewValue()).toBe(defaultValue);
+
+              option.click();
+              expect(configValue()).toBe(value);
+              expect(option.getAttribute('aria-checked')).toBe('true');
+              expect(options[0].getAttribute('aria-checked')).toBe('false');
+
+              getStyleOption(menu, defaultLabel).click();
+              expect(configValue()).toBe(defaultValue);
+            });
+      }
+
       it('keeps a committed text size as the preview baseline', async () => {
         const config = {
           controlPanelElements: [

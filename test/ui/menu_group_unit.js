@@ -697,7 +697,7 @@ describe('MenuGroup', () => {
       expect(label(get('shaka-caption-style-button')))
           .toBe(localization.resolve(LocIds.STYLE));
       expect(label(styleMenu.querySelector('.shaka-caption-size-button')))
-          .toBe(localization.resolve(LocIds.SIZE));
+          .toBe(localization.resolve(LocIds.FONT_SIZE));
       expect(label(styleMenu.querySelector('.shaka-caption-position-button')))
           .toBe(localization.resolve(LocIds.POSITION));
 
@@ -733,6 +733,31 @@ describe('MenuGroup', () => {
       expect(buttons[1].classList.contains('shaka-caption-size-button'))
           .toBe(true);
     });
+
+    it('creates the style elements in the default order',
+        async () => {
+          await setTextTracks([createTextTrack(false)]);
+          const styleMenu = /** @type {!HTMLElement} */ (getFirst(
+              'shaka-captions-settings-button').parentElement.querySelector(
+              '.shaka-menu-group .shaka-menu-group'));
+          const buttons = Array.from(styleMenu.querySelectorAll(
+              ':scope > button:not(.shaka-back-to-overflow-button)'));
+          const classNames = [
+            'shaka-caption-font-family-button',
+            'shaka-caption-font-color-button',
+            'shaka-caption-size-button',
+            'shaka-caption-background-color-button',
+            'shaka-caption-background-opacity-button',
+            'shaka-caption-character-edge-style-button',
+            'shaka-caption-font-opacity-button',
+            'shaka-caption-position-button',
+            'shaka-caption-style-reset-button',
+          ];
+          expect(buttons.length).toBe(classNames.length);
+          for (let i = 0; i < classNames.length; i++) {
+            expect(buttons[i].classList.contains(classNames[i])).toBe(true);
+          }
+        });
 
     describe('reset', () => {
       /**
@@ -793,11 +818,19 @@ describe('MenuGroup', () => {
           textDisplayer: {
             fontScaleFactor: 1.5,
             positionArea: shaka.config.PositionArea.TOP_LEFT,
+            fontFamily: shaka.config.FontFamily.MONOSPACED_SERIF,
+            fontColor: '#ff0',
+            fontOpacity: 0.5,
+            backgroundColor: '#f00',
+            backgroundOpacity: 0.25,
+            characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
             subtitleDelay: 2,
           },
         });
         await openStyleMenu();
         expect(getStyleSelection('shaka-caption-size-button')).toBe('150%');
+        expect(getStyleSelection('shaka-caption-font-opacity-button'))
+            .toBe('50%');
 
         get('shaka-caption-style-reset-button').click();
         await Util.shortDelay();
@@ -805,6 +838,13 @@ describe('MenuGroup', () => {
         const config = player.getConfiguration().textDisplayer;
         expect(config.fontScaleFactor).toBe(1);
         expect(config.positionArea).toBe(shaka.config.PositionArea.DEFAULT);
+        expect(config.fontFamily).toBe(shaka.config.FontFamily.DEFAULT);
+        expect(config.fontColor).toBe('');
+        expect(isNaN(config.fontOpacity)).toBe(true);
+        expect(config.backgroundColor).toBe('');
+        expect(isNaN(config.backgroundOpacity)).toBe(true);
+        expect(config.characterEdgeStyle)
+            .toBe(shaka.config.CharacterEdgeStyle.DEFAULT);
         // The subtitle delay is not part of the style.
         expect(config.subtitleDelay).toBe(2);
 
@@ -812,8 +852,19 @@ describe('MenuGroup', () => {
         // stays open.
         const localization = controls.getLocalization();
         expect(getStyleSelection('shaka-caption-size-button')).toBe('100%');
-        expect(getStyleSelection('shaka-caption-position-button')).toBe(
-            localization.resolve(shaka.ui.Locales.Ids.DEFAULT));
+        const defaultLabel =
+            localization.resolve(shaka.ui.Locales.Ids.DEFAULT);
+        for (const className of [
+          'shaka-caption-position-button',
+          'shaka-caption-font-family-button',
+          'shaka-caption-font-color-button',
+          'shaka-caption-font-opacity-button',
+          'shaka-caption-background-color-button',
+          'shaka-caption-background-opacity-button',
+          'shaka-caption-character-edge-style-button',
+        ]) {
+          expect(getStyleSelection(className)).toBe(defaultLabel);
+        }
         expect(isDisplayed(getStyleMenu())).toBe(true);
       });
     });

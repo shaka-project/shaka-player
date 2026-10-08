@@ -15,7 +15,7 @@ filterDescribe('LOCMAFParser', isMSFSupported, () => {
   let codec;
 
   beforeEach(() => {
-    codec = new shaka.msf.QuicVarIntCodec();
+    codec = new shaka.msf.draft18.Codec();
   });
 
   /**
@@ -930,42 +930,6 @@ filterDescribe('LOCMAFParser', isMSFSupported, () => {
               }),
               payload(20))));
       expect(chunk).toBe(null);
-    });
-  });
-
-  describe('the draft-18 codec', () => {
-    it('reads the same fields under the newer varint encoding', () => {
-      // The spec defines its vi64 by reference to MOQT's own encoding, which
-      // changed in draft-17, so the same numbers are different bytes.
-      const quic = new shaka.msf.QuicVarIntCodec();
-      codec = new shaka.msf.draft18.Codec();
-
-      const draft18Object = concat(
-          fullHeader({
-            [Field.TFHD_DEFAULT_SAMPLE_DURATION]: 3000,
-            [Field.TFDT_BASE_MEDIA_DECODE_TIME]: 90000,
-            [Field.TRUN_SAMPLE_COUNT]: 1,
-          }),
-          payload(5));
-
-      const chunk = makeParser().parse(object(draft18Object));
-      expect(chunk.startTime).toBe(1);
-      expect(chunk.data.byteLength).toBe(96 + 8 + 5);
-
-      // The bytes really do differ, so this is not a vacuous pass.
-      codec = quic;
-      const quicObject = concat(
-          fullHeader({
-            [Field.TFHD_DEFAULT_SAMPLE_DURATION]: 3000,
-            [Field.TFDT_BASE_MEDIA_DECODE_TIME]: 90000,
-            [Field.TRUN_SAMPLE_COUNT]: 1,
-          }),
-          payload(5));
-      expect(Array.from(draft18Object)).not.toEqual(Array.from(quicObject));
-
-      // And the reconstruction from each is identical.
-      const other = makeParser().parse(object(quicObject));
-      expect(Array.from(other.data)).toEqual(Array.from(chunk.data));
     });
   });
 
