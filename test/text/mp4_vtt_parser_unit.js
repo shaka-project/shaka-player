@@ -286,6 +286,148 @@ describe('Mp4VttParser', () => {
         .toThrow(error);
   });
 
+  it('uses the regions of the WebVTTConfigurationBox', () => {
+    const config =
+        'WEBVTT\n\n' +
+        'REGION\n' +
+        'id:fred\n' +
+        'width:40%\n' +
+        'lines:2\n' +
+        'regionanchor:0%,100%\n' +
+        'viewportanchor:10%,90%\n' +
+        'scroll:up\n';
+    const parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(createInitSegment(config));
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 0,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    const result = parser.parseMedia(
+        createMediaSegment([
+          {settings: 'region:fred', payload: 'In the region'},
+          {settings: 'region:fred line:0', payload: 'Out of the region'},
+          {settings: 'region:bob', payload: 'Unknown region'},
+        ]),
+        time, null, []);
+
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 1,
+            payload: 'In the region',
+            region: jasmine.objectContaining({
+              id: 'fred',
+              width: 40,
+              height: 2,
+              heightUnits: shaka.text.CueRegion.units.LINES,
+              regionAnchorX: 0,
+              regionAnchorY: 100,
+              viewportAnchorX: 10,
+              viewportAnchorY: 90,
+              scroll: shaka.text.CueRegion.scrollMode.UP,
+            }),
+          },
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Out of the region',
+            line: 0,
+            region: jasmine.objectContaining({id: ''}),
+          },
+          {
+            startTime: 2,
+            endTime: 3,
+            payload: 'Unknown region',
+            region: jasmine.objectContaining({id: ''}),
+          },
+        ],
+        result);
+  });
+
+  /**
+   * @param {string} name
+   * @param {...!Uint8Array} payload
+   * @return {!Uint8Array}
+   */
+  function box(name, ...payload) {
+    return shaka.util.Mp4Generator.box(name, ...payload);
+  }
+
+  /**
+   * @param {string} str
+   * @return {!Uint8Array}
+   */
+  function utf8(str) {
+    return shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(str));
+  }
+
+  /**
+   * Creates a WebVTT in MP4 init segment, with a timescale of 1000.
+   *
+   * @param {string} config The contents of the WebVTTConfigurationBox.
+   * @return {!Uint8Array}
+   */
+  function createInitSegment(config) {
+    const mdhd = box('mdhd', new Uint8Array([
+      0, 0, 0, 0, // version and flags
+      0, 0, 0, 0, // creation time
+      0, 0, 0, 0, // modification time
+      0, 0, 0x03, 0xe8, // timescale
+      0, 0, 0, 0, // duration
+      0x55, 0xc4, 0, 0, // language and pre-defined
+    ]));
+    const wvtt = box('wvtt',
+        new Uint8Array([
+          0, 0, 0, 0, 0, 0, // reserved
+          0, 1, // data reference index
+        ]),
+        box('vttC', utf8(config)));
+    const stsd = box('stsd',
+        new Uint8Array([
+          0, 0, 0, 0, // version and flags
+          0, 0, 0, 1, // entry count
+        ]),
+        wvtt);
+    return box('moov',
+        box('trak',
+            box('mdia', mdhd,
+                box('minf',
+                    box('stbl', stsd)))));
+  }
+
+  /**
+   * Creates a WebVTT in MP4 media segment with one cue per second.
+   *
+   * @param {!Array<{settings: string, payload: string}>} cues
+   * @return {!Uint8Array}
+   */
+  function createMediaSegment(cues) {
+    const samples = cues.map((cue) => box('vttc',
+        box('sttg', utf8(cue.settings)),
+        box('payl', utf8(cue.payload))));
+    const tfdt = box('tfdt', new Uint8Array([
+      0, 0, 0, 0, // version and flags
+      0, 0, 0, 0, // base media decode time
+    ]));
+    // Per-sample durations and sizes.
+    const trunPayload = new Uint8Array(8 + samples.length * 8);
+    const view = shaka.util.BufferUtils.toDataView(trunPayload);
+    view.setUint32(0, 0x000300); // flags: sample duration and size present
+    view.setUint32(4, samples.length);
+    samples.forEach((sample, i) => {
+      view.setUint32(8 + i * 8, 1000);
+      view.setUint32(12 + i * 8, sample.byteLength);
+    });
+    const trun = box('trun', trunPayload);
+    return shaka.util.Uint8ArrayUtils.concat(
+        box('moof', box('traf', tfdt, trun)),
+        box('mdat', ...samples));
+  }
+
   function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
     expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
   }

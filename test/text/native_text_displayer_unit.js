@@ -290,6 +290,27 @@ describe('NativeTextDisplayer', () => {
         expect(cues[0].region).toEqual(jasmine.any(VTTRegion));
         expect(cues[1].region).toBe(cues[0].region);
       });
+
+      it('appends equal time cues of a region in order', () => {
+        const region = new shaka.text.CueRegion();
+        region.id = 'fred';
+        region.height = 2;
+        region.heightUnits = shaka.text.CueRegion.units.LINES;
+        region.scroll = shaka.text.CueRegion.scrollMode.UP;
+        const shakaCues = ['First', 'Second', 'Third'].map((text) => {
+          const cue = new shaka.text.Cue(0, 5, text);
+          cue.region = region;
+          return cue;
+        });
+
+        displayer.append(shakaCues);
+
+        // The last one is added last, so the region shows it at the bottom.
+        const cues = mockTrack.addCue.calls.allArgs().map((args) => args[0]);
+        expect(cues.map((cue) => cue.text))
+            .toEqual(['First', 'Second', 'Third']);
+        expect(cues[0].region).toEqual(jasmine.any(VTTRegion));
+      });
     });
   });
 
