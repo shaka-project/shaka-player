@@ -310,7 +310,11 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-b-frames/*', included: false},
       {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-h264-gop-spans-segments/*', included: false},
       {pattern: 'test/test/assets/hls-ts-h265/*', included: false},
+      // eslint-disable-next-line @stylistic/max-len
+      {pattern: 'test/test/assets/hls-ts-h265-gop-spans-segments/*', included: false},
       {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
       // eslint-disable-next-line @stylistic/max-len

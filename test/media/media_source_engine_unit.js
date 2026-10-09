@@ -1132,6 +1132,63 @@ describe('MediaSourceEngine', () => {
       expect(videoSourceBuffer.timestampOffset).toBeCloseTo(expectedOffset, 6);
     });
 
+    describe('with segments that start in the middle of a GOP', () => {
+      // How far the first frame of such a segment is from where the playlist
+      // says it starts, as when it is not the earliest one to be presented.
+      const midGopShift = 0.16;
+
+      /** @type {!jasmine.Spy} */
+      let getTimestampSpy;
+
+      /**
+       * @param {number} startTime
+       * @param {boolean} startsMidGop
+       * @param {boolean=} seeked
+       */
+      const appendSegment = async (startTime, startsMidGop, seeked = false) => {
+        getTimestampSpy.and.returnValue({
+          timestamp: startTime + (startsMidGop ? midGopShift : 0),
+          metadata: [],
+          startsMidGop: startsMidGop,
+        });
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, dummyReference(startTime, startTime + 1),
+            fakeStream, /* hasClosedCaptions= */ false, seeked);
+        videoSourceBuffer.updateend();
+        await append;
+      };
+
+      beforeEach(async () => {
+        const initObject = new Map();
+        initObject.set(ContentType.VIDEO, fakeVideoStream);
+        await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+            shaka.media.ManifestParser.HLS);
+        getTimestampSpy =
+            spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata');
+
+        await appendSegment(10, /* startsMidGop= */ false);
+        expect(videoSourceBuffer.timestampOffset).toBeCloseTo(0, 6);
+        videoSourceBuffer.abort.calls.reset();
+      });
+
+      // Moving it would abort(), and the SourceBuffer would then drop every
+      // frame up to the next key frame: the whole segment.
+      it('keeps the timestampOffset of the segment before', async () => {
+        await appendSegment(11, /* startsMidGop= */ true);
+
+        expect(videoSourceBuffer.abort).not.toHaveBeenCalled();
+        expect(videoSourceBuffer.timestampOffset).toBeCloseTo(0, 6);
+      });
+
+      it('moves the timestampOffset after a seek', async () => {
+        await appendSegment(11, /* startsMidGop= */ true, /* seeked= */ true);
+
+        expect(videoSourceBuffer.abort).toHaveBeenCalled();
+        expect(videoSourceBuffer.timestampOffset)
+            .toBeCloseTo(-midGopShift, 6);
+      });
+    });
+
     // Chromium, Gecko and WebKit have all been measured to place the first
     // frame exactly on appendWindowStart for a negative timestampOffset, so
     // the fudge from https://github.com/shaka-project/shaka-player/issues/1281
