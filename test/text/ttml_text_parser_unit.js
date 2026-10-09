@@ -10,6 +10,131 @@ describe('TtmlTextParser', () => {
   const Util = shaka.test.Util;
   const anyString = jasmine.any(String);
 
+  describe('element namespaces', () => {
+    const namespace = 'http://www.w3.org/ns/ttml';
+    const text =
+        `<tt xmlns="${namespace}" ` +
+        'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><styling><style xml:id="s" tts:color="red"/></styling>' +
+        '<layout><region xml:id="r" tts:origin="10% 20%"/></layout></head>' +
+        '<body region="r"><div begin="1s" end="3s">' +
+        '<p style="s">First<br/><span>Second</span></p>' +
+        '</div></body></tt>';
+
+    /**
+     * @param {string} documentText
+     * @return {!Array<!shaka.text.Cue>}
+     */
+    function parse(documentText) {
+      return new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(
+              shaka.util.StringUtils.toUTF8(documentText)),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 10,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          'https://bar', /* images= */ []);
+    }
+
+    it('accepts a prefixed root after an XML declaration', () => {
+      const prefixed = text.replace('<tt ', `<t:tt xmlns:t="${namespace}" `)
+          .replace('</tt>', '</t:tt>');
+      expect(parse('<?xml version="1.0"?>' + prefixed)).toEqual(parse(text));
+    });
+
+    it('accepts prefixes on all TTML elements', () => {
+      const prefixed = text.replace('xmlns=', 'xmlns:t=')
+          .replace(/<(\/?)(\w+)/g, '<$1t:$2');
+      expect(parse(prefixed)).toEqual(parse(text));
+    });
+
+    it('resolves aliases declared on nested elements', () => {
+      const prefixed = text
+          .replace('<body ', `<a:body xmlns:a="${namespace}" `)
+          .replace('</body>', '</a:body>')
+          .replace('<p ', `<b:p xmlns:b="${namespace}" `)
+          .replace('</p>', '</b:p>')
+          .replace('<br/>', '<b:br/>');
+      expect(parse(prefixed)).toEqual(parse(text));
+    });
+
+    it('resolves prefixes within their scope', () => {
+      const prefixed = text
+          .replace('<tt ', `<tt xmlns:t="${namespace}" `)
+          .replace('<head>',
+              '<head xmlns:t="urn:foreign"><t:region xml:id="foreign"/>')
+          .replace('<body ', '<t:body ')
+          .replace('</body>', '</t:body>');
+      expect(parse(prefixed)).toEqual(parse(text));
+    });
+
+    it('ignores foreign elements in a default namespace', () => {
+      const foreign = text.replace('<head>',
+          '<head><metadata xmlns="urn:foreign">' +
+          '<region xml:id="foreign"/><style xml:id="s"/>' +
+          '<body/></metadata>');
+      expect(parse(foreign)).toEqual(parse(text));
+    });
+
+    it('supports a prefix declared below an unqualified root', () => {
+      const prefixed = text.replace('<body ',
+          `<t:body xmlns:t="${namespace}" `)
+          .replace('</body>', '</t:body>')
+          .replace('<div ', '<t:div ')
+          .replace('</div>', '</t:div>')
+          .replace('<p ', '<t:p ')
+          .replace('</p>', '</t:p>');
+      expect(parse(prefixed)).toEqual(parse(text));
+    });
+
+    it('supports clearing the default namespace for compatibility', () => {
+      const unqualified = text.replace('<body ', '<body xmlns="" ');
+      expect(parse(unqualified)).toEqual(parse(text));
+    });
+
+    it('supports the legacy TTML element namespace', () => {
+      const prefixed = text.replace('xmlns=', 'xmlns:t=')
+          .replace(namespace + '"', 'http://www.w3.org/2006/10/ttaf1"')
+          .replace(/<(\/?)(\w+)/g, '<$1t:$2');
+      expect(parse(prefixed)).toEqual(parse(text));
+    });
+
+    it('preserves whitespace with a prefixed root', () => {
+      const preserved = `<tt xmlns="${namespace}" xml:space="preserve">` +
+          '<body><div><p begin="0s" end="1s">\n  <span>A</span>\n  ' +
+          '</p></div></body></tt>';
+      const prefixed = preserved.replace('xmlns=', 'xmlns:t=')
+          .replace(/<(\/?)(\w+)/g, '<$1t:$2');
+      const expected = parse(preserved);
+      expect(expected[0].nestedCues[0].nestedCues[0].nestedCues[0].payload)
+          .toBe('\n  ');
+      expect(parse(prefixed)).toEqual(expected);
+    });
+
+    it('rejects foreign or undeclared root namespaces', () => {
+      for (const root of [
+        'This is not XML',
+        '<t:tt xmlns:t="urn:foreign"/>',
+        '<tt xmlns="urn:foreign"/>',
+        '<t:tt/>',
+      ]) {
+        errorHelper(shaka.util.Error.Code.INVALID_XML, root, anyString);
+      }
+    });
+
+    it('validates the structure of prefixed elements', () => {
+      errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+          `<t:tt xmlns:t="${namespace}">` +
+          '<t:body><t:p/></t:body></t:tt>', anyString);
+      errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+          `<t:tt xmlns:t="${namespace}">` +
+          '<t:body><t:div><t:span/></t:div></t:body></t:tt>', anyString);
+    });
+  });
+
   it('supports no cues', () => {
     verifyHelper([],
         '<tt></tt>',
