@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.16.52](https://github.com/shaka-project/shaka-player/compare/v4.16.51...v4.16.52) (2026-10-09)
+
+
+### Bug Fixes
+
+* Clear prefetch cache for init segments and aborted requests ([#10587](https://github.com/shaka-project/shaka-player/issues/10587)) ([17aefb1](https://github.com/shaka-project/shaka-player/commit/17aefb174bb1cfe7b4390023dfb9afeea754da88)), closes [#10569](https://github.com/shaka-project/shaka-player/issues/10569)
+* **DASH:** Keep captions working when a Period's timeline ends early ([#10649](https://github.com/shaka-project/shaka-player/issues/10649)) ([64ea713](https://github.com/shaka-project/shaka-player/commit/64ea71350097235401851b72e5955e19580a2cbc))
+* **DASH:** Prevent freezes when live Period IDs reappear ([#10641](https://github.com/shaka-project/shaka-player/issues/10641)) ([cb35b7d](https://github.com/shaka-project/shaka-player/commit/cb35b7d415cef8c558f0f1381bc93fcf04b3e623))
+* **DRM:** Don't let a manifest ClearKey license URL override drm.servers ([#10659](https://github.com/shaka-project/shaka-player/issues/10659)) ([8c76cea](https://github.com/shaka-project/shaka-player/commit/8c76cea614309e1162156c612890431c1d4f3cad)), closes [#10656](https://github.com/shaka-project/shaka-player/issues/10656)
+* Keep crossing the boundary when the playhead overshoots it ([#10676](https://github.com/shaka-project/shaka-player/issues/10676)) ([67b6acc](https://github.com/shaka-project/shaka-player/commit/67b6acccfba8bacb85ab0deaa73a35fd3cda2a15))
+* Keep the configured crossBoundaryStrategy across loads ([#10660](https://github.com/shaka-project/shaka-player/issues/10660)) ([0b1ebca](https://github.com/shaka-project/shaka-player/commit/0b1ebcae11d79fdf583763ff667e524ee5a24a3d)), closes [#10647](https://github.com/shaka-project/shaka-player/issues/10647)
+* **Preload:** Prefetch the segment that contains the start time ([#10702](https://github.com/shaka-project/shaka-player/issues/10702)) ([7563ad9](https://github.com/shaka-project/shaka-player/commit/7563ad996b8d92b0b8c06516605d7fb63d4380f5)), closes [#10701](https://github.com/shaka-project/shaka-player/issues/10701)
+* presentation timeline enforce segment availability live ([#10617](https://github.com/shaka-project/shaka-player/issues/10617)) ([992b7af](https://github.com/shaka-project/shaka-player/commit/992b7afdc54e512df82e7e5002bb57b4d50ba7ee))
+* **WebVTT:** Show subtitles in fMP4 HLS streams with absolute cue times ([#10688](https://github.com/shaka-project/shaka-player/issues/10688)) ([c395394](https://github.com/shaka-project/shaka-player/commit/c3953941eb7e7e6b7f5ad9c0d3108987c36b68db))
+
+
+### Performance Improvements
+
+* reduce compiled size with [@noinline](https://github.com/noinline) on shared constants ([#10716](https://github.com/shaka-project/shaka-player/issues/10716)) ([59eecde](https://github.com/shaka-project/shaka-player/commit/59eecdeb02e93473b16ca3af8afd0aa6633fc75c))
+
 ## [4.16.51](https://github.com/shaka-project/shaka-player/compare/v4.16.50...v4.16.51) (2026-09-25)
 
 
