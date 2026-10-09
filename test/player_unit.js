@@ -1134,7 +1134,7 @@ describe('Player', () => {
         expect(createdDrmEngines[0].destroy).not.toHaveBeenCalled();
       });
 
-      it('evicts an unreused kept engine once superseded by a new one',
+      it('evicts an unused kept engine once superseded by a new one',
           async () => {
             player.configure('drm.keepDrmEngineOnDetach', true);
 
