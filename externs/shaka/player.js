@@ -2597,6 +2597,7 @@ shaka.extern.AccessibilityConfiguration;
  *   supportsMultipleMediaElements: boolean,
  *   disableHLSInterstitial: boolean,
  *   disableDASHInterstitial: boolean,
+ *   disableSVTA: boolean,
  *   allowPreloadOnDomElements: boolean,
  *   allowStartInMiddleOfInterstitial: boolean,
  *   disableTrackingEvents: boolean,
@@ -2638,6 +2639,11 @@ shaka.extern.AccessibilityConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableDASHInterstitial
  *   If this is true, we ignore DASH interstitial events.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableSVTA
+ *   If this is true, we ignore SVTA2053 ad creative signaling, so its
+ *   tracking events are not sent.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {boolean} allowPreloadOnDomElements

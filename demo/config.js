@@ -575,6 +575,8 @@ shakaDemo.Config = class {
             'ads.disableHLSInterstitial')
         .addBoolInput_('Ignore DASH Interstitial',
             'ads.disableDASHInterstitial')
+        .addBoolInput_('Ignore SVTA ad creative signaling',
+            'ads.disableSVTA')
         .addBoolInput_('Allow preload on DOM elements',
             'ads.allowPreloadOnDomElements')
         .addBoolInput_('Allow start in the middle of an interstitial',

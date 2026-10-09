@@ -66,7 +66,14 @@ shaka.extern.AdCuePoint;
  *   groupId: ?string,
  *   startTime: number,
  *   endTime: ?number,
- *   uri: string,
+ *   uri: ?string,
+ *   playbackMode: (string|undefined),
+ *   adCreativeSignaling: (?shaka.extern.AdCreativeSignaling.Slot|undefined),
+ *   pod: (?shaka.extern.AdCreativeSignaling.Pod|undefined),
+ *   podOffset: (number|undefined),
+ *   startOffset: (number|undefined),
+ *   sequenceLength: (number|undefined),
+ *   position: (number|undefined),
  *   mimeType: ?string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
@@ -99,9 +106,24 @@ shaka.extern.AdCuePoint;
  *   The start time of the interstitial.
  * @property {?number} endTime
  *   The end time of the interstitial.
- * @property {string} uri
- *   The uri of the interstitial, can be any type that
- *   ShakaPlayer supports (either in MSE or src=)
+ * @property {?string} uri
+ *   The external media URI. May be null for embedded interstitials.
+ * @property {(string|undefined)} playbackMode
+ *   Either "external" (the default) or "embedded". Embedded interstitials
+ *   describe media already present in the current content timeline.
+ * @property {(?shaka.extern.AdCreativeSignaling.Slot|
+ *   undefined)} adCreativeSignaling
+ *   Validated SVTA version 2 slot metadata.
+ * @property {(?shaka.extern.AdCreativeSignaling.Pod|undefined)} pod
+ *   The containing SVTA pod, if any.
+ * @property {(number|undefined)} podOffset
+ *   The slot start relative to its pod.
+ * @property {(number|undefined)} startOffset
+ *   The initial seek offset within an external asset.
+ * @property {(number|undefined)} sequenceLength
+ *   The number of slots in the pod.
+ * @property {(number|undefined)} position
+ *   The one-based slot position in the pod.
  * @property {?string} mimeType
  *   The mimeType of the interstitial if known.
  * @property {boolean} isSkippable
@@ -589,3 +611,23 @@ shaka.extern.IAd = class {
    */
   getPodIndex() {}
 };
+
+
+/**
+ * @typedef {{
+ *   id: ?string,
+ *   startTime: number,
+ *   endTime: ?number,
+ *   pre: boolean,
+ *   post: boolean,
+ *   canJump: boolean,
+ *   timelineRange: boolean,
+ *   playoutLimit: ?number,
+ *   resolutionTimeOffset: (number|undefined),
+ *   resolving: boolean,
+ *   resolved: boolean,
+ *   resolve: function(number):!Promise<!Array<shaka.extern.AdInterstitial>>,
+ *   abort: function():!Promise,
+ * }}
+ */
+shaka.extern.DeferredInterstitial;
