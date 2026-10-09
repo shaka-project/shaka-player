@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.15.63](https://github.com/shaka-project/shaka-player/compare/v4.15.62...v4.15.63) (2026-10-09)
+
+
+### Bug Fixes
+
+* Clear prefetch cache for init segments and aborted requests ([#10587](https://github.com/shaka-project/shaka-player/issues/10587)) ([53da369](https://github.com/shaka-project/shaka-player/commit/53da3693a4fc7cd30308221ea81c79812c8b0538)), closes [#10569](https://github.com/shaka-project/shaka-player/issues/10569)
+* **DASH:** Keep captions working when a Period's timeline ends early ([#10649](https://github.com/shaka-project/shaka-player/issues/10649)) ([2968b87](https://github.com/shaka-project/shaka-player/commit/2968b879b1b9822a975e1cef2b5fa71f62f1ed78))
+* **DASH:** Prevent freezes when live Period IDs reappear ([#10641](https://github.com/shaka-project/shaka-player/issues/10641)) ([56011a5](https://github.com/shaka-project/shaka-player/commit/56011a503012b548dbf6f4ec20b1297131be7e83))
+* **Preload:** Prefetch the segment that contains the start time ([#10702](https://github.com/shaka-project/shaka-player/issues/10702)) ([9e842d7](https://github.com/shaka-project/shaka-player/commit/9e842d74c065ff9d0d10db7627674d1af5b675b4)), closes [#10701](https://github.com/shaka-project/shaka-player/issues/10701)
+* presentation timeline enforce segment availability live ([#10617](https://github.com/shaka-project/shaka-player/issues/10617)) ([28b191b](https://github.com/shaka-project/shaka-player/commit/28b191b95c4270d4b175a6d49d6f8d101578e137))
+* **WebVTT:** Show subtitles in fMP4 HLS streams with absolute cue times ([#10688](https://github.com/shaka-project/shaka-player/issues/10688)) ([7868b3b](https://github.com/shaka-project/shaka-player/commit/7868b3b5d38adfe17258671bbc2a76024c359e66))
+
+
+### Performance Improvements
+
+* reduce compiled size with [@noinline](https://github.com/noinline) on shared constants ([#10716](https://github.com/shaka-project/shaka-player/issues/10716)) ([55f4b69](https://github.com/shaka-project/shaka-player/commit/55f4b69c20b812ca34bedf80e577d0e9d425e5c1))
+
 ## [4.15.62](https://github.com/shaka-project/shaka-player/compare/v4.15.61...v4.15.62) (2026-09-25)
 
 
