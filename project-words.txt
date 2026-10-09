@@ -216,7 +216,9 @@ cooldown
 cssnano
 hbbtv
 Conax
+Consolas
 cvox
+Cutive
 dolbylaboratories
 expressjs
 Expressplay
@@ -231,6 +233,7 @@ isoboxer
 Jwplayer
 Kaltura
 Livesim
+Lucida
 moqlivemock
 moqtail
 muxjs

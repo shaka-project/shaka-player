@@ -88,10 +88,31 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-font-family: adds a button that controls the font family of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-font-color: adds a button that controls the font color of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-font-opacity: adds a button that controls the font opacity of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-background-color: adds a button that controls the background color
+  of the captions. The button is visible only if the content has at least one
+  text track.
+* captions-background-opacity: adds a button that controls the background
+  opacity of the captions. The button is visible only if the content has at
+  least one text track.
+* captions-character-edge-style: adds a button that controls the style of the
+  edges of the characters of the captions (drop shadow, raised, depressed or
+  outline). The button is visible only if the content has at least one text
+  track.
 * captions-style: adds a menu group with the elements listed in the
-  `captionsStyleElements` configuration, by default captions-size,
-  captions-position and captions-style-reset. The group is visible only if one
-  of them is.
+  `captionsStyleElements` configuration, by default captions-font-family,
+  captions-font-color, captions-size, captions-background-color,
+  captions-background-opacity, captions-character-edge-style,
+  captions-font-opacity, captions-position and captions-style-reset. The group
+  is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.
@@ -145,15 +166,37 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
+* captions-font-family: adds a button that controls the font family of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-font-color: adds a button that controls the font color of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-font-opacity: adds a button that controls the font opacity of the
+  captions. The button is visible only if the content has at least one text
+  track.
+* captions-background-color: adds a button that controls the background color
+  of the captions. The button is visible only if the content has at least one
+  text track.
+* captions-background-opacity: adds a button that controls the background
+  opacity of the captions. The button is visible only if the content has at
+  least one text track.
+* captions-character-edge-style: adds a button that controls the style of the
+  edges of the characters of the captions (drop shadow, raised, depressed or
+  outline). The button is visible only if the content has at least one text
+  track.
 * captions-style: adds a menu group with the elements listed in the
-  `captionsStyleElements` configuration, by default captions-size,
-  captions-position and captions-style-reset. The group is visible only if one
-  of them is.
+  `captionsStyleElements` configuration, by default captions-font-family,
+  captions-font-color, captions-size, captions-background-color,
+  captions-background-opacity, captions-character-edge-style,
+  captions-font-opacity, captions-position and captions-style-reset. The group
+  is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.
-* captions-style-reset: adds a button that restores the default size and
-  position of the captions. The button is visible only if the content has at
+* captions-style-reset: adds a button that restores the default style of the
+  captions (font family, font color, font opacity, size, background color,
+  background opacity, character edge style and position). The button is visible only if the content has at
   least one text track.
 * queue: adds a button that opens a menu listing all items in the playback queue.
   Each item displays its title and, if available, a poster thumbnail. The currently

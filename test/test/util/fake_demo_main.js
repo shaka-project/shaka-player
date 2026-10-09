@@ -127,7 +127,13 @@ shaka.test.FakeDemoMain = class {
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
       captionsStyleElements: [
+        'captions-font-family',
+        'captions-font-color',
         'captions-size',
+        'captions-background-color',
+        'captions-background-opacity',
+        'captions-character-edge-style',
+        'captions-font-opacity',
         'captions-position',
         'captions-style-reset',
       ],

@@ -3181,6 +3181,12 @@ shaka.extern.OfflineConfiguration;
  * @typedef {{
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
+ *   fontFamily: shaka.config.FontFamily,
+ *   fontColor: string,
+ *   fontOpacity: number,
+ *   backgroundColor: string,
+ *   backgroundOpacity: number,
+ *   characterEdgeStyle: shaka.config.CharacterEdgeStyle,
  *   subtitleDelay: number,
  *   suspendRenderingWhenHidden: boolean,
  * }}
@@ -3199,6 +3205,63 @@ shaka.extern.OfflineConfiguration;
  *   position.
  *   <br>
  *   Defaults to <code>''</code>.
+ * @property {shaka.config.FontFamily} fontFamily
+ *   The font family of the subtitles.  The default value indicates that the
+ *   font family defined by the subtitle is used, otherwise it is overwritten
+ *   with the given font family.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>shaka.config.FontFamily.DEFAULT</code>.
+ * @property {string} fontColor
+ *   The font color of the subtitles, as a CSS color (e.g.
+ *   <code>'#ff0'</code> or <code>'yellow'</code>).  An empty string indicates
+ *   that the color defined by the subtitle is used, otherwise it is
+ *   overwritten with the given color.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {number} fontOpacity
+ *   The font opacity of the subtitles, between 0 and 1.  It replaces the
+ *   opacity of the font color in use, whether it is the one defined by the
+ *   subtitle or the one given in <code>fontColor</code>.  NaN indicates
+ *   that the opacity of the font color in use is kept.
+ *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
+ *   <code>rgba()</code> and basic named colors.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>NaN</code>.
+ * @property {string} backgroundColor
+ *   The background color of the subtitles, as a CSS color (e.g.
+ *   <code>'#080808'</code> or <code>'black'</code>).  An empty string
+ *   indicates that the background defined by the subtitle is used, otherwise
+ *   it is overwritten with the given color.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {number} backgroundOpacity
+ *   The background opacity of the subtitles, between 0 and 1.  It replaces
+ *   the opacity of the background color in use, whether it is the one defined
+ *   by the subtitle, the default one, or the one given in
+ *   <code>backgroundColor</code>.  NaN indicates that the opacity of the
+ *   background color in use is kept.
+ *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
+ *   <code>rgba()</code> and basic named colors.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>NaN</code>.
+ * @property {shaka.config.CharacterEdgeStyle} characterEdgeStyle
+ *   The style of the edges of the characters of the subtitles.  The default
+ *   value indicates that the shadow and the outline defined by the subtitle
+ *   are used, otherwise they are overwritten with the given style.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>shaka.config.CharacterEdgeStyle.DEFAULT</code>.
  * @property {number} subtitleDelay
  *   Manual subtitle timing offset in seconds. Positive values delay subtitles
  *   (appear later than video); negative values advance them.

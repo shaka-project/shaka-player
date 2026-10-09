@@ -331,6 +331,7 @@ shakaDemo.Config = class {
       'DRAFT_18': 'draft-18',
       'DRAFT_20': 'draft-20',
       'DRAFT_21': 'draft-21',
+      'DRAFT_22': 'draft-22',
     };
 
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
@@ -423,6 +424,25 @@ shakaDemo.Config = class {
       'BOTTOM_RIGHT': 'bottom right',
     };
 
+    const fontFamilyOptions = shaka.config.FontFamily;
+    const fontFamilyOptionNames = {
+      'DEFAULT': 'Default',
+      'MONOSPACED_SERIF': 'Monospaced serif',
+      'PROPORTIONAL_SERIF': 'Proportional serif',
+      'MONOSPACED_SANS_SERIF': 'Monospaced sans-serif',
+      'PROPORTIONAL_SANS_SERIF': 'Proportional sans-serif',
+    };
+
+    const characterEdgeStyleOptions = shaka.config.CharacterEdgeStyle;
+    const characterEdgeStyleOptionNames = {
+      'DEFAULT': 'Default',
+      'NONE': 'None',
+      'DROP_SHADOW': 'Drop shadow',
+      'RAISED': 'Raised',
+      'DEPRESSED': 'Depressed',
+      'OUTLINE': 'Outline',
+    };
+
     const docLink = this.resolveExternLink_('.TextDisplayerConfiguration');
     this.addSection_('Text displayer', docLink)
         .addNumberInput_('Font scale factor',
@@ -432,6 +452,26 @@ shakaDemo.Config = class {
             'textDisplayer.positionArea',
             positionAreaOptions,
             positionAreaOptionNames)
+        .addSelectInput_('Font family',
+            'textDisplayer.fontFamily',
+            fontFamilyOptions,
+            fontFamilyOptionNames)
+        .addTextInput_('Font color', 'textDisplayer.fontColor')
+        .addNumberInput_('Font opacity',
+            'textDisplayer.fontOpacity',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addTextInput_('Background color', 'textDisplayer.backgroundColor')
+        .addNumberInput_('Background opacity',
+            'textDisplayer.backgroundOpacity',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addSelectInput_('Character edge style',
+            'textDisplayer.characterEdgeStyle',
+            characterEdgeStyleOptions,
+            characterEdgeStyleOptionNames)
         .addNumberInput_('Subtitle delay (seconds)',
             'textDisplayer.subtitleDelay',
             /* canBeDecimal= */ true)

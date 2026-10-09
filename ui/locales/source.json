@@ -41,6 +41,22 @@
     "meaning": "Return to previous menu",
     "message": "Back"
   },
+  "BACKGROUND_COLOR": {
+    "description": "Label for a button used to select the background color of the subtitles, inside the subtitle style menu.",
+    "message": "Background color"
+  },
+  "BACKGROUND_OPACITY": {
+    "description": "Label for a button used to select the background opacity of the subtitles, inside the subtitle style menu.",
+    "message": "Background opacity"
+  },
+  "BLACK": {
+    "description": "Name of the color black, in a menu used to select the color of the subtitles.",
+    "message": "Black"
+  },
+  "BLUE": {
+    "description": "Name of the color blue, in a menu used to select the color of the subtitles.",
+    "message": "Blue"
+  },
   "BOTTOM_CENTER": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Bottom center"
@@ -81,13 +97,25 @@
     "description": "Label for a button used to open a submenu to choose a chapter.",
     "message": "Chapters"
   },
+  "CHARACTER_EDGE_STYLE": {
+    "description": "Label for a button used to select the style of the edges of the characters of the subtitles (none, drop shadow, raised, depressed or outline), inside the subtitle style menu.",
+    "message": "Character edge style"
+  },
   "COPY_VIDEO_FRAME": {
     "description": "Label for a button used to copy the current video frame to the clipboard.",
     "message": "Copy video frame"
   },
+  "CYAN": {
+    "description": "Name of the color cyan, in a menu used to select the color of the subtitles.",
+    "message": "Cyan"
+  },
   "DEFAULT": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Default"
+  },
+  "DEPRESSED": {
+    "description": "Name of a character edge style for the subtitles: the characters look engraved into the video.",
+    "message": "Depressed"
   },
   "DISABLE_AUTOPLAY": {
     "description": "Label for a button that turns off autoplay, so that the next item in the playback queue no longer starts playing automatically when the current one ends.",
@@ -96,6 +124,10 @@
   "DOWNLOAD_VIDEO_FRAME": {
     "description": "Label for a button used to download the current video frame.",
     "message": "Save video frame"
+  },
+  "DROP_SHADOW": {
+    "description": "Name of a character edge style for the subtitles: a soft shadow below and to the right of the characters.",
+    "message": "Drop shadow"
   },
   "ENABLE_AUTOPLAY": {
     "description": "Label for a button that turns on autoplay, so that the next item in the playback queue starts playing automatically when the current one ends.",
@@ -125,9 +157,29 @@
     "description": "Label for a button used to play video at a higher rate than normal.",
     "message": "Fast-forward"
   },
+  "FONT_COLOR": {
+    "description": "Label for a button used to select the font color of the subtitles, inside the subtitle style menu.",
+    "message": "Font color"
+  },
+  "FONT_FAMILY": {
+    "description": "Label for a button used to select the font family of the subtitles, inside the subtitle style menu.",
+    "message": "Font family"
+  },
+  "FONT_OPACITY": {
+    "description": "Label for a button used to select the font opacity of the subtitles, inside the subtitle style menu.",
+    "message": "Font opacity"
+  },
+  "FONT_SIZE": {
+    "description": "Label for a button used to navigate to a submenu to choose the font size of the subtitles, when it is already inside the subtitle style submenu.",
+    "message": "Font size"
+  },
   "FULL_SCREEN": {
     "description": "Label for a button used to enter full screen mode in the video player.",
     "message": "Full screen"
+  },
+  "GREEN": {
+    "description": "Name of the color green, in a menu used to select the color of the subtitles.",
+    "message": "Green"
   },
   "LANGUAGE": {
     "description": "Label for a button used to navigate to a submenu to choose the audio language in the video player.",
@@ -149,6 +201,18 @@
     "description": "Suffix appended to a track's language name to indicate it was programmatically translated (e.g. 'Spanish Translated').",
     "message": "Translated"
   },
+  "MAGENTA": {
+    "description": "Name of the color magenta, in a menu used to select the color of the subtitles.",
+    "message": "Magenta"
+  },
+  "MONOSPACED_SANS_SERIF": {
+    "description": "Name of a font family for the subtitles: a sans-serif font where all the characters have the same width, like Lucida Console.",
+    "message": "Monospaced sans-serif"
+  },
+  "MONOSPACED_SERIF": {
+    "description": "Name of a font family for the subtitles: a serif font where all the characters have the same width, like Courier New.",
+    "message": "Monospaced serif"
+  },
   "MORE_SETTINGS": {
     "description": "Label for a button used to open a menu with additional settings in the video player.",
     "message": "More settings"
@@ -160,6 +224,10 @@
   "MUTE": {
     "description": "Label for a button used to mute the sound in the video player.",
     "message": "Mute"
+  },
+  "NONE": {
+    "description": "Name of the option that removes the edges of the characters of the subtitles, in the character edge style menu.",
+    "message": "None"
   },
   "NOT_APPLICABLE": {
     "description": "Label for a button used to select an audio track for which language is not applicable, such as content without spoken words.",
@@ -176,6 +244,10 @@
   "ORIGINAL_VERSION": {
     "description": "Label for a button used to select an audio track which contains audio in original version.",
     "message": "Original version"
+  },
+  "OUTLINE": {
+    "description": "Name of a character edge style for the subtitles: an outline around the characters.",
+    "message": "Outline"
   },
   "PAUSE": {
     "description": "Label for a button used to pause a video in the video player.",
@@ -201,6 +273,14 @@
     "description": "Label for a button used to navigate to a submenu to choose the subtitle position, when it is already inside the subtitle style submenu.",
     "message": "Position"
   },
+  "PROPORTIONAL_SANS_SERIF": {
+    "description": "Name of a font family for the subtitles: a sans-serif font where the characters have different widths, like Arial.",
+    "message": "Proportional sans-serif"
+  },
+  "PROPORTIONAL_SERIF": {
+    "description": "Name of a font family for the subtitles: a serif font where the characters have different widths, like Times New Roman.",
+    "message": "Proportional serif"
+  },
   "QUALITY": {
     "description": "Label for a button used to open a submenu to choose audio quality in the video player.",
     "meaning": "Audio quality",
@@ -210,9 +290,17 @@
     "description": "Label for a button used to open a submenu that shows the list of items queued for playback.",
     "message": "Queue"
   },
+  "RAISED": {
+    "description": "Name of a character edge style for the subtitles: the characters look raised from the video.",
+    "message": "Raised"
+  },
   "RECENTER_VR": {
     "description": "Label for a button used to recenter the VR view.",
     "message": "Recenter"
+  },
+  "RED": {
+    "description": "Name of the color red, in a menu used to select the color of the subtitles.",
+    "message": "Red"
   },
   "REPLAY": {
     "description": "Label for a button used to replay the video in a video player.",
@@ -243,10 +331,6 @@
     "description": "Label for a button used to seek forward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
     "message": "Seek forward [SECONDS] seconds"
   },
-  "SIZE": {
-    "description": "Label for a button used to navigate to a submenu to choose the subtitle size, when it is already inside the subtitle style submenu.",
-    "message": "Size"
-  },
   "SKIP_AD": {
     "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked.",
     "message": "Skip Ad"
@@ -274,6 +358,30 @@
   "SUBTITLES_EXAMPLE": {
     "description": "Example subtitle text shown while previewing subtitle style settings when no subtitle is currently visible.",
     "message": "Subtitles example"
+  },
+  "SUBTITLE_BACKGROUND_COLOR": {
+    "description": "Label for a button used to select the background color of the subtitles.",
+    "message": "Subtitle background color"
+  },
+  "SUBTITLE_BACKGROUND_OPACITY": {
+    "description": "Label for a button used to select the background opacity of the subtitles.",
+    "message": "Subtitle background opacity"
+  },
+  "SUBTITLE_CHARACTER_EDGE_STYLE": {
+    "description": "Label for a button used to select the style of the edges of the characters of the subtitles (none, drop shadow, raised, depressed or outline).",
+    "message": "Subtitle character edge style"
+  },
+  "SUBTITLE_FONT_COLOR": {
+    "description": "Label for a button used to select the font color of the subtitles.",
+    "message": "Subtitle font color"
+  },
+  "SUBTITLE_FONT_FAMILY": {
+    "description": "Label for a button used to select the font family of the subtitles.",
+    "message": "Subtitle font family"
+  },
+  "SUBTITLE_FONT_OPACITY": {
+    "description": "Label for a button used to select the font opacity of the subtitles.",
+    "message": "Subtitle font opacity"
   },
   "SUBTITLE_FORCED": {
     "description": "Label used to identify a subtitle track that is forced to be shown.",
@@ -338,5 +446,13 @@
   "VOLUME": {
     "description": "Label for a slider used to set the volume level of the video player.",
     "message": "Volume"
+  },
+  "WHITE": {
+    "description": "Name of the color white, in a menu used to select the color of the subtitles.",
+    "message": "White"
+  },
+  "YELLOW": {
+    "description": "Name of the color yellow, in a menu used to select the color of the subtitles.",
+    "message": "Yellow"
   }
 }
