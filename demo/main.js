@@ -828,6 +828,10 @@ shakaDemo.Main = class {
         !this.support_.manifest['application/x-mpegurl']) {
       return 'Your browser does not support HLS manifests.';
     }
+    if (asset.features.includes(shakaAssets.Feature.MKV) &&
+        !this.support_.manifest['video/x-matroska']) {
+      return 'Your browser does not support MKV files.';
+    }
 
     // Does the asset contain a playable mime type?
     const mimeTypes = [];
@@ -839,6 +843,11 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
+    }
+    if (asset.features.includes(shakaAssets.Feature.MKV)) {
+      // The MKV files are repackaged to MP4 (or to WebM, for VP8 and Vorbis).
+      mimeTypes.push('video/mp4');
+      mimeTypes.push('video/webm');
     }
     if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
       mimeTypes.push('audio/aac');
@@ -879,6 +888,9 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.APAC)) {
       mimeTypes.push('audio/mp4; codecs="apac.31.00"');
+    }
+    if (asset.features.includes(shakaAssets.Feature.DOLBY_DIGITAL)) {
+      mimeTypes.push('audio/mp4; codecs="ac-3"');
     }
     if (asset.features.includes(shakaAssets.Feature.DOLBY_DIGITAL_PLUS)) {
       mimeTypes.push('audio/mp4; codecs="ec-3"');

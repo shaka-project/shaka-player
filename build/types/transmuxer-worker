@@ -7,5 +7,11 @@
 +../../lib/device/default_browser.js
 +@devices
 +../../lib/transmuxer/loc_transmuxer.js
++../../lib/mkv/matroska_cluster_parser.js
++../../lib/mkv/matroska_codecs.js
++../../lib/mkv/matroska_constants.js
++../../lib/mkv/matroska_index_parser.js
++../../lib/transmuxer/matroska_transmuxer.js
++../../lib/util/webm_generator.js
 +../../lib/transmuxer/transmuxer_worker.js
 +@transmuxer

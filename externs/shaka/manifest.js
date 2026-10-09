@@ -91,8 +91,8 @@
  *   streams.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {string} type
- *   Indicates the type of the manifest. It can be <code>'HLS'</code> or
- *   <code>'DASH'</code>.
+ *   Indicates the type of the manifest. It can be <code>'HLS'</code>,
+ *   <code>'DASH'</code>, <code>'MSF'</code> or <code>'MKV'</code>.
  * @property {?shaka.extern.ServiceDescription} serviceDescription
  *   The service description for the manifest. Used to adapt playbackRate to
  *   decrease latency.

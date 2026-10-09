@@ -643,6 +643,21 @@ UNLCK
 vaage
 webapis
 WHATWG
+MPEGH
+Xiph
+centiseconds
+FCFC
+Forzados
+HAABBGGRR
+mundo
+HDMV
+mkvmerge
+MUXING
+muxers
+remuxed
+STREAMINFO
+theora
+TRUEHD
 
 # banned words
 !timmer
