@@ -170,7 +170,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ true)
         .addArrayStringInput_('preferredKeySystems',
-            'drm.preferredKeySystems');
+            'drm.preferredKeySystems')
+        .addBoolInput_('Keep DRM engine on detach',
+            'drm.keepDrmEngineOnDetach');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions,
         arrayString = false) => {
