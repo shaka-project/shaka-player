@@ -634,17 +634,79 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     });
 
     /**
+     * @param {!Uint8Array=} answer The SUBSCRIBE_OK to answer with.
      * @return {!Promise<bigint>}
      */
-    async function subscribeJoining() {
+    async function subscribeJoining(answer) {
       const subscribed = session.subscribe(
           NAMESPACE, TRACK, (obj) => received.push(obj),
           /* startLocation= */ null, /* joinCurrentGroup= */ true);
       await shaka.test.Util.shortDelay();
-      responses.enqueue(subscribeOk());
+      responses.enqueue(answer || subscribeOk());
       const alias = await subscribed;
       await shaka.test.Util.shortDelay();
       return alias;
+    }
+
+    /**
+     * A SUBSCRIBE_OK for Track Alias 7 reporting the given Largest Object, or
+     * none at all when the track has nothing published.
+     *
+     * @param {?Array<number>} largestObject
+     * @return {!Uint8Array}
+     */
+    function subscribeOkAt(largestObject) {
+      const params = largestObject ?
+          [0x01, 0x09].concat(largestObject) : [0x00];
+      const payload = [0x07].concat(params);
+      return new Uint8Array([0x04, 0x00, payload.length].concat(payload));
+    }
+
+    /**
+     * Hands an Object to the subscription as a subgroup stream would.
+     *
+     * @param {bigint} alias
+     * @param {number} group
+     * @param {number} object
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function deliverToSubscription(alias, group, object) {
+      return session.deliver_(alias, {
+        trackAlias: alias,
+        location: {group: BigInt(group), object: BigInt(object)},
+        data: new Uint8Array([0x7b, 0x7d]),
+        extensions: null,
+        status: null,
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 0,
+      });
+    }
+
+    /**
+     * Objects 0 to count - 1 of a Group, on a fetch stream answering the
+     * given request.
+     *
+     * @param {number} requestId
+     * @param {number} group
+     * @param {number} count
+     * @return {!shaka.msf.Reader}
+     */
+    function groupStartFor(requestId, group, count) {
+      const values = [requestId, 0x1c, group, 0, [0x80], 2, [0x7b, 0x7d]];
+      for (let i = 1; i < count; i++) {
+        // Subgroup and Group as before, Object ID one more.
+        values.push(0x01, 2, [0x7b, 0x7d]);
+      }
+      return fetchStreamOf(bytesOf(...values));
+    }
+
+    /**
+     * @return {!Array<string>}
+     */
+    function receivedLocations() {
+      return received.map(
+          (obj) => `${obj.location.group}:${obj.location.object}`);
     }
 
     /**
@@ -699,6 +761,59 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       expect(received.length).toBe(0);
     });
 
+    it('holds the subscription back until the current group is in',
+        async () => {
+          // The subscription starts at the Next Object, mid-group, and its
+          // streams race the fetch. A segmenter fed the end of a Group before
+          // its start cannot make a decodable segment of it.
+          const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+          await deliverToSubscription(alias, 5, 3);
+          await deliverToSubscription(alias, 5, 2);
+          expect(received.length).toBe(0);
+
+          responses.enqueue(fetchOk());
+          await shaka.test.Util.shortDelay();
+          await readFetchStream(groupStartFor(2, 5, 2));
+
+          expect(receivedLocations()).toEqual(['5:0', '5:1', '5:2', '5:3']);
+
+          await deliverToSubscription(alias, 6, 0);
+          expect(receivedLocations().pop()).toBe('6:0');
+        });
+
+    it('still fetches when the SUBSCRIBE_OK reports no Largest Object',
+        async () => {
+          // relay.moqtail.dev answers without LARGEST_OBJECT and then delivers
+          // from the middle of a Group, so only the Joining FETCH's own answer
+          // can say there is nothing to fill.
+          const alias = await subscribeJoining(subscribeOkAt(null));
+          expect(written.length).toBe(2);
+
+          await deliverToSubscription(alias, 7, 18);
+          expect(received.length).toBe(0);
+
+          responses.enqueue(fetchOk());
+          await shaka.test.Util.shortDelay();
+          await readFetchStream(groupStartFor(2, 7, 2));
+
+          expect(receivedLocations()).toEqual(['7:0', '7:1', '7:18']);
+        });
+
+    it('releases the subscription when the Joining FETCH fails', async () => {
+      const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+      await deliverToSubscription(alias, 5, 2);
+      responses.enqueue(new Uint8Array([
+        0x05, // REQUEST_ERROR
+        0x00, 0x03, // Length
+        0x03, // Error Code
+        0x00, // Retry Interval
+        0x00, // Empty Reason
+      ]));
+      await shaka.test.Util.shortDelay();
+
+      expect(receivedLocations()).toEqual(['5:2']);
+    });
+
     it('keeps the subscription when the Joining FETCH fails', async () => {
       // A track with nothing published yet has no current Group to fetch.
       const alias = await subscribeJoining();
@@ -744,6 +859,26 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
         expect(received.length).toBe(1);
         expect(received[0].location.group).toBe(BigInt(5));
+      });
+
+      it('does not wait for a fill on a track with nothing published',
+          async () => {
+            // Without a Largest Object the fill range is empty, and the
+            // publisher opens no fill fetch stream at all.
+            const alias = await subscribeJoining(subscribeOkAt(null));
+            await deliverToSubscription(alias, 0, 0);
+
+            expect(receivedLocations()).toEqual(['0:0']);
+          });
+
+      it('releases the subscription when the fill stream ends', async () => {
+        // A fill stream that stops short of the Largest Object has said all
+        // it is going to.
+        const alias = await subscribeJoining(subscribeOkAt([5, 3]));
+        await deliverToSubscription(alias, 5, 4);
+        await readFetchStream(groupStartFor(0, 5, 2));
+
+        expect(receivedLocations()).toEqual(['5:0', '5:1', '5:4']);
       });
     });
 

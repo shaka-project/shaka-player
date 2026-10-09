@@ -119,9 +119,10 @@ shaka.extern.MsfSession = class {
    *   subscription starts. MSF requires it of the catalog, whose current
    *   state is the first Object of the latest Group plus the ones after it.
    *   Draft-18 does it with a Joining FETCH and draft-20 with FILL_PARAMETERS;
-   *   the Objects arrive on the same callback as the subscription's, not
-   *   necessarily in order, and one may arrive twice. A session that cannot
-   *   do it delivers only what the subscription does.
+   *   the Objects arrive on the same callback as the subscription's, in
+   *   Location order and without repeats. A session that cannot do it, or
+   *   whose publisher does not answer in time, delivers only what the
+   *   subscription does.
    * @return {!Promise<bigint>}
    * @exportDoc
    */
