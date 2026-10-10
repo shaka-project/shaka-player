@@ -530,6 +530,33 @@ describe('ManifestTextParser', () => {
           },
           manifestTextWithPreloadSegments);
     });
+
+    it('parses key preload hints as playlist tags', () => {
+      const manifestTextWithKeyHint = '#EXTM3U\n' +
+        '#EXT-X-TARGETDURATION:6\n' +
+        '#EXTINF:5\n' +
+        'uri\n' +
+        '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="next.key"\n';
+
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 3, 'EXT-X-PRELOAD-HINT', [
+                new shaka.hls.Attribute('TYPE', 'KEY'),
+                new shaka.hls.Attribute('METHOD', 'AES-128'),
+                new shaka.hls.Attribute('URI', 'next.key'),
+              ]),
+            ],
+            segments: [
+              new shaka.hls.Segment(
+                  /* verbatimSegmentUri= */ 'uri',
+                  /* tags= */ [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+            ],
+          },
+          manifestTextWithKeyHint);
+    });
   });
 
   // TODO(#1672): Get a better type than "Object" here.
