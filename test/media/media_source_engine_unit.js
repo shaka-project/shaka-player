@@ -1313,6 +1313,23 @@ describe('MediaSourceEngine', () => {
         expect(videoSourceBuffer.timestampOffset).toBeCloseTo(0, 6);
       });
 
+      it('moves the timestampOffset after a jump in the timeline', async () => {
+        getTimestampSpy.and.returnValue({
+          timestamp: 41,
+          metadata: [],
+          scte35: [],
+          startsMidGop: true,
+        });
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, dummyReference(11, 12), fakeStream,
+            /* hasClosedCaptions= */ false);
+        videoSourceBuffer.updateend();
+        await append;
+
+        expect(videoSourceBuffer.abort).toHaveBeenCalled();
+        expect(videoSourceBuffer.timestampOffset).toBeCloseTo(-30, 6);
+      });
+
       it('moves the timestampOffset after a seek', async () => {
         await appendSegment(11, /* startsMidGop= */ true, /* seeked= */ true);
 
