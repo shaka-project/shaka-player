@@ -4,6 +4,7 @@
 +../../lib/msf/compression.js
 +../../lib/msf/dialect_registry.js
 +../../lib/msf/event_timeline.js
++../../lib/msf/join_gate.js
 +../../lib/msf/loc_parser.js
 +../../lib/msf/media_timeline.js
 +../../lib/msf/locmaf_parser.js

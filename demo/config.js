@@ -318,15 +318,6 @@ shakaDemo.Config = class {
 
   /** @private */
   addMsfManifestSection_() {
-    const msfFilterTypeOptions = shaka.config.MsfFilterType;
-    const msfFilterTypeOptionNames = {
-      'NONE': 'NONE',
-      'NEXT_GROUP_START': 'NEXT_GROUP_START',
-      'LARGEST_OBJECT': 'LARGEST_OBJECT',
-      'ABSOLUTE_START': 'ABSOLUTE_START',
-      'ABSOLUTE_RANGE': 'ABSOLUTE_RANGE',
-    };
-
     const msfVersionOptions = shaka.config.MsfVersion;
     const msfVersionOptionNames = {
       'AUTO': 'Auto',
@@ -344,10 +335,6 @@ shakaDemo.Config = class {
             'manifest.msf.namespaces')
         .addTextInput_('Authorization token',
             'manifest.msf.authorizationToken')
-        .addSelectInput_('Subscribe FilterType',
-            'manifest.msf.subscribeFilterType',
-            msfFilterTypeOptions,
-            msfFilterTypeOptionNames)
         .addSelectInput_('MoQ version used in the connection',
             'manifest.msf.version',
             msfVersionOptions,

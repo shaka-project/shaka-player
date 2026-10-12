@@ -396,26 +396,6 @@ player.configure({
 });
 ```
 
-### `subscribeFilterType` (MsfFilterType, default: `LARGEST_OBJECT`)
-
-Controls the filter applied when subscribing to tracks. Corresponds to the
-MoQT subscribe filter parameter.
-
-| Value | Description |
-|---|---|
-| `shaka.config.MsfFilterType.LARGEST_OBJECT` | Start from the latest available object. |
-| `shaka.config.MsfFilterType.NEXT_GROUP_START` | Start from the next available group . |
-
-```js
-player.configure({
-  manifest: {
-    msf: {
-      subscribeFilterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
-    }
-  }
-});
-```
-
 ### `version` (MsfVersion, default: `AUTO`)
 
 Controls which MoQT draft version(s) to negotiate with the server.
@@ -494,7 +474,6 @@ player.configure({
       namespaces: ['live', 'ch1'], // Known namespace; leave [] to auto-discover
       authorizationToken: '',       // Bearer token if required by server
       version: shaka.config.MsfVersion.AUTO, // Version negotiation strategy
-      subscribeFilterType: shaka.config.MsfFilterType.LARGEST_OBJECT,
       catalogPreprocessor: (catalog) => {}, // Modifies the catalog in place
     }
   }

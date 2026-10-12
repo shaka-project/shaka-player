@@ -786,6 +786,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
      * @type {!Array<{
      *   trackName: string,
      *   startLocation: ?Object,
+     *   joinCurrentGroup: boolean,
      *   callback: shaka.extern.MsfObjectCallback,
      * }>}
      */
@@ -832,10 +833,12 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
           getCodec: () => codec,
-          subscribeTrack: (namespace, trackName, callback, startLocation) => {
+          subscribeTrack: (namespace, trackName, callback, startLocation,
+              joinCurrentGroup) => {
             subscribes.push({
               trackName,
               startLocation: startLocation || null,
+              joinCurrentGroup: !!joinCurrentGroup,
               callback,
             });
             if (startLocation && refuseAbsoluteStart) {
@@ -894,6 +897,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     /**
      * @param {string} trackName
      * @return {?{startLocation: ?Object,
+     *            joinCurrentGroup: boolean,
      *            callback: shaka.extern.MsfObjectCallback}}
      */
     function lastSubscribeTo(trackName) {
@@ -995,6 +999,19 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       }
       nextSegments = [];
     }
+
+    it('joins the current group of a track it starts at the live edge',
+        async () => {
+          // Media can only start decoding at the start of a Group, and a
+          // timeline track restates itself in full there.
+          givenAStartedParser();
+          await processCatalog([videoTrack(), timelineTrack()]);
+          videoStream().createSegmentIndex();
+          await shaka.test.Util.shortDelay();
+
+          expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(true);
+          expect(lastSubscribeTo('history').joinCurrentGroup).toBe(true);
+        });
 
     it('feeds the tracks a timeline track declares it describes',
         async () => {
@@ -1409,6 +1426,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         expect(subscribes.length).toBe(before + 1);
         expect(lastSubscribeTo('video0').startLocation).toEqual(
             {group: BigInt(30), object: BigInt(0), subgroup: null});
+        // A seek names its own starting point; there is nothing to join.
+        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(false);
         // The old subscription is withdrawn: it delivers from where the
         // player no longer is.
         expect(unsubscribeSpy).toHaveBeenCalled();
@@ -1456,6 +1475,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         // No Location: the subscription follows the live edge again, which is
         // what it would take minutes of delivery to reach otherwise.
         expect(lastSubscribeTo('video0').startLocation).toBeNull();
+        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(true);
         expect(stream.segmentIndex.getNumReferences()).toBe(0);
       });
 
