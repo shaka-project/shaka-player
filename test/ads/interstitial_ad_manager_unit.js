@@ -542,8 +542,8 @@ describe('Interstitial Ad manager', () => {
         }),
         pod: null,
         podOffset: 0,
-        sequenceLength: 1,
-        position: 1,
+        podSize: 1,
+        podPosition: 1,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });

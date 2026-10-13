@@ -72,8 +72,8 @@ shaka.extern.AdCuePoint;
  *   pod: (?shaka.extern.AdCreativeSignaling.Pod|undefined),
  *   podOffset: (number|undefined),
  *   startOffset: (number|undefined),
- *   sequenceLength: (number|undefined),
- *   position: (number|undefined),
+ *   podSize: (number|undefined),
+ *   podPosition: (number|undefined),
  *   mimeType: ?string,
  *   isSkippable: boolean,
  *   skipOffset: ?number,
@@ -113,17 +113,17 @@ shaka.extern.AdCuePoint;
  *   describe media already present in the current content timeline.
  * @property {(?shaka.extern.AdCreativeSignaling.Slot|
  *   undefined)} adCreativeSignaling
- *   Validated SVTA version 2 slot metadata.
+ *   Validated SVTA2053 slot metadata.
  * @property {(?shaka.extern.AdCreativeSignaling.Pod|undefined)} pod
  *   The containing SVTA pod, if any.
  * @property {(number|undefined)} podOffset
  *   The slot start relative to its pod.
  * @property {(number|undefined)} startOffset
  *   The initial seek offset within an external asset.
- * @property {(number|undefined)} sequenceLength
+ * @property {(number|undefined)} podSize
  *   The number of slots in the pod.
- * @property {(number|undefined)} position
- *   The one-based slot position in the pod.
+ * @property {(number|undefined)} podPosition
+ *   The one-based position of the slot in the pod.
  * @property {?string} mimeType
  *   The mimeType of the interstitial if known.
  * @property {boolean} isSkippable
@@ -206,33 +206,6 @@ shaka.extern.AdInterstitial;
  * @exportDoc
  */
 shaka.extern.AdPositionInfo;
-
-
-/**
- * @typedef {{
- *   startTime: number,
- *   endTime: ?number,
- *   tracking: ?shaka.extern.AdTrackingEvent,
- *   position: number,
- *   sequenceLength: number,
- * }}
- *
- * @description
- * Contains the Tracking info.
- *
- * @property {number} startTime
- *   The start time of the tracking info.
- * @property {?number} endTime
- *   The end time of the tracking info.
- * @property {?shaka.extern.AdTrackingEvent} tracking
- *   Contains the tracking events that should be sent.
- * @property {number} position
- *   Returns the position of the tracking.
- * @property {number} sequenceLength
- *   The total number of trackings.
- * @exportDoc
- */
-shaka.extern.AdTrackingInfo;
 
 
 /**

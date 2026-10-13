@@ -63,8 +63,8 @@ describe('SvtaInterstitialParser', () => {
     expect(ads[0].startTime).toBe(105);
     expect(ads[1].startTime).toBe(115);
     expect(ads[0].pod).toBe(ads[1].pod);
-    expect(ads[1].position).toBe(2);
-    expect(ads[1].sequenceLength).toBe(2);
+    expect(ads[1].podPosition).toBe(2);
+    expect(ads[1].podSize).toBe(2);
     expect(ads[1].podOffset).toBe(10);
   });
 
@@ -102,7 +102,15 @@ describe('SvtaInterstitialParser', () => {
       expect(ads.length).toBe(1);
       expect(ads[0].startTime).toBe(100);
       expect(ads[0].endTime).toBe(105);
+      expect(ads[0].adCreativeSignaling.identifiers).toEqual([]);
     }
+  });
+
+  it('defaults the slots of a pod to an empty array', () => {
+    const envelope = {payload: [{duration: 10}], type: 'pod'};
+    const result = Parser.parseInterstitials(envelope, 0, 'id');
+    expect(result.interstitials).toEqual([]);
+    expect(envelope.payload[0].slots).toEqual([]);
   });
 
   it('rejects missing remote feature declarations and unsupported features',

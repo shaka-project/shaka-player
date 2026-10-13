@@ -77,7 +77,7 @@ describe('HlsInterstitialParser', () => {
     expect(assets[0].adCreativeSignaling).toBeUndefined();
     expect(assets[1].adCreativeSignaling).toBe(slot);
     expect(assets[1].pod).toBe(pod);
-    expect(assets[1].sequenceLength).toBe(1);
+    expect(assets[1].podSize).toBe(1);
     expect(assets[1].tracking).toBeNull();
   });
 

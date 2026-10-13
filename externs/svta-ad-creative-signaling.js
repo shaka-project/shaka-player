@@ -31,7 +31,7 @@ shaka.extern.AdCreativeSignaling.CarriageEnvelope;
  *   type: (string|undefined),
  *   start: number,
  *   duration: number,
- *   identifiers: (!Array<!shaka.extern.AdCreativeSignaling.AdIdentifier>|undefined),
+ *   identifiers: !Array<!shaka.extern.AdCreativeSignaling.AdIdentifier>,
  *   tracking: (!Array<!shaka.extern.AdCreativeSignaling.TrackingEvent>|undefined),
  *   verifications: (!Array<!shaka.extern.AdCreativeSignaling.Verification>|undefined),
  *   skipOffset: (number|undefined),
@@ -45,7 +45,7 @@ shaka.extern.AdCreativeSignaling.Slot;
  * @typedef {{
  *   start: (number|undefined),
  *   duration: number,
- *   slots: (!Array<!shaka.extern.AdCreativeSignaling.Slot>|undefined),
+ *   slots: !Array<!shaka.extern.AdCreativeSignaling.Slot>,
  *   tracking: (!Array<!shaka.extern.AdCreativeSignaling.TrackingEvent>|undefined),
  *   $remote: (!shaka.extern.AdCreativeSignaling.RemoteFields|undefined)
  * }}
