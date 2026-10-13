@@ -1341,6 +1341,68 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('converts percentage font sizes to em', () => {
+    // A CSS percentage is relative to the inherited font size, while a
+    // shaka.text.Cue percentage is relative to the cell height (as in TTML).
+    // Other units are kept as they are.
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {startTime: 10, endTime: 20, payload: 'Full', fontSize: '1em'},
+            ],
+          },
+          {
+            startTime: 20, endTime: 30,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20, endTime: 30,
+                payload: 'Fraction',
+                fontSize: '0.625em',
+              },
+            ],
+          },
+          {
+            startTime: 30, endTime: 40,
+            payload: '',
+            nestedCues: [
+              {startTime: 30, endTime: 40, payload: 'Em', fontSize: '1.5em'},
+            ],
+          },
+          {
+            startTime: 40, endTime: 50,
+            payload: '',
+            nestedCues: [
+              {startTime: 40, endTime: 50, payload: 'Px', fontSize: '10px'},
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(.full) { font-size: 100%; }\n' +
+        '::cue(.fraction) { font-size: 62.5%; }\n' +
+        '::cue(.em) { font-size: 1.5em; }\n' +
+        '::cue(.px) { font-size: 10px; }\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.full>Full</c>\n\n' +
+        '00:00:20.000 --> 00:00:30.000\n' +
+        '<c.fraction>Fraction</c>\n\n' +
+        '00:00:30.000 --> 00:00:40.000\n' +
+        '<c.em>Em</c>\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        '<c.px>Px</c>\n\n',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   it('supports default color overriding', () => {
     verifyHelper(
         [
