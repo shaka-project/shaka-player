@@ -83,6 +83,51 @@ describe('DashParser SegmentTemplate', () => {
       await Dash.testSegmentIndex(source, references);
     });
 
+    it('finds the same segments as a plain SegmentIndex', async () => {
+      // 4.004s segments (120000/29970).  The end of some of them is a hair
+      // before the start of the next: segment 112 ends at 448.44844844844846
+      // and segment 113 starts at 448.4484484484485.
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '  timescale="29970" duration="120000" />',
+      ], /* duration= */ 7300);
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      const segmentIndex = stream.segmentIndex;
+      goog.asserts.assert(segmentIndex, 'Null segmentIndex!');
+
+      /** @type {!Array<!shaka.media.SegmentReference>} */
+      const references = [];
+      segmentIndex.forEachTopLevelReference((reference) => {
+        references.push(reference);
+      });
+      expect(references.length).toBe(1824);
+      expect(references[111].endTime).toBeLessThan(references[112].startTime);
+
+      const plain = new shaka.media.SegmentIndex(references);
+      const mismatches = [];
+      for (const reference of references) {
+        const times = [
+          reference.startTime,
+          (reference.startTime + reference.endTime) / 2,
+          reference.endTime,
+        ];
+        for (const time of times) {
+          const found = segmentIndex.find(time);
+          const expected = plain.find(time);
+          if (found !== expected) {
+            mismatches.push({time, found, expected});
+          }
+        }
+      }
+      expect(mismatches).toEqual([]);
+      // The time StreamingEngine looks up after segment 112 is buffered.
+      expect(segmentIndex.find(references[111].endTime)).toBe(111);
+    });
+
     it('with @startNumber > 1', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" media="s$Number$.mp4"',
