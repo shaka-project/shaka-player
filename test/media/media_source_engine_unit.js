@@ -499,7 +499,28 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeTransportStream);
       await mediaSourceEngine.init(initObject, false);
       expect(proxySpy).toHaveBeenCalledOnceWith(
-          mockTransmuxer, 'https://example.com/worker.js');
+          mockTransmuxer, 'https://example.com/worker.js', null);
+    });
+
+    it('passes the chosen plugin priority to TransmuxerProxy', async () => {
+      const TransmuxerEngine = shaka.transmuxer.TransmuxerEngine;
+      const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+          .and.callThrough();
+      const prioritySpy =
+          spyOn(TransmuxerEngine, 'findTransmuxerPluginPriority')
+              .and.returnValue(TransmuxerEngine.PluginPriority.FALLBACK);
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.transmuxWorkerUrl = 'https://example.com/worker.js';
+      mediaSourceEngine.configure(config);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(prioritySpy).toHaveBeenCalledTimes(1);
+      expect(proxySpy).toHaveBeenCalledOnceWith(
+          mockTransmuxer, 'https://example.com/worker.js',
+          TransmuxerEngine.PluginPriority.FALLBACK);
     });
   });
 
