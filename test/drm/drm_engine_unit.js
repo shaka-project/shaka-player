@@ -2084,6 +2084,48 @@ describe('DrmEngine', () => {
   });  // describe('update')
 
   describe('destroy', () => {
+    it('ignores session creation throughout teardown', async () => {
+      await initAndAttach();
+      await sendEncryptedEvent();
+
+      const closing = new shaka.util.PublicPromise();
+      const detaching = new shaka.util.PublicPromise();
+      const detachStarted = new shaka.util.PublicPromise();
+      session1.close.and.returnValue(closing);
+      mockVideo.setMediaKeys.and.callFake(() => {
+        detachStarted.resolve();
+        return detaching;
+      });
+      mockMediaKeys.createSession.calls.reset();
+
+      const checkSessionCreation = () => {
+        const initData = new Uint8Array([1, 2, 3]);
+        expect(() => drmEngine.newInitData('cenc', initData)).not.toThrow();
+        expect(drmEngine.createSession('cenc', initData, 'temporary'))
+            .toBeUndefined();
+        expect(mockMediaKeys.createSession).not.toHaveBeenCalled();
+      };
+
+      const destroying = drmEngine.destroy();
+      try {
+        // MediaKeys still exist while the event manager has been released.
+        expect(session1.close).toHaveBeenCalled();
+        expect(drmEngine.getMediaKeys()).toBe(mockMediaKeys);
+        checkSessionCreation();
+
+        closing.resolve();
+        await detachStarted;
+        expect(drmEngine.getMediaKeys()).toBe(mockMediaKeys);
+        checkSessionCreation();
+      } finally {
+        closing.resolve();
+        detaching.resolve();
+        await destroying;
+      }
+
+      checkSessionCreation();
+    });
+
     it('tears down MediaKeys and active sessions', async () => {
       await initAndAttach();
 
