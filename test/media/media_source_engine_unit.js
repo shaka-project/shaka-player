@@ -1002,6 +1002,34 @@ describe('MediaSourceEngine', () => {
           .toHaveBeenCalledWith(buffer, true, 1);
     });
 
+    it('passes continuity timeline through split muxed content', async () => {
+      const muxedAudioStream = makeFakeStream('audio/mp4');
+      muxedAudioStream.fullMimeTypes = new Set([muxedAudioStream.mimeType]);
+      muxedAudioStream.isAudioMuxedInVideo = true;
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.AUDIO, muxedAudioStream);
+      await mediaSourceEngine.init(initObject, false);
+
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 7);
+      // Split muxed content appends video, then audio, each waiting for its
+      // own 'updateend'.
+      await Util.shortDelay();
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      videoSourceBuffer.updateend();
+      await Util.shortDelay();
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 7);
+    });
+
     it('sets timestampOffset on adaptations in sequence mode', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
