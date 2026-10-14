@@ -47,6 +47,23 @@ describe('TransmuxerWorker', () => {
 
   /**
    * @param {!Object} msg
+   * @suppress {visibility}
+   */
+  function initWith(msg) {
+    worker.onInit_(msg);
+  }
+
+  /**
+   * @param {number} id
+   * @return {?shaka.extern.Transmuxer}
+   * @suppress {visibility}
+   */
+  function storedTransmuxer(id) {
+    return worker.transmuxers_.get(id) || null;
+  }
+
+  /**
+   * @param {!Object} msg
    * @return {!Promise}
    * @suppress {visibility}
    */
@@ -100,6 +117,72 @@ describe('TransmuxerWorker', () => {
     expect(posted.length).toBe(1);
     expect(posted[0].message['cmd']).toBe('transmuxed');
     expect(posted[0].message['reqId']).toBe(0);
+  });
+
+  describe('plugin selection', () => {
+    const PluginPriority = shaka.transmuxer.TransmuxerEngine.PluginPriority;
+    const TransmuxerEngine = shaka.transmuxer.TransmuxerEngine;
+    const fakeMimeType = 'video/x-shaka-fake-worker-transmux';
+
+    beforeEach(() => {
+      TransmuxerEngine.registerTransmuxer(fakeMimeType, () => {
+        throw new Error('optional runtime not loaded');
+      }, PluginPriority.APPLICATION);
+      TransmuxerEngine.registerTransmuxer(fakeMimeType,
+          () => /** @type {!shaka.extern.Transmuxer} */ ({
+            fallback: true,
+            destroy: () => {},
+          }),
+          PluginPriority.FALLBACK);
+    });
+
+    afterEach(() => {
+      TransmuxerEngine.unregisterTransmuxer(
+          fakeMimeType, PluginPriority.APPLICATION);
+      TransmuxerEngine.unregisterTransmuxer(
+          fakeMimeType, PluginPriority.FALLBACK);
+    });
+
+    it('builds the plugin at the priority the main thread chose', () => {
+      initWith({
+        'id': 7,
+        'mimeType': fakeMimeType,
+        'priority': PluginPriority.FALLBACK,
+      });
+
+      expect(storedTransmuxer(7)).toEqual(
+          jasmine.objectContaining({fallback: true}));
+    });
+
+    it('answers unavailable when the chosen plugin throws on construction',
+        async () => {
+          expect(() => initWith({
+            'id': 8,
+            'mimeType': fakeMimeType,
+            'priority': PluginPriority.APPLICATION,
+          })).not.toThrow();
+          expect(storedTransmuxer(8)).toBe(null);
+
+          await transmux(transmuxMessage(8, new ArrayBuffer(4), 'video'));
+
+          expect(posted.length).toBe(1);
+          expect(posted[0].message).toEqual(
+              {'cmd': 'unavailable', 'id': 8, 'reqId': 0});
+        });
+
+    it('answers unavailable when no plugin is registered at the priority',
+        async () => {
+          initWith({
+            'id': 9,
+            'mimeType': fakeMimeType,
+            'priority': PluginPriority.PREFERRED,
+          });
+
+          await transmux(transmuxMessage(9, new ArrayBuffer(4), 'video'));
+
+          expect(posted.length).toBe(1);
+          expect(posted[0].message['cmd']).toBe('unavailable');
+        });
   });
 
   it('posts an error when transmuxing before init', async () => {
