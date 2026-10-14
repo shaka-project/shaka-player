@@ -662,6 +662,22 @@ describe('MediaSourceEngine', () => {
       await p;
     });
 
+    it('does not append empty data to the SourceBuffer', async () => {
+      // Resolves without an 'updateend' event from the SourceBuffer.
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, new Uint8Array(0), null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
+
+      // The queue keeps moving after the skipped append.
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await p;
+    });
+
     it('invokes modifyPreselectionSegmentCallback for Preselection streams',
         async () => {
           const stream =
