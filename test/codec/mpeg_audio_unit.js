@@ -49,4 +49,25 @@ describe('MpegAudio', () => {
       }
     }
   });
+
+  it('gives the codec of MPEG audio in MP4 by the sample rate', () => {
+    // MPEG-1 audio has the high rates, and MPEG-2 the low ones.
+    expect(MpegAudio.getMp4Codec(48000)).toBe('mp4a.6B');
+    expect(MpegAudio.getMp4Codec(32000)).toBe('mp4a.6B');
+    expect(MpegAudio.getMp4Codec(24000)).toBe('mp4a.69');
+    expect(MpegAudio.getMp4Codec(22050)).toBe('mp4a.69');
+  });
+
+  it('builds the esds of MPEG audio without DecoderSpecificInfo', () => {
+    // Version and flags, ES_Descriptor (ES_ID 0, no flags),
+    // DecoderConfigDescriptor (MPEG-1 audio, audio stream, buffer size,
+    // maximum and average bitrate) and SLConfigDescriptor.
+    expect(Array.from(MpegAudio.buildEsds(44100))).toEqual([
+      0, 0, 0, 0,
+      0x03, 0x15, 0, 0, 0,
+      0x04, 0x0D, 0x6B, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0x06, 0x01, 0x02,
+    ]);
+    expect(MpegAudio.buildEsds(22050)[11]).toBe(0x69);
+  });
 });

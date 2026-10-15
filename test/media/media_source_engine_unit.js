@@ -499,7 +499,28 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeTransportStream);
       await mediaSourceEngine.init(initObject, false);
       expect(proxySpy).toHaveBeenCalledOnceWith(
-          mockTransmuxer, 'https://example.com/worker.js');
+          mockTransmuxer, 'https://example.com/worker.js', null);
+    });
+
+    it('passes the chosen plugin priority to TransmuxerProxy', async () => {
+      const TransmuxerEngine = shaka.transmuxer.TransmuxerEngine;
+      const proxySpy = spyOn(shaka.transmuxer, 'TransmuxerProxy')
+          .and.callThrough();
+      const prioritySpy =
+          spyOn(TransmuxerEngine, 'findTransmuxerPluginPriority')
+              .and.returnValue(TransmuxerEngine.PluginPriority.FALLBACK);
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.transmuxWorkerUrl = 'https://example.com/worker.js';
+      mediaSourceEngine.configure(config);
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
+      await mediaSourceEngine.init(initObject, false);
+      expect(prioritySpy).toHaveBeenCalledTimes(1);
+      expect(proxySpy).toHaveBeenCalledOnceWith(
+          mockTransmuxer, 'https://example.com/worker.js',
+          TransmuxerEngine.PluginPriority.FALLBACK);
     });
   });
 
@@ -654,6 +675,22 @@ describe('MediaSourceEngine', () => {
     });
 
     it('appends the given data', async () => {
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await p;
+    });
+
+    it('does not append empty data to the SourceBuffer', async () => {
+      // Resolves without an 'updateend' event from the SourceBuffer.
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, new Uint8Array(0), null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
+
+      // The queue keeps moving after the skipped append.
       const p = mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, buffer, null, fakeStream,
           /* hasClosedCaptions= */ false);
@@ -1054,6 +1091,34 @@ describe('MediaSourceEngine', () => {
 
       expect(mockClosedCaptionParser.initSpy)
           .toHaveBeenCalledWith(buffer, true, 1);
+    });
+
+    it('passes continuity timeline through split muxed content', async () => {
+      const muxedAudioStream = makeFakeStream('audio/mp4');
+      muxedAudioStream.fullMimeTypes = new Set([muxedAudioStream.mimeType]);
+      muxedAudioStream.isAudioMuxedInVideo = true;
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.AUDIO, muxedAudioStream);
+      await mediaSourceEngine.init(initObject, false);
+
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ true, /* seeked= */ false,
+          /* adaptation= */ false, /* isChunkedData= */ false,
+          /* fromSplit= */ false, /* continuityTimeline= */ 7);
+      // Split muxed content appends video, then audio, each waiting for its
+      // own 'updateend'.
+      await Util.shortDelay();
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      videoSourceBuffer.updateend();
+      await Util.shortDelay();
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      audioSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockClosedCaptionParser.initSpy)
+          .toHaveBeenCalledWith(buffer, false, 7);
     });
 
     it('sets timestampOffset on adaptations in sequence mode', async () => {

@@ -177,6 +177,8 @@ shakaAssets.Feature = {
 
   // Set if the asset requires APAC support.
   APAC: 'APAC',
+  // Set if the asset requires DD (AC-3) support.
+  DOLBY_DIGITAL: 'DD',
   // Set if the asset requires DD+ support.
   DOLBY_DIGITAL_PLUS: 'DD+',
   // Set if the asset requires AC-4 support.
@@ -196,6 +198,8 @@ shakaAssets.Feature = {
   HLS: 'HLS',
   // Set if the asset is an MSF.
   MSF: 'MSF',
+  // Set if the asset is a Matroska (MKV) file.
+  MKV: 'MKV',
 
   // Set if the asset has at least one image stream.
   THUMBNAILS: 'Thumbnails',
@@ -528,6 +532,30 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addExtraChapter(shakaAssets.ExternalChapters.SINTEL),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel 720p (MKV, H.264, AC-3, SRT)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/Sintel.mkv/Sintel.2010.720p.mkv',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.MKV)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .setMimeType('video/x-matroska'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel 4k (MKV, H.264, AC-3, SRT)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/Sintel.mkv/Sintel.2010.4k.mkv',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.MKV)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.DOLBY_DIGITAL)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .setMimeType('video/x-matroska'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
