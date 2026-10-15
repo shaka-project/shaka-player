@@ -307,6 +307,7 @@ class Build(object):
         '--entry_point=goog:shaka.transmuxer.Ac3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.Ec3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.LocTransmuxer',
+        '--entry_point=goog:shaka.transmuxer.MatroskaTransmuxer',
         '--entry_point=goog:shaka.transmuxer.Mp3Transmuxer',
         '--entry_point=goog:shaka.transmuxer.MpegTsTransmuxer',
         '--entry_point=goog:shaka.transmuxer.TsTransmuxer',

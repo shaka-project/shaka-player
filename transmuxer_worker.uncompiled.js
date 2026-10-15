@@ -47,6 +47,7 @@ goog.require('shaka.transmuxer.AacTransmuxer');
 goog.require('shaka.transmuxer.Ac3Transmuxer');
 goog.require('shaka.transmuxer.Ec3Transmuxer');
 goog.require('shaka.transmuxer.LocTransmuxer');
+goog.require('shaka.transmuxer.MatroskaTransmuxer');
 goog.require('shaka.transmuxer.Mp3Transmuxer');
 goog.require('shaka.transmuxer.MpegTsTransmuxer');
 goog.require('shaka.transmuxer.TsTransmuxer');
