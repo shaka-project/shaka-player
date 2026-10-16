@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.2.14](https://github.com/shaka-project/shaka-player/compare/v5.2.13...v5.2.14) (2026-10-16)
+
+
+### Bug Fixes
+
+* **CEA:** Keep the caption continuity timeline for split muxed content ([#10734](https://github.com/shaka-project/shaka-player/issues/10734)) ([e6642a6](https://github.com/shaka-project/shaka-player/commit/e6642a6c12c3aa1da2925337de979eed369ae90c))
+* **DASH:** Fix stall when a fixed-duration segment lookup rounds to the next segment ([#10717](https://github.com/shaka-project/shaka-player/issues/10717)) ([21b47a1](https://github.com/shaka-project/shaka-player/commit/21b47a152d7868f6460c412b4b23163e8192bf74))
+* **Transmux:** Keep codec probing working when a transmuxer plugin throws ([#10735](https://github.com/shaka-project/shaka-player/issues/10735)) ([7c9c600](https://github.com/shaka-project/shaka-player/commit/7c9c600c8fabc6b4098e4ae3d911283c932ca60e))
+* **TTML:** Support namespace-qualified elements ([#10713](https://github.com/shaka-project/shaka-player/issues/10713)) ([32689dc](https://github.com/shaka-project/shaka-player/commit/32689dcd513c589e1de5c0ac70695298a4a099a1))
+* **WebVTT:** Keep percentage font sizes relative to the subtitle size ([#10727](https://github.com/shaka-project/shaka-player/issues/10727)) ([644c688](https://github.com/shaka-project/shaka-player/commit/644c688a7b648cbdeb80503a0d784c63c48928a7)), closes [#10726](https://github.com/shaka-project/shaka-player/issues/10726)
+
 ## [5.2.13](https://github.com/shaka-project/shaka-player/compare/v5.2.12...v5.2.13) (2026-10-09)
 
 
