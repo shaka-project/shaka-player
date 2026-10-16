@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.15.64](https://github.com/shaka-project/shaka-player/compare/v4.15.63...v4.15.64) (2026-10-16)
+
+
+### Bug Fixes
+
+* **DASH:** Fix stall when a fixed-duration segment lookup rounds to the next segment ([#10717](https://github.com/shaka-project/shaka-player/issues/10717)) ([efbf3a5](https://github.com/shaka-project/shaka-player/commit/efbf3a52bb126e358828a51e8ed7e5e0a3ef2637))
+* **TTML:** Support namespace-qualified elements ([#10713](https://github.com/shaka-project/shaka-player/issues/10713)) ([916cdf8](https://github.com/shaka-project/shaka-player/commit/916cdf8268dc0113fc5b49b9787a782925a900a2))
+* **WebVTT:** Keep percentage font sizes relative to the subtitle size ([#10727](https://github.com/shaka-project/shaka-player/issues/10727)) ([9d03e11](https://github.com/shaka-project/shaka-player/commit/9d03e11b1d0c894b0299a907e4f824d7095ad5ab)), closes [#10726](https://github.com/shaka-project/shaka-player/issues/10726)
+
 ## [4.15.63](https://github.com/shaka-project/shaka-player/compare/v4.15.62...v4.15.63) (2026-10-09)
 
 
