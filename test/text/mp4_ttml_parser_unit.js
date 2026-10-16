@@ -76,12 +76,12 @@ describe('Mp4TtmlParser', () => {
     const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time, null, []);
     // Bodies.
     expect(ret.length).toBe(2);
-    // Divs.
-    expect(ret[0].nestedCues.length).toBe(1);
-    expect(ret[1].nestedCues.length).toBe(1);
+    // The backgrounds of the "background" region, and the divs.
+    expect(ret[0].nestedCues.length).toBe(2);
+    expect(ret[1].nestedCues.length).toBe(2);
     // Cues.
-    expect(ret[0].nestedCues[0].nestedCues.length).toBe(5);
-    expect(ret[1].nestedCues[0].nestedCues.length).toBe(5);
+    expect(ret[0].nestedCues[1].nestedCues.length).toBe(5);
+    expect(ret[1].nestedCues[1].nestedCues.length).toBe(5);
   });
 
   it('handles media segments with multiple sample', () => {
@@ -97,12 +97,12 @@ describe('Mp4TtmlParser', () => {
     const ret = parser.parseMedia(ttmlSegmentMultipleSample, time, null, []);
     // Bodies.
     expect(ret.length).toBe(2);
-    // Divs.
-    expect(ret[0].nestedCues.length).toBe(1);
-    expect(ret[1].nestedCues.length).toBe(1);
+    // The backgrounds of the "background" region, and the divs.
+    expect(ret[0].nestedCues.length).toBe(2);
+    expect(ret[1].nestedCues.length).toBe(2);
     // Cues.
-    expect(ret[0].nestedCues[0].nestedCues.length).toBe(5);
-    expect(ret[1].nestedCues[0].nestedCues.length).toBe(5);
+    expect(ret[0].nestedCues[1].nestedCues.length).toBe(5);
+    expect(ret[1].nestedCues[1].nestedCues.length).toBe(5);
   });
 
   it('clips each sample of a multi-sample segment to its own time', () => {
@@ -178,8 +178,11 @@ describe('Mp4TtmlParser', () => {
     const ret2 = parser.parseMedia(ttmlSegment, time2, null, []);
     expect(ret2.length).toBeGreaterThan(0);
 
-    expect(ret2[0].startTime).toBe(ret1[0].startTime + 7);
-    expect(ret2[0].endTime).toBe(ret1[0].endTime + 7);
+    // The first subtitle, after the background of the "background" region.
+    const cue1 = ret1[0].nestedCues[1].nestedCues[0];
+    const cue2 = ret2[0].nestedCues[1].nestedCues[0];
+    expect(cue2.startTime).toBe(cue1.startTime + 7);
+    expect(cue2.endTime).toBe(cue1.endTime + 7);
   });
 
   it('rejects init segment with no ttml', () => {
@@ -280,8 +283,17 @@ describe('Mp4TtmlParser', () => {
       isMpegTs: false,
     };
     const result = parser.parseMedia(ttmlSegment, time, null, []);
+    // The background of the "background" region is shown during the whole
+    // segment, below the subtitles.
+    const background = result[0].nestedCues.shift();
+    expect(background.region.id).toBe('background');
+    expect(background.region.backgroundColor)
+        .toBe('rgba(0,0,0,' + (100 / 255) + ')');
+    expect(background.startTime).toBe(0);
+    expect(background.endTime).toBe(60);
     shaka.test.TtmlUtils.verifyHelper(
-        cues, result, {startTime: 23, endTime: 53.5});
+        cues, result, {startTime: 0, endTime: 60},
+        {startTime: 23, endTime: 53.5});
   });
 
   it('handles IMSC1 (CMAF) image subtitle', () => {

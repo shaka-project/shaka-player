@@ -454,6 +454,24 @@ describe('UITextDisplayer', () => {
     expect(parentCueElements[0].textContent).toBe('');
   });
 
+  it('keeps nested cues in the order of the document', async () => {
+    const parentCue = new shaka.text.Cue(0, 100, '');
+    // The second nested cue begins first.
+    parentCue.nestedCues = [
+      new shaka.text.Cue(10, 100, 'One'),
+      new shaka.text.Cue(5, 100, 'Two'),
+    ];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([parentCue]);
+
+    video.currentTime = 20;
+    await updateCaptions();
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    expect(textContainer.textContent).toBe('OneTwo');
+  });
+
   it('creates separate elements for cue regions', async () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
@@ -519,6 +537,175 @@ describe('UITextDisplayer', () => {
 
     // Regions with a fixed height don't clip their cues.
     expect(regionElement.style.overflow).toBe('');
+  });
+
+  it('applies the styles of cue regions', async () => {
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'regionId';
+    cueRegion.width = 50;
+    cueRegion.height = 40;
+    cueRegion.backgroundColor = 'red';
+    cueRegion.opacity = 0.5;
+    // In percentage of the height or of the width of the region.
+    cueRegion.padding = '10% 5px 0% 20%';
+    cueRegion.overflow = 'hidden';
+    cueRegion.zIndex = 2;
+    const cue = new shaka.text.Cue(0, 100, 'Test');
+    cue.region = cueRegion;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const regionElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-region'));
+    expect(regionElement.style.backgroundColor).toBe('red');
+    expect(regionElement.style.opacity).toBe('0.5');
+    expect(regionElement.style.overflow).toBe('hidden');
+    expect(regionElement.style.zIndex).toBe('2');
+    // The padding is inside the region.
+    expect(regionElement.style.boxSizing).toBe('border-box');
+    const regionHeight = videoContainer.clientHeight * 0.4;
+    const regionWidth = videoContainer.clientWidth * 0.5;
+    expect(parseFloat(regionElement.style.paddingTop))
+        .toBeCloseTo(regionHeight * 0.1, 2);
+    expect(regionElement.style.paddingRight).toBe('5px');
+    expect(parseFloat(regionElement.style.paddingBottom)).toBe(0);
+    expect(parseFloat(regionElement.style.paddingLeft))
+        .toBeCloseTo(regionWidth * 0.2, 2);
+  });
+
+  it('paints the background of a region while it shows content', async () => {
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'regionId';
+    cueRegion.backgroundColor = 'red';
+    const containerCue = new shaka.text.Cue(0, 100, '');
+    containerCue.region = cueRegion;
+    containerCue.nestedCues = [new shaka.text.Cue(0, 50, 'Test')];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([containerCue]);
+
+    video.currentTime = 10;
+    await updateCaptions();
+    let regionElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-region'));
+    expect(regionElement.style.backgroundColor).toBe('red');
+
+    // The container is still displayed, but none of its content is.
+    video.currentTime = 60;
+    await updateCaptions();
+    regionElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-region'));
+    expect(regionElement.style.backgroundColor).toBe('');
+  });
+
+  it('converts the line height in cells', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    cue.lineHeight = '1c';
+    cue.cellResolution = {
+      columns: 60,
+      rows: 20,
+    };
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    // videoContainerHeight=450px and ttp:cellResolution="60 20".
+    const captions = videoContainer.querySelector('.shaka-text-container div');
+    expect(captions.style.lineHeight).toBe('22.5px');
+  });
+
+  it('draws the text stroke with the inherited text color', async () => {
+    const cue = new shaka.text.Cue(0, 100, '');
+    cue.color = 'red';
+    const nestedCue = new shaka.text.Cue(0, 100, 'Stroke');
+    nestedCue.textStrokeWidth = '2px';
+    cue.nestedCues = [nestedCue];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const element = Array.from(videoContainer.querySelectorAll(
+        '.shaka-text-container span')).find(
+        (e) => e.textContent == 'Stroke' && e.style.textShadow);
+    expect(element.style.textShadow).toContain('red');
+    expect(element.style.textShadow).not.toContain('undefined');
+  });
+
+  it('draws the text stroke around the text', async () => {
+    const cue = new shaka.text.Cue(0, 100, '');
+    cue.textStrokeColor = 'red';
+    cue.textStrokeWidth = '2px';
+    cue.textShadow = '1px 1px blue';
+    const removedStroke = new shaka.text.Cue(0, 100, 'No stroke');
+    removedStroke.textStrokeWidth = '0';
+    cue.nestedCues = [new shaka.text.Cue(0, 100, 'Stroke'), removedStroke];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    /**
+     * @param {string} text
+     * @return {string}
+     */
+    const getTextShadow = (text) => {
+      const elements = Array.from(videoContainer.querySelectorAll(
+          '.shaka-text-container span'));
+      const element = elements.find(
+          (e) => e.textContent == text && e.style.textShadow);
+      return element.style.textShadow;
+    };
+    /**
+     * @param {string} textShadow
+     * @return {number}
+     */
+    const countStrokeShadows =
+        (textShadow) => textShadow.split('red').length - 1;
+
+    // A CSS stroke would be drawn over the text.
+    const cueElement =
+        videoContainer.querySelector('.shaka-text-container div');
+    expect(cueElement.style.webkitTextStrokeWidth).toBe('');
+    expect(countStrokeShadows(cueElement.style.textShadow)).toBe(16);
+    expect(cueElement.style.textShadow).toContain('blue');
+    // The nested cues inherit the stroke and the shadow, unless they remove
+    // them.
+    expect(countStrokeShadows(getTextShadow('Stroke'))).toBe(16);
+    expect(getTextShadow('Stroke')).toContain('blue');
+    expect(countStrokeShadows(getTextShadow('No stroke'))).toBe(0);
+    expect(getTextShadow('No stroke')).toContain('blue');
+  });
+
+  it('hides the cues which are not visible', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Hidden');
+    cue.visibility = 'hidden';
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const cueElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-container > div'));
+    // The cue still takes its place.
+    expect(cueElement.style.visibility).toBe('hidden');
+    expect(cueElement.textContent).toBe('Hidden');
+  });
+
+  it('does not wrap the lines of cues which should not wrap', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Test');
+    cue.wrapLine = false;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const cueElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-container > div'));
+    expect(cueElement.style.whiteSpace).toBe('pre');
   });
 
   describe('regions sized in lines', () => {
