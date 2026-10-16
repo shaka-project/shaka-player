@@ -220,6 +220,10 @@ module.exports = (config) => {
         included: false,
       },
 
+      // libmmt's classic-script build, for the MMTP packaging
+      'node_modules/@blockcast/mmt-container/dist/' +
+          'mmtp-container-parser.no-modules.js',
+
       // load closure base, the deps tree, and the uncompiled library
       'test/test/closure-boot.js',
       'node_modules/google-closure-library/closure/goog/base.js',
@@ -249,6 +253,7 @@ module.exports = (config) => {
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/mkv/*', included: false},
+      {pattern: 'test/test/assets/mmtp/*', included: false},
       {pattern: 'test/test/assets/audio-iamf/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted/*', included: false},
       {pattern: 'test/test/assets/clear-encrypted-hls/*', included: false},

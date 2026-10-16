@@ -23,6 +23,7 @@
     "@babel/parser": "^7.28.5",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.16.11",
+    "@blockcast/mmt-container": "0.3.0-main.2ac53602a867",
     "@joeyparrish/karma-babel-preprocessor": "^8.2.0",
     "@stylistic/eslint-plugin-js": "^4.2.0",
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",

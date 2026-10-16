@@ -580,6 +580,11 @@ wallclock
 wilaw
 QUIC
 WEBTRANSPORT
+blockcast
+libmmt
+mmtp
+raptorq
+ssbg
 
 # CMCD
 ttfb

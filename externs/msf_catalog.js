@@ -132,6 +132,7 @@ msfCatalog.Accessibility;
  *   mpeg2tsRandomAccess: (boolean|undefined),
  *   mpeg2tsTimestampMode: (string|undefined),
  *   mpeg2tsScte35Pid: (number|undefined),
+ *   mmtpMode: (string|undefined),
  * }}
  */
 msfCatalog.Track;
