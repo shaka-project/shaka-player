@@ -267,6 +267,26 @@ describe('HlsParser live', () => {
         await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
+      it('pushes the grown duration to the player', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const updateDuration = spyOn(playerInterface, 'updateDuration');
+
+        const manifest = await testInitialManifest(master, media, [ref1]);
+        expect(manifest.presentationTimeline.getDuration()).toBe(2);
+        updateDuration.calls.reset();
+
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        expect(manifest.presentationTimeline.getDuration()).toBe(4);
+        expect(updateDuration).toHaveBeenCalledTimes(1);
+
+        // Nothing new in the playlist: the duration is not pushed again.
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        expect(updateDuration).toHaveBeenCalledTimes(1);
+      });
+
       it('updates all variants', async () => {
         const secondVariant = [
           '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
