@@ -15,10 +15,29 @@ Candidate features for future release cycles:
 v6.0
  - Conversion to Typescript (Smaller, more modular binary)
 
-v5.2 - 2026 Q4
+v5.4 - 2027 Q1
  - TBD
 
 =====
+
+v5.3 - 2026 Q4
+ - Next-generation audio: IAMF support in CMAF/MP4 and DASH Preselections
+   https://github.com/shaka-project/shaka-player/issues/10581
+   https://github.com/shaka-project/shaka-player/issues/9139
+ - AV1 support in MPEG-TS and CEA-608/708 caption extraction from AV1
+ - CMCD: MPD-signaled parameters (DASH 6th ed.)
+   https://github.com/shaka-project/shaka-player/issues/10580
+ - Unify SCTE-35 handling across DASH, HLS and EMSG
+ - Ads: Runtime skip ranges, including skipping played MediaTailor ad breaks
+ - UI: Subtitle style customization and seek backward/forward buttons
+   https://github.com/shaka-project/shaka-player/issues/10686
+   https://github.com/shaka-project/shaka-player/issues/10541
+ - WebVTT: Region parsing and rendering support
+   https://github.com/shaka-project/shaka-player/issues/2583
+ - MSF: Support MoQT drafts 18, 20, 21 and 22; remove support for drafts 14 and 16
+   (experimental build)
+ - MKV support (experimental build)
+   https://github.com/shaka-project/shaka-player/issues/10388
 
 v5.2 - 2026 Q3
  - Metadata extraction support for `src=` playback
