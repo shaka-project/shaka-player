@@ -184,6 +184,25 @@ describe('TtmlTextParser', () => {
       expect(p.opacity).toBe(1);
     });
 
+    it('resolves the padding in em with the font size of the region', () => {
+      /**
+       * @param {string} fontSize
+       * @return {string}
+       */
+      const getPadding = (fontSize) => parse(
+          '<layout><region xml:id="r1" tts:extent="50% 40%" ' +
+          `${fontSize} tts:padding="0% 1em"/></layout>`,
+          '<body region="r1"><div>' +
+          '<p begin="0s" end="1s">Test</p>' +
+          '</div></body>').region.padding;
+      // A cell is 1/32 of the width of the root container, so 1/16 of the
+      // region.
+      expect(getPadding('')).toBe('0% 6.25% 0% 6.25%');
+      expect(getPadding('tts:fontSize="2c"')).toBe('0% 12.5% 0% 12.5%');
+      expect(getPadding('tts:fontSize="200%"')).toBe('0% 12.5% 0% 12.5%');
+      expect(getPadding('tts:fontSize="2em"')).toBe('0% 12.5% 0% 12.5%');
+    });
+
     it('applies the padding relative to the writing mode', () => {
       const body = parse(
           '<layout><region xml:id="r1" tts:writingMode="tbrl" ' +
@@ -218,6 +237,63 @@ describe('TtmlTextParser', () => {
       expect(background.nestedCues).toEqual([]);
       expect(body.startTime).toBe(2);
       expect(body.endTime).toBe(8);
+    });
+
+    it('presents region backgrounds when body is animated', () => {
+      const cues = new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(
+              shaka.util.StringUtils.toUTF8(
+                  '<tt xmlns="http://www.w3.org/ns/ttml" ' +
+                  'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+                  '<head><layout>' +
+                  '<region xml:id="r1" tts:backgroundColor="red" ' +
+                  'begin="0s" end="6s"/>' +
+                  '</layout></head>' +
+                  '<body region="r1">' +
+                  '<set begin="2s" end="4s" tts:color="yellow"/>' +
+                  '<div><p begin="0s" end="6s">Test</p></div>' +
+                  '</body></tt>')),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 10,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          'https://bar', /* images= */ []);
+      expect(cues.length).toBe(3);
+      for (const cue of cues) {
+        expect(cue.nestedCues.some((c) => c.region && c.region.id == 'r1' &&
+            c.region.backgroundColor == 'red')).toBe(true);
+      }
+    });
+
+    it('does not overlap region backgrounds when body is split', () => {
+      const cues = new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(
+              shaka.util.StringUtils.toUTF8(
+                  '<tt xmlns="http://www.w3.org/ns/ttml" ' +
+                  'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+                  '<head><layout>' +
+                  '<region xml:id="r1" tts:backgroundColor="red"/>' +
+                  '</layout></head>' +
+                  '<body region="r1">' +
+                  '<set begin="2s" end="4s" tts:color="yellow"/>' +
+                  '<div><p begin="0s" end="6s">Test</p></div>' +
+                  '</body></tt>')),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 10,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          'https://bar', /* images= */ []);
+      expect(cues.length).toBe(3);
+      const backgrounds = cues.map((cue) => cue.nestedCues.find((c) =>
+        c.isContainer && c.region && c.region.backgroundColor == 'red'));
+      expect(backgrounds.map((c) => [c.startTime, c.endTime])).toEqual(
+          [[0, 2], [2, 4], [4, 10]]);
     });
 
     it('presents the content only while its region is active', () => {
@@ -262,6 +338,41 @@ describe('TtmlTextParser', () => {
         width: 50,
         height: 40,
       }));
+
+      const bodyAbove100 = parse(
+          '<layout><region xml:id="r1" tts:origin="10rw 20rh" ' +
+          'tts:extent="120rw 80rh"/></layout>',
+          '<body region="r1"><div>' +
+          '<p begin="0s" end="1s">Test</p>' +
+          '</div></body>');
+      expect(bodyAbove100.region).toEqual(jasmine.objectContaining({
+        width: 120,
+        height: 80,
+      }));
+    });
+
+    it('does not use a percentage root extent as pixels', () => {
+      const cues = new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(
+              '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
+              'tts:extent="100% 100%"><head><layout>' +
+              '<region xml:id="r1" tts:extent="640px 480px"/>' +
+              '</layout></head><body region="r1"><div>' +
+              '<p begin="0s" end="1s">Test</p></div></body></tt>')),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 10,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          'https://bar', /* images= */ []);
+      expect(cues[0].region).toEqual(jasmine.objectContaining({
+        width: 640,
+        height: 480,
+        widthUnits: shaka.text.CueRegion.units.PX,
+        heightUnits: shaka.text.CueRegion.units.PX,
+      }));
     });
 
     it('supports the position of regions', () => {
@@ -284,6 +395,10 @@ describe('TtmlTextParser', () => {
       // A percentage is relative to the space left by the region.
       expect(getAnchor('25% 50%')).toEqual({x: 10, y: 40});
       expect(getAnchor('right 10rw bottom 5rh')).toEqual({x: 30, y: 75});
+      expect(getAnchor('center 10% bottom')).toEqual({x: 24, y: 80});
+      expect(getAnchor('center 10% center 20%')).toEqual({x: 24, y: 56});
+      expect(getAnchor('10% center')).toEqual({x: 4, y: 40});
+      expect(getAnchor('center left')).toEqual({x: 0, y: 40});
     });
 
     it('ignores the position of regions with an origin', () => {
@@ -2263,6 +2378,37 @@ describe('TtmlTextParser', () => {
         {startTime: 1, endTime: 2});
   });
 
+  it('uses inherited text color if span tts:textOutline omits color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: '',
+            nestedCues: [
+              {
+                payload: 'Test',
+                textStrokeColor: 'red',
+                textStrokeWidth: '3px',
+              },
+            ],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="00:01.00" end="00:02.00" tts:color="red">' +
+        '<span tts:textOutline="3px">Test</span></p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 1, endTime: 2});
+  });
+
   it('does not add an outline if tts:textOutline only contains color', () => {
     verifyHelper(
         [
@@ -2859,6 +3005,45 @@ describe('TtmlTextParser', () => {
         {startTime: 1, endTime: 6});
   });
 
+  it('does not let animations advance sequential time containers', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 1,
+            payload: '',
+            color: 'red',
+            nestedCues: [
+              {startTime: 0, endTime: 1, payload: 'A'},
+            ],
+          },
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: '',
+            nestedCues: [
+              {startTime: 1, endTime: 2, payload: 'B'},
+            ],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<body><div>' +
+        '<p timeContainer="seq">' +
+        '<span dur="1s">A</span>' +
+        '<set begin="0s" end="1s" tts:color="red"/>' +
+        '<span dur="1s">B</span>' +
+        '</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 2});
+  });
+
   it('clips the times of an element to the times of its parent', () => {
     verifyHelper(
         [
@@ -3276,6 +3461,50 @@ describe('TtmlTextParser', () => {
         '<body><div>' +
         '<p begin="0s" end="6s" tts:color="white">' +
         '<set begin="2s" end="4s" tts:color="yellow"/>Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 6});
+  });
+
+  it('preserves element styling when animated with a style reference', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 2,
+            payload: 'Test',
+            color: 'white',
+            fontSize: '20px',
+          },
+          {
+            startTime: 2,
+            endTime: 4,
+            payload: 'Test',
+            color: 'yellow',
+            fontSize: '20px',
+          },
+          {
+            startTime: 4,
+            endTime: 6,
+            payload: 'Test',
+            color: 'white',
+            fontSize: '20px',
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><styling>' +
+        '<style xml:id="base" tts:fontSize="20px" tts:color="white"/>' +
+        '<style xml:id="highlight" tts:color="yellow"/>' +
+        '</styling></head>' +
+        '<body><div>' +
+        '<p begin="0s" end="6s" style="base">' +
+        '<set begin="2s" end="4s" style="highlight"/>Test</p>' +
         '</div></body></tt>',
         {
           periodStart: 0,

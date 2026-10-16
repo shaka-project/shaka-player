@@ -600,6 +600,41 @@ describe('UITextDisplayer', () => {
     expect(regionElement.style.backgroundColor).toBe('');
   });
 
+  it('converts the line height in cells', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    cue.lineHeight = '1c';
+    cue.cellResolution = {
+      columns: 60,
+      rows: 20,
+    };
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    // videoContainerHeight=450px and ttp:cellResolution="60 20".
+    const captions = videoContainer.querySelector('.shaka-text-container div');
+    expect(captions.style.lineHeight).toBe('22.5px');
+  });
+
+  it('draws the text stroke with the inherited text color', async () => {
+    const cue = new shaka.text.Cue(0, 100, '');
+    cue.color = 'red';
+    const nestedCue = new shaka.text.Cue(0, 100, 'Stroke');
+    nestedCue.textStrokeWidth = '2px';
+    cue.nestedCues = [nestedCue];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const element = Array.from(videoContainer.querySelectorAll(
+        '.shaka-text-container span')).find(
+        (e) => e.textContent == 'Stroke' && e.style.textShadow);
+    expect(element.style.textShadow).toContain('red');
+    expect(element.style.textShadow).not.toContain('undefined');
+  });
+
   it('draws the text stroke around the text', async () => {
     const cue = new shaka.text.Cue(0, 100, '');
     cue.textStrokeColor = 'red';
