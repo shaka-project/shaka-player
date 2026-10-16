@@ -140,6 +140,78 @@ describe('VideoFrameCallbackHandler', () => {
               .toHaveBeenCalledTimes(3);
         });
 
+    it('re-registers before invoking the user callback', () => {
+      mockVideo = createMockVideoWithRVFC();
+      handler = new VideoFrameCallbackHandler(mockVideo);
+
+      handler.start(() => {
+        expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(2);
+      });
+      fireLastRegisteredCallback();
+    });
+
+    it('stays armed when the user callback throws', () => {
+      mockVideo = createMockVideoWithRVFC();
+      handler = new VideoFrameCallbackHandler(mockVideo);
+      const callbackSpy = jasmine.createSpy('userCallback')
+          .and.throwError('boom');
+
+      handler.start(shaka.test.Util.spyFunc(callbackSpy));
+      expect(() => fireLastRegisteredCallback()).toThrow(new Error('boom'));
+      expect(() => fireLastRegisteredCallback()).toThrow(new Error('boom'));
+
+      expect(callbackSpy).toHaveBeenCalledTimes(2);
+      expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(3);
+    });
+
+    it('cancels the re-registered callback when released mid-loop', () => {
+      mockVideo = createMockVideoWithRVFC();
+      handler = new VideoFrameCallbackHandler(mockVideo);
+
+      handler.start(() => handler.release());
+      fireLastRegisteredCallback();
+
+      expect(mockVideo.cancelVideoFrameCallback).toHaveBeenCalledOnceWith(2);
+    });
+
+    it('cancels and ignores the old successor when restarted mid-loop', () => {
+      mockVideo = createMockVideoWithRVFC();
+      handler = new VideoFrameCallbackHandler(mockVideo);
+      const firstCallbackSpy = jasmine.createSpy('firstCallback');
+      const secondCallbackSpy = jasmine.createSpy('secondCallback');
+      const firstCallback = shaka.test.Util.spyFunc(firstCallbackSpy);
+
+      handler.start(() => {
+        firstCallback();
+        handler.start(shaka.test.Util.spyFunc(secondCallbackSpy));
+      });
+      fireLastRegisteredCallback();
+      const staleSuccessor = registeredCallbacks[1];
+
+      staleSuccessor(200, null);
+
+      expect(mockVideo.cancelVideoFrameCallback).toHaveBeenCalledOnceWith(2);
+      expect(firstCallbackSpy).toHaveBeenCalledTimes(1);
+      expect(secondCallbackSpy).not.toHaveBeenCalled();
+
+      fireLastRegisteredCallback(300, null);
+      expect(secondCallbackSpy).toHaveBeenCalledOnceWith(300, null);
+    });
+
+    it('does not pre-register another callback in once mode', () => {
+      mockVideo = createMockVideoWithRVFC();
+      handler = new VideoFrameCallbackHandler(mockVideo);
+      const callbackSpy = jasmine.createSpy('userCallback');
+
+      handler.start(shaka.test.Util.spyFunc(callbackSpy), /* once= */ true);
+      fireLastRegisteredCallback();
+      handler.release();
+
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+      expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
+      expect(mockVideo.cancelVideoFrameCallback).not.toHaveBeenCalled();
+    });
+
     it('does not re-register if start is called again mid-loop', () => {
       mockVideo = createMockVideoWithRVFC();
       handler = new VideoFrameCallbackHandler(mockVideo);
