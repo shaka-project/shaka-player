@@ -296,6 +296,51 @@ describe('TtmlTextParser', () => {
           [[0, 2], [2, 4], [4, 10]]);
     });
 
+    it('presents region backgrounds without any content', () => {
+      /**
+       * @param {string} body
+       * @return {!Array<!shaka.text.Cue>}
+       */
+      const parseBody = (body) => new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(
+              shaka.util.StringUtils.toUTF8(
+                  '<tt xmlns="http://www.w3.org/ns/ttml" ' +
+                  'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+                  '<head><layout>' +
+                  '<region xml:id="r1" tts:backgroundColor="red"/>' +
+                  `</layout></head>${body}</tt>`)),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 10,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          'https://bar', /* images= */ []);
+
+      for (const body of [
+        '<body/>',
+        '<body><div><p begin="1s" end="2s" tts:display="none">A</p></div>' +
+            '</body>',
+      ]) {
+        const cues = parseBody(body);
+        expect(cues.length).toBe(1);
+        expect(cues[0].nestedCues.length).toBe(1);
+        expect(cues[0].nestedCues[0]).toEqual(jasmine.objectContaining({
+          startTime: 0,
+          endTime: 10,
+          isContainer: true,
+        }));
+        expect(cues[0].nestedCues[0].region.backgroundColor).toBe('red');
+      }
+
+      // A timed body only shows them during its interval.
+      const timed = parseBody('<body begin="2s" end="4s"/>');
+      expect(timed.length).toBe(1);
+      expect(timed[0].startTime).toBe(2);
+      expect(timed[0].endTime).toBe(4);
+    });
+
     it('presents the content only while its region is active', () => {
       const body = parse(
           '<layout><region xml:id="r1" begin="2s" end="5s"/></layout>',
@@ -3003,6 +3048,32 @@ describe('TtmlTextParser', () => {
           isMpegTs: false,
         },
         {startTime: 1, endTime: 6});
+  });
+
+  it('supports namespace aliases in animations', () => {
+    verifyHelper(
+        [
+          {startTime: 0, endTime: 2, payload: 'Test', color: 'white'},
+          {startTime: 2, endTime: 4, payload: 'Test', color: 'red'},
+          {startTime: 4, endTime: 6, payload: 'Test', color: 'blue'},
+        ],
+        '<tt xmlns:s="http://www.w3.org/ns/ttml#styling">' +
+        '<head><styling>' +
+        '<style xml:id="blue" s:color="blue"/>' +
+        '</styling></head>' +
+        '<body><div>' +
+        '<p begin="0s" end="6s" s:color="white">' +
+        '<set begin="2s" end="4s" s:color="red"/>' +
+        '<set begin="4s" end="6s" style="blue"/>Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 6});
   });
 
   it('does not let animations advance sequential time containers', () => {
