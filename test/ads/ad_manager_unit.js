@@ -165,6 +165,56 @@ describe('Ad manager', () => {
     });
   });
 
+  it('routes native HLS creative metadata to the SVTA parser', async () => {
+    Object.assign(mockVideo, {style: document.createElement('video').style});
+    const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
+        .and.returnValue({interstitials: [], deferred: []});
+    const metadata = {type: 'com.apple.quicktime.HLS', startTime: 0,
+      endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
+    try {
+      await adManager.onHLSMetadata(metadata);
+      expect(parse).toHaveBeenCalledTimes(1);
+      expect(parse.calls.argsFor(0)[0]).toBe(metadata);
+    } finally {
+      adManager.release();
+    }
+  });
+
+  it('measures SVTA metadata when HLS insertion is disabled', async () => {
+    Object.assign(mockVideo, {style: document.createElement('video').style});
+    const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    config.disableHLSInterstitial = true;
+    adManager.configure(config);
+    const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
+        .and.returnValue({interstitials: [], deferred: []});
+    const metadata = {type: 'com.apple.hls.interstitial', startTime: 0,
+      endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
+    try {
+      await adManager.onHLSMetadata(metadata);
+      expect(parse).toHaveBeenCalledTimes(1);
+      expect(parse.calls.argsFor(0)[0]).toBe(metadata);
+    } finally {
+      adManager.release();
+    }
+  });
+
+  it('ignores SVTA metadata when SVTA is disabled', async () => {
+    const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    config.disableSVTA = true;
+    adManager.configure(config);
+    const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
+        .and.returnValue({interstitials: [], deferred: []});
+    const metadata = {type: 'urn:svta:advertising-wg:ad-creative-signaling',
+      startTime: 0, endTime: 10,
+      values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
+    try {
+      await adManager.onHLSMetadata(metadata);
+      expect(parse).not.toHaveBeenCalled();
+    } finally {
+      adManager.release();
+    }
+  });
+
   /**
    * @param {shaka.util.Error.Severity} severity
    * @param {shaka.util.Error.Code} code

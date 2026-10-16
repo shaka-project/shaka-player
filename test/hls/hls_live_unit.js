@@ -2291,6 +2291,201 @@ describe('HlsParser live', () => {
     expect(segmentIndex.get(0).getMetadata().title).toBe('Intro');
   });
 
+  describe('key preload hints', () => {
+    const KEY = shaka.net.NetworkingEngine.RequestType.KEY;
+
+    // The playlists end at 2000-01-01T00:00:10Z.
+    const mediaWithKeyHint = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="next.key",',
+      'DATE-OF-FIRST-USE="2000-01-01T00:00:18Z"\n',
+    ].join('');
+
+    const mediaWithKeyHintWithoutDate = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="next.key"\n',
+    ].join('');
+
+    const mediaWithTwoKeyHints = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="next.key",',
+      'DATE-OF-FIRST-USE="2000-01-01T00:00:18Z"\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="other.key"\n',
+    ].join('');
+
+    const mediaWithDrmKeyHint = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=SAMPLE-AES-CTR,',
+      'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
+      'URI="data:text/plain;base64,AAAA"\n',
+    ].join('');
+
+    const mediaWithoutKeyHint = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    const mediaWithKeyAndKeyHint = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:00Z\n',
+      '#EXTINF:5,\n',
+      'main0.mp4\n',
+      '#EXT-X-KEY:METHOD=AES-128,URI="next.key"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-PRELOAD-HINT:TYPE=KEY,METHOD=AES-128,URI="next.key",',
+      'DATE-OF-FIRST-USE="2000-01-01T00:00:18Z"\n',
+    ].join('');
+
+    /** @type {!jasmine.Spy} */
+    let delaySpy;
+
+    /** @suppress {accessControls} */
+    function spyOnKeyPreloadDelay() {
+      delaySpy = spyOn(parser, 'getKeyPreloadDelay_').and.callThrough();
+    }
+
+    beforeEach(() => {
+      spyOnKeyPreloadDelay();
+      fakeNetEngine.setResponseValue('test:/next.key', new Uint8Array(16));
+    });
+
+    /**
+     * @return {number}
+     * @suppress {accessControls}
+     */
+    function numKeyPreloads() {
+      return parser.keyPreloads_.size;
+    }
+
+    /** @suppress {accessControls} */
+    async function preloadKeysNow() {
+      for (const {timer} of parser.keyPreloads_.values()) {
+        timer.tickNow();
+      }
+      await shaka.test.Util.shortDelay();
+    }
+
+    it('preloads at a random point before the first use', async () => {
+      spyOn(Math, 'random').and.returnValue(0.25);
+      await testInitialManifest(master, mediaWithKeyHint);
+
+      // 8 seconds between the end of the playlist and the first use.
+      expect(delaySpy.calls.mostRecent().returnValue).toBe(2);
+      fakeNetEngine.expectNoRequest('test:/next.key', KEY);
+
+      await preloadKeysNow();
+      fakeNetEngine.expectRequest('test:/next.key', KEY);
+      expect(numKeyPreloads()).toBe(0);
+    });
+
+    it('preloads within a target duration without DATE-OF-FIRST-USE',
+        async () => {
+          spyOn(Math, 'random').and.returnValue(0.3);
+          await testInitialManifest(master, mediaWithKeyHintWithoutDate);
+
+          expect(delaySpy.calls.mostRecent().returnValue).toBe(1.5);
+          await preloadKeysNow();
+          fakeNetEngine.expectRequest('test:/next.key', KEY);
+        });
+
+    it('ignores all but the first hint of each KEYFORMAT', async () => {
+      await testInitialManifest(master, mediaWithTwoKeyHints);
+
+      expect(numKeyPreloads()).toBe(1);
+      await preloadKeysNow();
+      fakeNetEngine.expectRequest('test:/next.key', KEY);
+      fakeNetEngine.expectNoRequest('test:/other.key', KEY);
+    });
+
+    it('ignores hints of keys that are not AES', async () => {
+      await testInitialManifest(master, mediaWithDrmKeyHint);
+
+      expect(numKeyPreloads()).toBe(0);
+    });
+
+    it('cancels the preload of a hint that disappears', async () => {
+      spyOn(Math, 'random').and.returnValue(0.99);
+      const manifest = await testInitialManifest(master, mediaWithKeyHint);
+      expect(numKeyPreloads()).toBe(1);
+
+      await testUpdate(manifest, mediaWithoutKeyHint);
+      expect(numKeyPreloads()).toBe(0);
+      fakeNetEngine.expectNoRequest('test:/next.key', KEY);
+    });
+
+    it('requests the key again after a failed preload', async () => {
+      let keyRequests = 0;
+      fakeNetEngine.setResponse('test:/next.key', () => {
+        keyRequests++;
+        if (keyRequests == 1) {
+          return Promise.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.RECOVERABLE,
+              shaka.util.Error.Category.NETWORK,
+              shaka.util.Error.Code.BAD_HTTP_STATUS));
+        }
+        return Promise.resolve(new Uint8Array(16));
+      });
+      const manifest =
+          await testInitialManifest(master, mediaWithKeyAndKeyHint);
+
+      await preloadKeysNow();
+      expect(keyRequests).toBe(1);
+
+      const segmentIndex = manifest.variants[0].video.segmentIndex;
+      goog.asserts.assert(segmentIndex, 'Null segmentIndex!');
+      const aesKey = Array.from(segmentIndex).pop().aesKey;
+      goog.asserts.assert(aesKey && aesKey.fetchKey, 'Missing AES key!');
+      await aesKey.fetchKey();
+      expect(keyRequests).toBe(2);
+      expect(aesKey.cryptoKey).toBeDefined();
+    });
+  });
+
   /**
    * @param {string | Array<string>} uri A relative URI to http://example.com
    * @param {number} start

@@ -204,6 +204,24 @@ describe('TransmuxerProxy', () => {
       expect(capturedWorkerUrl).toBe('https://example.com/worker.js');
     });
 
+    it('names the chosen plugin priority in the init message', async () => {
+      transmuxer.destroy();
+      transmuxer = new TransmuxerProxy(mockInner, FAKE_WORKER_URL,
+          shaka.transmuxer.TransmuxerEngine.PluginPriority.FALLBACK);
+
+      const id = getInstanceId(transmuxer);
+      const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+      simulateTransmuxed(id, 0, new ArrayBuffer(3));
+      await p;
+
+      expect(mockWorker.postMessage).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            'cmd': 'init',
+            'priority':
+                shaka.transmuxer.TransmuxerEngine.PluginPriority.FALLBACK,
+          }));
+    });
+
     it('sends init message only once for multiple calls', async () => {
       const id = getInstanceId(transmuxer);
       const p1 = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
@@ -521,9 +539,10 @@ describe('TransmuxerProxy', () => {
       const id = getInstanceId(transmuxer);
       const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
 
-      // Simulate the worker responding with an error because init failed
-      // (no plugin found). The worker now returns the error with the
-      // correct reqId from the transmux request, not reqId: -1.
+      // Simulate the worker responding with an error for an id it never
+      // initialized. The worker returns the error with the correct reqId
+      // from the transmux request, not reqId: -1. (An init that could not
+      // build the chosen plugin answers 'unavailable' instead; see below.)
       const assertion = expectAsync(p).toBeRejectedWith(
           jasmine.objectContaining({
             code: shaka.util.Error.Code.TRANSMUXING_FAILED,
@@ -543,6 +562,41 @@ describe('TransmuxerProxy', () => {
 
       await assertion;
     });
+
+    it('falls back to main thread when the worker answers unavailable',
+        async () => {
+          const id = getInstanceId(transmuxer);
+          let settled = false;
+          const p = transmuxer.transmux(
+              fakeData, fakeStream, null, 10, 'video').then(() => {
+            settled = true;
+          });
+
+          capturedMessageHandler({data: {
+            'cmd': 'unavailable',
+            'id': id,
+            'reqId': 0,
+          }});
+
+          // The reply must reach the instance through the shared router and
+          // settle the request on its own, long before the 30 s request
+          // timeout could resolve it with the same fallback.
+          for (let i = 0; i < 10; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await Promise.resolve();
+          }
+          expect(settled).toBe(true);
+          expect(mockInner.transmux).toHaveBeenCalledTimes(1);
+          await p;
+
+          // The instance stays on the main thread; the worker is not asked
+          // again and is not terminated for other instances.
+          mockWorker.postMessage.calls.reset();
+          await transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+          expect(mockInner.transmux).toHaveBeenCalledTimes(2);
+          expect(mockWorker.postMessage).not.toHaveBeenCalled();
+          expect(mockWorker.terminate).not.toHaveBeenCalled();
+        });
 
     describe('Worker constructor failure', () => {
       beforeEach(() => {

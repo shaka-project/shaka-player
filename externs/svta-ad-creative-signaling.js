@@ -16,9 +16,9 @@ shaka.extern.AdCreativeSignaling = {};
 
 /**
  * @typedef {{
- *   version: number,
- *   type: string,
- *   payload: !Array<!shaka.extern.AdCreativeSignaling.Slot>,
+ *   version: (number|undefined),
+ *   type: (string|undefined),
+ *   payload: !Array<!(shaka.extern.AdCreativeSignaling.Slot|shaka.extern.AdCreativeSignaling.Pod|shaka.extern.AdCreativeSignaling.TrackingEvent|shaka.extern.AdCreativeSignaling.Verification)>,
  *   features: (!{
  *     remoteFields: boolean
  *   }|undefined)
@@ -28,7 +28,7 @@ shaka.extern.AdCreativeSignaling.CarriageEnvelope;
 
 /**
  * @typedef {{
- *   type: string,
+ *   type: (string|undefined),
  *   start: number,
  *   duration: number,
  *   identifiers: !Array<!shaka.extern.AdCreativeSignaling.AdIdentifier>,
@@ -45,6 +45,7 @@ shaka.extern.AdCreativeSignaling.Slot;
  * @typedef {{
  *   start: (number|undefined),
  *   duration: number,
+ *   slots: !Array<!shaka.extern.AdCreativeSignaling.Slot>,
  *   tracking: (!Array<!shaka.extern.AdCreativeSignaling.TrackingEvent>|undefined),
  *   $remote: (!shaka.extern.AdCreativeSignaling.RemoteFields|undefined)
  * }}
