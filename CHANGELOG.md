@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.16.53](https://github.com/shaka-project/shaka-player/compare/v4.16.52...v4.16.53) (2026-10-16)
+
+
+### Bug Fixes
+
+* **DASH:** Fix stall when a fixed-duration segment lookup rounds to the next segment ([#10717](https://github.com/shaka-project/shaka-player/issues/10717)) ([9d12c8d](https://github.com/shaka-project/shaka-player/commit/9d12c8d94187ddbf8e72a1b1615ae505f388349b))
+* **DRM:** Ignore session creation during teardown ([#10730](https://github.com/shaka-project/shaka-player/issues/10730)) ([69153e6](https://github.com/shaka-project/shaka-player/commit/69153e66f1d5c35fc34ae30d088ca77d6697f373))
+* **TTML:** Support namespace-qualified elements ([#10713](https://github.com/shaka-project/shaka-player/issues/10713)) ([a342c46](https://github.com/shaka-project/shaka-player/commit/a342c46aeb55d93359b185017bbea1ee674ef216))
+* **WebVTT:** Keep percentage font sizes relative to the subtitle size ([#10727](https://github.com/shaka-project/shaka-player/issues/10727)) ([43e1621](https://github.com/shaka-project/shaka-player/commit/43e1621ac0de36312b238d8ceac399ef05f32a26)), closes [#10726](https://github.com/shaka-project/shaka-player/issues/10726)
+
 ## [4.16.52](https://github.com/shaka-project/shaka-player/compare/v4.16.51...v4.16.52) (2026-10-09)
 
 
