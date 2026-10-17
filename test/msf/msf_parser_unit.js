@@ -225,7 +225,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
      * @suppress {visibility}
      */
     function closedCaptionsOf(track) {
-      parser.processTrack_(track, new Map(), new Map());
+      parser.processTrack_(track, new Map(), new Map(), [track]);
       const streams = parser.videoStreams_;
       return streams.length ? streams[0].closedCaptions : null;
     }
@@ -569,6 +569,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let unsubscribeSpy;
     /** @type {!Array<string>} */
     let subscribedNames;
+    /** @type {!Array<?shaka.msf.Utils.Location|undefined>} */
+    let startLocations;
     /** @type {!Array<string>} */
     let companionNames;
     /** @type {!Array<!shaka.extern.MsfSegment>} */
@@ -579,6 +581,8 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let releasedSegmenterList;
     /** @type {!Array<{segmenter: ?, trackName: string}>} */
     let companionPushes;
+    /** @type {!Array<?>} */
+    let mainPushes;
 
     /**
      * @return {!shaka.extern.MsfSegment}
@@ -622,8 +626,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
         /** @type {?} */ ({
           getCodec: () => null,
-          subscribeTrack: (namespace, trackName, callback) => {
+          subscribeTrack: (namespace, trackName, callback, startLocation) => {
             objectCallbacks.push(callback);
+            startLocations.push(startLocation);
             subscribedNames.push(trackName);
             return new Promise((resolve, reject) => {
               pendingSubscribes.push({resolve, reject});
@@ -680,11 +685,13 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       pendingSubscribes = [];
       objectCallbacks = [];
       subscribedNames = [];
+      startLocations = [];
       companionNames = [];
       nextCompanionSegments = [];
       createdSegmenterList = [];
       releasedSegmenterList = [];
       companionPushes = [];
+      mainPushes = [];
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
 
@@ -700,7 +707,10 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           getCompanionTracks: () => companionNames,
           createSegmenter: () => {
             const segmenter = {
-              push: () => nextSegments,
+              push: () => {
+                mainPushes.push(segmenter);
+                return nextSegments;
+              },
               pushCompanion: (trackName) => {
                 companionPushes.push({segmenter, trackName});
                 return nextCompanionSegments;
@@ -808,6 +818,24 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           expect(startTimes).toEqual([0, 1, 2, 3, 4]);
         });
 
+    it('does not push into a segmenter released by an ABR switch', () => {
+      // The switch closes the index, which releases the segmenter, between
+      // reporting the group and handing the object over.
+      const stream = makeStream();
+      stream.createSegmentIndex();
+      const callback = objectCallbacks[0];
+      callback(fakeObject(0));
+      expect(mainPushes).toEqual([createdSegmenterList[0]]);
+
+      playerInterface.onSegmentReceived = () => {
+        stream.closeSegmentIndex();
+      };
+      callback(fakeObject(1));
+
+      expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
+      expect(mainPushes).toEqual([createdSegmenterList[0]]);
+    });
+
     it('withdraws a subscription that closed before SUBSCRIBE_OK', async () => {
       // Until the SUBSCRIBE_OK lands there is no Track Alias, so there is
       // nothing to unsubscribe with. A track closed in that window used to be
@@ -901,35 +929,35 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
       it('skips a track whose companion the catalog does not carry',
           /** @suppress {visibility} */ () => {
-        companionNames = ['video0-repair'];
-        // A track of that name in another namespace is not it.
-        const other = companionTrack('video0-repair');
-        other.namespace = 'elsewhere';
-        parser.playerInterface_ = playerInterface;
-        parser.processTrack_(/** @type {msfCatalog.Track} */ ({
-          name: 'video0',
-          packaging: PACKAGING,
-          codec: 'avc3.4d401f',
-          isLive: true,
-        }), new Map(), new Map(), [other]);
+            companionNames = ['video0-repair'];
+            // A track of that name in another namespace is not it.
+            const other = companionTrack('video0-repair');
+            other.namespace = 'elsewhere';
+            parser.playerInterface_ = playerInterface;
+            parser.processTrack_(/** @type {msfCatalog.Track} */ ({
+              name: 'video0',
+              packaging: PACKAGING,
+              codec: 'avc3.4d401f',
+              isLive: true,
+            }), new Map(), new Map(), [other]);
 
-        expect(parser.videoStreams_.length).toBe(0);
-      });
+            expect(parser.videoStreams_.length).toBe(0);
+          });
 
       it('skips a track that names itself as its companion',
           /** @suppress {visibility} */ () => {
-        companionNames = ['video0'];
-        const track = /** @type {msfCatalog.Track} */ ({
-          name: 'video0',
-          packaging: PACKAGING,
-          codec: 'avc3.4d401f',
-          isLive: true,
-        });
-        parser.playerInterface_ = playerInterface;
-        parser.processTrack_(track, new Map(), new Map(), [track]);
+            companionNames = ['video0'];
+            const track = /** @type {msfCatalog.Track} */ ({
+              name: 'video0',
+              packaging: PACKAGING,
+              codec: 'avc3.4d401f',
+              isLive: true,
+            });
+            parser.playerInterface_ = playerInterface;
+            parser.processTrack_(track, new Map(), new Map(), [track]);
 
-        expect(parser.videoStreams_.length).toBe(0);
-      });
+            expect(parser.videoStreams_.length).toBe(0);
+          });
 
       it('withdraws them with the track', async () => {
         companionNames = ['video0-repair'];
@@ -945,6 +973,99 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
         expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(7));
         expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(8));
+      });
+    });
+
+    describe('refused start', () => {
+      /**
+       * Re-subscribes the stream from a Location, as a seek to content not
+       * yet received does.
+       *
+       * @param {!shaka.extern.Stream} stream
+       * @suppress {visibility}
+       */
+      function seekTo(stream) {
+        const state = parser.activeStreams_.get('/video0');
+        parser.stopSubscription_(state);
+        parser.resubscribe_(state, {
+          group: BigInt(3), object: BigInt(0), subgroup: null,
+        });
+      }
+
+      it('returns track and companions to the live edge together',
+          async () => {
+            companionNames = ['video0-repair'];
+            const stream = makeStream([companionTrack('video0-repair')]);
+            stream.createSegmentIndex();
+            seekTo(stream);
+            const subscribedBefore = subscribedNames.length;
+            const mainIndex = subscribedNames.lastIndexOf('video0');
+            const repairIndex = subscribedNames.lastIndexOf('video0-repair');
+            pendingSubscribes[repairIndex].resolve(BigInt(8));
+            await shaka.test.Util.shortDelay();
+
+            pendingSubscribes[mainIndex].reject(new Error('refused'));
+            await shaka.test.Util.shortDelay();
+
+            // The companion subscribed from the refused group is withdrawn.
+            expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(8));
+            // Both come back at the live edge, on a new segmenter.
+            const fresh = subscribedNames.slice(subscribedBefore);
+            expect(fresh).toEqual(
+                jasmine.arrayContaining(['video0', 'video0-repair']));
+            expect(fresh.length).toBe(2);
+            for (const location of startLocations.slice(subscribedBefore)) {
+              expect(location).toBeNull();
+            }
+            expect(createdSegmenterList.length).toBe(3);
+            expect(releasedSegmenterList).toEqual(
+                createdSegmenterList.slice(0, 2));
+
+            nextCompanionSegments = [fakeSegment()];
+            callbackFor('video0-repair')(fakeObject(9));
+            expect(companionPushes).toEqual([{
+              segmenter: createdSegmenterList[2],
+              trackName: 'video0-repair',
+            }]);
+          });
+
+      it('follows the live edge with a companion refused on its own',
+          async () => {
+            companionNames = ['video0-repair'];
+            const stream = makeStream([companionTrack('video0-repair')]);
+            stream.createSegmentIndex();
+            seekTo(stream);
+            const repairIndex = subscribedNames.lastIndexOf('video0-repair');
+
+            pendingSubscribes[repairIndex].reject(new Error('refused'));
+            await shaka.test.Util.shortDelay();
+
+            expect(subscribedNames.lastIndexOf('video0-repair'))
+                .toBeGreaterThan(repairIndex);
+            expect(startLocations[startLocations.length - 1]).toBeNull();
+            // The track itself stays where it was asked to start.
+            expect(subscribedNames.filter((n) => n == 'video0').length)
+                .toBe(2);
+            expect(createdSegmenterList.length).toBe(2);
+
+            nextCompanionSegments = [fakeSegment()];
+            callbackFor('video0-repair')(fakeObject(9));
+            expect(companionPushes).toEqual([{
+              segmenter: createdSegmenterList[1],
+              trackName: 'video0-repair',
+            }]);
+          });
+
+      it('does not retry a companion refused at the live edge', async () => {
+        companionNames = ['video0-repair'];
+        const stream = makeStream([companionTrack('video0-repair')]);
+        stream.createSegmentIndex();
+        const repairIndex = subscribedNames.indexOf('video0-repair');
+
+        pendingSubscribes[repairIndex].reject(new Error('refused'));
+        await shaka.test.Util.shortDelay();
+
+        expect(subscribedNames.length).toBe(2);
       });
     });
 
@@ -1010,14 +1131,15 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             }]);
           });
 
-      it('releases the segmenter of every open stream when stopped', async () => {
-        const stream = makeStream();
-        stream.createSegmentIndex();
+      it('releases the segmenter of every open stream when stopped',
+          async () => {
+            const stream = makeStream();
+            stream.createSegmentIndex();
 
-        await parser.stop();
+            await parser.stop();
 
-        expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
-      });
+            expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
+          });
 
       it('tolerates a packaging without the optional hooks', () => {
         shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
@@ -1139,7 +1261,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           packaging: PACKAGING,
           codec: 'avc1.4d401f',
           isLive: true,
-        }, overrides[i])), new Map(), new Map());
+        }, overrides[i])), new Map(), new Map(), []);
       }
       return parser.videoStreams_;
     }
