@@ -567,6 +567,18 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let objectCallbacks;
     /** @type {!jasmine.Spy} */
     let unsubscribeSpy;
+    /** @type {!Array<string>} */
+    let subscribedNames;
+    /** @type {!Array<string>} */
+    let companionNames;
+    /** @type {!Array<!shaka.extern.MsfSegment>} */
+    let nextCompanionSegments;
+    /** @type {!Array<?>} */
+    let createdSegmenterList;
+    /** @type {!Array<?>} */
+    let releasedSegmenterList;
+    /** @type {!Array<{segmenter: ?, trackName: string}>} */
+    let companionPushes;
 
     /**
      * @return {!shaka.extern.MsfSegment}
@@ -597,12 +609,14 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     }
 
     /**
-     * Creates the one stream of a catalog holding a single video track.
+     * Creates the one stream of a catalog holding a single video track, and
+     * whatever other tracks it is given.
      *
+     * @param {!Array<msfCatalog.Track>=} otherTracks
      * @return {!shaka.extern.Stream}
      * @suppress {visibility}
      */
-    function makeStream() {
+    function makeStream(otherTracks = []) {
       parser.playerInterface_ = playerInterface;
       parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
       parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
@@ -610,6 +624,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           getCodec: () => null,
           subscribeTrack: (namespace, trackName, callback) => {
             objectCallbacks.push(callback);
+            subscribedNames.push(trackName);
             return new Promise((resolve, reject) => {
               pendingSubscribes.push({resolve, reject});
             });
@@ -619,7 +634,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           release: () => {},
         }));
 
-      parser.processTrack_(/** @type {msfCatalog.Track} */ ({
+      const track = /** @type {msfCatalog.Track} */ ({
         name: 'video0',
         packaging: PACKAGING,
         codec: 'avc3.4d401f',
@@ -628,16 +643,48 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         width: 1280,
         height: 720,
         isLive: true,
-      }), new Map(), new Map());
+      });
+      parser.processTrack_(
+          track, new Map(), new Map(), [track].concat(otherTracks));
 
       expect(parser.videoStreams_.length).toBe(1);
       return parser.videoStreams_[0];
+    }
+
+    /**
+     * @param {string} name
+     * @return {msfCatalog.Track}
+     */
+    function companionTrack(name) {
+      return /** @type {msfCatalog.Track} */ ({
+        name,
+        packaging: PACKAGING,
+        isLive: true,
+      });
+    }
+
+    /**
+     * Returns the object callback of the latest subscription to a track.
+     *
+     * @param {string} trackName
+     * @return {shaka.extern.MsfObjectCallback}
+     */
+    function callbackFor(trackName) {
+      const index = subscribedNames.lastIndexOf(trackName);
+      expect(index).not.toBe(-1);
+      return objectCallbacks[index];
     }
 
     beforeEach(() => {
       nextSegments = [];
       pendingSubscribes = [];
       objectCallbacks = [];
+      subscribedNames = [];
+      companionNames = [];
+      nextCompanionSegments = [];
+      createdSegmenterList = [];
+      releasedSegmenterList = [];
+      companionPushes = [];
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
 
@@ -650,7 +697,21 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             }),
             initSegmentReference: null,
           }),
-          createSegmenter: () => ({push: () => nextSegments}),
+          getCompanionTracks: () => companionNames,
+          createSegmenter: () => {
+            const segmenter = {
+              push: () => nextSegments,
+              pushCompanion: (trackName) => {
+                companionPushes.push({segmenter, trackName});
+                return nextCompanionSegments;
+              },
+              release: () => {
+                releasedSegmenterList.push(segmenter);
+              },
+            };
+            createdSegmenterList.push(segmenter);
+            return segmenter;
+          },
         }));
       });
     });
@@ -814,6 +875,169 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       indexCreated.then(settle, settle);
       await shaka.test.Util.shortDelay();
       expect(settled).toBe(false);
+    });
+
+    describe('companion tracks', () => {
+      it('subscribes them by catalog name and feeds the same segmenter',
+          () => {
+            companionNames = ['video0-repair'];
+            const stream = makeStream([companionTrack('video0-repair')]);
+            stream.createSegmentIndex();
+
+            expect(subscribedNames).toEqual(
+                jasmine.arrayContaining(['video0', 'video0-repair']));
+            expect(createdSegmenterList.length).toBe(1);
+
+            // A repair symbol can complete media of its own.
+            nextCompanionSegments = [fakeSegment()];
+            callbackFor('video0-repair')(fakeObject(0));
+
+            expect(companionPushes).toEqual([{
+              segmenter: createdSegmenterList[0],
+              trackName: 'video0-repair',
+            }]);
+            expect(stream.segmentIndex.getNumReferences()).toBe(1);
+          });
+
+      it('skips a track whose companion the catalog does not carry',
+          /** @suppress {visibility} */ () => {
+        companionNames = ['video0-repair'];
+        // A track of that name in another namespace is not it.
+        const other = companionTrack('video0-repair');
+        other.namespace = 'elsewhere';
+        parser.playerInterface_ = playerInterface;
+        parser.processTrack_(/** @type {msfCatalog.Track} */ ({
+          name: 'video0',
+          packaging: PACKAGING,
+          codec: 'avc3.4d401f',
+          isLive: true,
+        }), new Map(), new Map(), [other]);
+
+        expect(parser.videoStreams_.length).toBe(0);
+      });
+
+      it('skips a track that names itself as its companion',
+          /** @suppress {visibility} */ () => {
+        companionNames = ['video0'];
+        const track = /** @type {msfCatalog.Track} */ ({
+          name: 'video0',
+          packaging: PACKAGING,
+          codec: 'avc3.4d401f',
+          isLive: true,
+        });
+        parser.playerInterface_ = playerInterface;
+        parser.processTrack_(track, new Map(), new Map(), [track]);
+
+        expect(parser.videoStreams_.length).toBe(0);
+      });
+
+      it('withdraws them with the track', async () => {
+        companionNames = ['video0-repair'];
+        const stream = makeStream([companionTrack('video0-repair')]);
+        stream.createSegmentIndex();
+        const repairIndex = subscribedNames.indexOf('video0-repair');
+        const mainIndex = subscribedNames.indexOf('video0');
+        pendingSubscribes[repairIndex].resolve(BigInt(8));
+        pendingSubscribes[mainIndex].resolve(BigInt(7));
+        await shaka.test.Util.shortDelay();
+
+        stream.closeSegmentIndex();
+
+        expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(7));
+        expect(unsubscribeSpy).toHaveBeenCalledWith(BigInt(8));
+      });
+    });
+
+    describe('segmenter release', () => {
+      it('releases the segmenter when the stream closes', () => {
+        companionNames = ['video0-repair'];
+        const stream = makeStream([companionTrack('video0-repair')]);
+        stream.createSegmentIndex();
+        const repairCallback = callbackFor('video0-repair');
+
+        stream.closeSegmentIndex();
+
+        expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
+
+        // Whatever was still in flight never reaches it.
+        nextCompanionSegments = [fakeSegment()];
+        repairCallback(fakeObject(0));
+        expect(companionPushes).toEqual([]);
+      });
+
+      it('releases each segmenter once across a rendition switch', () => {
+        // Switching away closes the index; switching back creates it anew.
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        stream.closeSegmentIndex();
+        stream.createSegmentIndex();
+        stream.closeSegmentIndex();
+
+        expect(createdSegmenterList.length).toBe(2);
+        expect(releasedSegmenterList).toEqual(createdSegmenterList);
+      });
+
+      it('releases the old segmenter when the subscription is replaced',
+          /** @suppress {visibility} */ () => {
+            companionNames = ['video0-repair'];
+            const stream = makeStream([companionTrack('video0-repair')]);
+            stream.createSegmentIndex();
+            const oldRepair = callbackFor('video0-repair');
+            const oldMain = callbackFor('video0');
+
+            // What a seek to content not yet received does.
+            const state = parser.activeStreams_.get('/video0');
+            parser.stopSubscription_(state);
+            parser.resubscribe_(state, {
+              group: BigInt(3), object: BigInt(0), subgroup: null,
+            });
+
+            expect(createdSegmenterList.length).toBe(2);
+            expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
+
+            // The old subscription's objects cannot re-enter the new one.
+            nextSegments = [fakeSegment()];
+            nextCompanionSegments = [fakeSegment()];
+            oldMain(fakeObject(0));
+            oldRepair(fakeObject(0));
+            expect(companionPushes).toEqual([]);
+            expect(stream.segmentIndex.getNumReferences()).toBe(0);
+
+            callbackFor('video0-repair')(fakeObject(3));
+            expect(companionPushes).toEqual([{
+              segmenter: createdSegmenterList[1],
+              trackName: 'video0-repair',
+            }]);
+          });
+
+      it('releases the segmenter of every open stream when stopped', async () => {
+        const stream = makeStream();
+        stream.createSegmentIndex();
+
+        await parser.stop();
+
+        expect(releasedSegmenterList).toEqual([createdSegmenterList[0]]);
+      });
+
+      it('tolerates a packaging without the optional hooks', () => {
+        shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
+          return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
+            describeTrack: () => ({
+              basicInfo: /** @type {?} */ ({
+                mimeType: 'video/mp4',
+                codecs: 'avc1.4d401f',
+              }),
+              initSegmentReference: null,
+            }),
+            createSegmenter: () => ({push: () => nextSegments}),
+          }));
+        });
+        const stream = makeStream();
+        stream.createSegmentIndex();
+
+        expect(subscribedNames).toEqual(['video0']);
+        expect(() => stream.closeSegmentIndex()).not.toThrow();
+      });
     });
 
     it('reports a refused re-subscription to the player', async () => {

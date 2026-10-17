@@ -65,6 +65,23 @@ shaka.extern.MsfPackaging = class {
    * @exportDoc
    */
   createSegmenter(codec) {}
+
+  /**
+   * Names the catalog tracks that must be subscribed alongside the track this
+   * instance described, and whose objects are delivered to the same
+   * segmenter through MsfSegmenter.pushCompanion(). A packaging that carries
+   * forward error correction repair symbols on a track of their own names
+   * that track here; most packagings name none.
+   *
+   * Called once, after describeTrack() has accepted the track. Every name must
+   * be a track of the same catalog. If one is not, the track is skipped
+   * rather than played without its companion. A packaging with no companions
+   * returns an empty list.
+   *
+   * @return {!Array<string>}
+   * @exportDoc
+   */
+  getCompanionTracks() {}
 };
 
 
@@ -145,6 +162,31 @@ shaka.extern.MsfSegmenter = class {
    * @exportDoc
    */
   push(obj) {}
+
+  /**
+   * Consumes one MoQT object of a companion track, one of the names
+   * MsfPackaging.getCompanionTracks() returned, and returns the segments it
+   * completed. An object can complete a segment here too: a repair symbol can
+   * recover the media an object of the main track was missing. Never called
+   * on a segmenter whose packaging names no companions.
+   *
+   * @param {string} trackName The companion track the object arrived on.
+   * @param {!shaka.extern.MsfObject} obj
+   * @return {!Array<!shaka.extern.MsfSegment>}
+   * @exportDoc
+   */
+  pushCompanion(trackName, obj) {}
+
+  /**
+   * Releases whatever state the segmenter holds. Called once the segmenter
+   * will receive no more objects: when the subscription feeding it is
+   * replaced, as on a seek or a resubscription, and when its stream is closed,
+   * as on a rendition switch or when the player stops. Nothing is pushed to a
+   * segmenter after it has been released.
+   *
+   * @exportDoc
+   */
+  release() {}
 };
 
 
