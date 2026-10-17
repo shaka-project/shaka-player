@@ -351,7 +351,7 @@ describe('SkipRangeController', () => {
 
     beforeEach(() => {
       controller = makeController(makeInterface());
-      warningLog = spyOn(shaka.log, 'warning');
+      warningLog = spyOn(shaka.log, 'alwaysWarn');
     });
 
     it('aligns and snaps when both endpoints land on boundaries', () => {
