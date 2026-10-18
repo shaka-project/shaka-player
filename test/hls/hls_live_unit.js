@@ -992,6 +992,24 @@ describe('HlsParser live', () => {
         await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
+      it('does not push the duration to the player when it ends', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const updateDuration = spyOn(playerInterface, 'updateDuration');
+
+        const manifest = await testInitialManifest(master, media, [ref1]);
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        // The MediaSource duration of a live stream stays infinite, also
+        // after the transition to VOD.
+        await testUpdate(
+            manifest, mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n',
+            [ref1, ref2]);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(updateDuration).not.toHaveBeenCalled();
+      });
+
       it('evicts removed segments', async () => {
         const ref1 = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
