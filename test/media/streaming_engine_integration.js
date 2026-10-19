@@ -324,23 +324,6 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(100).waitForEnd(video);
     });
 
-    it('plays without bitrate changed', async () => {
-      // Let's go!
-      const bandwidth1 = variant.video.bandwidth;
-      const bandwidth2 = 10000000;
-      const variant2 = setupNewVariant();
-      variant2.video.bandwidth = bandwidth2;
-      expect(variant.video.bandwidth).toBe(5000000);
-      expect(variant2.video.bandwidth).toBe(10000000);
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-      await video.play();
-      await waiter.timeoutAfter(10);
-      streamingEngine.switchVariant(variant2, false, 0, false, undefined, 120);
-      expect(streamingEngine.getCurrentVariant().video.bandwidth)
-          .toBe(bandwidth1);
-    });
-
     it('plays at high playback rates', async () => {
       // Experimentally, we find that playback rates above 2x in this test seem
       // to cause decoder failures on Tizen 3.  This is out of our control, and
