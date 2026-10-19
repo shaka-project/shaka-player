@@ -1,7 +1,8 @@
 # SCTE-35 messages
 
-Shaka surfaces SCTE-35 messages from DASH MPD events, in-band MP4 `emsg`, HLS
-`EXT-X-DATERANGE`, and MSF event timeline tracks through one API.
+Shaka surfaces SCTE-35 messages from DASH MPD events, in-band MP4 `emsg`,
+in-band MPEG-2 transport streams, HLS `EXT-X-DATERANGE`, and MSF event timeline
+tracks through one API.
 
 Shaka does not interpret the message. It tells you *where* a message came from
 and *when* it applies, and hands you the payload untouched, so you can decode
@@ -34,8 +35,8 @@ const messages = player.getAllScte35Events();
 | `startTime` | Presentation time, in seconds, that the message applies to. |
 | `endTime` | When the transport signals a duration, the end of it. Otherwise equal to `startTime`, which is always the case for MSF. |
 | `schemeIdUri` | The SCTE-35 scheme the transport used. |
-| `id` | The transport's identifier, independent of `splice_event_id` and `segmentation_event_id`. MSF has none, so Shaka derives one from the record's index reference and payload. |
-| `source` | `dash`, `hls`, `emsg`, or `msf`. |
+| `id` | The transport's identifier, independent of `splice_event_id` and `segmentation_event_id`. MSF and transport streams have none, so Shaka derives one: from the record's index reference and payload for MSF, and as `<PID>-<CRC_32 in hexadecimal>` for transport streams. |
+| `source` | `dash`, `hls`, `emsg`, `ts`, or `msf`. |
 | `kind` | `out`, `in`, or `cmd` for HLS; the empty string otherwise. |
 | `data` | The complete `splice_info_section`, or null. |
 | `node` | The original XML, for XML-only messages, or null. |
@@ -66,8 +67,8 @@ Outer whitespace is ignored when identifying schemes, and XML namespace
 prefixes are not significant.
 
 `data` holds the binary `splice_info_section` whenever the transport carries
-one, whether it arrived as raw `emsg` bytes, as base64 inside `Signal/Binary`,
-or as an HLS hexadecimal attribute. Decode it with the SCTE-35 library of your
+one, whether it arrived as raw `emsg` bytes or transport stream sections, as
+base64 inside `Signal/Binary`, or as an HLS hexadecimal attribute. Decode it with the SCTE-35 library of your
 choice. `data` is null only for an XML-only `urn:scte:scte35:2013:xml` message,
 which is exposed as `node` instead. A payload Shaka cannot decode into bytes is
 skipped rather than reported, and never fails playback.
@@ -91,6 +92,26 @@ player.configure('mediaSource.dispatchAllEmsgBoxes', true);
 
 This is required to receive SCTE-35 `emsg` in HLS, and is the fallback for a
 DASH stream that omits the declaration.
+
+## In-band MPEG-2 transport streams
+
+Transport stream segments, as in HLS and MSF, can carry SCTE-35 in a PID of
+their own, which the PMT lists with `stream_type` `0x86`. Shaka reads the
+`splice_info_section`s on every such PID and reports them with `source` `ts`
+and the scheme `urn:scte:scte35:2013:bin`. Nothing needs to be configured.
+
+A message is placed at its splice time when the section carries one: a
+`splice_insert` of the whole program that is neither immediate nor cancelled,
+or a `time_signal` with a time. The time has `pts_adjustment` applied and is
+mapped onto the presentation timeline exactly like the segment's media, so it
+can lie past the end of the segment that carried it. Any other message,
+including an encrypted one, is placed at the start of the segment that carried
+it.
+
+Transport streams repeat each section until it no longer applies, so a section
+is reported once, the first time it is seen. `splice_null` (a heartbeat) and
+`bandwidth_reservation` carry no message and are not reported. Sections whose
+`CRC_32` does not match are discarded.
 
 
 ## MSF event timelines
