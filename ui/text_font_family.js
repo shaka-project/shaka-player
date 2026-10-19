@@ -19,7 +19,7 @@ goog.requireType('shaka.ui.Controls');
 /**
  * Selects the font family of the subtitles.
  *
- * @extends {shaka.ui.TextStyleMenu<shaka.config.FontFamily>}
+ * @extends {shaka.ui.TextStyleMenu<string>}
  * @final
  * @export
  */
@@ -82,7 +82,7 @@ shaka.ui.TextFontFamily = class extends shaka.ui.TextStyleMenu {
   }
 
   /**
-   * @param {!shaka.config.FontFamily} fontFamily
+   * @param {string} fontFamily
    * @return {string}
    * @private
    */
@@ -100,7 +100,8 @@ shaka.ui.TextFontFamily = class extends shaka.ui.TextStyleMenu {
       case shaka.config.FontFamily.PROPORTIONAL_SANS_SERIF:
         return this.localization.resolve(LocIds.PROPORTIONAL_SANS_SERIF);
     }
-    return '';
+    // Font families given by the application are shown by their first font.
+    return fontFamily.split(',')[0].trim().replace(/^(["'])(.*)\1$/, '$2');
   }
 };
 
