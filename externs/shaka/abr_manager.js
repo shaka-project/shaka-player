@@ -162,13 +162,20 @@ shaka.extern.AbrManager = class {
   configure(config) {}
 
   /**
-   * Sets the streaming engine to know the buffer information
+   * Set the streaming engine to know the buffer information
    *
    * @param {shaka.media.StreamingEngine} streamingEngine
    * @exportDoc
    */
   setStreamingEngine(streamingEngine) {}
-  
+
+  /**
+   * Set the player interface the buffer length and position
+   *
+   * @param {shaka.abr.AbrManager.PlayerInterface} playerInterface
+   * @exportDoc
+   */
+  setPlayerInterface(playerInterface) {}
 };
 
 
@@ -187,7 +194,7 @@ shaka.extern.AbrManager = class {
  * a fast switch that doesn't involve a buffering event. A minimum of two video
  * segments should always be kept buffered to avoid temporary hiccups.
  *
- * @typedef {function(shaka.extern.Variant, boolean=, number=, number=)}
+ * @typedef {function(shaka.extern.Variant, boolean=, number=)}
  * @exportDoc
  */
 shaka.extern.AbrManager.SwitchCallback;
@@ -216,3 +223,18 @@ shaka.extern.AbrManager.DisableStreamCallback;
  * @exportDoc
  */
 shaka.extern.AbrManager.Factory;
+
+
+/**
+ * @typedef {{
+ *   getPresentationTime: function():number,
+ *   mediaSourceEngine: !shaka.media.MediaSourceEngine,
+ * }}
+ *
+ * @property {function():number} getPresentationTime
+ *   Get the position in the presentation (in seconds) of the content that the
+ *   viewer is seeing on screen right now.
+ * @property {!shaka.media.MediaSourceEngine} mediaSourceEngine
+ *   The MediaSourceEngine. The caller retains ownership.
+ */
+shaka.abr.AbrManager.PlayerInterface;
