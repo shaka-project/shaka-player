@@ -3182,6 +3182,7 @@ shaka.extern.OfflineConfiguration;
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
  *   fontFamily: shaka.config.FontFamily,
+ *   fontVariant: string,
  *   fontColor: string,
  *   fontOpacity: number,
  *   backgroundColor: string,
@@ -3213,6 +3214,15 @@ shaka.extern.OfflineConfiguration;
  *   Only supported by <code>shaka.text.UITextDisplayer</code>.
  *   <br>
  *   Defaults to <code>shaka.config.FontFamily.DEFAULT</code>.
+ * @property {string} fontVariant
+ *   The font variant of the subtitles, as a CSS <code>font-variant</code>
+ *   (e.g. <code>'small-caps'</code>, the small capitals font style of
+ *   CEA-708).  An empty string indicates that the font variant is not
+ *   changed, otherwise it is overwritten with the given font variant.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {string} fontColor
  *   The font color of the subtitles, as a CSS color (e.g.
  *   <code>'#ff0'</code> or <code>'yellow'</code>).  An empty string indicates

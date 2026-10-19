@@ -1459,6 +1459,25 @@ describe('UITextDisplayer', () => {
       expect(fontFamily).toContain('monospace');
     });
 
+    it('does not change the font variant by default', async () => {
+      const textContainer = await render([createStyledCue()]);
+      expect(textContainer.querySelector('div').style.fontVariant).toBe('');
+    });
+
+    it('overrides the font variant', async () => {
+      config.fontVariant = 'small-caps';
+      const cue = new shaka.text.Cue(0, 100, '');
+      const nestedCue = new shaka.text.Cue(0, 100, 'Nested');
+      cue.nestedCues = [nestedCue];
+      const textContainer = await render([cue]);
+      expect(textContainer.querySelector('div').style.fontVariant)
+          .toBe('small-caps');
+      const textElement = textContainer.querySelector(
+          '.shaka-text-wrapper span span');
+      expect(textElement.textContent).toBe('Nested');
+      expect(getComputedStyle(textElement).fontVariant).toBe('small-caps');
+    });
+
     it('removes the edges of the characters', async () => {
       config.characterEdgeStyle = shaka.config.CharacterEdgeStyle.NONE;
       const cue = createStyledCue();
