@@ -983,6 +983,27 @@ describe('HlsParser live', () => {
         await testUpdate(manifest, mediaWithRemovedSegment, [ref2]);
       });
 
+      it('keeps listed segments when the clock ran ahead of the content',
+          async () => {
+            const ref1 = makeReference(
+                'test:/main.mp4', 0, 2, /* syncTime= */ null);
+            const ref2 = makeReference(
+                'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+
+            const manifest = await testInitialManifest(
+                master, mediaWithAdditionalSegment, [ref1, ref2]);
+
+            // The wall clock moves on but the playlist does not: the
+            // extrapolated availability window has passed every listed
+            // segment.  Nothing the server still lists may be evicted, or
+            // the window would shrink on every update.
+            const realNow = Date.now();
+            spyOn(Date, 'now').and.callFake(() => realNow + 60 * 1000);
+
+            await testUpdate(
+                manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+          });
+
       it('has correct references if switching after update', async () => {
         const ref1 = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
