@@ -63,7 +63,7 @@ by the subtitles, so only the options that are changed override it.
 |--------|--------|---------|
 | `fontScaleFactor` | The factor used to increase or decrease the font size | `1` |
 | `positionArea` | `shaka.config.PositionArea` (see below) | `DEFAULT` |
-| `fontFamily` | A CSS font family, or a preset of `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF` or `PROPORTIONAL_SANS_SERIF` | `''` |
+| `fontFamily` | A CSS font family, or a preset of `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF` or `PROPORTIONAL_SANS_SERIF` | `DEFAULT` |
 | `fontColor` | A CSS color | `''` |
 | `fontOpacity` | Between 0 and 1 | `NaN` |
 | `backgroundColor` | A CSS color | `''` |

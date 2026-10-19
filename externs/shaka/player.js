@@ -3216,7 +3216,7 @@ shaka.extern.OfflineConfiguration;
  *   <br>
  *   Only supported by <code>shaka.text.UITextDisplayer</code>.
  *   <br>
- *   Defaults to <code>''</code>.
+ *   Defaults to <code>shaka.config.FontFamily.DEFAULT</code>.
  * @property {string} fontColor
  *   The font color of the subtitles, as a CSS color (e.g.
  *   <code>'#ff0'</code> or <code>'yellow'</code>).  An empty string indicates
