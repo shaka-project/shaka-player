@@ -520,6 +520,61 @@ describe('StreamingEngine', () => {
     jasmine.clock().uninstall();
   });
 
+  describe('silent audio tail', () => {
+    /**
+     * Set up a static presentation with audio ending at 20s and video at 40s.
+     * @return {!Promise}
+     */
+    async function setupShortAudio() {
+      setupVod();
+      const audio = /** @type {!shaka.extern.Stream} */ (audioStream);
+      const video = /** @type {!shaka.extern.Stream} */ (videoStream);
+      await audio.createSegmentIndex();
+      await video.createSegmentIndex();
+
+      const audioIndex = audio.segmentIndex;
+      const videoIndex = video.segmentIndex;
+      goog.asserts.assert(audioIndex && videoIndex, 'Missing segment index');
+      const audioReferences = [
+        audioIndex.get(0),
+        audioIndex.get(1),
+      ];
+      const videoReferences = [
+        videoIndex.get(0),
+        videoIndex.get(1),
+        videoIndex.get(2),
+        videoIndex.get(3),
+      ];
+      audio.segmentIndex = new shaka.media.SegmentIndex(audioReferences);
+      video.segmentIndex = new shaka.media.SegmentIndex(videoReferences);
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+    }
+
+    it('plays the video-only tail and restores audio on seek ' +
+        'back', async () => {
+      await setupShortAudio();
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledWith(ContentType.AUDIO);
+      expect(mediaSourceEngine.segments[ContentType.AUDIO])
+          .toEqual([true, true, false, false]);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+      mediaSourceEngine.hasSourceBufferFor.and.returnValue(false);
+      presentationTimeInSeconds = 10;
+      streamingEngine.seeked();
+
+      expect(mediaSourceEngine.reset).toHaveBeenCalled();
+    });
+  });
+
   describe('live seekable range', () => {
     beforeEach(async () => {
       setupVod();
@@ -653,6 +708,7 @@ describe('StreamingEngine', () => {
     await runTest();
 
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
 
     // Verify buffers.
     expect(mediaSourceEngine.initSegments).toEqual({

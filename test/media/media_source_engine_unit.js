@@ -524,6 +524,24 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('removeSourceBuffer', () => {
+    it('removes only the requested SourceBuffer', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, false);
+
+      await mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+
+      expect(mockMediaSource.removeSourceBuffer)
+          .toHaveBeenCalledWith(audioSourceBuffer);
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(false);
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.VIDEO))
+          .toBe(true);
+    });
+  });
+
   describe('bufferStart and bufferEnd', () => {
     beforeEach(async () => {
       const initObject = new Map();
@@ -1968,6 +1986,7 @@ describe('MediaSourceEngine', () => {
       readyState: 'open',
       sourceBuffers: document.createElement('div'),
       addSourceBuffer: jasmine.createSpy('addSourceBuffer'),
+      removeSourceBuffer: jasmine.createSpy('removeSourceBuffer'),
       endOfStream: jasmine.createSpy('endOfStream'),
       durationGetter: jasmine.createSpy('duration getter'),
       durationSetter: jasmine.createSpy('duration setter'),
