@@ -162,17 +162,9 @@ shaka.extern.AbrManager = class {
   configure(config) {}
 
   /**
-   * Set the streaming engine to know the buffer information
-   *
-   * @param {shaka.media.StreamingEngine} streamingEngine
-   * @exportDoc
-   */
-  setStreamingEngine(streamingEngine) {}
-
-  /**
    * Set the player interface the buffer length and position
    *
-   * @param {shaka.abr.AbrManager.PlayerInterface} playerInterface
+   * @param {shaka.extern.AbrManager.PlayerInterface} playerInterface
    * @exportDoc
    */
   setPlayerInterface(playerInterface) {}
@@ -228,13 +220,16 @@ shaka.extern.AbrManager.Factory;
 /**
  * @typedef {{
  *   getPresentationTime: function():number,
- *   mediaSourceEngine: !shaka.media.MediaSourceEngine,
+ *   getBufferedInfoTotal: function():!Array<!shaka.extern.BufferedRange>,
+ *   getCurrentVariantTotalBandwidth: function():(number|null),
  * }}
  *
  * @property {function():number} getPresentationTime
  *   Get the position in the presentation (in seconds) of the content that the
  *   viewer is seeing on screen right now.
- * @property {!shaka.media.MediaSourceEngine} mediaSourceEngine
- *   The MediaSourceEngine. The caller retains ownership.
+ * @property {function():!Array<!shaka.extern.BufferedRange>} getBufferedInfoTotal
+ *   The total buffer information length.
+ * @property {function():(number|null)} getCurrentVariantTotalBandwidth
+ *   The current bandwidth play by the player
  */
-shaka.abr.AbrManager.PlayerInterface;
+shaka.extern.AbrManager.PlayerInterface;
