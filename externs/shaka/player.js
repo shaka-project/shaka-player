@@ -3181,7 +3181,7 @@ shaka.extern.OfflineConfiguration;
  * @typedef {{
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
- *   fontFamily: string,
+ *   fontFamily: (shaka.config.FontFamily|string),
  *   fontColor: string,
  *   fontOpacity: number,
  *   backgroundColor: string,
@@ -3205,7 +3205,7 @@ shaka.extern.OfflineConfiguration;
  *   position.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {string} fontFamily
+ * @property {(shaka.config.FontFamily|string)} fontFamily
  *   The font family of the subtitles, as a CSS <code>font-family</code>
  *   (e.g. <code>'OpenDyslexic, sans-serif'</code>).  An empty string
  *   indicates that the font family defined by the subtitle is used, otherwise
