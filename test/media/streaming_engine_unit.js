@@ -4607,7 +4607,7 @@ describe('StreamingEngine', () => {
     // live/sequence-mode/src= rejection is covered by the Player tests.
 
     it('does not skip a range whose end is mid-segment', async () => {
-      const warnOnce = spyOn(shaka.log, 'alwaysWarn').and.callThrough();
+      const warnOnce = spyOn(shaka.log, 'warning').and.callThrough();
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
       // End the range at 25, inside segment 2 ([20,30)) -- not a segment
@@ -4627,7 +4627,7 @@ describe('StreamingEngine', () => {
     });
 
     it('does not skip a range whose start is mid-segment', async () => {
-      const warnOnce = spyOn(shaka.log, 'alwaysWarn').and.callThrough();
+      const warnOnce = spyOn(shaka.log, 'warning').and.callThrough();
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
       // Start the range at 15, inside segment 1 ([10,20)) -- not a segment
