@@ -777,6 +777,210 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     });
   });
 
+  describe('segments cut on Group boundaries', () => {
+    const PACKAGING = 'fake-group-test';
+
+    /** @type {!Array<!shaka.extern.MsfSegment>} */
+    let nextSegments;
+    /** @type {?shaka.util.Error} */
+    let nextError;
+    /** @type {!Array<shaka.extern.MsfObjectCallback>} */
+    let objectCallbacks;
+
+    /**
+     * @param {number} startTime
+     * @param {number} group
+     * @return {!shaka.extern.MsfSegment}
+     */
+    function fakeSegment(startTime, group) {
+      return {
+        startTime,
+        duration: 2,
+        data: new Uint8Array([0x01]),
+        timestampOffset: 0,
+        discontinuitySequence: 0,
+        group: BigInt(group),
+      };
+    }
+
+    /**
+     * @param {number} group
+     * @return {!shaka.extern.MsfObject}
+     */
+    function fakeObject(group) {
+      return /** @type {!shaka.extern.MsfObject} */ (/** @type {?} */ ({
+        trackAlias: BigInt(7),
+        location: {group: BigInt(group), object: BigInt(0), subgroup: null},
+        data: new Uint8Array([0x01, 0x02]),
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 10,
+      }));
+    }
+
+    /**
+     * Creates the video streams of a catalog whose tracks are alternates of
+     * each other.
+     *
+     * @param {!Array<!Object>} overrides One per track.
+     * @return {!Array<!shaka.extern.Stream>}
+     * @suppress {visibility}
+     */
+    function makeStreams(overrides) {
+      parser.playerInterface_ = playerInterface;
+      parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
+      parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
+        /** @type {?} */ ({
+          getCodec: () => null,
+          subscribeTrack: (namespace, trackName, callback) => {
+            objectCallbacks.push(callback);
+            return new Promise(() => {});
+          },
+          unsubscribeTrack: () => Promise.resolve(),
+          supportsAbsoluteStart: () => false,
+          release: () => {},
+        }));
+
+      for (let i = 0; i < overrides.length; i++) {
+        parser.processTrack_(/** @type {msfCatalog.Track} */ (Object.assign({
+          name: `video${i}`,
+          packaging: PACKAGING,
+          codec: 'avc1.4d401f',
+          isLive: true,
+        }, overrides[i])), new Map(), new Map());
+      }
+      return parser.videoStreams_;
+    }
+
+    /**
+     * Delivers an object whose segmenter answers with the given segments.
+     *
+     * @param {number} callbackIndex
+     * @param {!Array<!shaka.extern.MsfSegment>} segments
+     */
+    function deliver(callbackIndex, segments) {
+      nextSegments = segments;
+      objectCallbacks[callbackIndex](fakeObject(0));
+    }
+
+    /**
+     * @param {!shaka.extern.Stream} stream
+     * @return {!Array<!shaka.media.SegmentReference>}
+     */
+    function referencesOf(stream) {
+      goog.asserts.assert(stream.segmentIndex, 'stream must have an index');
+      return Array.from(stream.segmentIndex);
+    }
+
+    beforeEach(() => {
+      nextSegments = [];
+      nextError = null;
+      objectCallbacks = [];
+
+      shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
+        return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
+          describeTrack: () => ({
+            basicInfo: /** @type {?} */ ({
+              mimeType: 'video/mp2t',
+              codecs: 'avc1.4d401f',
+            }),
+            initSegmentReference: null,
+          }),
+          createSegmenter: () => ({
+            push: () => {
+              if (nextError) {
+                throw nextError;
+              }
+              return nextSegments;
+            },
+          }),
+        }));
+      });
+    });
+
+    afterEach(() => {
+      shaka.msf.PackagingRegistry.unregisterPackaging(PACKAGING);
+    });
+
+    it('lines up a rendition on another clock with its alternate', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5), fakeSegment(102, 6)]);
+
+      // The switch lands on the next Group, on a clock 4900 s ahead.
+      low.createSegmentIndex();
+      deliver(1, [fakeSegment(5004, 7), fakeSegment(5006, 8)]);
+
+      const references = referencesOf(low);
+      expect(references.map((r) => r.startTime)).toEqual([104, 106]);
+      expect(references.map((r) => r.timestampOffset)).toEqual([-4900, -4900]);
+    });
+
+    it('lines up the same Group seen by both renditions', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      low.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 5)]);
+
+      expect(referencesOf(low)[0].startTime).toBe(100);
+    });
+
+    it('leaves renditions that share a clock alone', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      low.createSegmentIndex();
+      // The previous group's end is only an estimate.
+      deliver(1, [fakeSegment(102.04, 6)]);
+
+      expect(referencesOf(low)[0].startTime).toBe(102.04);
+      expect(referencesOf(low)[0].timestampOffset).toBe(0);
+    });
+
+    it('does not line up tracks outside an alternate group', () => {
+      const [first, second] = makeStreams([{}, {}]);
+      first.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      second.createSegmentIndex();
+      deliver(1, [fakeSegment(5002, 6)]);
+
+      expect(referencesOf(second)[0].startTime).toBe(5002);
+    });
+
+    it('fails the stream when its segmenter fails', async () => {
+      const [stream] = makeStreams([{}]);
+      const indexCreated = stream.createSegmentIndex();
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER);
+
+      nextError = error;
+      deliver(0, []);
+
+      await expectAsync(indexCreated).toBeRejectedWith(
+          shaka.test.Util.jasmineError(error));
+    });
+
+    it('reports a failure after the first segment to the player', () => {
+      const onErrorSpy = jasmine.createSpy('onError');
+      playerInterface.onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const [stream] = makeStreams([{}]);
+      stream.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+
+      nextError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER);
+      deliver(0, []);
+      deliver(0, []);
+
+      // Only once: everything after the failure is dropped.
+      expect(onErrorSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('media timeline', () => {
     const PACKAGING = 'fake-timeline-test';
 
