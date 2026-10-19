@@ -376,6 +376,56 @@ describe('PresentationTimeline', () => {
 
       expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
     });
+
+    it('runs at most one segment past the newest segment when clamped', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+      timeline.setClampLiveEdgeToSegments(true);
+
+      const ref1 = makeSegmentReference(0, 10);
+      const ref2 = makeSegmentReference(10, 20);
+      const ref3 = makeSegmentReference(20, 30);
+      const ref4 = makeSegmentReference(30, 40);
+      const ref5 = makeSegmentReference(40, 50);
+
+      setElapsed(50);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
+      timeline.lockStartTime();
+
+      // While the wall clock is within one segment duration (10) of the
+      // newest known segment, the edge follows the wall clock as usual.
+      setElapsed(55);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(55);
+
+      // Beyond that, no newer segment was announced, so the content is not
+      // available past the last known segment plus one segment duration.
+      setElapsed(100);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
+
+      // Once a newer segment is announced, the end moves with it.
+      const ref6 = makeSegmentReference(50, 60);
+      timeline.notifySegments([ref6]);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(70);
+    });
+
+    it('runs ahead of the newest known segment unless clamped', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+
+      const ref1 = makeSegmentReference(0, 10);
+      const ref2 = makeSegmentReference(10, 20);
+      const ref3 = makeSegmentReference(20, 30);
+      const ref4 = makeSegmentReference(30, 40);
+      const ref5 = makeSegmentReference(40, 50);
+
+      setElapsed(50);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
+      timeline.lockStartTime();
+
+      // notifySegments() anchored the start time so that the live edge was
+      // 50 at elapsed 50; 50 seconds later the wall clock puts it at 100,
+      // even though no segment past 50 was ever announced.
+      setElapsed(100);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(100);
+    });
   });
 
   describe('getDuration', () => {
