@@ -10,10 +10,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
   const originalGetLocationProtocol =
       shaka.net.NetworkingEngine.getLocationProtocol_;
+  const originalGetLocationHref =
+      shaka.net.NetworkingEngine.getLocationHref_;
   const originalDefer = shaka.net.Backoff.defer;
 
   /** @type {string} */
   let fakeProtocol;
+  /** @type {string} */
+  let fakeHref;
   /** @type {!shaka.net.NetworkingEngine} */
   let networkingEngine;
   /** @type {!jasmine.Spy} */
@@ -29,6 +33,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
   beforeAll(() => {
     shaka.net.NetworkingEngine.getLocationProtocol_ = () => fakeProtocol;
+    shaka.net.NetworkingEngine.getLocationHref_ = () => fakeHref;
   });
 
   function makeResolveScheme(spyName) {
@@ -38,6 +43,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
   beforeEach(() => {
     fakeProtocol = 'http:';
+    fakeHref = 'http://page.example/dir/index.html';
     error = new shaka.util.Error(
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
@@ -72,6 +78,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   afterAll(() => {
     shaka.net.NetworkingEngine.getLocationProtocol_ =
         originalGetLocationProtocol;
+    shaka.net.NetworkingEngine.getLocationHref_ = originalGetLocationHref;
     shaka.net.Backoff.defer = originalDefer;
   });
 
@@ -487,6 +494,26 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           .promise;
       expect(resolveScheme).toHaveBeenCalled();
       expect(resolveScheme.calls.argsFor(0)[0]).toBe('resolve://foo');
+    });
+
+    it('resolves path-only URIs against the page location', async () => {
+      fakeProtocol = 'resolve:';
+      fakeHref = 'resolve://page.example/dir/index.html';
+      await networkingEngine
+          .request(requestType, createRequest('/foo/bar.m3u8?a=1'))
+          .promise;
+      expect(resolveScheme.calls.argsFor(0)[0])
+          .toBe('resolve://page.example/foo/bar.m3u8?a=1');
+    });
+
+    it('resolves relative paths against the page location', async () => {
+      fakeProtocol = 'resolve:';
+      fakeHref = 'resolve://page.example/dir/index.html';
+      await networkingEngine
+          .request(requestType, createRequest('foo.m3u8'))
+          .promise;
+      expect(resolveScheme.calls.argsFor(0)[0])
+          .toBe('resolve://page.example/dir/foo.m3u8');
     });
 
     it('sets the time to 1st byte of the request when headers are available',
