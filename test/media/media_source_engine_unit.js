@@ -420,6 +420,59 @@ describe('MediaSourceEngine', () => {
           `video/mp4; codecs="${audioCodec},av01.0.08M.08"`);
     });
 
+    it('splits multiplexed content that a transmuxer splits', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.forceTransmux = true;
+      mediaSourceEngine.configure(config);
+      const stream = makeFakeStream('video/mp4');
+      stream.codecs = 'mp4a.40.2,avc1.42E01E';
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, stream);
+      await mediaSourceEngine.init(initObject, false);
+
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
+    });
+
+    it('splits unsupported multiplexed content', async () => {
+      // Each of the audio and the video may have a transmuxer of its own.
+      shaka.transmuxer.TransmuxerEngine.findTransmuxer = (mimeType) => null;
+      const stream = makeFakeStream('tsMimetype');
+      stream.codecs = 'mp4a.40.34,avc1.64001F';
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, stream);
+      await mediaSourceEngine.init(initObject, false);
+
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not split multiplexed content without a transmuxer', async () => {
+      shaka.transmuxer.TransmuxerEngine.findTransmuxer = (mimeType) => null;
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.forceTransmux = true;
+      mediaSourceEngine.configure(config);
+      const stream = makeFakeStream('video/mp4');
+      stream.codecs = 'mp4a.40.2,avc1.42E01E';
+
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, stream);
+      await mediaSourceEngine.init(initObject, false);
+
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledOnceWith(
+          'video/mp4; codecs="mp4a.40.2,avc1.42E01E"');
+
+      // The first segment must not find the SourceBuffer type changed, which
+      // would reset the MediaSource.
+      createMediaSourceSpy.calls.reset();
+      await mediaSourceEngine.setStreamProperties(
+          ContentType.VIDEO, /* timestampOffset= */ 0,
+          /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity,
+          /* ignoreTimestampOffset= */ false, stream.mimeType, stream.codecs,
+          initObject);
+      expect(createMediaSourceSpy).not.toHaveBeenCalled();
+    });
+
     it('creates SourceBuffers with extra features', async () => {
       const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
       config.addExtraFeaturesToSourceBuffer = (mimeType) => {
