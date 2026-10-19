@@ -1459,9 +1459,11 @@ describe('UITextDisplayer', () => {
       expect(fontFamily).toContain('monospace');
     });
 
-    it('does not change the font variant by default', async () => {
+    it('overrides the font family with any CSS font family', async () => {
+      config.fontFamily = 'OpenDyslexic, sans-serif';
       const textContainer = await render([createStyledCue()]);
-      expect(textContainer.querySelector('div').style.fontVariant).toBe('');
+      const fontFamily = textContainer.querySelector('div').style.fontFamily;
+      expect(fontFamily).toBe('OpenDyslexic, sans-serif');
     });
 
     it('overrides the font variant', async () => {
