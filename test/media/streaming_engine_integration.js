@@ -261,24 +261,6 @@ describe('StreamingEngine', () => {
     variant = manifest.variants[0];
   }
 
-  function setupNewVariant() {
-    const firstPeriodStartTime = 0;
-    const secondPeriodStartTime = 20;
-    const presentationDuration = 40;
-    manifest = shaka.test.StreamingEngineUtil.createManifest(
-        /** @type {!shaka.media.PresentationTimeline} */(timeline),
-        [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        /* segmentDurations= */ {
-          audio: metadata.audio.segmentDuration,
-          video: metadata.video.segmentDuration,
-        },
-        /* initSegmentRanges= */ {
-          audio: [0, null],
-          video: [0, null],
-        });
-    return manifest.variants[0];
-  }
-
   function createStreamingEngine() {
     const playerInterface = {
       getPresentationTime: () => playhead.getTime(),
