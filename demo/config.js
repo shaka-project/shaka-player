@@ -445,6 +445,7 @@ shakaDemo.Config = class {
             'textDisplayer.fontFamily',
             fontFamilyOptions,
             fontFamilyOptionNames)
+        .addTextInput_('Font variant', 'textDisplayer.fontVariant')
         .addTextInput_('Font color', 'textDisplayer.fontColor')
         .addNumberInput_('Font opacity',
             'textDisplayer.fontOpacity',

@@ -64,6 +64,7 @@ by the subtitles, so only the options that are changed override it.
 | `fontScaleFactor` | The factor used to increase or decrease the font size | `1` |
 | `positionArea` | `shaka.config.PositionArea` (see below) | `DEFAULT` |
 | `fontFamily` | A CSS font family, or a preset of `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF` or `PROPORTIONAL_SANS_SERIF` | `DEFAULT` |
+| `fontVariant` | A CSS `font-variant` (e.g. `'small-caps'`) | `''` |
 | `fontColor` | A CSS color | `''` |
 | `fontOpacity` | Between 0 and 1 | `NaN` |
 | `backgroundColor` | A CSS color | `''` |
@@ -126,6 +127,12 @@ some presets.  Fonts that are not installed on the system can be loaded with
 player.addFont('OpenDyslexic', 'https://example.com/opendyslexic.woff2');
 player.configure('textDisplayer.fontFamily', 'OpenDyslexic, sans-serif');
 ```
+
+###### Font variant
+
+`fontVariant` replaces the font variant of the subtitles.  For example,
+`'small-caps'` renders them with small capitals, one of the font styles of
+CEA-708 captions.
 
 ###### Colors and opacities
 
