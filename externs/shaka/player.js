@@ -3181,7 +3181,7 @@ shaka.extern.OfflineConfiguration;
  * @typedef {{
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
- *   fontFamily: shaka.config.FontFamily,
+ *   fontFamily: string,
  *   fontColor: string,
  *   fontOpacity: number,
  *   backgroundColor: string,
@@ -3205,14 +3205,18 @@ shaka.extern.OfflineConfiguration;
  *   position.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {shaka.config.FontFamily} fontFamily
- *   The font family of the subtitles.  The default value indicates that the
- *   font family defined by the subtitle is used, otherwise it is overwritten
- *   with the given font family.
+ * @property {string} fontFamily
+ *   The font family of the subtitles, as a CSS <code>font-family</code>
+ *   (e.g. <code>'OpenDyslexic, sans-serif'</code>).  An empty string
+ *   indicates that the font family defined by the subtitle is used, otherwise
+ *   it is overwritten with the given font family.
+ *   <code>shaka.config.FontFamily</code> lists some presets.  Fonts that are
+ *   not installed on the system can be loaded with
+ *   <code>player.addFont()</code>.
  *   <br>
  *   Only supported by <code>shaka.text.UITextDisplayer</code>.
  *   <br>
- *   Defaults to <code>shaka.config.FontFamily.DEFAULT</code>.
+ *   Defaults to <code>''</code>.
  * @property {string} fontColor
  *   The font color of the subtitles, as a CSS color (e.g.
  *   <code>'#ff0'</code> or <code>'yellow'</code>).  An empty string indicates

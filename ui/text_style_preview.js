@@ -11,7 +11,6 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.EventManager');
 goog.requireType('shaka.config.CharacterEdgeStyle');
-goog.requireType('shaka.config.FontFamily');
 goog.requireType('shaka.config.PositionArea');
 goog.requireType('shaka.Player');
 
@@ -192,7 +191,7 @@ shaka.ui.TextStylePreview = class {
  * @typedef {{
  *   fontScaleFactor: (number|undefined),
  *   positionArea: (shaka.config.PositionArea|undefined),
- *   fontFamily: (shaka.config.FontFamily|undefined),
+ *   fontFamily: (string|undefined),
  *   fontColor: (string|undefined),
  *   fontOpacity: (number|undefined),
  *   backgroundColor: (string|undefined),
