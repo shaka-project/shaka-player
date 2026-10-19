@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.1](https://github.com/shaka-project/shaka-player/compare/v5.3.0...v5.3.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **Text:** Allow any CSS font family in textDisplayer.fontFamily ([#10756](https://github.com/shaka-project/shaka-player/issues/10756)) ([4434712](https://github.com/shaka-project/shaka-player/commit/4434712a5bb8ba856e7fc42276f2d582ef8820e3))
+
 ## [5.3.0](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.3.0) (2026-10-16)
 
 
