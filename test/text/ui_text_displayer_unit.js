@@ -1459,6 +1459,13 @@ describe('UITextDisplayer', () => {
       expect(fontFamily).toContain('monospace');
     });
 
+    it('overrides the font family with any CSS font family', async () => {
+      config.fontFamily = 'OpenDyslexic, sans-serif';
+      const textContainer = await render([createStyledCue()]);
+      const fontFamily = textContainer.querySelector('div').style.fontFamily;
+      expect(fontFamily).toBe('OpenDyslexic, sans-serif');
+    });
+
     it('removes the edges of the characters', async () => {
       config.characterEdgeStyle = shaka.config.CharacterEdgeStyle.NONE;
       const cue = createStyledCue();

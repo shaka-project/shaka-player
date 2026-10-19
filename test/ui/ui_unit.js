@@ -1609,6 +1609,27 @@ describe('UI', () => {
             });
       }
 
+      it('shows font families given by the application', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-font-family',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        player.configure('textDisplayer.fontFamily',
+            '"Open Sans", Arial, sans-serif');
+
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-font-family-button');
+        const currentSelection = UiUtils.getElementByClassName(
+            button, 'shaka-current-selection-span');
+        expect(currentSelection.textContent).toBe('Open Sans');
+      });
+
       it('keeps a committed text size as the preview baseline', async () => {
         const config = {
           controlPanelElements: [
