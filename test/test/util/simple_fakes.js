@@ -73,6 +73,9 @@ shaka.test.FakeAbrManager = class {
     this.setCmsdManager = jasmine.createSpy('setCmsdManager');
 
     /** @type {!jasmine.Spy} */
+    this.setPlayerInterface = jasmine.createSpy('setPlayerInterface');
+
+    /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
   }
 };
