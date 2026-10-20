@@ -36,6 +36,7 @@ let MockSourceBuffer;
 
 describe('MediaSourceEngine', () => {
   const Util = shaka.test.Util;
+  const BufferUtils = shaka.util.BufferUtils;
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
@@ -128,6 +129,9 @@ describe('MediaSourceEngine', () => {
   let requiresTimestampOffsetFudgeSpy;
   /** @type {!jasmine.Spy} */
   let fakeEncryptionSpy;
+
+  /** @type {!jasmine.Spy} */
+  let onScte35;
 
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -260,6 +264,7 @@ describe('MediaSourceEngine', () => {
     spyOn(shaka.transmuxer.TransmuxerProxy, 'getOrCreateWorker_')
         .and.returnValue(null);
 
+    onScte35 = jasmine.createSpy('onScte35');
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         mockTextDisplayer,
@@ -267,6 +272,7 @@ describe('MediaSourceEngine', () => {
           getKeySystem: () => null,
           onMetadata: () => {},
           onEmsg: () => {},
+          onScte35: Util.spyFunc(onScte35),
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,
@@ -346,6 +352,7 @@ describe('MediaSourceEngine', () => {
             getKeySystem: () => null,
             onMetadata: () => {},
             onEmsg: () => {},
+            onScte35: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
             getDrmInfo: () => null,
@@ -374,6 +381,7 @@ describe('MediaSourceEngine', () => {
             getKeySystem: () => null,
             onMetadata: () => {},
             onEmsg: () => {},
+            onScte35: () => {},
             onEvent: () => {},
             onManifestUpdate: () => {},
             getDrmInfo: () => null,
@@ -807,6 +815,7 @@ describe('MediaSourceEngine', () => {
           .and.returnValue({
             timestamp: 5,
             metadata: [],
+            scte35: [],
           });
 
       const p = mediaSourceEngine.appendBuffer(
@@ -825,6 +834,7 @@ describe('MediaSourceEngine', () => {
           .and.returnValue({
             timestamp: null,
             metadata: [],
+            scte35: [],
           });
 
       const p = mediaSourceEngine.appendBuffer(
@@ -1219,7 +1229,11 @@ describe('MediaSourceEngine', () => {
       const mediaStart = 92703.440178;
       spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
           .and.callFake((contentType, data, reference) => {
-            return {timestamp: mediaStart + reference.startTime, metadata: []};
+            return {
+              timestamp: mediaStart + reference.startTime,
+              metadata: [],
+              scte35: [],
+            };
           });
 
       const expectedOffset = -mediaStart;
@@ -1269,7 +1283,7 @@ describe('MediaSourceEngine', () => {
 
       const mediaStart = 92703.440178;
       spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
-          .and.returnValue({timestamp: mediaStart, metadata: []});
+          .and.returnValue({timestamp: mediaStart, metadata: [], scte35: []});
 
       const append = mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, buffer, dummyReference(0, 10), fakeStream,
@@ -1335,6 +1349,152 @@ describe('MediaSourceEngine', () => {
           ContentType.VIDEO, packedAac, dummyReference(0, 10), fakeStream,
           'video/mp2t; codecs="avc1.42E01E"');
       expect(timestamp).toBeNull();
+    });
+  });
+
+  describe('in-band SCTE-35', () => {
+    const Scte35 = shaka.test.Scte35;
+    const pid = 500;
+    /** 2^33, where 33-bit timestamps wrap. */
+    const maxTs = 8589934592;
+
+    /** @type {!BufferSource} */
+    let videoSegment;
+    /**
+     * The media time of the first frame of video.ts, about 57.4 seconds.
+     * @type {number}
+     */
+    let segmentStart;
+
+    beforeAll(async () => {
+      videoSegment = await Util.fetch('/base/test/test/assets/video.ts');
+      const tsParser = new shaka.util.TsParser().parse(
+          BufferUtils.toUint8(videoSegment));
+      const startTime = tsParser.getStartTimeFromPesHeaders(ContentType.VIDEO);
+      goog.asserts.assert(startTime != null, 'video.ts should have a PTS');
+      segmentStart = startTime;
+    });
+
+    beforeEach(async () => {
+      const tsStream = makeFakeStream('video/mp2t');
+      tsStream.fullMimeTypes = new Set([tsStream.mimeType]);
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, tsStream);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      // HLS in segments mode, so the timestamp offset comes from the segment.
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+          shaka.media.ManifestParser.HLS);
+      // Parsing the segment and setting the timestamp offset come before the
+      // append, so finish each append when it is issued.
+      videoSourceBuffer.appendBuffer.and.callFake(() => {
+        Util.shortDelay().then(() => videoSourceBuffer.updateend());
+      });
+    });
+
+    /**
+     * Appends video.ts carrying the given sections at the given position.
+     *
+     * @param {!Array<!Uint8Array>} sections
+     * @param {number=} startTime
+     * @return {!Promise}
+     */
+    const append = async (sections, startTime = 10) => {
+      const segment = Scte35.addToTs(videoSegment, pid, sections);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, segment, dummyReference(startTime, startTime + 10),
+          fakeStream, /* hasClosedCaptions= */ false);
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalled();
+    };
+
+    /** @return {!Array<shaka.extern.Scte35Event>} */
+    const reported = () => onScte35.calls.allArgs().map((args) => args[0]);
+
+    /**
+     * @param {!Uint8Array} section
+     * @return {string}
+     */
+    const idOf = (section) => {
+      const crc = BufferUtils.toDataView(section)
+          .getUint32(section.length - 4);
+      return pid + '-' + crc.toString(16).padStart(8, '0');
+    };
+
+    it('places a splice_insert at its splice time', async () => {
+      const section = Scte35.spliceInsert(60 * 90000);
+      await append([section]);
+
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      const event = reported()[0];
+      expect(event.schemeIdUri).toBe('urn:scte:scte35:2013:bin');
+      expect(event.source).toBe('ts');
+      expect(event.kind).toBe('');
+      expect(event.id).toBe(idOf(section));
+      expect(event.data).toEqual(section);
+      expect(event.node).toBeNull();
+      // The segment's first frame plays at 10 seconds.
+      expect(event.startTime).toBeCloseTo(10 + 60 - segmentStart, 3);
+      expect(event.endTime).toBe(event.startTime);
+    });
+
+    it('places a time_signal at its splice time', async () => {
+      await append([Scte35.timeSignal(58 * 90000)]);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      expect(reported()[0].startTime).toBeCloseTo(10 + 58 - segmentStart, 3);
+    });
+
+    it('applies pts_adjustment', async () => {
+      await append([
+        Scte35.spliceInsert(maxTs - 90000, {ptsAdjustment: 61 * 90000}),
+      ]);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      expect(reported()[0].startTime).toBeCloseTo(10 + 60 - segmentStart, 3);
+    });
+
+    it('takes the splice time closest to the segment across a wrap',
+        async () => {
+          // One second before 0 is just before the segment, not 26.5 hours
+          // after it.
+          await append([Scte35.spliceInsert(maxTs - 90000)]);
+          expect(onScte35).toHaveBeenCalledTimes(1);
+          expect(reported()[0].startTime)
+              .toBeCloseTo(10 - 1 - segmentStart, 3);
+        });
+
+    it('places an immediate splice at the segment start', async () => {
+      await append([Scte35.spliceInsert(null)], 20);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      expect(reported()[0].startTime).toBe(20);
+    });
+
+    it('places an encrypted section at the segment start', async () => {
+      await append([Scte35.spliceInsert(60 * 90000, {encrypted: true})], 20);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      expect(reported()[0].startTime).toBe(20);
+    });
+
+    it('ignores splice_null heartbeats', async () => {
+      await append([Scte35.spliceNull()]);
+      expect(onScte35).not.toHaveBeenCalled();
+    });
+
+    it('reports a retransmitted section once', async () => {
+      const section = Scte35.spliceInsert(60 * 90000);
+      await append([section, section]);
+      await append([section], 20);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+
+      const other = Scte35.spliceInsert(60 * 90000, {eventId: 2});
+      await append([section, other], 30);
+      expect(onScte35).toHaveBeenCalledTimes(2);
+      expect(reported()[1].id).toBe(idOf(other));
+    });
+
+    it('reports a section spanning several packets', async () => {
+      const descriptors = new Array(400).fill(0x42);
+      const section = Scte35.spliceInsert(60 * 90000, {descriptors});
+      await append([section]);
+      expect(onScte35).toHaveBeenCalledTimes(1);
+      expect(reported()[0].data).toEqual(section);
     });
   });
 

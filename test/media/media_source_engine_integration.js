@@ -191,6 +191,7 @@ describe('MediaSourceEngine', () => {
           getKeySystem: () => null,
           onMetadata: Util.spyFunc(onMetadata),
           onEmsg: Util.spyFunc(onEmsg),
+          onScte35: () => {},
           onEvent: Util.spyFunc(onEvent),
           onManifestUpdate: Util.spyFunc(onManifestUpdate),
           getDrmInfo: () => null,
