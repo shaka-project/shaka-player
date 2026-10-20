@@ -32,10 +32,13 @@
  *   startTime when the transport does not signal a duration.
  * @property {string} id
  *   The transport's identifier for this message.  It is independent of the
- *   splice and segmentation event IDs inside the payload.  MSF has none, so
- *   for 'msf' it is derived from the record's index reference and payload.
+ *   splice and segmentation event IDs inside the payload.  MSF and transport
+ *   streams have none, so for 'msf' it is derived from the record's index
+ *   reference and payload, and for 'ts' it is the PID and the section's
+ *   CRC_32 in hexadecimal, as in '500-1a63a8ea'.
  * @property {string} source
- *   Where the message was found: 'dash', 'hls', 'emsg' or 'msf'.
+ *   Where the message was found: 'dash', 'hls', 'emsg', 'ts' (a
+ *   splice_info_section in an MPEG-2 transport stream) or 'msf'.
  * @property {string} kind
  *   'out', 'in' or 'cmd' for HLS, matching the attribute that carried the
  *   payload.  The empty string for other sources.

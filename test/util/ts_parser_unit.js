@@ -119,4 +119,115 @@ describe('TsParser', () => {
     expect(tsParser.getAudioData().length).toBeGreaterThan(0);
     expect(tsParser.getVideoData().length).toBe(0);
   });
+
+  describe('SCTE-35', () => {
+    const Scte35 = shaka.test.Scte35;
+    const pid = 500;
+    /** 2^33, where 33-bit timestamps wrap. */
+    const maxTs = 8589934592;
+
+    /** @type {!BufferSource} */
+    let videoSegment;
+
+    beforeAll(async () => {
+      videoSegment = await Util.fetch('/base/test/test/assets/video.ts');
+    });
+
+    /**
+     * @param {!Array<!Uint8Array>} sections
+     * @return {!Array<shaka.util.TsParser.Scte35Section>}
+     */
+    const parseSections = (sections) => {
+      const tsParser = new shaka.util.TsParser();
+      tsParser.parse(Scte35.addToTs(videoSegment, pid, sections));
+      return tsParser.getScte35Sections();
+    };
+
+    it('reads the splice time of a splice_insert', () => {
+      const section = Scte35.spliceInsert(60 * 90000);
+      const sections = parseSections([section]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].pid).toBe(pid);
+      expect(sections[0].section).toEqual(section);
+      expect(sections[0].commandType).toBe(0x05);
+      expect(sections[0].pts).toBe(60 * 90000);
+      const view = BufferUtils.toDataView(section);
+      expect(sections[0].crc).toBe(view.getUint32(section.length - 4));
+    });
+
+    it('reads the splice time of a time_signal', () => {
+      const sections = parseSections([Scte35.timeSignal(60 * 90000)]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].commandType).toBe(0x06);
+      expect(sections[0].pts).toBe(60 * 90000);
+    });
+
+    it('applies pts_adjustment and wraps to 33 bits', () => {
+      const sections = parseSections([
+        Scte35.spliceInsert(maxTs - 90000, {ptsAdjustment: 61 * 90000}),
+      ]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].pts).toBe(60 * 90000);
+    });
+
+    it('has no splice time for an immediate splice_insert', () => {
+      const sections = parseSections([Scte35.spliceInsert(null)]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].pts).toBeNull();
+    });
+
+    it('has no splice time for an encrypted section', () => {
+      const sections = parseSections([
+        Scte35.spliceInsert(60 * 90000, {encrypted: true}),
+      ]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].pts).toBeNull();
+    });
+
+    it('reports a splice_null', () => {
+      const sections = parseSections([Scte35.spliceNull()]);
+      expect(sections.length).toBe(1);
+      expect(sections[0].commandType).toBe(0x00);
+      expect(sections[0].pts).toBeNull();
+    });
+
+    it('reassembles a section spanning several packets', () => {
+      const descriptors = new Array(400).fill(0x42);
+      const section = Scte35.spliceInsert(60 * 90000, {descriptors});
+      expect(section.length).toBeGreaterThan(2 * 184);
+      const sections = parseSections([section, Scte35.timeSignal(90000)]);
+      expect(sections.length).toBe(2);
+      expect(sections[0].section).toEqual(section);
+      expect(sections[0].pts).toBe(60 * 90000);
+      expect(sections[1].pts).toBe(90000);
+    });
+
+    it('ignores a section with a bad CRC', () => {
+      const section = Scte35.spliceInsert(60 * 90000);
+      section[section.length - 1] ^= 0xff;
+      expect(parseSections([section]).length).toBe(0);
+    });
+
+    it('ignores sections on PIDs the PMT does not list', () => {
+      const tsParser = new shaka.util.TsParser();
+      const segment = Scte35.addToTs(
+          videoSegment, pid, [Scte35.spliceInsert(60 * 90000)]);
+      // Move the SCTE-35 packet to another PID.
+      const packet = 2 * 188;
+      expect(((segment[packet + 1] & 0x1f) << 8) | segment[packet + 2])
+          .toBe(pid);
+      segment[packet + 2] = (pid + 1) & 0xff;
+      tsParser.parse(segment);
+      expect(tsParser.getScte35Sections().length).toBe(0);
+    });
+
+    it('clears the sections with the rest of the data', () => {
+      const tsParser = new shaka.util.TsParser();
+      tsParser.parse(Scte35.addToTs(
+          videoSegment, pid, [Scte35.spliceInsert(60 * 90000)]));
+      expect(tsParser.getScte35Sections().length).toBe(1);
+      tsParser.clearData();
+      expect(tsParser.getScte35Sections().length).toBe(0);
+    });
+  });
 });
