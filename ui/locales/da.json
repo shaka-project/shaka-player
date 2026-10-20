@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Placering af undertekster",
   "SUBTITLE_SIZE": "Størrelse på undertekster",
   "SUBTITLE_STYLE": "Stil for undertekster",
+  "SUBTITLE_WINDOW_COLOR": "Vinduesfarve for undertekster",
+  "SUBTITLE_WINDOW_OPACITY": "Vinduets gennemsigtighed for undertekster",
   "SURROUND": "Surroundsound",
   "TOGGLE_STEREOSCOPIC": "Slå stereoskopisk visning til/fra",
   "TOP_CENTER": "Øverst i midten",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videotype",
   "VOLUME": "Lydstyrke",
   "WHITE": "Hvid",
+  "WINDOW_COLOR": "Vinduesfarve",
+  "WINDOW_OPACITY": "Vinduets gennemsigtighed",
   "YELLOW": "Gul"
 }

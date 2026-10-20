@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "उपशीर्षक की जगह",
   "SUBTITLE_SIZE": "उपशीर्षक का साइज़",
   "SUBTITLE_STYLE": "उपशीर्षक का स्टाइल",
+  "SUBTITLE_WINDOW_COLOR": "उपशीर्षक की विंडो का रंग",
+  "SUBTITLE_WINDOW_OPACITY": "उपशीर्षक की विंडो की ओपैसिटी",
   "SURROUND": "सराउंड",
   "TOGGLE_STEREOSCOPIC": "स्टीरियोस्कोपिक को टॉगल करें",
   "TOP_CENTER": "ऊपर बीच में",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "वीडियो का टाइप",
   "VOLUME": "मात्रा",
   "WHITE": "सफ़ेद",
+  "WINDOW_COLOR": "विंडो का रंग",
+  "WINDOW_OPACITY": "विंडो की ओपैसिटी",
   "YELLOW": "पीला"
 }

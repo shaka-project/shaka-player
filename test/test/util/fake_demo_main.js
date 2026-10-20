@@ -132,6 +132,8 @@ shaka.test.FakeDemoMain = class {
         'captions-size',
         'captions-background-color',
         'captions-background-opacity',
+        'captions-window-color',
+        'captions-window-opacity',
         'captions-character-edge-style',
         'captions-font-opacity',
         'captions-position',

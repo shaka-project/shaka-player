@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Subtitru novietojums",
   "SUBTITLE_SIZE": "Subtitru lielums",
   "SUBTITLE_STYLE": "Subtitru stils",
+  "SUBTITLE_WINDOW_COLOR": "Subtitru loga krāsa",
+  "SUBTITLE_WINDOW_OPACITY": "Subtitru loga necaurredzamība",
   "SURROUND": "Telpiskā skaņa",
   "TOGGLE_STEREOSCOPIC": "Pārslēgt stereoskopisko režīmu",
   "TOP_CENTER": "Augšā centrā",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Video veids",
   "VOLUME": "Skaļums",
   "WHITE": "Balta",
+  "WINDOW_COLOR": "Loga krāsa",
+  "WINDOW_OPACITY": "Loga necaurredzamība",
   "YELLOW": "Dzeltena"
 }

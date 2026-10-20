@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Položaj titlova",
   "SUBTITLE_SIZE": "Veličina titlova",
   "SUBTITLE_STYLE": "Stil titlova",
+  "SUBTITLE_WINDOW_COLOR": "Boja prozora titlova",
+  "SUBTITLE_WINDOW_OPACITY": "Prozirnost prozora titlova",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Prebaci stereoskopski prikaz",
   "TOP_CENTER": "Gore u sredini",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Vrsta videozapisa",
   "VOLUME": "Glasnoća",
   "WHITE": "Bijela",
+  "WINDOW_COLOR": "Boja prozora",
+  "WINDOW_OPACITY": "Prozirnost prozora",
   "YELLOW": "Žuta"
 }

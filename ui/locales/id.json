@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Posisi subtitle",
   "SUBTITLE_SIZE": "Ukuran subtitle",
   "SUBTITLE_STYLE": "Gaya subtitle",
+  "SUBTITLE_WINDOW_COLOR": "Warna jendela subtitle",
+  "SUBTITLE_WINDOW_OPACITY": "Opasitas jendela subtitle",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Aktifkan/nonaktifkan stereoskop",
   "TOP_CENTER": "Tengah atas",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Jenis video",
   "VOLUME": "Volume",
   "WHITE": "Putih",
+  "WINDOW_COLOR": "Warna jendela",
+  "WINDOW_OPACITY": "Opasitas jendela",
   "YELLOW": "Kuning"
 }

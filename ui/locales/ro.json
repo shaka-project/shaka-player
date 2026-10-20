@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Poziția subtitrărilor",
   "SUBTITLE_SIZE": "Dimensiunea subtitrărilor",
   "SUBTITLE_STYLE": "Stilul subtitrărilor",
+  "SUBTITLE_WINDOW_COLOR": "Culoarea ferestrei pentru subtitrări",
+  "SUBTITLE_WINDOW_OPACITY": "Opacitatea ferestrei pentru subtitrări",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Comută la stereoscopic",
   "TOP_CENTER": "Sus în centru",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Tip de videoclip",
   "VOLUME": "Volum",
   "WHITE": "Alb",
+  "WINDOW_COLOR": "Culoarea ferestrei",
+  "WINDOW_OPACITY": "Opacitatea ferestrei",
   "YELLOW": "Galben"
 }

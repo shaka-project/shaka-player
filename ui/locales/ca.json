@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Posició dels subtítols",
   "SUBTITLE_SIZE": "Mida dels subtítols",
   "SUBTITLE_STYLE": "Estil dels subtítols",
+  "SUBTITLE_WINDOW_COLOR": "Color de la finestra dels subtítols",
+  "SUBTITLE_WINDOW_OPACITY": "Opacitat de la finestra dels subtítols",
   "SURROUND": "So envoltant",
   "TOGGLE_STEREOSCOPIC": "Commuta l'opció estereoscòpica",
   "TOP_CENTER": "A dalt al centre",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Tipus de vídeo",
   "VOLUME": "Volum",
   "WHITE": "Blanc",
+  "WINDOW_COLOR": "Color de la finestra",
+  "WINDOW_OPACITY": "Opacitat de la finestra",
   "YELLOW": "Groc"
 }

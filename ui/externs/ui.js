@@ -676,7 +676,8 @@ shaka.extern.UITrackLabelCallback;
  *   <br>
  *   Defaults to <code>['captions-font-family', 'captions-font-color',
  *   'captions-size', 'captions-background-color',
- *   'captions-background-opacity', 'captions-character-edge-style',
+ *   'captions-background-opacity', 'captions-window-color',
+ *   'captions-window-opacity', 'captions-character-edge-style',
  *   'captions-font-opacity', 'captions-position',
  *   'captions-style-reset']</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture

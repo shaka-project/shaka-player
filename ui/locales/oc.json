@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Posicion dels sostítols",
   "SUBTITLE_SIZE": "Talha dels sostítols",
   "SUBTITLE_STYLE": "Estil dels sostítols",
+  "SUBTITLE_WINDOW_COLOR": "Color de la fenèstra dels sostítols",
+  "SUBTITLE_WINDOW_OPACITY": "Opacitat de la fenèstra dels sostítols",
   "SURROUND": "Son envolopant",
   "TOGGLE_STEREOSCOPIC": "Activar/desactivar l’estereoscopia",
   "TOP_CENTER": "En naut al centre",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Tipe de vidèo",
   "VOLUME": "Volum",
   "WHITE": "Blanc",
+  "WINDOW_COLOR": "Color de la fenèstra",
+  "WINDOW_OPACITY": "Opacitat de la fenèstra",
   "YELLOW": "Jaune"
 }

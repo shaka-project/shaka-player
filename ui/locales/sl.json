@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Položaj podnapisov",
   "SUBTITLE_SIZE": "Velikost podnapisov",
   "SUBTITLE_STYLE": "Slog podnapisov",
+  "SUBTITLE_WINDOW_COLOR": "Barva okna podnapisov",
+  "SUBTITLE_WINDOW_OPACITY": "Neprosojnost okna podnapisov",
   "SURROUND": "Prostorski zvok",
   "TOGGLE_STEREOSCOPIC": "Preklop stereoskopskega načina",
   "TOP_CENTER": "Zgoraj na sredini",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Vrsta videa",
   "VOLUME": "Glasnost",
   "WHITE": "Bela",
+  "WINDOW_COLOR": "Barva okna",
+  "WINDOW_OPACITY": "Neprosojnost okna",
   "YELLOW": "Rumena"
 }

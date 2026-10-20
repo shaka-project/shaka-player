@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "字幕位置",
   "SUBTITLE_SIZE": "字幕大小",
   "SUBTITLE_STYLE": "字幕樣式",
+  "SUBTITLE_WINDOW_COLOR": "字幕視窗顏色",
+  "SUBTITLE_WINDOW_OPACITY": "字幕視窗透明度",
   "SURROUND": "環場音效",
   "TOGGLE_STEREOSCOPIC": "切換立體影像",
   "TOP_CENTER": "頂部置中",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "影片類型",
   "VOLUME": "音量",
   "WHITE": "白色",
+  "WINDOW_COLOR": "視窗顏色",
+  "WINDOW_OPACITY": "視窗透明度",
   "YELLOW": "黃色"
 }

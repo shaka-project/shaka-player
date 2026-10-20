@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Θέση υπότιτλων",
   "SUBTITLE_SIZE": "Μέγεθος υπότιτλων",
   "SUBTITLE_STYLE": "Στιλ υπότιτλων",
+  "SUBTITLE_WINDOW_COLOR": "Χρώμα παραθύρου υπότιτλων",
+  "SUBTITLE_WINDOW_OPACITY": "Αδιαφάνεια παραθύρου υπότιτλων",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Εναλλαγή στερεοσκοπικής",
   "TOP_CENTER": "Πάνω στο κέντρο",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Τύπος βίντεο",
   "VOLUME": "Ένταση",
   "WHITE": "Άσπρο",
+  "WINDOW_COLOR": "Χρώμα παραθύρου",
+  "WINDOW_OPACITY": "Αδιαφάνεια παραθύρου",
   "YELLOW": "Κίτρινο"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "字幕の位置",
   "SUBTITLE_SIZE": "字幕のサイズ",
   "SUBTITLE_STYLE": "字幕のスタイル",
+  "SUBTITLE_WINDOW_COLOR": "字幕のウィンドウの色",
+  "SUBTITLE_WINDOW_OPACITY": "字幕のウィンドウの透過度",
   "SURROUND": "サラウンド",
   "TOGGLE_STEREOSCOPIC": "立体画像を切り替える",
   "TOP_CENTER": "上中央",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "動画の種類",
   "VOLUME": "音量",
   "WHITE": "白",
+  "WINDOW_COLOR": "ウィンドウの色",
+  "WINDOW_OPACITY": "ウィンドウの透過度",
   "YELLOW": "黄"
 }

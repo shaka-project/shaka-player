@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "[Šûбţîţļé þöšîţîöñ one two]",
   "SUBTITLE_SIZE": "[Šûбţîţļé šîžé one two]",
   "SUBTITLE_STYLE": "[Šûбţîţļé šţýļé one two]",
+  "SUBTITLE_WINDOW_COLOR": "[Šûбţîţļé ŵîñðöŵ çöļöŕ one two three four]",
+  "SUBTITLE_WINDOW_OPACITY": "[Šûбţîţļé ŵîñðöŵ öþåçîţý one two three four five]",
   "SURROUND": "[Šûŕŕöûñð one]",
   "TOGGLE_STEREOSCOPIC": "[Ţöĝĝļé šţéŕéöšçöþîç one two three]",
   "TOP_CENTER": "[Ţöþ çéñţéŕ one two]",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "[Vîðéö ţýþé one two]",
   "VOLUME": "[Vöļûmé one]",
   "WHITE": "[Wĥîţé one]",
+  "WINDOW_COLOR": "[Ŵîñðöŵ çöļöŕ one two]",
+  "WINDOW_OPACITY": "[Ŵîñðöŵ öþåçîţý one two]",
   "YELLOW": "[Yéļļöŵ one]"
 }

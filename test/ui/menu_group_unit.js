@@ -748,6 +748,8 @@ describe('MenuGroup', () => {
             'shaka-caption-size-button',
             'shaka-caption-background-color-button',
             'shaka-caption-background-opacity-button',
+            'shaka-caption-window-color-button',
+            'shaka-caption-window-opacity-button',
             'shaka-caption-character-edge-style-button',
             'shaka-caption-font-opacity-button',
             'shaka-caption-position-button',
@@ -823,6 +825,8 @@ describe('MenuGroup', () => {
             fontOpacity: 0.5,
             backgroundColor: '#f00',
             backgroundOpacity: 0.25,
+            windowColor: '#00f',
+            windowOpacity: 0.5,
             characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
             subtitleDelay: 2,
           },
@@ -843,6 +847,8 @@ describe('MenuGroup', () => {
         expect(isNaN(config.fontOpacity)).toBe(true);
         expect(config.backgroundColor).toBe('');
         expect(isNaN(config.backgroundOpacity)).toBe(true);
+        expect(config.windowColor).toBe('');
+        expect(isNaN(config.windowOpacity)).toBe(true);
         expect(config.characterEdgeStyle)
             .toBe(shaka.config.CharacterEdgeStyle.DEFAULT);
         // The subtitle delay is not part of the style.
@@ -861,6 +867,8 @@ describe('MenuGroup', () => {
           'shaka-caption-font-opacity-button',
           'shaka-caption-background-color-button',
           'shaka-caption-background-opacity-button',
+          'shaka-caption-window-color-button',
+          'shaka-caption-window-opacity-button',
           'shaka-caption-character-edge-style-button',
         ]) {
           expect(getStyleSelection(className)).toBe(defaultLabel);

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Untertitelposition",
   "SUBTITLE_SIZE": "Untertitelgröße",
   "SUBTITLE_STYLE": "Untertitelstil",
+  "SUBTITLE_WINDOW_COLOR": "Fensterfarbe der Untertitel",
+  "SUBTITLE_WINDOW_OPACITY": "Fenster-Deckkraft der Untertitel",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Einstellung „stereoskopisch“ ein‑/ausschalten",
   "TOP_CENTER": "Oben mittig",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videotyp",
   "VOLUME": "Lautstärke",
   "WHITE": "Weiß",
+  "WINDOW_COLOR": "Fensterfarbe",
+  "WINDOW_OPACITY": "Fenster-Deckkraft",
   "YELLOW": "Gelb"
 }
