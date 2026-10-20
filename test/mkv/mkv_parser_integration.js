@@ -91,6 +91,18 @@ describe('MkvParser integration', () => {
     }
   }
 
+  /**
+   * Skips the test on Chromecast with Linux, where MP3 played with a video
+   * never finishes loading.
+   * @param {boolean} condition
+   */
+  function skipOnChromecastLinux(condition) {
+    if (condition &&
+        deviceDetected.getDeviceName() === 'Chromecast with Linux') {
+      pending('Disabled on Chromecast with Linux.');
+    }
+  }
+
   /** @param {string} type */
   async function requireSupport(type) {
     // Tizen reports the support of MP3 as raw audio/mpeg and of VP8 and Vorbis
@@ -161,6 +173,7 @@ describe('MkvParser integration', () => {
     it('plays ' + name + ' with captions and chapters', async () => {
       // The video element fails to decode the AAC played with a video.
       skipOnTizen(audioCodec == 'aac');
+      skipOnChromecastLinux(audioCodec == 'mp3');
       await requireSupport(videoTypes[videoCodec]);
       await requireSupport(audioTypes[audioCodec]);
       await player.load(base + name + '.mkv');
@@ -230,6 +243,7 @@ describe('MkvParser integration', () => {
     it('seeks across clusters with ' + audio + ' and resumes playback',
         async () => {
           skipOnTizen(audio == 'aac');
+          skipOnChromecastLinux(audio == 'mp3');
           await requireSupport(videoTypes.avc);
           await requireSupport(audioTypes[audio]);
           await player.load(base + 'avc-' + audio + '-srt.mkv');
