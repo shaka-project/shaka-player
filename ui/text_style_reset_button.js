@@ -109,6 +109,7 @@ shaka.ui.TextStyleResetButton.STYLE_SETTINGS_ = [
   'fontScaleFactor',
   'positionArea',
   'fontFamily',
+  'fontVariant',
   'fontColor',
   'fontOpacity',
   'backgroundColor',

@@ -276,6 +276,30 @@ shaka.extern.UIMediaSession;
 shaka.extern.UIDocumentPictureInPicture;
 
 /**
+ * @typedef {{
+ *   fontFamily: (shaka.config.FontFamily|string),
+ *   fontVariant: (string|undefined),
+ *   label: (string|undefined)
+ * }}
+ *
+ * @description
+ *   A font style offered by the <code>captions-font-family</code> menu.
+ *   Choosing it sets <code>textDisplayer.fontFamily</code> and
+ *   <code>textDisplayer.fontVariant</code>.
+ *
+ * @property {(shaka.config.FontFamily|string)} fontFamily
+ *   A CSS font family, or a preset of <code>shaka.config.FontFamily</code>.
+ * @property {(string|undefined)} fontVariant
+ *   A CSS font variant (e.g. <code>'small-caps'</code>).  Defaults to
+ *   <code>''</code>, which doesn't change the font variant of the subtitles.
+ * @property {(string|undefined)} label
+ *   The label shown in the menu.  If not given, the presets are shown by
+ *   their localized name, and other font families by their first font.
+ * @exportDoc
+ */
+shaka.extern.UIFontStyle;
+
+/**
  * A callback for customizing track labels in the UI.
  *
  * The callback receives the default label (or null if the language was
@@ -357,6 +381,7 @@ shaka.extern.UITrackLabelCallback;
  *   mediaSession: shaka.extern.UIMediaSession,
  *   captionsStyles: boolean,
  *   captionsFontScaleFactors: !Array<number>,
+ *   captionsFontStyles: !Array<!shaka.extern.UIFontStyle>,
  *   captionsStyleElements: !Array<string>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
@@ -671,6 +696,15 @@ shaka.extern.UITrackLabelCallback;
  *   The ordered list of font scale factor selection.
  *   <br>
  *   Defaults to <code>[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]</code>.
+ * @property {!Array<!shaka.extern.UIFontStyle>} captionsFontStyles
+ *   The ordered list of font styles in the <code>captions-font-family</code>
+ *   menu.  Applications can remove presets, or add their own font families
+ *   (for example, a web font loaded with <code>player.addFont()</code>).
+ *   <br>
+ *   Defaults to "Default" followed by the font styles of the subtitles of
+ *   YouTube, which are the presets of <code>shaka.config.FontFamily</code>
+ *   (<code>SMALL_CAPITALS</code> with the <code>'small-caps'</code> font
+ *   variant).
  * @property {!Array<string>} captionsStyleElements
  *   The ordered list of elements in the subtitle style menu.
  *   <br>
