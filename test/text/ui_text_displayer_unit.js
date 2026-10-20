@@ -1451,6 +1451,90 @@ describe('UITextDisplayer', () => {
           .toBe(normalizeColor('rgba(8, 8, 8, 0.5)'));
     });
 
+    it('does not paint a window by default', async () => {
+      const textContainer = await render([createStyledCue()]);
+      expect(textContainer.querySelector('.shaka-text-window')).toBe(null);
+    });
+
+    it('paints the window behind the text of a cue', async () => {
+      config.windowColor = '#00f';
+      const textContainer = await render([createStyledCue()]);
+
+      const cueElement = textContainer.querySelector('div');
+      const windowElement = cueElement.querySelector('.shaka-text-window');
+      expect(windowElement.parentElement).toBe(cueElement);
+      expect(windowElement.style.backgroundColor).toBe(normalizeColor('#00f'));
+      // The background of the text is painted over the window.
+      const textElement = windowElement.querySelector('span');
+      expect(textElement.textContent).toBe('Captain\'s log.');
+      expect(textElement.style.backgroundColor)
+          .toBe(normalizeColor('rgba(255, 0, 0, 0.5)'));
+    });
+
+    it('applies the window opacity to the configured window color',
+        async () => {
+          config.windowColor = '#ff0';
+          config.windowOpacity = 0.75;
+          const textContainer = await render([createStyledCue()]);
+          const windowElement =
+              textContainer.querySelector('.shaka-text-window');
+          expect(windowElement.style.backgroundColor)
+              .toBe(normalizeColor('rgba(255, 255, 0, 0.75)'));
+        });
+
+    it('paints a black window if only the window opacity is configured',
+        async () => {
+          config.windowOpacity = 0.5;
+          const textContainer = await render([createStyledCue()]);
+          const windowElement =
+              textContainer.querySelector('.shaka-text-window');
+          expect(windowElement.style.backgroundColor)
+              .toBe(normalizeColor('rgba(0, 0, 0, 0.5)'));
+        });
+
+    it('paints the window behind all the lines of nested cues', async () => {
+      config.windowColor = '#0f0';
+      const cue = new shaka.text.Cue(0, 100, '');
+      cue.backgroundColor = 'black';
+      const firstLine = new shaka.text.Cue(0, 100, 'First');
+      const lineBreak = new shaka.text.Cue(0, 100, '');
+      lineBreak.lineBreak = true;
+      const secondLine = new shaka.text.Cue(0, 100, 'Second');
+      cue.nestedCues = [firstLine, lineBreak, secondLine];
+      const textContainer = await render([cue]);
+
+      // The wrapper of the lines is the window.
+      const wrapper = textContainer.querySelector('.shaka-text-wrapper');
+      expect(wrapper.style.backgroundColor).toBe(normalizeColor('#0f0'));
+      expect(textContainer.querySelector('.shaka-text-window')).toBe(null);
+      const textElements = Array.from(
+          wrapper.querySelectorAll(':scope > span > span'));
+      expect(textElements.map((e) => e.textContent))
+          .toEqual(['First', 'Second']);
+      for (const textElement of textElements) {
+        expect(textElement.style.backgroundColor)
+            .toBe(normalizeColor('black'));
+      }
+    });
+
+    it('paints the window behind the blocks of a container', async () => {
+      config.windowColor = '#f0f';
+      const container = new shaka.text.Cue(0, 100, '');
+      container.isContainer = true;
+      const paragraph = new shaka.text.Cue(0, 100, '');
+      const span = new shaka.text.Cue(0, 100, 'Paragraph');
+      paragraph.nestedCues = [span];
+      container.nestedCues = [paragraph];
+      const textContainer = await render([container]);
+
+      const wrapper = textContainer.querySelector('.shaka-text-wrapper');
+      expect(wrapper.style.backgroundColor).not.toBe(normalizeColor('#f0f'));
+      const paragraphElement = wrapper.querySelector('span');
+      expect(paragraphElement.style.backgroundColor)
+          .toBe(normalizeColor('#f0f'));
+      expect(paragraphElement.textContent).toBe('Paragraph');
+    });
+
     it('overrides the font family', async () => {
       config.fontFamily = shaka.config.FontFamily.MONOSPACED_SERIF;
       const textContainer = await render([createStyledCue()]);

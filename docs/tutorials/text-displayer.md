@@ -69,6 +69,8 @@ by the subtitles, so only the options that are changed override it.
 | `fontOpacity` | Between 0 and 1 | `NaN` |
 | `backgroundColor` | A CSS color | `''` |
 | `backgroundOpacity` | Between 0 and 1 | `NaN` |
+| `windowColor` | A CSS color | `''` |
+| `windowOpacity` | Between 0 and 1 | `NaN` |
 | `characterEdgeStyle` | `shaka.config.CharacterEdgeStyle`: `NONE`, `DROP_SHADOW`, `RAISED`, `DEPRESSED` or `OUTLINE` | `DEFAULT` |
 
 Example configuration:
@@ -141,6 +143,13 @@ CEA-708 captions.
 whether it is the one defined by the subtitles or the one given in the
 configuration.  The opacities are only applied to hexadecimal, `rgb()`,
 `rgba()` and basic named colors.
+
+###### Window
+
+`windowColor` and `windowOpacity` paint a window behind the subtitles: a box
+around all the lines of each block of text, under their background.  The
+subtitles don't define a window, so it is only painted when one of them is
+configured.  If only `windowOpacity` is configured, the window is black.
 
 ###### Character edge style
 
