@@ -8,16 +8,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   const StatusPromise = shaka.test.StatusPromise;
   const Util = shaka.test.Util;
   const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-  const originalGetLocationProtocol =
-      shaka.net.NetworkingEngine.getLocationProtocol_;
-  const originalGetLocationHref =
-      shaka.net.NetworkingEngine.getLocationHref_;
+  const originalGetBaseUri = shaka.net.NetworkingEngine.getBaseUri_;
   const originalDefer = shaka.net.Backoff.defer;
 
   /** @type {string} */
-  let fakeProtocol;
-  /** @type {string} */
-  let fakeHref;
+  let fakeBaseUri;
   /** @type {!shaka.net.NetworkingEngine} */
   let networkingEngine;
   /** @type {!jasmine.Spy} */
@@ -32,8 +27,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   let deferSpy;
 
   beforeAll(() => {
-    shaka.net.NetworkingEngine.getLocationProtocol_ = () => fakeProtocol;
-    shaka.net.NetworkingEngine.getLocationHref_ = () => fakeHref;
+    shaka.net.NetworkingEngine.getBaseUri_ = () => fakeBaseUri;
   });
 
   function makeResolveScheme(spyName) {
@@ -42,8 +36,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   }
 
   beforeEach(() => {
-    fakeProtocol = 'http:';
-    fakeHref = 'http://page.example/dir/index.html';
+    fakeBaseUri = 'http://page.example/dir/index.html';
     error = new shaka.util.Error(
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
@@ -76,9 +69,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   });
 
   afterAll(() => {
-    shaka.net.NetworkingEngine.getLocationProtocol_ =
-        originalGetLocationProtocol;
-    shaka.net.NetworkingEngine.getLocationHref_ = originalGetLocationHref;
+    shaka.net.NetworkingEngine.getBaseUri_ = originalGetBaseUri;
     shaka.net.Backoff.defer = originalDefer;
   });
 
@@ -488,32 +479,87 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await networkingEngine.request(requestType, request).promise;
     });
 
-    it('infers a scheme for // URIs', async () => {
-      fakeProtocol = 'resolve:';
-      await networkingEngine.request(requestType, createRequest('//foo'))
-          .promise;
-      expect(resolveScheme).toHaveBeenCalled();
-      expect(resolveScheme.calls.argsFor(0)[0]).toBe('resolve://foo');
-    });
+    describe('without a scheme', () => {
+      beforeEach(() => {
+        fakeBaseUri = 'resolve://page.example/dir/index.html';
+      });
 
-    it('resolves path-only URIs against the page location', async () => {
-      fakeProtocol = 'resolve:';
-      fakeHref = 'resolve://page.example/dir/index.html';
-      await networkingEngine
-          .request(requestType, createRequest('/foo/bar.m3u8?a=1'))
-          .promise;
-      expect(resolveScheme.calls.argsFor(0)[0])
-          .toBe('resolve://page.example/foo/bar.m3u8?a=1');
-    });
+      /**
+       * @param {string} uri
+       * @return {!Promise<string>} The URI the plugin received.
+       */
+      async function requestedUri(uri) {
+        await networkingEngine.request(requestType, createRequest(uri))
+            .promise;
+        return resolveScheme.calls.argsFor(0)[0];
+      }
 
-    it('resolves relative paths against the page location', async () => {
-      fakeProtocol = 'resolve:';
-      fakeHref = 'resolve://page.example/dir/index.html';
-      await networkingEngine
-          .request(requestType, createRequest('foo.m3u8'))
-          .promise;
-      expect(resolveScheme.calls.argsFor(0)[0])
-          .toBe('resolve://page.example/dir/foo.m3u8');
+      it('infers a scheme for // URIs', async () => {
+        expect(await requestedUri('//foo')).toBe('resolve://foo');
+      });
+
+      it('keeps the port of // URIs', async () => {
+        expect(await requestedUri('//foo:8080/x.mpd'))
+            .toBe('resolve://foo:8080/x.mpd');
+      });
+
+      it('resolves path-only URIs', async () => {
+        expect(await requestedUri('/foo/bar.m3u8?a=1'))
+            .toBe('resolve://page.example/foo/bar.m3u8?a=1');
+      });
+
+      it('resolves relative paths', async () => {
+        expect(await requestedUri('foo.m3u8'))
+            .toBe('resolve://page.example/dir/foo.m3u8');
+      });
+
+      it('keeps a colon in the query string', async () => {
+        expect(await requestedUri('foo.m3u8?t=12:00'))
+            .toBe('resolve://page.example/dir/foo.m3u8?t=12:00');
+      });
+
+      it('resolves against the document base URI', async () => {
+        fakeBaseUri = 'resolve://cdn.example/assets/';
+        expect(await requestedUri('foo.m3u8'))
+            .toBe('resolve://cdn.example/assets/foo.m3u8');
+      });
+
+      it('applies forceHTTPS to the first attempt', async () => {
+        fakeBaseUri = 'http://page.example/';
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().networking;
+        config.forceHTTPS = true;
+        networkingEngine.configure(config);
+        const originalHttps = shaka.net.NetworkingEngine.schemes_.get('https');
+        shaka.net.NetworkingEngine.registerScheme(
+            'https', Util.spyFunc(resolveScheme),
+            shaka.net.NetworkingEngine.PluginPriority.APPLICATION);
+        try {
+          expect(await requestedUri('/foo')).toBe('https://page.example/foo');
+        } finally {
+          shaka.net.NetworkingEngine.schemes_.set('https', originalHttps);
+        }
+      });
+
+      it('passes the resolved URI to request filters', async () => {
+        const filter = jasmine.createSpy('request filter');
+        networkingEngine.registerRequestFilter(Util.spyFunc(filter));
+        await networkingEngine.request(requestType, createRequest('/foo'))
+            .promise;
+        expect(filter.calls.argsFor(0)[1].uris[0])
+            .toBe('resolve://page.example/foo');
+      });
+
+      it('fails with UNSUPPORTED_SCHEME on an opaque base', async () => {
+        fakeBaseUri = 'blob:resolve://page.example/1234';
+        const expected = Util.jasmineError(new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.UNSUPPORTED_SCHEME, '/foo'));
+        await expectAsync(networkingEngine
+            .request(requestType, createRequest('/foo')).promise)
+            .toBeRejectedWith(expected);
+      });
     });
 
     it('sets the time to 1st byte of the request when headers are available',
@@ -1107,7 +1153,6 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     shaka.net.NetworkingEngine.registerScheme('offline',
         Util.spyFunc(offlineScheme));
 
-    fakeProtocol = 'https:';
     await networkingEngine
         .request(requestType, createRequest('offline:db/123'))
         .promise;
