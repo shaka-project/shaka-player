@@ -8,10 +8,14 @@ goog.provide('cml.cmcd.toCmcdUrl');
 goog.require('cml.cmcd.Cmcd');
 goog.require('cml.cmcd.CmcdEncodeOptions');
 goog.require('cml.cmcd.encodeCmcd');
+goog.require('cml.cmcd.percentEncode');
 
 
 /**
- * Convert a CMCD data object to a URL encoded string.
+ * Convert a CMCD object to a URL encoded string.
+ *
+ * Only letters, digits, `-`, `.`, `_`, and `~` stay unencoded, as in the
+ * query examples of CTA-5004-B.
  *
  * @param {cml.cmcd.Cmcd} cmcd The CMCD object to convert.
  * @param {cml.cmcd.CmcdEncodeOptions=} options Options for encoding.
@@ -26,5 +30,5 @@ cml.cmcd.toCmcdUrl = function(cmcd, options) {
 
   const params = cml.cmcd.encodeCmcd(cmcd, options);
 
-  return encodeURIComponent(params);
+  return cml.cmcd.percentEncode(params);
 };

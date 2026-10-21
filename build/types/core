@@ -225,7 +225,9 @@
 +../../third_party/cml-cmcd/is_cmcd_v1_key.js
 +../../third_party/cml-cmcd/is_token_field.js
 +../../third_party/cml-cmcd/is_valid.js
++../../third_party/cml-cmcd/percent_encode.js
 +../../third_party/cml-cmcd/prepare_cmcd_data.js
++../../third_party/cml-cmcd/replace_cmcd_param.js
 +../../third_party/cml-cmcd/resolve_version.js
 +../../third_party/cml-cmcd/to_cmcd_headers.js
 +../../third_party/cml-cmcd/to_cmcd_query.js
