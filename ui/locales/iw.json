@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "מיקום הכתוביות",
   "SUBTITLE_SIZE": "גודל הכתוביות",
   "SUBTITLE_STYLE": "סגנון הכתוביות",
+  "SUBTITLE_WINDOW_COLOR": "צבע החלון של הכתוביות",
+  "SUBTITLE_WINDOW_OPACITY": "שקיפות החלון של הכתוביות",
   "SURROUND": "סראונד",
   "TOGGLE_STEREOSCOPIC": "החלפת מצב סטריאוסקופי",
   "TOP_CENTER": "למעלה במרכז",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "סוג הסרטון",
   "VOLUME": "עוצמת קול",
   "WHITE": "לבן",
+  "WINDOW_COLOR": "צבע חלון",
+  "WINDOW_OPACITY": "שקיפות חלון",
   "YELLOW": "צהוב"
 }

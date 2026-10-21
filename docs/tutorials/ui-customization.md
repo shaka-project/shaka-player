@@ -103,6 +103,12 @@ The following elements can be added to the UI bar using this configuration value
 * captions-background-opacity: adds a button that controls the background
   opacity of the captions. The button is visible only if the content has at
   least one text track.
+* captions-window-color: adds a button that controls the color of the window
+  behind the captions. The button is visible only if the content has at least
+  one text track.
+* captions-window-opacity: adds a button that controls the opacity of the
+  window behind the captions. The button is visible only if the content has at
+  least one text track.
 * captions-character-edge-style: adds a button that controls the style of the
   edges of the characters of the captions (drop shadow, raised, depressed or
   outline). The button is visible only if the content has at least one text
@@ -110,9 +116,9 @@ The following elements can be added to the UI bar using this configuration value
 * captions-style: adds a menu group with the elements listed in the
   `captionsStyleElements` configuration, by default captions-font-family,
   captions-font-color, captions-size, captions-background-color,
-  captions-background-opacity, captions-character-edge-style,
-  captions-font-opacity, captions-position and captions-style-reset. The group
-  is visible only if one of them is.
+  captions-background-opacity, captions-window-color, captions-window-opacity,
+  captions-character-edge-style, captions-font-opacity, captions-position and
+  captions-style-reset. The group is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.
@@ -181,6 +187,12 @@ The following buttons can be added to the overflow menu:
 * captions-background-opacity: adds a button that controls the background
   opacity of the captions. The button is visible only if the content has at
   least one text track.
+* captions-window-color: adds a button that controls the color of the window
+  behind the captions. The button is visible only if the content has at least
+  one text track.
+* captions-window-opacity: adds a button that controls the opacity of the
+  window behind the captions. The button is visible only if the content has at
+  least one text track.
 * captions-character-edge-style: adds a button that controls the style of the
   edges of the characters of the captions (drop shadow, raised, depressed or
   outline). The button is visible only if the content has at least one text
@@ -188,9 +200,9 @@ The following buttons can be added to the overflow menu:
 * captions-style: adds a menu group with the elements listed in the
   `captionsStyleElements` configuration, by default captions-font-family,
   captions-font-color, captions-size, captions-background-color,
-  captions-background-opacity, captions-character-edge-style,
-  captions-font-opacity, captions-position and captions-style-reset. The group
-  is visible only if one of them is.
+  captions-background-opacity, captions-window-color, captions-window-opacity,
+  captions-character-edge-style, captions-font-opacity, captions-position and
+  captions-style-reset. The group is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.

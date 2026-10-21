@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "موقعیت زیرنویس",
   "SUBTITLE_SIZE": "اندازه زیرنویس",
   "SUBTITLE_STYLE": "سبک زیرنویس",
+  "SUBTITLE_WINDOW_COLOR": "رنگ پنجره زیرنویس",
+  "SUBTITLE_WINDOW_OPACITY": "ماتی پنجره زیرنویس",
   "SURROUND": "فراگیر",
   "TOGGLE_STEREOSCOPIC": "روشن/خاموش کردن برجسته‌نمایی",
   "TOP_CENTER": "بالا وسط",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "نوع ویدیو",
   "VOLUME": "میزان صدا",
   "WHITE": "سفید",
+  "WINDOW_COLOR": "رنگ پنجره",
+  "WINDOW_OPACITY": "ماتی پنجره",
   "YELLOW": "زرد"
 }

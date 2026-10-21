@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Subtitr mövqeyi",
   "SUBTITLE_SIZE": "Alt yazı ölçüsü",
   "SUBTITLE_STYLE": "Subtitr üslubu",
+  "SUBTITLE_WINDOW_COLOR": "Subtitrin pəncərə rəngi",
+  "SUBTITLE_WINDOW_OPACITY": "Subtitrin pəncərəsinin qeyri-şəffaflığı",
   "SURROUND": "Həcmli səs",
   "TOGGLE_STEREOSCOPIC": "Stereoskopik rejimi aç/bağla",
   "TOP_CENTER": "Yuxarı mərkəz",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Video növü",
   "VOLUME": "Səs səviyyəsi",
   "WHITE": "Ağ",
+  "WINDOW_COLOR": "Pəncərə rəngi",
+  "WINDOW_OPACITY": "Pəncərənin qeyri-şəffaflığı",
   "YELLOW": "Sarı"
 }

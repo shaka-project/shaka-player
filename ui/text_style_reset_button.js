@@ -113,6 +113,8 @@ shaka.ui.TextStyleResetButton.STYLE_SETTINGS_ = [
   'fontOpacity',
   'backgroundColor',
   'backgroundOpacity',
+  'windowColor',
+  'windowOpacity',
   'characterEdgeStyle',
 ];
 

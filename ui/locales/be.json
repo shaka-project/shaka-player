@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Пазіцыя субцітраў",
   "SUBTITLE_SIZE": "Памер субцітраў",
   "SUBTITLE_STYLE": "Стыль субцітраў",
+  "SUBTITLE_WINDOW_COLOR": "Колер акна субцітраў",
+  "SUBTITLE_WINDOW_OPACITY": "Непразрыстасць акна субцітраў",
   "SURROUND": "Аб'ёмны гук",
   "TOGGLE_STEREOSCOPIC": "Уключыць або адключыць стэрэаскапічны рэжым",
   "TOP_CENTER": "Уверсе па цэнтры",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Тып відэа",
   "VOLUME": "Гучнасць",
   "WHITE": "Белы",
+  "WINDOW_COLOR": "Колер акна",
+  "WINDOW_OPACITY": "Непразрыстасць акна",
   "YELLOW": "Жоўты"
 }

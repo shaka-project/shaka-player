@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Position des sous-titres",
   "SUBTITLE_SIZE": "Taille des sous-titres",
   "SUBTITLE_STYLE": "Style des sous-titres",
+  "SUBTITLE_WINDOW_COLOR": "Couleur de la fenêtre des sous-titres",
+  "SUBTITLE_WINDOW_OPACITY": "Opacité de la fenêtre des sous-titres",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Activer/Désactiver le mode stéréoscopique",
   "TOP_CENTER": "En haut au centre",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Type de Vidéo",
   "VOLUME": "Volume",
   "WHITE": "Blanc",
+  "WINDOW_COLOR": "Couleur de la fenêtre",
+  "WINDOW_OPACITY": "Opacité de la fenêtre",
   "YELLOW": "Jaune"
 }

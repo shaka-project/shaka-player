@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Positie van ondertitels",
   "SUBTITLE_SIZE": "Grootte van ondertitels",
   "SUBTITLE_STYLE": "Stijl van ondertitels",
+  "SUBTITLE_WINDOW_COLOR": "Vensterkleur van ondertitels",
+  "SUBTITLE_WINDOW_OPACITY": "Ondoorzichtigheid van venster van ondertitels",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Stereoscopisch aan-/uitzetten",
   "TOP_CENTER": "Boven midden",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Video type",
   "VOLUME": "Volume",
   "WHITE": "Wit",
+  "WINDOW_COLOR": "Vensterkleur",
+  "WINDOW_OPACITY": "Ondoorzichtigheid van venster",
   "YELLOW": "Geel"
 }

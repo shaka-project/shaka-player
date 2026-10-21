@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Felirat pozíciója",
   "SUBTITLE_SIZE": "Felirat mérete",
   "SUBTITLE_STYLE": "Felirat stílusa",
+  "SUBTITLE_WINDOW_COLOR": "Felirat ablakszíne",
+  "SUBTITLE_WINDOW_OPACITY": "Felirat ablakának átlátszatlansága",
   "SURROUND": "Térhatású hangzás",
   "TOGGLE_STEREOSCOPIC": "Sztereó térhatás be-/kikapcsolása",
   "TOP_CENTER": "Fent középen",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videó típusa",
   "VOLUME": "Hangerő",
   "WHITE": "Fehér",
+  "WINDOW_COLOR": "Ablakszín",
+  "WINDOW_OPACITY": "Ablak átlátszatlansága",
   "YELLOW": "Sárga"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "字幕位置",
   "SUBTITLE_SIZE": "字幕大小",
   "SUBTITLE_STYLE": "字幕样式",
+  "SUBTITLE_WINDOW_COLOR": "字幕窗口颜色",
+  "SUBTITLE_WINDOW_OPACITY": "字幕窗口不透明度",
   "SURROUND": "环绕声",
   "TOGGLE_STEREOSCOPIC": "切换立体声",
   "TOP_CENTER": "顶部居中",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "视频类型",
   "VOLUME": "音量",
   "WHITE": "白色",
+  "WINDOW_COLOR": "窗口颜色",
+  "WINDOW_OPACITY": "窗口不透明度",
   "YELLOW": "黄色"
 }

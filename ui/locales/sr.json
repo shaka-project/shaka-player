@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Положај титла",
   "SUBTITLE_SIZE": "Величина титла",
   "SUBTITLE_STYLE": "Стил титла",
+  "SUBTITLE_WINDOW_COLOR": "Боја прозора титла",
+  "SUBTITLE_WINDOW_OPACITY": "Непрозирност прозора титла",
   "SURROUND": "Просторни звук",
   "TOGGLE_STEREOSCOPIC": "Укључи/искључи стерео",
   "TOP_CENTER": "Горе у средини",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Тип видеа",
   "VOLUME": "Јачина звука",
   "WHITE": "Бела",
+  "WINDOW_COLOR": "Боја прозора",
+  "WINDOW_OPACITY": "Непрозирност прозора",
   "YELLOW": "Жута"
 }

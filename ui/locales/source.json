@@ -399,6 +399,14 @@
     "description": "Label for a button used to navigate to a submenu with the subtitle style options, such as the size and the position.",
     "message": "Subtitle style"
   },
+  "SUBTITLE_WINDOW_COLOR": {
+    "description": "Label for a button used to select the color of the window behind the subtitles.",
+    "message": "Subtitle window color"
+  },
+  "SUBTITLE_WINDOW_OPACITY": {
+    "description": "Label for a button used to select the opacity of the window behind the subtitles.",
+    "message": "Subtitle window opacity"
+  },
   "SURROUND": {
     "description": "Label used to identify a audio track that has surround audio.",
     "message": "Surround"
@@ -450,6 +458,14 @@
   "WHITE": {
     "description": "Name of the color white, in a menu used to select the color of the subtitles.",
     "message": "White"
+  },
+  "WINDOW_COLOR": {
+    "description": "Label for a button used to select the color of the window behind the subtitles, inside the subtitle style menu.",
+    "message": "Window color"
+  },
+  "WINDOW_OPACITY": {
+    "description": "Label for a button used to select the opacity of the window behind the subtitles, inside the subtitle style menu.",
+    "message": "Window opacity"
   },
   "YELLOW": {
     "description": "Name of the color yellow, in a menu used to select the color of the subtitles.",

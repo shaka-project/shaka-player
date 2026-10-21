@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "موضع الترجمة",
   "SUBTITLE_SIZE": "حجم الترجمة",
   "SUBTITLE_STYLE": "نمط الترجمة",
+  "SUBTITLE_WINDOW_COLOR": "لون النافذة في الترجمة",
+  "SUBTITLE_WINDOW_OPACITY": "درجة تعتيم النافذة في الترجمة",
   "SURROUND": "صوت محيطي",
   "TOGGLE_STEREOSCOPIC": "إيقاف العرض المجسّم أو تفعيله",
   "TOP_CENTER": "أعلى الوسط",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "نوع الفيديو",
   "VOLUME": "مستوى الصوت",
   "WHITE": "أبيض",
+  "WINDOW_COLOR": "لون النافذة",
+  "WINDOW_OPACITY": "درجة تعتيم النافذة",
   "YELLOW": "أصفر"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "ตำแหน่งคำบรรยาย",
   "SUBTITLE_SIZE": "ขนาดคำบรรยาย",
   "SUBTITLE_STYLE": "รูปแบบคำบรรยาย",
+  "SUBTITLE_WINDOW_COLOR": "สีหน้าต่างคำบรรยาย",
+  "SUBTITLE_WINDOW_OPACITY": "ความทึบแสงของหน้าต่างคำบรรยาย",
   "SURROUND": "เซอร์ราวด์",
   "TOGGLE_STEREOSCOPIC": "เปิด/ปิดฟีเจอร์สามมิติ",
   "TOP_CENTER": "ด้านบนตรงกลาง",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "ประเภทวิดีโอ",
   "VOLUME": "ระดับเสียง",
   "WHITE": "สีขาว",
+  "WINDOW_COLOR": "สีหน้าต่าง",
+  "WINDOW_OPACITY": "ความทึบแสงของหน้าต่าง",
   "YELLOW": "สีเหลือง"
 }

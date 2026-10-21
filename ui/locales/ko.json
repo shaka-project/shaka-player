@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "자막 위치",
   "SUBTITLE_SIZE": "자막 크기",
   "SUBTITLE_STYLE": "자막 스타일",
+  "SUBTITLE_WINDOW_COLOR": "자막 창 색상",
+  "SUBTITLE_WINDOW_OPACITY": "자막 창 불투명도",
   "SURROUND": "서라운드",
   "TOGGLE_STEREOSCOPIC": "입체 보기 전환",
   "TOP_CENTER": "상단 중앙",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "동영상 유형",
   "VOLUME": "볼륨",
   "WHITE": "흰색",
+  "WINDOW_COLOR": "창 색상",
+  "WINDOW_OPACITY": "창 불투명도",
   "YELLOW": "노란색"
 }

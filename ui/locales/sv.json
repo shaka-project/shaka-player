@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Undertextens placering",
   "SUBTITLE_SIZE": "Undertextens storlek",
   "SUBTITLE_STYLE": "Undertextens stil",
+  "SUBTITLE_WINDOW_COLOR": "Fönsterfärg för undertext",
+  "SUBTITLE_WINDOW_OPACITY": "Fönstrets opacitet för undertext",
   "SURROUND": "Surroundljud",
   "TOGGLE_STEREOSCOPIC": "Aktivera/inaktivera stereoskopiska bilder",
   "TOP_CENTER": "Högst upp i mitten",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videotyp",
   "VOLUME": "Volym",
   "WHITE": "Vit",
+  "WINDOW_COLOR": "Fönsterfärg",
+  "WINDOW_OPACITY": "Fönstrets opacitet",
   "YELLOW": "Gul"
 }

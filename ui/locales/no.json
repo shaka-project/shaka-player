@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Plassering av teksting",
   "SUBTITLE_SIZE": "Størrelse på teksting",
   "SUBTITLE_STYLE": "Stil for teksting",
+  "SUBTITLE_WINDOW_COLOR": "Vindusfarge for teksting",
+  "SUBTITLE_WINDOW_OPACITY": "Vindusopasitet for teksting",
   "SURROUND": "Surround-lyd",
   "TOGGLE_STEREOSCOPIC": "Slå stereoskopisk modus av/på",
   "TOP_CENTER": "Øverst i midten",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videotype",
   "VOLUME": "Volum",
   "WHITE": "Hvit",
+  "WINDOW_COLOR": "Vindusfarge",
+  "WINDOW_OPACITY": "Vindusopasitet",
   "YELLOW": "Gul"
 }

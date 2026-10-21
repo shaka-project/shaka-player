@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Subtitle position",
   "SUBTITLE_SIZE": "Subtitle size",
   "SUBTITLE_STYLE": "Subtitle style",
+  "SUBTITLE_WINDOW_COLOR": "Subtitle window color",
+  "SUBTITLE_WINDOW_OPACITY": "Subtitle window opacity",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Toggle stereoscopic",
   "TOP_CENTER": "Top center",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Video type",
   "VOLUME": "Volume",
   "WHITE": "White",
+  "WINDOW_COLOR": "Window color",
+  "WINDOW_OPACITY": "Window opacity",
   "YELLOW": "Yellow"
 }

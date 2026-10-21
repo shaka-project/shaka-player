@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Pozícia titulkov",
   "SUBTITLE_SIZE": "Veľkosť titulkov",
   "SUBTITLE_STYLE": "Štýl titulkov",
+  "SUBTITLE_WINDOW_COLOR": "Farba okna titulkov",
+  "SUBTITLE_WINDOW_OPACITY": "Nepriehľadnosť okna titulkov",
   "SURROUND": "Priestorový zvuk",
   "TOGGLE_STEREOSCOPIC": "Prepnúť na stereoskopický režim",
   "TOP_CENTER": "Hore v strede",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Typ videa",
   "VOLUME": "Hlasitosť",
   "WHITE": "Biela",
+  "WINDOW_COLOR": "Farba okna",
+  "WINDOW_OPACITY": "Nepriehľadnosť okna",
   "YELLOW": "Žltá"
 }

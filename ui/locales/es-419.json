@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Posición de los subtítulos",
   "SUBTITLE_SIZE": "Tamaño de los subtítulos",
   "SUBTITLE_STYLE": "Estilo de los subtítulos",
+  "SUBTITLE_WINDOW_COLOR": "Color de ventana de subtítulos",
+  "SUBTITLE_WINDOW_OPACITY": "Opacidad de ventana de subtítulos",
   "SURROUND": "Sonido envolvente",
   "TOGGLE_STEREOSCOPIC": "Activar o desactivar el modo estereoscópico",
   "TOP_CENTER": "Arriba en el centro",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Tipo de video",
   "VOLUME": "Volumen",
   "WHITE": "Blanco",
+  "WINDOW_COLOR": "Color de ventana",
+  "WINDOW_OPACITY": "Opacidad de ventana",
   "YELLOW": "Amarillo"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Subtitrų padėtis",
   "SUBTITLE_SIZE": "Subtitrų dydis",
   "SUBTITLE_STYLE": "Subtitrų stilius",
+  "SUBTITLE_WINDOW_COLOR": "Subtitrų lango spalva",
+  "SUBTITLE_WINDOW_OPACITY": "Subtitrų lango nepermatomumas",
   "SURROUND": "Erdvinis garsas",
   "TOGGLE_STEREOSCOPIC": "Perjungti stereoskopinį vaizdą",
   "TOP_CENTER": "Viršuje centre",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Vaizdo įrašo tipas",
   "VOLUME": "Apimtis",
   "WHITE": "Balta",
+  "WINDOW_COLOR": "Lango spalva",
+  "WINDOW_OPACITY": "Lango nepermatomumas",
   "YELLOW": "Geltona"
 }

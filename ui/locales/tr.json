@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Altyazı konumu",
   "SUBTITLE_SIZE": "Altyazı boyutu",
   "SUBTITLE_STYLE": "Altyazı stili",
+  "SUBTITLE_WINDOW_COLOR": "Altyazı penceresi rengi",
+  "SUBTITLE_WINDOW_OPACITY": "Altyazı penceresi opaklığı",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Stereoskopik modu aç/kapat",
   "TOP_CENTER": "Üst orta",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Video türü",
   "VOLUME": "Ses",
   "WHITE": "Beyaz",
+  "WINDOW_COLOR": "Pencere rengi",
+  "WINDOW_OPACITY": "Pencere opaklığı",
   "YELLOW": "Sarı"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Положение субтитров",
   "SUBTITLE_SIZE": "Размер субтитров",
   "SUBTITLE_STYLE": "Стиль субтитров",
+  "SUBTITLE_WINDOW_COLOR": "Цвет окна субтитров",
+  "SUBTITLE_WINDOW_OPACITY": "Прозрачность окна субтитров",
   "SURROUND": "Объемный звук",
   "TOGGLE_STEREOSCOPIC": "Включить или отключить стереоскопический режим",
   "TOP_CENTER": "Вверху по центру",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Тип видео",
   "VOLUME": "Громкость",
   "WHITE": "Белый",
+  "WINDOW_COLOR": "Цвет окна",
+  "WINDOW_OPACITY": "Прозрачность окна",
   "YELLOW": "Желтый"
 }

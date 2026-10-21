@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Позиция на субтитрите",
   "SUBTITLE_SIZE": "Размер на субтитрите",
   "SUBTITLE_STYLE": "Стил на субтитрите",
+  "SUBTITLE_WINDOW_COLOR": "Цвят на прозореца на субтитрите",
+  "SUBTITLE_WINDOW_OPACITY": "Плътност на прозореца на субтитрите",
   "SURROUND": "Съраунд",
   "TOGGLE_STEREOSCOPIC": "Превключване на стереоскопичния режим",
   "TOP_CENTER": "Горе в центъра",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Тип видеоклип",
   "VOLUME": "Звук",
   "WHITE": "Бяло",
+  "WINDOW_COLOR": "Цвят на прозореца",
+  "WINDOW_OPACITY": "Плътност на прозореца",
   "YELLOW": "Жълто"
 }

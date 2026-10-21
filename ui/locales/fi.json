@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Tekstityksen sijainti",
   "SUBTITLE_SIZE": "Tekstityksen koko",
   "SUBTITLE_STYLE": "Tekstityksen tyyli",
+  "SUBTITLE_WINDOW_COLOR": "Tekstityksen ikkunan väri",
+  "SUBTITLE_WINDOW_OPACITY": "Tekstityksen ikkunan läpinäkymättömyys",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "Stereoskooppi päälle/pois",
   "TOP_CENTER": "Ylhäällä keskellä",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Videon tyyppi",
   "VOLUME": "Äänenvoimakkuus",
   "WHITE": "Valkoinen",
+  "WINDOW_COLOR": "Ikkunan väri",
+  "WINDOW_OPACITY": "Ikkunan läpinäkymättömyys",
   "YELLOW": "Keltainen"
 }

@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Posisyon ng subtitle",
   "SUBTITLE_SIZE": "Laki ng subtitle",
   "SUBTITLE_STYLE": "Istilo ng subtitle",
+  "SUBTITLE_WINDOW_COLOR": "Kulay ng window ng subtitle",
+  "SUBTITLE_WINDOW_OPACITY": "Opacity ng window ng subtitle",
   "SURROUND": "Surround",
   "TOGGLE_STEREOSCOPIC": "I-toggle sa stereoscopic",
   "TOP_CENTER": "Itaas sa gitna",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Uri ng video",
   "VOLUME": "Volume",
   "WHITE": "Puti",
+  "WINDOW_COLOR": "Kulay ng window",
+  "WINDOW_OPACITY": "Opacity ng window",
   "YELLOW": "Dilaw"
 }

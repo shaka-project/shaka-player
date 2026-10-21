@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Pozycja napisów",
   "SUBTITLE_SIZE": "Rozmiar napisów",
   "SUBTITLE_STYLE": "Styl napisów",
+  "SUBTITLE_WINDOW_COLOR": "Kolor okna napisów",
+  "SUBTITLE_WINDOW_OPACITY": "Przezroczystość okna napisów",
   "SURROUND": "Przestrzenny",
   "TOGGLE_STEREOSCOPIC": "Przełącz tryb stereoskopowy",
   "TOP_CENTER": "Na górze pośrodku",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Typ filmu",
   "VOLUME": "Głośność",
   "WHITE": "Biały",
+  "WINDOW_COLOR": "Kolor okna",
+  "WINDOW_OPACITY": "Przezroczystość okna",
   "YELLOW": "Żółty"
 }

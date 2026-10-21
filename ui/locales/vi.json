@@ -98,6 +98,8 @@
   "SUBTITLE_POSITION": "Vị trí phụ đề",
   "SUBTITLE_SIZE": "Kích thước phụ đề",
   "SUBTITLE_STYLE": "Kiểu phụ đề",
+  "SUBTITLE_WINDOW_COLOR": "Màu cửa sổ phụ đề",
+  "SUBTITLE_WINDOW_OPACITY": "Độ mờ của cửa sổ phụ đề",
   "SURROUND": "Vòm",
   "TOGGLE_STEREOSCOPIC": "Bật/tắt chế độ hình nổi",
   "TOP_CENTER": "Giữa trên cùng",
@@ -111,5 +113,7 @@
   "VIDEO_TYPE": "Loại video",
   "VOLUME": "Âm lượng",
   "WHITE": "Trắng",
+  "WINDOW_COLOR": "Màu cửa sổ",
+  "WINDOW_OPACITY": "Độ mờ của cửa sổ",
   "YELLOW": "Vàng"
 }
