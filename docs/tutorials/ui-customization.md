@@ -88,9 +88,10 @@ The following elements can be added to the UI bar using this configuration value
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
-* captions-font-family: adds a button that controls the font family of the
-  captions. The button is visible only if the content has at least one text
-  track.
+* captions-font-family: adds a button that controls the font style of the
+  captions (its font family and font variant), with the options of
+  `captionsFontStyles`. The button is visible only if the content has at
+  least one text track.
 * captions-font-color: adds a button that controls the font color of the
   captions. The button is visible only if the content has at least one text
   track.
@@ -103,6 +104,12 @@ The following elements can be added to the UI bar using this configuration value
 * captions-background-opacity: adds a button that controls the background
   opacity of the captions. The button is visible only if the content has at
   least one text track.
+* captions-window-color: adds a button that controls the color of the window
+  behind the captions. The button is visible only if the content has at least
+  one text track.
+* captions-window-opacity: adds a button that controls the opacity of the
+  window behind the captions. The button is visible only if the content has at
+  least one text track.
 * captions-character-edge-style: adds a button that controls the style of the
   edges of the characters of the captions (drop shadow, raised, depressed or
   outline). The button is visible only if the content has at least one text
@@ -110,9 +117,9 @@ The following elements can be added to the UI bar using this configuration value
 * captions-style: adds a menu group with the elements listed in the
   `captionsStyleElements` configuration, by default captions-font-family,
   captions-font-color, captions-size, captions-background-color,
-  captions-background-opacity, captions-character-edge-style,
-  captions-font-opacity, captions-position and captions-style-reset. The group
-  is visible only if one of them is.
+  captions-background-opacity, captions-window-color, captions-window-opacity,
+  captions-character-edge-style, captions-font-opacity, captions-position and
+  captions-style-reset. The group is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.
@@ -166,9 +173,10 @@ The following buttons can be added to the overflow menu:
   The button is visible only if the content has at least one text track.
 * captions-size: adds a button that controls the size of the captions.
   The button is visible only if the content has at least one text track.
-* captions-font-family: adds a button that controls the font family of the
-  captions. The button is visible only if the content has at least one text
-  track.
+* captions-font-family: adds a button that controls the font style of the
+  captions (its font family and font variant), with the options of
+  `captionsFontStyles`. The button is visible only if the content has at
+  least one text track.
 * captions-font-color: adds a button that controls the font color of the
   captions. The button is visible only if the content has at least one text
   track.
@@ -181,6 +189,12 @@ The following buttons can be added to the overflow menu:
 * captions-background-opacity: adds a button that controls the background
   opacity of the captions. The button is visible only if the content has at
   least one text track.
+* captions-window-color: adds a button that controls the color of the window
+  behind the captions. The button is visible only if the content has at least
+  one text track.
+* captions-window-opacity: adds a button that controls the opacity of the
+  window behind the captions. The button is visible only if the content has at
+  least one text track.
 * captions-character-edge-style: adds a button that controls the style of the
   edges of the characters of the captions (drop shadow, raised, depressed or
   outline). The button is visible only if the content has at least one text
@@ -188,9 +202,9 @@ The following buttons can be added to the overflow menu:
 * captions-style: adds a menu group with the elements listed in the
   `captionsStyleElements` configuration, by default captions-font-family,
   captions-font-color, captions-size, captions-background-color,
-  captions-background-opacity, captions-character-edge-style,
-  captions-font-opacity, captions-position and captions-style-reset. The group
-  is visible only if one of them is.
+  captions-background-opacity, captions-window-color, captions-window-opacity,
+  captions-character-edge-style, captions-font-opacity, captions-position and
+  captions-style-reset. The group is visible only if one of them is.
 * captions-settings: adds a menu group with the captions and captions-style
   elements. The group is visible only if one of them is, and shows the current
   text track.
@@ -374,6 +388,34 @@ while a linear ad is playing) or not added.
 const config = {
   'bigButtons': ['seek_backward', 'play_pause', 'seek_forward'],
   'seekButtonDistance': 15,
+}
+ui.configure(config);
+```
+
+#### Configuring the font styles of the captions
+The `captions-font-family` menu offers the font styles in `captionsFontStyles`.
+By default, they are "Default" (the font of the subtitles) followed by the font
+styles of YouTube: monospaced serif, proportional serif, monospaced sans-serif,
+proportional sans-serif, casual, cursive and small capitals.  Each entry sets
+`textDisplayer.fontFamily` and `textDisplayer.fontVariant`, and can have a
+`label`.  Without a label, the presets of `shaka.config.FontFamily` are shown by
+their localized name, and other font families by their first font.
+
+The presets can be removed, and fonts given by the application can be added:
+
+```js
+player.addFont('OpenDyslexic', 'https://example.com/opendyslexic.woff2');
+const config = {
+  'captionsFontStyles': [
+    {fontFamily: shaka.config.FontFamily.DEFAULT},
+    {fontFamily: shaka.config.FontFamily.PROPORTIONAL_SANS_SERIF},
+    {
+      fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+      fontVariant: 'small-caps',
+    },
+    {fontFamily: 'OpenDyslexic, sans-serif'},
+    {fontFamily: '"Atkinson Hyperlegible", sans-serif', label: 'Atkinson'},
+  ],
 }
 ui.configure(config);
 ```

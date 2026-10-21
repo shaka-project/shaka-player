@@ -748,6 +748,8 @@ describe('MenuGroup', () => {
             'shaka-caption-size-button',
             'shaka-caption-background-color-button',
             'shaka-caption-background-opacity-button',
+            'shaka-caption-window-color-button',
+            'shaka-caption-window-opacity-button',
             'shaka-caption-character-edge-style-button',
             'shaka-caption-font-opacity-button',
             'shaka-caption-position-button',
@@ -818,11 +820,14 @@ describe('MenuGroup', () => {
           textDisplayer: {
             fontScaleFactor: 1.5,
             positionArea: shaka.config.PositionArea.TOP_LEFT,
-            fontFamily: shaka.config.FontFamily.MONOSPACED_SERIF,
+            fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+            fontVariant: 'small-caps',
             fontColor: '#ff0',
             fontOpacity: 0.5,
             backgroundColor: '#f00',
             backgroundOpacity: 0.25,
+            windowColor: '#00f',
+            windowOpacity: 0.5,
             characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
             subtitleDelay: 2,
           },
@@ -839,10 +844,13 @@ describe('MenuGroup', () => {
         expect(config.fontScaleFactor).toBe(1);
         expect(config.positionArea).toBe(shaka.config.PositionArea.DEFAULT);
         expect(config.fontFamily).toBe(shaka.config.FontFamily.DEFAULT);
+        expect(config.fontVariant).toBe('');
         expect(config.fontColor).toBe('');
         expect(isNaN(config.fontOpacity)).toBe(true);
         expect(config.backgroundColor).toBe('');
         expect(isNaN(config.backgroundOpacity)).toBe(true);
+        expect(config.windowColor).toBe('');
+        expect(isNaN(config.windowOpacity)).toBe(true);
         expect(config.characterEdgeStyle)
             .toBe(shaka.config.CharacterEdgeStyle.DEFAULT);
         // The subtitle delay is not part of the style.
@@ -861,6 +869,8 @@ describe('MenuGroup', () => {
           'shaka-caption-font-opacity-button',
           'shaka-caption-background-color-button',
           'shaka-caption-background-opacity-button',
+          'shaka-caption-window-color-button',
+          'shaka-caption-window-opacity-button',
           'shaka-caption-character-edge-style-button',
         ]) {
           expect(getStyleSelection(className)).toBe(defaultLabel);
