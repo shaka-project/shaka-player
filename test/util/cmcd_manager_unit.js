@@ -1125,6 +1125,74 @@ describe('CmcdManager', () => {
       expect(r.uris[1]).toContain('cdn2.example.com');
     });
 
+    // https://github.com/shaka-project/shaka-player/issues/10763
+    it('appends CMCD to relative and scheme-only URIs (query mode)', () => {
+      for (const uri of ['/api/seg.mp4', 'seg.mp4', 'http:/api/seg.mp4']) {
+        const r = createRequest(uri);
+        manager.applyRequestData(RequestType.SEGMENT, r,
+            createSegmentContext('video'));
+        expect(r.uris[0].startsWith(uri + '?CMCD=')).toBe(true);
+        expect(r.uris[0]).toContain('cid%3D%22testing%22');
+        expect(r.uris[0]).not.toContain('//api');
+      }
+    });
+
+    it('keeps CMCD on a relative URI that carries nor (query mode)', () => {
+      const player = createMockPlayer();
+      const {manager: m} = createManager(player, {includeKeys: ['sid', 'nor']});
+      const context = createSegmentContext('video');
+      const next = /** @type {shaka.media.SegmentReference} */ ({
+        startTime: 3.33,
+        endTime: 6.66,
+        getUris: () => ['/api/seg2.mp4'],
+      });
+      const stream = /** @type {!shaka.extern.Stream} */ (context.stream);
+      stream.segmentIndex = /** @type {shaka.media.SegmentIndex} */ (
+        /** @type {?} */ ({
+          getIteratorForTime: () => ({next: () => ({value: next})}),
+        }));
+      const r = createRequest('/api/seg1.mp4');
+      m.applyRequestData(RequestType.SEGMENT, r, context);
+      expect(r.uris[0].startsWith('/api/seg1.mp4?CMCD=')).toBe(true);
+      expect(decodeURIComponent(r.uris[0]))
+          .toContain('nor=("/api/seg2.mp4")');
+    });
+
+    it('preserves other query parameters byte for byte (query mode)', () => {
+      const token = 'hdnts=exp=1700000000~acl=/*~hmac=abc123';
+      const single = createRequest('https://cdn1.example.com/seg.mp4?' + token);
+      manager.applyRequestData(RequestType.SEGMENT, single,
+          createSegmentContext('video'));
+      expect(single.uris[0].startsWith(
+          'https://cdn1.example.com/seg.mp4?' + token + '&CMCD=')).toBe(true);
+
+      const multi = createRequest();
+      multi.uris = [
+        'https://cdn1.example.com/seg.mp4?' + token,
+        '/relative/seg.mp4?' + token + '#frag',
+      ];
+      manager.applyRequestData(RequestType.SEGMENT, multi,
+          createSegmentContext('video'));
+      expect(multi.uris[0].startsWith(
+          'https://cdn1.example.com/seg.mp4?' + token + '&CMCD=')).toBe(true);
+      expect(multi.uris[1].startsWith(
+          '/relative/seg.mp4?' + token + '&CMCD=')).toBe(true);
+      expect(multi.uris[1].endsWith('#frag')).toBe(true);
+      // Alternates carry identical CMCD.
+      expect(multi.uris[1].split('&CMCD=')[1].split('#')[0])
+          .toBe(multi.uris[0].split('&CMCD=')[1]);
+    });
+
+    it('percent-encodes the CMCD query as the CTA-5004-B examples do', () => {
+      const player = createMockPlayer();
+      const {manager: m} = createManager(player,
+          {includeKeys: ['cid'], contentId: 'a b(c)'});
+      const r = createRequest();
+      m.applyRequestData(RequestType.SEGMENT, r,
+          createSegmentContext('video'));
+      expect(r.uris[0]).toContain('cid%3D%22a%20b%28c%29%22');
+    });
+
     it('writes CMCD-* headers when useHeaders is true', () => {
       const player = createMockPlayer();
       const {manager: m} = createManager(player,
@@ -1329,6 +1397,27 @@ describe('CmcdManager', () => {
         priv(manager)['reporter_'].recordResponseReceived.calls
             .mostRecent().args[1]);
       expect(data.url).toBe('https://test/seg.mp4');
+    });
+
+    it('strips only the CMCD query from a relative reported url', () => {
+      const player = createMockPlayer();
+      const {manager} = createManager(player, createResponseConfig());
+      spyOn(priv(manager)['reporter_'], 'recordResponseReceived');
+      const token = 'hdnts=exp=1700000000~acl=/*~hmac=abc123';
+      const uri = '/api/seg.mp4?' + token + '&CMCD=cid%3D%22x%22';
+      manager.applyResponseData(RequestType.SEGMENT,
+          /** @type {shaka.extern.Response} */ ({
+            status: 200,
+            uri: uri,
+            originalUri: uri,
+            originalRequest: createRequest(),
+            timeMs: 50,
+            headers: {},
+          }));
+      const data = /** @type {!Object} */ (
+        priv(manager)['reporter_'].recordResponseReceived.calls
+            .mostRecent().args[1]);
+      expect(data.url).toBe('/api/seg.mp4?' + token);
     });
   });
 

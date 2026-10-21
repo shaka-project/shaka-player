@@ -11,7 +11,6 @@ goog.require('cml.cmcd.CMCD_EVENT_RESPONSE_RECEIVED');
 goog.require('cml.cmcd.CMCD_EVENT_TIME_INTERVAL');
 goog.require('cml.cmcd.CMCD_HEADERS');
 goog.require('cml.cmcd.CMCD_MIME_TYPE');
-goog.require('cml.cmcd.CMCD_PARAM');
 goog.require('cml.cmcd.CMCD_QUERY');
 goog.require('cml.cmcd.CMCD_REQUEST_MODE');
 goog.require('cml.cmcd.CMCD_STATE_EVENT_FIELDS');
@@ -20,6 +19,7 @@ goog.require('cml.cmcd.CmcdEventType');
 goog.require('cml.cmcd.encodeCmcd');
 goog.require('cml.cmcd.encodePreparedCmcd');
 goog.require('cml.cmcd.prepareCmcdData');
+goog.require('cml.cmcd.replaceCmcdParam');
 goog.require('cml.cmcd.toPreparedCmcdHeaders');
 goog.require('cml.cmcd.uuid');
 goog.requireType('cml.cmcd.Cmcd');
@@ -580,12 +580,9 @@ cml.cmcd.CmcdReporter = class {
       return;
     }
 
-    const urlObj = new URL(/** @type {string} */ (url));
-    urlObj.searchParams.delete(cml.cmcd.CMCD_PARAM);
-
     /** @type {!cml.cmcd.Cmcd} */
     const derived = /** @type {!cml.cmcd.Cmcd} */ ({
-      url: urlObj.toString(),
+      url: cml.cmcd.replaceCmcdParam(/** @type {string} */ (url)),
       rc: status,
     });
 
@@ -680,7 +677,6 @@ cml.cmcd.CmcdReporter = class {
       return report;
     }
 
-    const url = new URL(report.url);
     /** @type {!cml.cmcd.Cmcd} */
     const cmcdData = /** @type {!cml.cmcd.Cmcd} */ (
         Object.assign({}, this.data_, data || {}, {
@@ -701,8 +697,7 @@ cml.cmcd.CmcdReporter = class {
       case cml.cmcd.CMCD_QUERY: {
         const param = cml.cmcd.encodePreparedCmcd(cmcd);
         if (param) {
-          url.searchParams.set(cml.cmcd.CMCD_PARAM, param);
-          report.url = url.toString();
+          report.url = cml.cmcd.replaceCmcdParam(report.url, param);
         }
         break;
       }

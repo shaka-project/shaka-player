@@ -585,6 +585,7 @@ ttlb
 cmsdd
 cmsds
 cdnb
+hdnts
 
 # other
 Aegisub

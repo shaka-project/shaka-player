@@ -56,6 +56,22 @@ cml-cmcd
       `cml.cmcd.CmcdReporter_*_`. State machine (per-target sequence
       counters, sid-change reset, batching/flushing) preserved
       verbatim.
+    - Backports on top of v2.4.0 (remove on the next bump; both are in
+      cmcd-v2.8.1 and later):
+        * Upstream #494 (commit 463012fc1): `replace_cmcd_param.js` and
+          `percent_encode.js` added. `CmcdReporter` writes the `CMCD`
+          query parameter into the request URL string, and strips it from
+          the `rr` event url, instead of round-tripping through
+          `new URL()` + `searchParams`. Relative URLs work and the rest
+          of the URL is left unchanged. `appendCmcdQuery` uses the same
+          helper (fixes a parameter written after the fragment), and
+          `toCmcdUrl` uses `percentEncode`: only letters, digits, `-`,
+          `.`, `_`, `~` stay unencoded, so a space is `%20` (was `+`
+          from the reporter) and `(`/`)` are `%28`/`%29`.
+        * The invalid-`baseUrl` guard of upstream cmcd-v2.8.0
+          (`toBase()` in `formatNor.ts`), as
+          `CMCD_FORMATTER_MAP_toBase_`: a relative request URL no longer
+          makes the `nor` formatter throw `Invalid URL`.
     - `setInterval` whitelisted in build/conformance.textproto for
       `cmcd_reporter.js`. Upstream uses `setInterval` directly in
       `start()`; replacing with `shaka.util.Timer` would break the
