@@ -139,13 +139,15 @@ describe('TtmlTextParser', () => {
     /**
      * @param {string} head The content of the head element.
      * @param {string} body The body element.
+     * @param {string=} ttAttributes More attributes of the tt element.
      * @return {!shaka.text.Cue} The cue of the body.
      */
-    function parse(head, body) {
+    function parse(head, body, ttAttributes = '') {
       const cues = new shaka.text.TtmlTextParser().parseMedia(
           shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(
-              '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
-              `<head>${head}</head>${body}</tt>`)),
+              '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
+              'xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
+              `${ttAttributes}><head>${head}</head>${body}</tt>`)),
           {
             periodStart: 0,
             segmentStart: 0,
@@ -394,6 +396,169 @@ describe('TtmlTextParser', () => {
         width: 120,
         height: 80,
       }));
+    });
+
+    describe('origin and extent', () => {
+      const root1080p = 'tts:extent="1920px 1080px"';
+
+      /**
+       * @param {string} regionAttributes
+       * @param {string=} ttAttributes
+       * @return {shaka.text.CueRegion}
+       */
+      function parseRegion(regionAttributes, ttAttributes = '') {
+        return parse(
+            `<layout><region xml:id="r1" ${regionAttributes}/></layout>`,
+            '<body region="r1"><div>' +
+            '<p begin="0s" end="1s">Test</p>' +
+            '</div></body>',
+            ttAttributes).region;
+      }
+
+      it('resolves cells with the default cell resolution', () => {
+        // The default cell resolution is 32 columns by 15 rows.
+        const region = parseRegion('tts:origin="4c 3c" tts:extent="16c 6c"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 12.5,
+          viewportAnchorY: 20,
+          viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+          width: 50,
+          height: 40,
+          widthUnits: CueRegion.units.PERCENTAGE,
+          heightUnits: CueRegion.units.PERCENTAGE,
+        }));
+      });
+
+      it('resolves cells against columns and rows respectively', () => {
+        // With a grid which is not square, swapping the axes would give
+        // different results.
+        const region = parseRegion(
+            'tts:origin="4c 3c" tts:extent="20c 10c"',
+            'ttp:cellResolution="40 20"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 10,
+          viewportAnchorY: 15,
+          viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+          width: 50,
+          height: 50,
+          widthUnits: CueRegion.units.PERCENTAGE,
+          heightUnits: CueRegion.units.PERCENTAGE,
+        }));
+      });
+
+      it('extends a region with an origin in cells to the edges', () => {
+        const region = parseRegion('tts:origin="8c 3c"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 25,
+          viewportAnchorY: 20,
+          width: 75,
+          height: 80,
+          widthUnits: CueRegion.units.PERCENTAGE,
+          heightUnits: CueRegion.units.PERCENTAGE,
+        }));
+      });
+
+      it('supports lengths with different units', () => {
+        const region = parseRegion(
+            'tts:origin="10% 108px" tts:extent="960px 3c"', root1080p);
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 10,
+          viewportAnchorY: 10,
+          viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+          width: 50,
+          height: 20,
+          widthUnits: CueRegion.units.PERCENTAGE,
+          heightUnits: CueRegion.units.PERCENTAGE,
+        }));
+      });
+
+      it('supports lengths in pixels which are not integers', () => {
+        const region = parseRegion(
+            'tts:origin="10.5px 20.25px" tts:extent="100.5px 50.75px"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 10.5,
+          viewportAnchorY: 20.25,
+          viewportAnchorUnits: CueRegion.units.PX,
+          width: 100.5,
+          height: 50.75,
+          widthUnits: CueRegion.units.PX,
+          heightUnits: CueRegion.units.PX,
+        }));
+      });
+
+      it('supports a negative origin', () => {
+        const region = parseRegion(
+            'tts:origin="-10% -3c" tts:extent="50% 3c"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: -10,
+          viewportAnchorY: -20,
+          viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+          width: 50,
+          height: 20,
+        }));
+      });
+
+      it('ignores a negative extent', () => {
+        const warnOnce = spyOn(shaka.log, 'warnOnce');
+        const region = parseRegion('tts:extent="-50% 40%"');
+        expect(region).toEqual(jasmine.objectContaining({
+          width: 100,
+          height: 100,
+          widthUnits: CueRegion.units.PERCENTAGE,
+          heightUnits: CueRegion.units.PERCENTAGE,
+        }));
+        expect(warnOnce).toHaveBeenCalledWith(
+            anyString, jasmine.stringMatching('-50% 40%'));
+      });
+
+      it('ignores an origin which mixes pixels and other units', () => {
+        // Without the size of the root container, pixels cannot be converted
+        // to the percentage the other coordinate is in.
+        const warnOnce = spyOn(shaka.log, 'warnOnce');
+        const region = parseRegion('tts:origin="10% 72px"');
+        expect(region).toEqual(jasmine.objectContaining({
+          viewportAnchorX: 0,
+          viewportAnchorY: 0,
+          viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+        }));
+        expect(warnOnce).toHaveBeenCalledWith(
+            anyString, jasmine.stringMatching('10% 72px'));
+      });
+
+      it('resolves em with the aspect ratio of the root container', () => {
+        const warnOnce = spyOn(shaka.log, 'warnOnce');
+        // The default font size is one cell, and a cell is 1/15 of the height
+        // of the root container.  A horizontal em is as long as a vertical
+        // one, which is 1080 / 15 = 72px, or 3.75% of 1920px.
+        const region = parseRegion('tts:extent="10em 3em"', root1080p);
+        expect(region.width).toBeCloseTo(37.5);
+        expect(region.height).toBeCloseTo(20);
+        expect(region.widthUnits).toBe(CueRegion.units.PERCENTAGE);
+        expect(region.heightUnits).toBe(CueRegion.units.PERCENTAGE);
+        expect(warnOnce).not.toHaveBeenCalled();
+      });
+
+      it('approximates horizontal em without a root extent', () => {
+        const warnOnce = spyOn(shaka.log, 'warnOnce');
+        // Without the aspect ratio of the root container, a horizontal em is
+        // measured along the width of a cell, 1/32 of the root container.
+        const region = parseRegion('tts:extent="10em 3em"');
+        expect(region.width).toBeCloseTo(31.25);
+        expect(region.height).toBeCloseTo(20);
+        expect(warnOnce).toHaveBeenCalledWith(
+            'ttml-horizontal-em', jasmine.stringMatching('10em'));
+      });
+
+      it('resolves em with a font size of two lengths', () => {
+        const warnOnce = spyOn(shaka.log, 'warnOnce');
+        // The first length is the width of an em, and the second its height,
+        // so no aspect ratio is needed.
+        const region = parseRegion(
+            'tts:fontSize="2c 1c" tts:extent="4em 3em"');
+        expect(region.width).toBeCloseTo(25);
+        expect(region.height).toBeCloseTo(20);
+        expect(warnOnce).not.toHaveBeenCalled();
+      });
     });
 
     it('does not use a percentage root extent as pixels', () => {
