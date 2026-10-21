@@ -135,6 +135,7 @@ describe('DrmEngine', () => {
           getKeySystem: () => null,
           onMetadata: () => {},
           onEmsg: () => {},
+          onScte35: () => {},
           onEvent: () => {},
           onManifestUpdate: () => {},
           getDrmInfo: () => null,

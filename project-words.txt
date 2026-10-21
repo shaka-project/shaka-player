@@ -213,6 +213,7 @@ Clearkeys
 Clutz
 codem
 cooldown
+Corsiva
 cssnano
 hbbtv
 Conax
@@ -228,7 +229,9 @@ Fairplay
 gstreamer
 Gumlet
 GPAC
+Handlee
 Hisense
+Hyperlegible
 isoboxer
 Jwplayer
 Kaltura

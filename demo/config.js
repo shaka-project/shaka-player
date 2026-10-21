@@ -458,6 +458,12 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true,
             /* canBeZero= */ true,
             /* canBeUnset= */ true)
+        .addTextInput_('Window color', 'textDisplayer.windowColor')
+        .addNumberInput_('Window opacity',
+            'textDisplayer.windowOpacity',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
         .addSelectInput_('Character edge style',
             'textDisplayer.characterEdgeStyle',
             characterEdgeStyleOptions,

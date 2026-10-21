@@ -63,12 +63,14 @@ by the subtitles, so only the options that are changed override it.
 |--------|--------|---------|
 | `fontScaleFactor` | The factor used to increase or decrease the font size | `1` |
 | `positionArea` | `shaka.config.PositionArea` (see below) | `DEFAULT` |
-| `fontFamily` | A CSS font family, or a preset of `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF` or `PROPORTIONAL_SANS_SERIF` | `DEFAULT` |
+| `fontFamily` | A CSS font family, or a preset of `shaka.config.FontFamily`: `MONOSPACED_SERIF`, `PROPORTIONAL_SERIF`, `MONOSPACED_SANS_SERIF`, `PROPORTIONAL_SANS_SERIF`, `CASUAL`, `CURSIVE` or `SMALL_CAPITALS` | `DEFAULT` |
 | `fontVariant` | A CSS `font-variant` (e.g. `'small-caps'`) | `''` |
 | `fontColor` | A CSS color | `''` |
 | `fontOpacity` | Between 0 and 1 | `NaN` |
 | `backgroundColor` | A CSS color | `''` |
 | `backgroundOpacity` | Between 0 and 1 | `NaN` |
+| `windowColor` | A CSS color | `''` |
+| `windowOpacity` | Between 0 and 1 | `NaN` |
 | `characterEdgeStyle` | `shaka.config.CharacterEdgeStyle`: `NONE`, `DROP_SHADOW`, `RAISED`, `DEPRESSED` or `OUTLINE` | `DEFAULT` |
 
 Example configuration:
@@ -120,7 +122,7 @@ guidelines, or provide a consistent layout across different content.
 ###### Font family
 
 `fontFamily` accepts any CSS font family.  `shaka.config.FontFamily` lists
-some presets.  Fonts that are not installed on the system can be loaded with
+the font families of the subtitles of YouTube as presets.  Fonts that are not installed on the system can be loaded with
 `player.addFont()`, or declared with `@font-face` in the CSS of the page:
 
 ```js
@@ -132,7 +134,17 @@ player.configure('textDisplayer.fontFamily', 'OpenDyslexic, sans-serif');
 
 `fontVariant` replaces the font variant of the subtitles.  For example,
 `'small-caps'` renders them with small capitals, one of the font styles of
-CEA-708 captions.
+CEA-708 captions.  Use it with the `SMALL_CAPITALS` font family to get the
+small capitals of YouTube:
+
+```js
+player.configure({
+  textDisplayer: {
+    fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+    fontVariant: 'small-caps',
+  },
+});
+```
 
 ###### Colors and opacities
 
@@ -141,6 +153,13 @@ CEA-708 captions.
 whether it is the one defined by the subtitles or the one given in the
 configuration.  The opacities are only applied to hexadecimal, `rgb()`,
 `rgba()` and basic named colors.
+
+###### Window
+
+`windowColor` and `windowOpacity` paint a window behind the subtitles: a box
+around all the lines of each block of text, under their background.  The
+subtitles don't define a window, so it is only painted when one of them is
+configured.  If only `windowOpacity` is configured, the window is black.
 
 ###### Character edge style
 
