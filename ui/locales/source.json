@@ -81,6 +81,10 @@
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
   },
+  "CASUAL": {
+    "description": "Name of a font style for the subtitles: an informal font, like Comic Sans MS.",
+    "message": "Casual"
+  },
   "CENTER": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Center"
@@ -104,6 +108,10 @@
   "COPY_VIDEO_FRAME": {
     "description": "Label for a button used to copy the current video frame to the clipboard.",
     "message": "Copy video frame"
+  },
+  "CURSIVE": {
+    "description": "Name of a font style for the subtitles: a font that imitates handwriting, like Monotype Corsiva.",
+    "message": "Cursive"
   },
   "CYAN": {
     "description": "Name of the color cyan, in a menu used to select the color of the subtitles.",
@@ -346,6 +354,10 @@
   "SKIP_TO_LIVE": {
     "description": "Label for a button used to skip ahead to the live broadcast.",
     "message": "Skip ahead to live"
+  },
+  "SMALL_CAPITALS": {
+    "description": "Name of a font style for the subtitles: lowercase letters are shown as smaller uppercase letters.",
+    "message": "Small capitals"
   },
   "STATISTICS": {
     "description": "Label for a button that displays statistics of the video.",

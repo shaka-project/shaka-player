@@ -1648,6 +1648,116 @@ describe('UI', () => {
         expect(currentSelection.textContent).toBe('Open Sans');
       });
 
+      it('selects small capitals with its font variant', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-font-family',
+          ],
+          customContextMenu: false,
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        usePreviewTextDisplayer(player);
+        controls.showUI();
+
+        const LocIds = shaka.ui.Locales.Ids;
+        const localization = controls.getLocalization();
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-font-family-button');
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-settings-menu');
+        const currentSelection = UiUtils.getElementByClassName(
+            button, 'shaka-current-selection-span');
+        button.click();
+
+        // The same font styles as YouTube, after the default one.
+        const labels = Array.from(menu.querySelectorAll(
+            'button[role="menuitemradio"] > span'))
+            .map((span) => span.textContent);
+        expect(labels).toEqual([
+          LocIds.DEFAULT,
+          LocIds.MONOSPACED_SERIF,
+          LocIds.PROPORTIONAL_SERIF,
+          LocIds.MONOSPACED_SANS_SERIF,
+          LocIds.PROPORTIONAL_SANS_SERIF,
+          LocIds.CASUAL,
+          LocIds.CURSIVE,
+          LocIds.SMALL_CAPITALS,
+        ].map((id) => localization.resolve(id)));
+
+        const smallCapitals = getStyleOption(
+            menu, localization.resolve(LocIds.SMALL_CAPITALS));
+        UiUtils.simulateEvent(smallCapitals, 'mouseenter');
+        expect(latestPreviewConfig().fontFamily)
+            .toBe(shaka.config.FontFamily.SMALL_CAPITALS);
+        expect(latestPreviewConfig().fontVariant).toBe('small-caps');
+
+        smallCapitals.click();
+        let textDisplayer = player.getConfiguration().textDisplayer;
+        expect(textDisplayer.fontFamily)
+            .toBe(shaka.config.FontFamily.SMALL_CAPITALS);
+        expect(textDisplayer.fontVariant).toBe('small-caps');
+        expect(smallCapitals.getAttribute('aria-checked')).toBe('true');
+        expect(currentSelection.textContent)
+            .toBe(localization.resolve(LocIds.SMALL_CAPITALS));
+
+        // Any other font style clears the font variant.
+        getStyleOption(menu, localization.resolve(LocIds.CASUAL)).click();
+        textDisplayer = player.getConfiguration().textDisplayer;
+        expect(textDisplayer.fontFamily).toBe(shaka.config.FontFamily.CASUAL);
+        expect(textDisplayer.fontVariant).toBe('');
+      });
+
+      it('shows the font styles given by the application', async () => {
+        const config = {
+          controlPanelElements: [
+            'captions-font-family',
+          ],
+          customContextMenu: false,
+          captionsFontStyles: [
+            {fontFamily: shaka.config.FontFamily.DEFAULT},
+            {fontFamily: shaka.config.FontFamily.PROPORTIONAL_SANS_SERIF},
+            {fontFamily: 'OpenDyslexic, sans-serif'},
+            {
+              fontFamily: '"Atkinson Hyperlegible", sans-serif',
+              label: 'Atkinson',
+            },
+          ],
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        controls.showUI();
+
+        const LocIds = shaka.ui.Locales.Ids;
+        const localization = controls.getLocalization();
+        const button = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-font-family-button');
+        const menu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-settings-menu');
+        const currentSelection = UiUtils.getElementByClassName(
+            button, 'shaka-current-selection-span');
+        button.click();
+
+        const labels = Array.from(menu.querySelectorAll(
+            'button[role="menuitemradio"] > span'))
+            .map((span) => span.textContent);
+        expect(labels).toEqual([
+          localization.resolve(LocIds.DEFAULT),
+          localization.resolve(LocIds.PROPORTIONAL_SANS_SERIF),
+          'OpenDyslexic',
+          'Atkinson',
+        ]);
+
+        getStyleOption(menu, 'Atkinson').click();
+        expect(player.getConfiguration().textDisplayer.fontFamily)
+            .toBe('"Atkinson Hyperlegible", sans-serif');
+        expect(currentSelection.textContent).toBe('Atkinson');
+      });
+
       it('keeps a committed text size as the preview baseline', async () => {
         const config = {
           controlPanelElements: [

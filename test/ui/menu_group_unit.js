@@ -820,7 +820,8 @@ describe('MenuGroup', () => {
           textDisplayer: {
             fontScaleFactor: 1.5,
             positionArea: shaka.config.PositionArea.TOP_LEFT,
-            fontFamily: shaka.config.FontFamily.MONOSPACED_SERIF,
+            fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+            fontVariant: 'small-caps',
             fontColor: '#ff0',
             fontOpacity: 0.5,
             backgroundColor: '#f00',
@@ -843,6 +844,7 @@ describe('MenuGroup', () => {
         expect(config.fontScaleFactor).toBe(1);
         expect(config.positionArea).toBe(shaka.config.PositionArea.DEFAULT);
         expect(config.fontFamily).toBe(shaka.config.FontFamily.DEFAULT);
+        expect(config.fontVariant).toBe('');
         expect(config.fontColor).toBe('');
         expect(isNaN(config.fontOpacity)).toBe(true);
         expect(config.backgroundColor).toBe('');
