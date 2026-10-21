@@ -3187,6 +3187,8 @@ shaka.extern.OfflineConfiguration;
  *   fontOpacity: number,
  *   backgroundColor: string,
  *   backgroundOpacity: number,
+ *   windowColor: string,
+ *   windowOpacity: number,
  *   characterEdgeStyle: shaka.config.CharacterEdgeStyle,
  *   subtitleDelay: number,
  *   suspendRenderingWhenHidden: boolean,
@@ -3262,6 +3264,28 @@ shaka.extern.OfflineConfiguration;
  *   by the subtitle, the default one, or the one given in
  *   <code>backgroundColor</code>.  NaN indicates that the opacity of the
  *   background color in use is kept.
+ *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
+ *   <code>rgba()</code> and basic named colors.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>NaN</code>.
+ * @property {string} windowColor
+ *   The color of the window of the subtitles, a box painted behind all the
+ *   lines of each block of text, under their background.  It is given as a
+ *   CSS color (e.g. <code>'#080808'</code> or <code>'black'</code>).  The
+ *   window is only painted when this or <code>windowOpacity</code> are
+ *   given, so an empty string indicates that there is no window, unless
+ *   <code>windowOpacity</code> is given, which paints a black window.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {number} windowOpacity
+ *   The opacity of the window of the subtitles, between 0 and 1.  It replaces
+ *   the opacity of the window color, whether it is the one given in
+ *   <code>windowColor</code> or the default black.  NaN indicates that the
+ *   opacity of the window color is kept.
  *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
  *   <code>rgba()</code> and basic named colors.
  *   <br>
