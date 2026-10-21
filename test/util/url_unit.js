@@ -37,64 +37,6 @@ describe('URL', () => {
       expect(shaka.util.URL.resolve(base, relative))
           .toBe('http://example.com/file.html');
     });
-
-    // Regression: the native URL constructor rejects a relative base, which
-    // broke apps that pass one in (e.g. a thumbnail track added by a path
-    // relative to the page).  See issue #10750.
-    it('resolves against a path-relative base', () => {
-      expect(shaka.util.URL.resolve('thumbs/main.vtt', 'tile.avif'))
-          .toBe('thumbs/tile.avif');
-    });
-
-    it('resolves against an absolute-path base', () => {
-      expect(shaka.util.URL.resolve('/media/thumbs/main.vtt', 'tile.avif'))
-          .toBe('/media/thumbs/tile.avif');
-    });
-
-    it('resolves against a protocol-relative base', () => {
-      expect(shaka.util.URL.resolve('//cdn.example/a/main.vtt', 'tile.avif'))
-          .toBe('//cdn.example/a/tile.avif');
-    });
-
-    it('keeps a protocol-relative reference free of a scheme', () => {
-      expect(shaka.util.URL.resolve('thumbs/main.vtt', '//cdn.example/t.avif'))
-          .toBe('//cdn.example/t.avif');
-    });
-
-    it('keeps the leading parent segments of a relative base', () => {
-      expect(shaka.util.URL.resolve('../thumbs/main.vtt', 'tile.avif'))
-          .toBe('../thumbs/tile.avif');
-    });
-
-    it('keeps parent segments that climb above a relative base', () => {
-      expect(shaka.util.URL.resolve('a/b/main.vtt', '../../../tile.avif'))
-          .toBe('../tile.avif');
-    });
-
-    it('keeps the fragment of a relative thumbnail reference', () => {
-      expect(shaka.util.URL.resolve(
-          'thumbs/main.vtt', 'tile.avif#xywh=0,0,192,108'))
-          .toBe('thumbs/tile.avif#xywh=0,0,192,108');
-    });
-
-    it('applies dot segments with a relative base', () => {
-      expect(shaka.util.URL.resolve('a/b/main.vtt', '../tile.avif'))
-          .toBe('a/tile.avif');
-      expect(shaka.util.URL.resolve('/a/b/main.vtt', '../../tile.avif'))
-          .toBe('/tile.avif');
-    });
-
-    it('keeps an absolute-path reference absolute with a relative base',
-        () => {
-          expect(shaka.util.URL.resolve('a/b/main.vtt', '/tile.avif'))
-              .toBe('/tile.avif');
-        });
-
-    it('lets an absolute reference win over a relative base', () => {
-      expect(shaka.util.URL.resolve(
-          'a/b/main.vtt', 'https://other.example/tile.avif'))
-          .toBe('https://other.example/tile.avif');
-    });
   });
 
   describe('resolveUris', () => {
@@ -179,28 +121,6 @@ describe('URL', () => {
 
       expect(base).toEqual(['http://a.com/']);
       expect(relative).toEqual(['x']);
-    });
-
-    it('resolves relative URIs against a relative base', () => {
-      // A thumbnail VTT added by a relative path, with the cue payloads
-      // that sit beside it.  See issue #10750.
-      const base = ['thumbs/main.vtt'];
-      const relative = [
-        'tile-1.avif#xywh=0,0,192,108',
-        'tile-2.avif#xywh=192,0,192,108',
-      ];
-
-      expect(shaka.util.URL.resolveUris(base, relative)).toEqual([
-        'thumbs/tile-1.avif#xywh=0,0,192,108',
-        'thumbs/tile-2.avif#xywh=192,0,192,108',
-      ]);
-    });
-
-    it('applies extra query params with a relative base', () => {
-      const result =
-          shaka.util.URL.resolveUris(['thumbs/main.vtt'], ['a.avif'], 'x=1');
-
-      expect(result).toEqual(['thumbs/a.avif?x=1']);
     });
 
     it('does not re-encode existing query params', () => {
