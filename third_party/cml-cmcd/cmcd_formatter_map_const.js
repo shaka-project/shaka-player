@@ -41,6 +41,32 @@ cml.cmcd.CMCD_FORMATTER_MAP_toRounded_ = function(value) {
 
 
 /**
+ * Resolves the base for `nor` relativization, or `undefined` when
+ * `baseUrl` is absent or not a valid absolute URL (for example a relative
+ * request URL), in which case `nor` values are emitted unchanged.
+ *
+ * LOCAL MOD: backport of the invalid-`baseUrl` guard from upstream
+ * cmcd-v2.8.0 (`toBase()` in `formatNor.ts`). In 2.4.0 a relative
+ * `baseUrl` made `getBaseUrl()` throw `Invalid URL`.
+ *
+ * @param {(string|undefined)} baseUrl
+ * @return {(string|undefined)}
+ * @private
+ */
+cml.cmcd.CMCD_FORMATTER_MAP_toBase_ = function(baseUrl) {
+  if (!baseUrl) {
+    return undefined;
+  }
+
+  try {
+    return new URL(cml.cmcd.getBaseUrl(baseUrl)).href;
+  } catch (e) {
+    return undefined;
+  }
+};
+
+
+/**
  * @param {cml.cmcd.CmcdValue} value
  * @param {cml.cmcd.CmcdFormatterOptions} options
  * @return {*}
@@ -58,10 +84,10 @@ cml.cmcd.CMCD_FORMATTER_MAP_toUrlSafe_ = function(value, options) {
         cml.cmcd.CMCD_FORMATTER_MAP_toUrlSafe_(value.value, options),
         value.params);
   } else {
-    if (options.baseUrl) {
+    const base = cml.cmcd.CMCD_FORMATTER_MAP_toBase_(options.baseUrl);
+    if (base) {
       value = cml.cmcd.urlToRelativePath(
-          /** @type {string} */ (value),
-          cml.cmcd.getBaseUrl(options.baseUrl));
+          /** @type {string} */ (value), base);
     }
     return options.version === 1 ?
         encodeURIComponent(/** @type {string} */ (value)) :
