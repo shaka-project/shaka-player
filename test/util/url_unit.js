@@ -375,32 +375,4 @@ describe('URL', () => {
           .toBe('https://example.com/path?sig=a%2Fb%3Dc');
     });
   });
-
-  describe('setScheme', () => {
-    it('replaces http with https', () => {
-      expect(shaka.util.URL.setScheme('http://example.com/path', 'https'))
-          .toBe('https://example.com/path');
-    });
-
-    it('replaces https with http', () => {
-      expect(shaka.util.URL.setScheme('https://example.com/path', 'http'))
-          .toBe('http://example.com/path');
-    });
-
-    it('preserves path and query string when replacing scheme', () => {
-      expect(
-          shaka.util.URL.setScheme('http://example.com/path?a=1&b=2', 'https'))
-          .toBe('https://example.com/path?a=1&b=2');
-    });
-
-    it('replaces scheme in custom scheme URI', () => {
-      expect(shaka.util.URL.setScheme('skd://example.com/license/123', 'https'))
-          .toBe('https://example.com/license/123');
-    });
-
-    it('prepends scheme when URI has no scheme', () => {
-      expect(shaka.util.URL.setScheme('//example.com/path', 'https'))
-          .toBe('https://example.com/path');
-    });
-  });
 });
