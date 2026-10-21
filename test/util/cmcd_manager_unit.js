@@ -1159,7 +1159,7 @@ describe('CmcdManager', () => {
     });
 
     it('preserves other query parameters byte for byte (query mode)', () => {
-      const token = 'hdnts=exp=1700000000~acl=/*~hmac=abc123';
+      const token = 'token=exp=1700000000~acl=/*~hmac=abc123';
       const single = createRequest('https://cdn1.example.com/seg.mp4?' + token);
       manager.applyRequestData(RequestType.SEGMENT, single,
           createSegmentContext('video'));
@@ -1403,7 +1403,7 @@ describe('CmcdManager', () => {
       const player = createMockPlayer();
       const {manager} = createManager(player, createResponseConfig());
       spyOn(priv(manager)['reporter_'], 'recordResponseReceived');
-      const token = 'hdnts=exp=1700000000~acl=/*~hmac=abc123';
+      const token = 'token=exp=1700000000~acl=/*~hmac=abc123';
       const uri = '/api/seg.mp4?' + token + '&CMCD=cid%3D%22x%22';
       manager.applyResponseData(RequestType.SEGMENT,
           /** @type {shaka.extern.Response} */ ({
