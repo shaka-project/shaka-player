@@ -101,4 +101,28 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('does not request segments past @endNumber', async () => {
+    const netEngine = player.getNetworkingEngine();
+    const SegmentType =
+        compiledShaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    /** @type {!Array<string>} */
+    const requestedUris = [];
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == SegmentType) {
+        requestedUris.push(request.uris[0]);
+      }
+    });
+
+    await player.load('/base/test/test/assets/clear-encrypted/end-number.mpd');
+    await video.play();
+    await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+
+    expect(video.ended).toBe(true);
+    expect(requestedUris.some((uri) => uri.includes('-s2.mp4'))).toBe(true);
+    expect(requestedUris.some((uri) => uri.includes('-s3.mp4'))).toBe(false);
+
+    await player.unload();
+  });
 });
