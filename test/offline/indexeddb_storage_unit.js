@@ -72,6 +72,24 @@ filterDescribe('IndexeddbStorageCell', offlineSupported, () => {
     await expectAsync(cell.getSegments(keys)).toBeRejectedWith(expected);
   });
 
+  it('can get all segment keys', async () => {
+    await IndexedDBUtils.deleteDB(dbName);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
+
+    expect(await cell.getAllSegmentKeys()).toEqual([]);
+
+    const keys = await cell.addSegments([
+      OfflineUtils.createSegmentData([0]),
+      OfflineUtils.createSegmentData([0, 1]),
+      OfflineUtils.createSegmentData([0, 1, 2]),
+    ]);
+    expect(await cell.getAllSegmentKeys()).toEqual(keys);
+
+    await cell.removeSegments([keys[1]], noop);
+    expect(await cell.getAllSegmentKeys()).toEqual([keys[0], keys[2]]);
+  });
+
   it('can add, get, and remove manifests', async () => {
     /** @type {!Array<shaka.extern.ManifestDB>} */
     const manifests = [
