@@ -108,6 +108,9 @@ shaka.test.FakeStreamingEngine = class {
     this.seeked = jasmine.createSpy('seeked');
 
     /** @type {!jasmine.Spy} */
+    this.retry = jasmine.createSpy('retry').and.returnValue(true);
+
+    /** @type {!jasmine.Spy} */
     this.getCurrentVariant =
         jasmine.createSpy('getCurrentVariant').and.callFake(
             () => activeVariant);
