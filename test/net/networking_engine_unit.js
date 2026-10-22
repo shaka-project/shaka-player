@@ -495,7 +495,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       }
 
       it('infers a scheme for // URIs', async () => {
-        expect(await requestedUri('//foo')).toBe('resolve://foo');
+        // Use a non-empty path: older Chromium (e.g. Chromecast) serializes
+        // an empty path in a non-special scheme as '/', newer ones as ''.
+        expect(await requestedUri('//foo/bar.mpd'))
+            .toBe('resolve://foo/bar.mpd');
       });
 
       it('keeps the port of // URIs', async () => {
