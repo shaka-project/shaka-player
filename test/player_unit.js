@@ -543,6 +543,14 @@ describe('Player', () => {
         expect(status).toBe(expectedStatus);
       }
 
+      /**
+       * @suppress {accessControls}
+       * @param {!shaka.util.Error} error
+       */
+      async function raiseError(error) {
+        await player.onError_(error);
+      }
+
       function multiVariantManifest() {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
@@ -585,6 +593,31 @@ describe('Player', () => {
 
         expect(variant.disabledUntilTime).toBe(0);
       });
+
+      it('keeps stream disabled after a critical error until retry',
+          async () => {
+            multiVariantManifest();
+
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+
+            const variant = manifest.variants[0];
+            const videoStream =
+            /** @type {shaka.extern.Stream} */ (variant.video);
+
+            player.disableStream(videoStream, disableTimeInSeconds);
+
+            onError.and.stub();
+            await raiseError(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.NETWORK,
+                shaka.util.Error.Code.HTTP_ERROR));
+
+            expect(variant.disabledUntilTime).toBeGreaterThan(Date.now()/1000);
+
+            expect(player.retryStreaming()).toBe(true);
+
+            expect(variant.disabledUntilTime).toBe(0);
+          });
 
       it('does not restore stream if disabled time did not elapsed',
           async () => {
