@@ -63,7 +63,7 @@ shaka.ui.MediaSession = class {
     /** @private {?string} */
     this.imageObjectUrl_ = null;
 
-    /** @private {!Set<string>} */
+    /** @private {!Set<MediaSessionAction>} */
     this.actionsHandled_ = new Set();
 
     if (this.player_.isFullyLoaded()) {
@@ -143,10 +143,10 @@ shaka.ui.MediaSession = class {
   }
 
   /**
-   * @return {!{title: string, artist: string, album: string,
-   *         artwork: Object, chapterInfo: ?Object}}
+   * @return {!MediaMetadataInit}
    */
   getMediaMetadata() {
+    /** @type {!MediaMetadataInit} */
     const metadata = {
       title: '',
       artist: '',
@@ -231,6 +231,7 @@ shaka.ui.MediaSession = class {
     }
     if (this.supported_) {
       const metadata = this.getMediaMetadata();
+      /** @type {!MediaImage} */
       const artwork = {
         src: imageUrl,
       };
@@ -253,14 +254,17 @@ shaka.ui.MediaSession = class {
     if (!this.supportsChapterInfo_) {
       return;
     }
+    /** @type {!Array<!ChapterInformationInit>} */
     const chapterInfo = [];
     for (const chapter of chapters) {
+      /** @type {!ChapterInformationInit} */
       const info = {
         title: chapter.title,
         startTime: chapter.startTime,
         artwork: [],
       };
       for (const imageInfo of chapter.images) {
+        /** @type {!MediaImage} */
         const artwork = {
           src: imageInfo.url,
         };
@@ -282,8 +286,8 @@ shaka.ui.MediaSession = class {
   }
 
   /**
-   * @param {string} type
-   * @param {?Function=} callback
+   * @param {MediaSessionAction} type
+   * @param {?function(!MediaSessionActionDetails)=} callback
    * @export
    */
   addMediaSessionHandler(type, callback = null) {
@@ -342,7 +346,7 @@ shaka.ui.MediaSession = class {
         }
         break;
       case 'seekto':
-        if (details.seekTime && !isFinite(details.seekTime)) {
+        if (details.seekTime == null || !isFinite(details.seekTime)) {
           break;
         }
         if (!ad || !ad.isLinear()) {
@@ -377,7 +381,7 @@ shaka.ui.MediaSession = class {
         }
         break;
     }
-  };
+  }
 
   /**
    * @private
@@ -562,6 +566,7 @@ shaka.ui.MediaSession = class {
     if (!this.config_.mediaSession.handleActions) {
       return;
     }
+    /** @type {function(!MediaSessionActionDetails)} */
     const actionHandler = (details) => {
       this.commonActionHandler(details);
     };
