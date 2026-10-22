@@ -18,6 +18,7 @@ function drmStorageSupport() {
 }
 
 filterDescribe('Storage', storageSupport, () => {
+  const OfflineUtils = shaka.test.OfflineUtils;
   const Util = shaka.test.Util;
 
   const englishUS = 'en-us';
@@ -1255,6 +1256,80 @@ filterDescribe('Storage', storageSupport, () => {
       await storage.remove(uri.toString());
     });
 
+    it('removes orphaned segments', async () => {
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
+
+      /** @type {!Array<number>} */
+      const ownedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(ownedKeys.length).toBeGreaterThan(0);
+
+      // Store segments that no manifest references, like the ones left by a
+      // download interrupted by closing the page.
+      const orphanedKeys = await withActiveCell((cell) => cell.addSegments([
+        OfflineUtils.createSegmentData([0]),
+        OfflineUtils.createSegmentData([0, 1]),
+      ]));
+
+      expect(await storage.removeOrphanedSegments()).toBe(2);
+
+      /** @type {!Array<number>} */
+      const remainingKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(remainingKeys).toEqual(ownedKeys);
+      for (const key of orphanedKeys) {
+        expect(remainingKeys).not.toContain(key);
+      }
+
+      // The stored content is untouched, and there is nothing left to remove.
+      expect((await storage.list()).length).toBe(1);
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+    });
+
+    it('removes orphaned segments and EME sessions', async () => {
+      await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      /** @type {!Array<number>} */
+      const ownedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      await withActiveCell((cell) => cell.addSegments([
+        OfflineUtils.createSegmentData([0]),
+      ]));
+
+      expect(await storage.removeOrphans()).toBe(true);
+
+      /** @type {!Array<number>} */
+      const remainingKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(remainingKeys).toEqual(ownedKeys);
+    });
+
+    it('does not remove orphaned segments while storing', async () => {
+      // Block the network so that the store will not finish.  Its segments are
+      // not referenced by its manifest until then.
+      /** @type {!Promise.PromiseWithResolvers} */
+      const hangingPromise = netEngine.delayNextRequest();
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.CANNOT_REMOVE_ORPHANS_WHILE_STORING));
+      await expectAsync(storage.removeOrphanedSegments())
+          .toBeRejectedWith(expected);
+      await expectAsync(storage.removeOrphans()).toBeRejectedWith(expected);
+
+      hangingPromise.resolve();
+      await storeOperation.promise;
+
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+      expect((await storage.list()).length).toBe(1);
+    });
+
     it('tracks progress on remove', async () => {
       const selectOneTrack = (tracks) => {
         const allVariants = tracks.filter((t) => {
@@ -1678,6 +1753,24 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
         .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
         .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
+  }
+
+  /**
+   * @param {function(shaka.extern.StorageCell):!Promise<T>} action
+   * @return {!Promise<T>}
+   * @template T
+   */
+  async function withActiveCell(action) {
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      return await action(handle.cell);
+    } finally {
+      await muxer.destroy();
+    }
   }
 
   async function eraseStorage() {

@@ -394,6 +394,19 @@ shaka.extern.StorageCell = class {
   getSegments(keys) {}
 
   /**
+   * Get the keys of all the segments stored in this cell.  Since these are
+   * only the keys and not the segment data, it is assumed that it is feasible
+   * to have them all in memory at one time.
+   *
+   * This is used to find segments that no manifest references any more, so
+   * they can be removed.  If a cell does not implement it, its orphaned
+   * segments will not be removed.
+   *
+   * @return {!Promise<!Array<number>>}
+   */
+  getAllSegmentKeys() {}
+
+  /**
    * Add a group of manifests. Will return a promise that resolves with a list
    * of keys for each manifest. If one manifest fails to be added, all manifests
    * should fail to be added.
