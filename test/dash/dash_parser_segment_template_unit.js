@@ -142,6 +142,68 @@ describe('DashParser SegmentTemplate', () => {
       await Dash.testSegmentIndex(source, references);
     });
 
+    it('honors @endNumber', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate startNumber="10" endNumber="12"',
+        '  media="s$Number$.mp4" duration="10" />',
+      ], /* duration= */ 60);
+      const references = [
+        ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+        ManifestParser.makeReference('s11.mp4', 10, 20, baseUri),
+        ManifestParser.makeReference('s12.mp4', 20, 30, baseUri),
+      ];
+      await Dash.testSegmentIndex(source, references);
+    });
+
+    it('does not cap duration segments when @endNumber is absent', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="10" />',
+      ], /* duration= */ 60);
+      const references = [];
+      for (let i = 1; i <= 6; i++) {
+        references.push(ManifestParser.makeReference(
+            `s${i}.mp4`, (i - 1) * 10, i * 10, baseUri));
+      }
+      await Dash.testSegmentIndex(source, references);
+    });
+
+    it('honors @endNumber with a SegmentTimeline', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate startNumber="10" endNumber="12"',
+        '  media="s$Number$.mp4">',
+        '  <SegmentTimeline><S t="0" d="10" r="5" /></SegmentTimeline>',
+        '</SegmentTemplate>',
+      ], /* duration= */ 60);
+      const references = [
+        ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+        ManifestParser.makeReference('s11.mp4', 10, 20, baseUri),
+        ManifestParser.makeReference('s12.mp4', 20, 30, baseUri),
+      ];
+      await Dash.testSegmentIndex(source, references);
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      const segmentIndex = stream.segmentIndex;
+      goog.asserts.assert(segmentIndex, 'Null segmentIndex!');
+      expect(segmentIndex.find(35)).toBeNull();
+    });
+
+    it('does not cap timeline segments when @endNumber is absent', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4">',
+        '  <SegmentTimeline><S t="0" d="10" r="5" /></SegmentTimeline>',
+        '</SegmentTemplate>',
+      ], /* duration= */ 60);
+      const references = [];
+      for (let i = 1; i <= 6; i++) {
+        references.push(ManifestParser.makeReference(
+            `s${i}.mp4`, (i - 1) * 10, i * 10, baseUri));
+      }
+      await Dash.testSegmentIndex(source, references);
+    });
+
     it('honors presentationTimeOffset', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
@@ -1454,6 +1516,7 @@ function makeTemplateInfo(timeline) {
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
+    'endNumber': null,
     'scaledPresentationTimeOffset': 0,
     'unscaledPresentationTimeOffset': 0,
     'timeline': timeline,
