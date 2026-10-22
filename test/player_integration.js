@@ -477,7 +477,7 @@ describe('Player', () => {
       // The track is anchored to the page, like fetch() would do, so it can
       // later serve as a base for URIs found in the text itself.
       const stream = player.getManifest().textStreams[0];
-      expect(stream.segmentIndex.earliestReference().getUris())
+      expect(stream.segmentIndex.get(0).getUris())
           .toEqual([new URL(relativeUri, location.href).href]);
     });
 
