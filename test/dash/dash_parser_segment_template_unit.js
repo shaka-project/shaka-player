@@ -258,6 +258,164 @@ describe('DashParser SegmentTemplate', () => {
       const segments = Array.from(stream.segmentIndex);
       expect(segments.length).toBe(200);
     });
+
+    describe('with @endNumber', () => {
+      it('stops at @endNumber when the period rounds up', async () => {
+        // The period implies 3 segments, but the packager folded the last
+        // 5 seconds into segment 2, so there is no segment 3.
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 25);
+        const lastRef = ManifestParser.makeReference('s2.mp4', 10, 25, baseUri);
+        lastRef.trueEndTime = 20;
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('with @startNumber > 1', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="10" endNumber="11"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 25);
+        const lastRef =
+            ManifestParser.makeReference('s11.mp4', 10, 25, baseUri);
+        lastRef.trueEndTime = 20;
+        const references = [
+          ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('does not extend a segment far from the period end', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 60);
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('does not go beyond the period', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="10"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 30);
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('is inherited and only caps its own AdaptationSet', async () => {
+        const source = [
+          '<MPD type="static">',
+          '  <Period duration="PT25S">',
+          '    <BaseURL>http://example.com</BaseURL>',
+          '    <AdaptationSet mimeType="video/mp4">',
+          '      <SegmentTemplate startNumber="1" endNumber="2"',
+          '        media="v$Number$.mp4" duration="10" />',
+          '      <Representation bandwidth="500" />',
+          '    </AdaptationSet>',
+          '    <AdaptationSet mimeType="audio/mp4">',
+          '      <Representation bandwidth="100">',
+          '        <SegmentTemplate startNumber="1"',
+          '          media="a$Number$.mp4" duration="10" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('https://foo', source);
+        const manifest = await parser.start('https://foo', playerInterface);
+        const variant = manifest.variants[0];
+        await variant.video.createSegmentIndex();
+        await variant.audio.createSegmentIndex();
+        goog.asserts.assert(variant.video.segmentIndex, 'Null segmentIndex!');
+        goog.asserts.assert(variant.audio.segmentIndex, 'Null segmentIndex!');
+
+        const videoRefs = Array.from(variant.video.segmentIndex);
+        expect(videoRefs.map((r) => r.getUris()[0])).toEqual([
+          'http://example.com/v1.mp4',
+          'http://example.com/v2.mp4',
+        ]);
+        expect(videoRefs[1].endTime).toBe(25);
+
+        const audioRefs = Array.from(variant.audio.segmentIndex);
+        expect(audioRefs.map((r) => r.getUris()[0])).toEqual([
+          'http://example.com/a1.mp4',
+          'http://example.com/a2.mp4',
+          'http://example.com/a3.mp4',
+        ]);
+      });
+
+      describe('for Live', () => {
+        const oldNow = Date.now;
+
+        beforeEach(() => {
+          jasmine.clock().install();
+        });
+
+        afterEach(() => {
+          jasmine.clock().uninstall();
+          Date.now = oldNow;
+        });
+
+        it('does not add references past @endNumber', async () => {
+          const source = Dash.makeSimpleManifestText([
+            '<SegmentTemplate startNumber="1" endNumber="5"',
+            '  media="s$Number$.mp4" duration="2" />',
+          ]);
+
+          Date.now = () => 6 * 1000;
+          fakeNetEngine.setResponseText('https://foo', source);
+          const manifest = await parser.start('https://foo', playerInterface);
+          const stream = manifest.variants[0].video;
+          await stream.createSegmentIndex();
+          goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+          const segmentIndex = /** @type {!shaka.media.SegmentIndex} */(
+            stream.segmentIndex);
+
+          const getUris = () => Array.from(segmentIndex)
+              .map((r) => r.getUris()[0]);
+          expect(getUris()).not.toContain('http://example.com/s5.mp4');
+
+          // Long after segment 5 would have become available.
+          Date.now = () => 60 * 1000;
+          jasmine.clock().tick(60 * 1000);
+          expect(getUris()).toContain('http://example.com/s5.mp4');
+          expect(getUris()).not.toContain('http://example.com/s6.mp4');
+        });
+
+        it('does not start past @endNumber', async () => {
+          const source = Dash.makeSimpleManifestText([
+            '<SegmentTemplate startNumber="1" endNumber="5"',
+            '  media="s$Number$.mp4" duration="2" />',
+          ]);
+
+          Date.now = () => 60 * 1000;
+          fakeNetEngine.setResponseText('https://foo', source);
+          const manifest = await parser.start('https://foo', playerInterface);
+          const stream = manifest.variants[0].video;
+          await stream.createSegmentIndex();
+          goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+
+          const uris = Array.from(stream.segmentIndex)
+              .map((r) => r.getUris()[0]);
+          expect(uris[uris.length - 1]).toBe('http://example.com/s5.mp4');
+        });
+      });
+    });
   });
 
   describe('index', () => {
@@ -1454,6 +1612,7 @@ function makeTemplateInfo(timeline) {
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
+    'endNumber': null,
     'scaledPresentationTimeOffset': 0,
     'unscaledPresentationTimeOffset': 0,
     'timeline': timeline,
