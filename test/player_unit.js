@@ -341,6 +341,50 @@ describe('Player', () => {
       expect(player.addSkipRange(10, 30)).toBe(false);
       expect(logWarnSpy).toHaveBeenCalledWith(unsupportedWarning);
     });
+
+    describe('with src= playback', () => {
+      beforeEach(() => {
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
+        // Make sure player.load() resolves for src=
+        spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+            (mediaElement, readyState, eventManager, callback) => {
+              callback();
+            });
+      });
+
+      afterEach(() => {
+        video.canPlayType.calls.reset();
+      });
+
+      it('rejects a range', async () => {
+        await player.load(fakeManifestUri, 0, 'video/mp4');
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+
+        expect(player.addSkipRange(10, 30)).toBe(false);
+        expect(player.getSkipRanges()).toEqual([]);
+      });
+
+      it('drops ranges queued before load', async () => {
+        expect(player.addSkipRange(10, 30)).toBe(true);
+
+        await player.load(fakeManifestUri, 0, 'video/mp4');
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+
+        expect(player.getSkipRanges()).toEqual([]);
+      });
+    });
+
+    it('returns copies of the ranges', async () => {
+      manifest.sequenceMode = false;
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.addSkipRange(10, 30);
+
+      const ranges = player.getSkipRanges();
+      ranges[0].end = 50;
+
+      expect(player.getSkipRanges()).toEqual([{start: 10, end: 30}]);
+    });
   });
 
   describe('load/unload', () => {

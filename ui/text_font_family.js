@@ -17,9 +17,10 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * Selects the font family of the subtitles.
+ * Selects the font style of the subtitles: its font family and font variant.
+ * The options are given by the captionsFontStyles UI config.
  *
- * @extends {shaka.ui.TextStyleMenu<shaka.config.FontFamily>}
+ * @extends {shaka.ui.TextStyleMenu<shaka.extern.UIFontStyle>}
  * @final
  * @export
  */
@@ -41,28 +42,43 @@ shaka.ui.TextFontFamily = class extends shaka.ui.TextStyleMenu {
 
   /** @override */
   getItems() {
-    return Object.values(shaka.config.FontFamily);
+    return this.controls.getConfig().captionsFontStyles;
   }
 
   /** @override */
-  getLabelForItem(fontFamily) {
-    return this.getName_(fontFamily);
+  getLabelForItem(fontStyle) {
+    return fontStyle.label || this.getName_(fontStyle.fontFamily);
   }
 
   /** @override */
-  onItemSelected(fontFamily) {
-    this.player.configure('textDisplayer.fontFamily', fontFamily);
+  onItemSelected(fontStyle) {
+    this.player.configure({
+      textDisplayer: {
+        fontFamily: fontStyle.fontFamily,
+        fontVariant: fontStyle.fontVariant || '',
+      },
+    });
   }
 
   /** @override */
-  getPreviewConfigForItem(fontFamily) {
-    return {fontFamily};
+  getPreviewConfigForItem(fontStyle) {
+    return {
+      fontFamily: fontStyle.fontFamily,
+      fontVariant: fontStyle.fontVariant || '',
+    };
   }
 
   /** @override */
   getCurrentValueLabel() {
-    return this.getName_(
-        this.player.getConfiguration().textDisplayer.fontFamily);
+    const config = this.player.getConfiguration().textDisplayer;
+    const fontStyle = this.getItems().find((item) => {
+      return item.fontFamily == config.fontFamily &&
+          (item.fontVariant || '') == config.fontVariant;
+    });
+    if (fontStyle) {
+      return this.getLabelForItem(fontStyle);
+    }
+    return this.getName_(config.fontFamily);
   }
 
   /** @override */
@@ -82,25 +98,33 @@ shaka.ui.TextFontFamily = class extends shaka.ui.TextStyleMenu {
   }
 
   /**
-   * @param {!shaka.config.FontFamily} fontFamily
+   * @param {string} fontFamily
    * @return {string}
    * @private
    */
   getName_(fontFamily) {
     const LocIds = shaka.ui.Locales.Ids;
+    const FontFamily = shaka.config.FontFamily;
     switch (fontFamily) {
-      case shaka.config.FontFamily.DEFAULT:
+      case FontFamily.DEFAULT:
         return this.localization.resolve(LocIds.DEFAULT);
-      case shaka.config.FontFamily.MONOSPACED_SERIF:
+      case FontFamily.MONOSPACED_SERIF:
         return this.localization.resolve(LocIds.MONOSPACED_SERIF);
-      case shaka.config.FontFamily.PROPORTIONAL_SERIF:
+      case FontFamily.PROPORTIONAL_SERIF:
         return this.localization.resolve(LocIds.PROPORTIONAL_SERIF);
-      case shaka.config.FontFamily.MONOSPACED_SANS_SERIF:
+      case FontFamily.MONOSPACED_SANS_SERIF:
         return this.localization.resolve(LocIds.MONOSPACED_SANS_SERIF);
-      case shaka.config.FontFamily.PROPORTIONAL_SANS_SERIF:
+      case FontFamily.PROPORTIONAL_SANS_SERIF:
         return this.localization.resolve(LocIds.PROPORTIONAL_SANS_SERIF);
+      case FontFamily.CASUAL:
+        return this.localization.resolve(LocIds.CASUAL);
+      case FontFamily.CURSIVE:
+        return this.localization.resolve(LocIds.CURSIVE);
+      case FontFamily.SMALL_CAPITALS:
+        return this.localization.resolve(LocIds.SMALL_CAPITALS);
     }
-    return '';
+    // Font families given by the application are shown by their first font.
+    return fontFamily.split(',')[0].trim().replace(/^(["'])(.*)\1$/, '$2');
   }
 };
 

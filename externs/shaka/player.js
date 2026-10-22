@@ -3187,11 +3187,14 @@ shaka.extern.OfflineConfiguration;
  * @typedef {{
  *   fontScaleFactor: number,
  *   positionArea: shaka.config.PositionArea,
- *   fontFamily: shaka.config.FontFamily,
+ *   fontFamily: (shaka.config.FontFamily|string),
+ *   fontVariant: string,
  *   fontColor: string,
  *   fontOpacity: number,
  *   backgroundColor: string,
  *   backgroundOpacity: number,
+ *   windowColor: string,
+ *   windowOpacity: number,
  *   characterEdgeStyle: shaka.config.CharacterEdgeStyle,
  *   subtitleDelay: number,
  *   suspendRenderingWhenHidden: boolean,
@@ -3211,14 +3214,27 @@ shaka.extern.OfflineConfiguration;
  *   position.
  *   <br>
  *   Defaults to <code>''</code>.
- * @property {shaka.config.FontFamily} fontFamily
- *   The font family of the subtitles.  The default value indicates that the
- *   font family defined by the subtitle is used, otherwise it is overwritten
- *   with the given font family.
+ * @property {(shaka.config.FontFamily|string)} fontFamily
+ *   The font family of the subtitles, as a CSS <code>font-family</code>
+ *   (e.g. <code>'OpenDyslexic, sans-serif'</code>).  An empty string
+ *   indicates that the font family defined by the subtitle is used, otherwise
+ *   it is overwritten with the given font family.
+ *   <code>shaka.config.FontFamily</code> lists some presets.  Fonts that are
+ *   not installed on the system can be loaded with
+ *   <code>player.addFont()</code>.
  *   <br>
  *   Only supported by <code>shaka.text.UITextDisplayer</code>.
  *   <br>
  *   Defaults to <code>shaka.config.FontFamily.DEFAULT</code>.
+ * @property {string} fontVariant
+ *   The font variant of the subtitles, as a CSS <code>font-variant</code>
+ *   (e.g. <code>'small-caps'</code>, the small capitals font style of
+ *   CEA-708).  An empty string indicates that the font variant is not
+ *   changed, otherwise it is overwritten with the given font variant.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @property {string} fontColor
  *   The font color of the subtitles, as a CSS color (e.g.
  *   <code>'#ff0'</code> or <code>'yellow'</code>).  An empty string indicates
@@ -3254,6 +3270,28 @@ shaka.extern.OfflineConfiguration;
  *   by the subtitle, the default one, or the one given in
  *   <code>backgroundColor</code>.  NaN indicates that the opacity of the
  *   background color in use is kept.
+ *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
+ *   <code>rgba()</code> and basic named colors.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>NaN</code>.
+ * @property {string} windowColor
+ *   The color of the window of the subtitles, a box painted behind all the
+ *   lines of each block of text, under their background.  It is given as a
+ *   CSS color (e.g. <code>'#080808'</code> or <code>'black'</code>).  The
+ *   window is only painted when this or <code>windowOpacity</code> are
+ *   given, so an empty string indicates that there is no window, unless
+ *   <code>windowOpacity</code> is given, which paints a black window.
+ *   <br>
+ *   Only supported by <code>shaka.text.UITextDisplayer</code>.
+ *   <br>
+ *   Defaults to <code>''</code>.
+ * @property {number} windowOpacity
+ *   The opacity of the window of the subtitles, between 0 and 1.  It replaces
+ *   the opacity of the window color, whether it is the one given in
+ *   <code>windowColor</code> or the default black.  NaN indicates that the
+ *   opacity of the window color is kept.
  *   The opacity is only applied to hexadecimal, <code>rgb()</code>,
  *   <code>rgba()</code> and basic named colors.
  *   <br>

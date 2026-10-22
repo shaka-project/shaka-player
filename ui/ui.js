@@ -12,6 +12,7 @@ goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
 goog.require('shaka.Player');
+goog.require('shaka.config.FontFamily');
 goog.require('shaka.device.DeviceFactory');
 goog.require('shaka.device.IDevice');
 goog.require('shaka.log');
@@ -467,12 +468,41 @@ shaka.ui.Overlay = class {
       },
       captionsStyles: true,
       captionsFontScaleFactors: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      captionsFontStyles: [
+        {
+          fontFamily: shaka.config.FontFamily.DEFAULT,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.MONOSPACED_SERIF,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.PROPORTIONAL_SERIF,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.MONOSPACED_SANS_SERIF,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.PROPORTIONAL_SANS_SERIF,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.CASUAL,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.CURSIVE,
+        },
+        {
+          fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+          fontVariant: 'small-caps',
+        },
+      ],
       captionsStyleElements: [
         'captions-font-family',
         'captions-font-color',
         'captions-size',
         'captions-background-color',
         'captions-background-opacity',
+        'captions-window-color',
+        'captions-window-opacity',
         'captions-character-edge-style',
         'captions-font-opacity',
         'captions-position',

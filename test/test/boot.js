@@ -748,6 +748,18 @@ function loadScript(file) {
 }
 
 /**
+ * Wait for the library scripts that test/test/closure-boot.js is loading, when
+ * it loads them.
+ *
+ * @return {!Promise}
+ */
+async function waitForLibrary() {
+  if (window['waitForClosureScripts']) {
+    await window['waitForClosureScripts']();
+  }
+}
+
+/**
  * Load all test scripts and await completion.
  *
  * @return {!Promise}
@@ -784,6 +796,13 @@ window.__karma__.start = async () => {
   // See https://github.com/shaka-project/shaka-player/issues/4094
 
   try {
+    await waitForLibrary();
+    for (const file of getClientArg('setupFiles')) {
+      // eslint-disable-next-line no-await-in-loop
+      await loadScript(file);
+    }
+    // The setup files may require more of the library.
+    await waitForLibrary();
     await setupTestEnvironment();
     console.log('Set up test environment.');
     await loadTests();

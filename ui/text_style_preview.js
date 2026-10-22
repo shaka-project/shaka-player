@@ -192,11 +192,14 @@ shaka.ui.TextStylePreview = class {
  * @typedef {{
  *   fontScaleFactor: (number|undefined),
  *   positionArea: (shaka.config.PositionArea|undefined),
- *   fontFamily: (shaka.config.FontFamily|undefined),
+ *   fontFamily: (shaka.config.FontFamily|string|undefined),
+ *   fontVariant: (string|undefined),
  *   fontColor: (string|undefined),
  *   fontOpacity: (number|undefined),
  *   backgroundColor: (string|undefined),
  *   backgroundOpacity: (number|undefined),
+ *   windowColor: (string|undefined),
+ *   windowOpacity: (number|undefined),
  *   characterEdgeStyle: (shaka.config.CharacterEdgeStyle|undefined),
  * }}
  *

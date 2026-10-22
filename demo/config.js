@@ -449,6 +449,7 @@ shakaDemo.Config = class {
             'textDisplayer.fontFamily',
             fontFamilyOptions,
             fontFamilyOptionNames)
+        .addTextInput_('Font variant', 'textDisplayer.fontVariant')
         .addTextInput_('Font color', 'textDisplayer.fontColor')
         .addNumberInput_('Font opacity',
             'textDisplayer.fontOpacity',
@@ -458,6 +459,12 @@ shakaDemo.Config = class {
         .addTextInput_('Background color', 'textDisplayer.backgroundColor')
         .addNumberInput_('Background opacity',
             'textDisplayer.backgroundOpacity',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true,
+            /* canBeUnset= */ true)
+        .addTextInput_('Window color', 'textDisplayer.windowColor')
+        .addNumberInput_('Window opacity',
+            'textDisplayer.windowOpacity',
             /* canBeDecimal= */ true,
             /* canBeZero= */ true,
             /* canBeUnset= */ true)

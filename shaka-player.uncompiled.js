@@ -151,6 +151,8 @@ goog.require('shaka.ui.TextSelection');
 goog.require('shaka.ui.TextSize');
 goog.require('shaka.ui.TextStyleGroup');
 goog.require('shaka.ui.TextStyleResetButton');
+goog.require('shaka.ui.TextWindowColor');
+goog.require('shaka.ui.TextWindowOpacity');
 goog.require('shaka.ui.ToggleStereoscopicButton');
 goog.require('shaka.ui.TrickPlayButton');
 goog.require('shaka.ui.VideoTypeSelection');
