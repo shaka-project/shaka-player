@@ -52,4 +52,11 @@ describe('PlayStation', () => {
     expect(ps5Device.returnLittleEndianUsingPlayReady()).toBe(false);
     expect(ps5Device.supportsEncryptionSchemePolyfill()).toBe(true);
   });
+
+  it('does not need the WebKit MSE polyfill', () => {
+    Util.setUserAgent(ps4);
+    expect(new shaka.device.PlayStation().needWebkitMSEPolyfill()).toBe(false);
+    Util.setUserAgent(ps5);
+    expect(new shaka.device.PlayStation().needWebkitMSEPolyfill()).toBe(false);
+  });
 });

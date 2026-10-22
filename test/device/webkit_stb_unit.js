@@ -32,4 +32,8 @@ describe('WebKitSTB', () => {
 
     expect(shaka.device.WebKitSTB['isWebkitSTB_']()).toBe(false);
   });
+
+  it('needs the WebKit MSE polyfill', () => {
+    expect(new shaka.device.WebKitSTB().needWebkitMSEPolyfill()).toBe(true);
+  });
 });
