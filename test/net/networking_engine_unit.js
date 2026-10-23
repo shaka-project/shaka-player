@@ -8,7 +8,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   const StatusPromise = shaka.test.StatusPromise;
   const Util = shaka.test.Util;
   const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-  const originalGetBaseUri = shaka.net.NetworkingEngine.getBaseUri_;
+  const originalGetBaseUri = shaka.util.URL.getBaseUri_;
   const originalDefer = shaka.net.Backoff.defer;
 
   /** @type {string} */
@@ -27,7 +27,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   let deferSpy;
 
   beforeAll(() => {
-    shaka.net.NetworkingEngine.getBaseUri_ = () => fakeBaseUri;
+    shaka.util.URL.getBaseUri_ = () => fakeBaseUri;
   });
 
   function makeResolveScheme(spyName) {
@@ -69,7 +69,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   });
 
   afterAll(() => {
-    shaka.net.NetworkingEngine.getBaseUri_ = originalGetBaseUri;
+    shaka.util.URL.getBaseUri_ = originalGetBaseUri;
     shaka.net.Backoff.defer = originalDefer;
   });
 
