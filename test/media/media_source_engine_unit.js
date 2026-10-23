@@ -1662,6 +1662,35 @@ describe('MediaSourceEngine', () => {
       expect(setCount).toBe(0);
     });
 
+    it('is reloading until the position is restored', async () => {
+      await mediaSourceEngine.init(initObject, false);
+
+      let loadedMetadataListener = null;
+      mockVideo.addEventListener.and.callFake((eventName, callback, _) => {
+        if (eventName == 'loadedmetadata') {
+          loadedMetadataListener = callback;
+        }
+      });
+
+      mockVideo.currentTime = 26;
+      const reset = resetMSE(initObject);
+      mockVideo.currentTime = 0;
+      await reset;
+
+      // Segments appended to the new MediaSource must not be treated as the
+      // initial buffer gap before the position has been restored.
+      expect(mediaSourceEngine.isReloadingMediaSource()).toBe(true);
+
+      expect(loadedMetadataListener).not.toBe(null);
+      if (!loadedMetadataListener) {
+        return;
+      }
+      loadedMetadataListener({target: mockVideo});
+
+      expect(mockVideo.currentTime).toBe(26);
+      expect(mediaSourceEngine.isReloadingMediaSource()).toBe(false);
+    });
+
     it('should preserve playing state', async () => {
       await mediaSourceEngine.init(initObject, false);
 
