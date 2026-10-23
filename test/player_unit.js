@@ -5681,6 +5681,24 @@ describe('Player', () => {
       // When we have nothing loaded, we go back to not audio-only status.
       expect(player.isAudioOnly()).toBe(false);
     });
+
+    it('is not audio-only when some variants carry video', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isAudioOnly()).toBe(false);
+    });
   });
 
   describe('isVideoOnly', () => {
@@ -5718,6 +5736,43 @@ describe('Player', () => {
 
       await player.unload();
       // When we have nothing loaded, we go back to not video-only status.
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants carry audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants mux audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.codecs = 'avc1.4d401f,mp4a.40.2';
+          });
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
       expect(player.isVideoOnly()).toBe(false);
     });
   });
