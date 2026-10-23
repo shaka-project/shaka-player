@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.2.15](https://github.com/shaka-project/shaka-player/compare/v5.2.14...v5.2.15) (2026-10-23)
+
+
+### Bug Fixes
+
+* **DASH:** Honor SegmentTemplate@endNumber ([#10785](https://github.com/shaka-project/shaka-player/issues/10785)) ([492b8cc](https://github.com/shaka-project/shaka-player/commit/492b8cc6120f0710b41c81973c1a59e464eecc0b))
+* End a network outage with an error instead of switching variants forever ([#10784](https://github.com/shaka-project/shaka-player/issues/10784)) ([4432f47](https://github.com/shaka-project/shaka-player/commit/4432f47f62723a4df0780008a0ac4d4688758c44)), closes [#10782](https://github.com/shaka-project/shaka-player/issues/10782)
+* Fix relative request URIs failing with CMCD query mode ([#10764](https://github.com/shaka-project/shaka-player/issues/10764)) ([68d3708](https://github.com/shaka-project/shaka-player/commit/68d370800f7e8daf2656fc716ed98cdcbbc3322b))
+* **HLS:** Keep the live availability window anchored to the playlist ([#10741](https://github.com/shaka-project/shaka-player/issues/10741)) ([b9b201b](https://github.com/shaka-project/shaka-player/commit/b9b201b132620b0ac4d4483ad397959f776ad409)), closes [#9346](https://github.com/shaka-project/shaka-player/issues/9346)
+* Play multiplexed MP4 when forceTransmux is enabled ([#10765](https://github.com/shaka-project/shaka-player/issues/10765)) ([693ce3b](https://github.com/shaka-project/shaka-player/commit/693ce3b601ad9c5202e4609cef884eaf944dd09b)), closes [#10762](https://github.com/shaka-project/shaka-player/issues/10762)
+* **WebVTT:** Anchor vertical cues to the correct edge ([#10775](https://github.com/shaka-project/shaka-player/issues/10775)) ([252f353](https://github.com/shaka-project/shaka-player/commit/252f353af33cb7d68ddd77b5b94dcd17d7c1a344))
+* **WebVTT:** Clamp cue box size to the space its anchor leaves ([#10766](https://github.com/shaka-project/shaka-player/issues/10766)) ([258e366](https://github.com/shaka-project/shaka-player/commit/258e366a9048afa18136212de19b6d7f0bc5ed86))
+
 ## [5.2.14](https://github.com/shaka-project/shaka-player/compare/v5.2.13...v5.2.14) (2026-10-16)
 
 
