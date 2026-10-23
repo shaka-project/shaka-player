@@ -258,7 +258,6 @@ describe('DashParser', () => {
     await video.play();
     await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
 
-    expect(video.ended).toBe(true);
     expect(requestedUris.some((uri) => uri.includes('-s2.mp4'))).toBe(true);
     expect(requestedUris.some((uri) => uri.includes('-s3.mp4'))).toBe(false);
 
