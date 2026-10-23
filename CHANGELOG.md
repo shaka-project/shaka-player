@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.3.2](https://github.com/shaka-project/shaka-player/compare/v5.3.1...v5.3.2) (2026-10-23)
+
+
+### Bug Fixes
+
+* Align skip range API behavior with its documentation ([#10753](https://github.com/shaka-project/shaka-player/issues/10753)) ([90415b0](https://github.com/shaka-project/shaka-player/commit/90415b026d73569993a19d97d27ed3a2a78a2168)), closes [#10752](https://github.com/shaka-project/shaka-player/issues/10752)
+* **CMCD:** Keep request URIs intact in CMCD query mode ([#10779](https://github.com/shaka-project/shaka-player/issues/10779)) ([caa53c0](https://github.com/shaka-project/shaka-player/commit/caa53c0880610fda1b08a766ce63741ada0d8fda))
+* **DASH:** Honor SegmentTemplate@endNumber ([#10785](https://github.com/shaka-project/shaka-player/issues/10785)) ([a3307f8](https://github.com/shaka-project/shaka-player/commit/a3307f8abc0338c617fd1a10aaede9d41bbedd69))
+* End a network outage with an error instead of switching variants forever ([#10784](https://github.com/shaka-project/shaka-player/issues/10784)) ([1ff7c8d](https://github.com/shaka-project/shaka-player/commit/1ff7c8dd63404e8eb16c2b2641706b6995994072)), closes [#10782](https://github.com/shaka-project/shaka-player/issues/10782)
+* Fix relative request URIs failing with CMCD query mode ([#10764](https://github.com/shaka-project/shaka-player/issues/10764)) ([fd852e7](https://github.com/shaka-project/shaka-player/commit/fd852e756a34d33bfa58c61c96d32844bfb5205a))
+* **HLS:** Keep the live availability window anchored to the playlist ([#10741](https://github.com/shaka-project/shaka-player/issues/10741)) ([13b9c62](https://github.com/shaka-project/shaka-player/commit/13b9c62dabd25137a9edbeddd69f1d9404064100)), closes [#9346](https://github.com/shaka-project/shaka-player/issues/9346)
+* Play multiplexed MP4 when forceTransmux is enabled ([#10765](https://github.com/shaka-project/shaka-player/issues/10765)) ([28cea4a](https://github.com/shaka-project/shaka-player/commit/28cea4a22dee912811a6371926eb55ed4924a7bf)), closes [#10762](https://github.com/shaka-project/shaka-player/issues/10762)
+* Stop applying Safari 8-12 MSE workarounds on PlayStation ([#10794](https://github.com/shaka-project/shaka-player/issues/10794)) ([a8d1cbe](https://github.com/shaka-project/shaka-player/commit/a8d1cbe3c18535335b01a6f77ddacdf2b227eb97)), closes [#10783](https://github.com/shaka-project/shaka-player/issues/10783)
+* **TTML:** Resolve cells and other units in a region's origin and extent ([#10778](https://github.com/shaka-project/shaka-player/issues/10778)) ([af45b67](https://github.com/shaka-project/shaka-player/commit/af45b67a9d029924991b65cfc299bf731d4e94a6))
+* **WebVTT:** Anchor vertical cues to the correct edge ([#10775](https://github.com/shaka-project/shaka-player/issues/10775)) ([36bcbba](https://github.com/shaka-project/shaka-player/commit/36bcbba94d0dbc7b87d190ec3fca5581e3d95a9b))
+* **WebVTT:** Clamp cue box size to the space its anchor leaves ([#10766](https://github.com/shaka-project/shaka-player/issues/10766)) ([c8cfcfb](https://github.com/shaka-project/shaka-player/commit/c8cfcfb89e583d5579592ddb59b59b81cbcc76b8))
+
 ## [5.3.1](https://github.com/shaka-project/shaka-player/compare/v5.3.0...v5.3.1) (2026-10-19)
 
 
