@@ -19,9 +19,12 @@ describe('MediaSource polyfill', () => {
   const originalUserAgent = navigator.userAgent;
 
   // install() patches these globals, so they are restored after every test.
+  // SourceBuffer is not exposed on window on every platform (Tizen 3, for
+  // example).
   /* eslint-disable no-restricted-syntax */
   const originalAddSourceBuffer = MediaSource.prototype.addSourceBuffer;
-  const originalRemove = SourceBuffer.prototype.remove;
+  const originalRemove =
+      window.SourceBuffer ? SourceBuffer.prototype.remove : null;
   /* eslint-enable no-restricted-syntax */
   const originalIsTypeSupported = MediaSource.isTypeSupported;
   const originalManagedIsTypeSupported =
@@ -31,7 +34,9 @@ describe('MediaSource polyfill', () => {
     Util.setUserAgent(originalUserAgent);
     /* eslint-disable no-restricted-syntax */
     MediaSource.prototype.addSourceBuffer = originalAddSourceBuffer;
-    SourceBuffer.prototype.remove = originalRemove;
+    if (originalRemove) {
+      SourceBuffer.prototype.remove = originalRemove;
+    }
     /* eslint-enable no-restricted-syntax */
     MediaSource.isTypeSupported = originalIsTypeSupported;
     if (originalManagedIsTypeSupported) {
@@ -58,8 +63,18 @@ describe('MediaSource polyfill', () => {
 
   /** @return {boolean} */
   function removalRangeIsPatched() {
+    if (!window.SourceBuffer) {
+      return false;
+    }
     // eslint-disable-next-line no-restricted-syntax
     return SourceBuffer.prototype.remove !== originalRemove;
+  }
+
+  // Patching remove() requires SourceBuffer on window.
+  function requireSourceBuffer() {
+    if (!window.SourceBuffer) {
+      pending('SourceBuffer is not exposed on window');
+    }
   }
 
   it('does not apply the Safari patches on PlayStation 4', () => {
@@ -75,6 +90,7 @@ describe('MediaSource polyfill', () => {
   });
 
   it('patches abort() and remove() on Safari 12', () => {
+    requireSourceBuffer();
     installOn(safari12, shaka.device.AppleBrowser);
     expect(abortIsStubbed()).toBe(true);
     expect(removalRangeIsPatched()).toBe(true);
@@ -88,6 +104,7 @@ describe('MediaSource polyfill', () => {
 
   it('patches abort() and remove() on WebKit STBs reporting version 11',
       () => {
+        requireSourceBuffer();
         installOn(webkitStb, shaka.device.WebKitSTB);
         expect(abortIsStubbed()).toBe(true);
         expect(removalRangeIsPatched()).toBe(true);
