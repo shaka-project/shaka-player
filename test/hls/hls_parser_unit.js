@@ -4045,6 +4045,142 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  describe('redundant variants', () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    it('groups variants that only differ in URI', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540\n',
+        'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540\n',
+        'video2\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].video.originalId).toBe('video,video2');
+    });
+
+    it('does not group variants with different audio groups', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540,AUDIO="aud1"\n',
+        'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540,AUDIO="aud2"\n',
+        'video2\n',
+        '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+        'CHANNELS="2",URI="audio"\n',
+        '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud2",LANGUAGE="en",',
+        'CHANNELS="6",URI="audio2"\n',
+      ].join('');
+
+      fakeNetEngine.setResponseText('test:/master', master);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.variants.length).toBe(2);
+    });
+
+    describe('with a real NetworkingEngine', () => {
+      /** @type {!shaka.net.NetworkingEngine} */
+      let networkingEngine;
+      /** @type {!jasmine.Spy} */
+      let schemeSpy;
+
+      beforeEach(() => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+          'RESOLUTION=960x540\n',
+          'redundant://a/video.m3u8\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+          'RESOLUTION=960x540\n',
+          'redundant://b/video.m3u8\n',
+        ].join('');
+        const StringUtils = shaka.util.StringUtils;
+        /** @type {!Map<string, BufferSource>} */
+        const responses = new Map()
+            .set('redundant://host/master.m3u8', StringUtils.toUTF8(master))
+            .set('redundant://b/video.m3u8', StringUtils.toUTF8(media))
+            .set('redundant://b/init.mp4', initSegmentData)
+            .set('redundant://b/main.mp4', segmentData);
+
+        schemeSpy = jasmine.createSpy('redundant scheme')
+            .and.callFake((uri, request, requestType) => {
+              const data = responses.get(uri);
+              if (!data) {
+                return shaka.util.AbortableOperation.failed(
+                    new shaka.util.Error(
+                        shaka.util.Error.Severity.RECOVERABLE,
+                        shaka.util.Error.Category.NETWORK,
+                        shaka.util.Error.Code.BAD_HTTP_STATUS,
+                        uri, 404, null, {}, requestType));
+              }
+              /** @type {shaka.extern.Response} */
+              const response = {
+                uri,
+                originalUri: uri,
+                data,
+                headers: {},
+                originalRequest: request,
+              };
+              return shaka.util.AbortableOperation.completed(response);
+            });
+        shaka.net.NetworkingEngine.registerScheme(
+            'redundant', Util.spyFunc(schemeSpy));
+
+        networkingEngine = new shaka.net.NetworkingEngine();
+        networkingEngine.configure(
+            shaka.util.PlayerConfiguration.createDefault().networking);
+        playerInterface.networkingEngine = networkingEngine;
+
+        config.retryParameters.baseDelay = 1;
+        config.retryParameters.fuzzFactor = 0;
+        parser.configure(config);
+      });
+
+      afterEach(async () => {
+        shaka.net.NetworkingEngine.unregisterScheme('redundant');
+        await networkingEngine.destroy();
+      });
+
+      it('falls back to a redundant variant on error', async () => {
+        const manifest =
+            await parser.start('redundant://host/master.m3u8', playerInterface);
+        expect(manifest.variants.length).toBe(1);
+
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
+        // The working URI goes first, so segments don't hit the failed one.
+        const reference = Array.from(video.segmentIndex)[0];
+        expect(reference.getUris()).toEqual([
+          'redundant://b/main.mp4',
+          'redundant://a/main.mp4',
+        ]);
+
+        const requestedUris = schemeSpy.calls.allArgs().map((args) => args[0]);
+        expect(requestedUris).toContain('redundant://a/video.m3u8');
+        expect(requestedUris).toContain('redundant://b/video.m3u8');
+      });
+    });
+  });
+
   it('constructs relative URIs', async () => {
     const master = [
       '#EXTM3U\n',
