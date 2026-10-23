@@ -34,7 +34,7 @@ describe('MediaSource polyfill', () => {
     Util.setUserAgent(originalUserAgent);
     /* eslint-disable no-restricted-syntax */
     MediaSource.prototype.addSourceBuffer = originalAddSourceBuffer;
-    if (window.SourceBuffer) {
+    if (originalRemove) {
       SourceBuffer.prototype.remove = originalRemove;
     }
     /* eslint-enable no-restricted-syntax */
