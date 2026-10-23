@@ -412,6 +412,21 @@ describe('Player', () => {
       expect(player.getTextTracks()[0].active).toBe(true);
     });
 
+    it('with external text tracks with a relative URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+
+      const relativeUri = 'base/test/test/assets/text-clip.vtt';
+      const newTrack = await player.addTextTrackAsync(
+          relativeUri, 'en', 'subtitles', 'text/vtt');
+      expect(player.getTextTracks()).toEqual([newTrack]);
+
+      // The track is anchored to the page, like fetch() would do, so it can
+      // later serve as a base for URIs found in the text itself.
+      const stream = player.getManifest().textStreams[0];
+      expect(stream.segmentIndex.get(0).getUris())
+          .toEqual([new URL(relativeUri, location.href).href]);
+    });
+
     it('with cea closed captions', async () => {
       await player.load('test:cea-708_mp4_compiled');
 
@@ -1218,6 +1233,16 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(30);
       expect(chapter3.endTime).toBe(61.349);
     });
+
+    it('adds external chapters with a relative URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      await player.addChaptersTrack(
+          'base/test/test/assets/chapters.vtt', 'en');
+
+      const chapters = await player.getChaptersAsync('en');
+      expect(chapters.length).toBe(3);
+      expect(chapters[0].title).toBe('Chapter 1');
+    });
   });  // describe('addChaptersTrack')
 
   it('requires a license server for HLS ClearKey content', async () => {
@@ -1331,6 +1356,19 @@ describe('Player', () => {
       ]);
       expect(defaultThumbs1.length).toBe(3);
       expect(defaultThumbs2.length).toBe(3);
+    });
+
+    // https://github.com/shaka-project/shaka-player/issues/10750
+    it('resolves relative cue payloads of a relative track URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const newTrack = await player.addThumbnailsTrack(
+          'base/test/test/assets/thumbnails-sprites.vtt');
+
+      const thumbnail = await player.getThumbnails(newTrack.id, 0);
+      expect(thumbnail.uris).toEqual([
+        new URL('/base/test/test/assets/image1.jpg#xywh=0,0,160,90',
+            location.href).href,
+      ]);
     });
   });  // describe('addThumbnailsTrack')
 
