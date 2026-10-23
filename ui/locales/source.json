@@ -118,7 +118,7 @@
     "message": "Cyan"
   },
   "DEFAULT": {
-    "description": "Label for a button used to indicate a subtitle position.",
+    "description": "Label for the option, shown in every subtitle style menu (font color, font family, background, edge style, position, etc.), that keeps the default style of the subtitles instead of overriding it.",
     "message": "Default"
   },
   "DEPRESSED": {
