@@ -383,6 +383,7 @@ shaka.extern.UITrackLabelCallback;
  *   captionsFontScaleFactors: !Array<number>,
  *   captionsFontStyles: !Array<!shaka.extern.UIFontStyle>,
  *   captionsStyleElements: !Array<string>,
+ *   captionsStyleDefaults: !Object<string, *>,
  *   documentPictureInPicture: shaka.extern.UIDocumentPictureInPicture,
  *   showUIOnPaused: boolean,
  *   customTrackLabel: shaka.extern.UITrackLabelCallback,
@@ -714,6 +715,24 @@ shaka.extern.UITrackLabelCallback;
  *   'captions-window-opacity', 'captions-character-edge-style',
  *   'captions-font-opacity', 'captions-position',
  *   'captions-style-reset']</code>.
+ * @property {!Object<string, *>} captionsStyleDefaults
+ *   The subtitle style restored by the <code>captions-style-reset</code>
+ *   button, as settings of {@link shaka.extern.TextDisplayerConfiguration}.
+ *   Only the style settings are used: <code>fontScaleFactor</code>,
+ *   <code>positionArea</code>, <code>fontFamily</code>,
+ *   <code>fontVariant</code>, <code>fontColor</code>,
+ *   <code>fontOpacity</code>, <code>backgroundColor</code>,
+ *   <code>backgroundOpacity</code>, <code>windowColor</code>,
+ *   <code>windowOpacity</code> and <code>characterEdgeStyle</code>.  Other
+ *   settings are ignored.  A style setting that is not given is restored to
+ *   the default value of the player.
+ *   <br>
+ *   The UI does not apply this style when it starts, so the application
+ *   should also give it to the player, for example with
+ *   <code>player.configure({textDisplayer:
+ *   ui.getConfiguration().captionsStyleDefaults})</code>.
+ *   <br>
+ *   Defaults to <code>{}</code>.
  * @property {shaka.extern.UIDocumentPictureInPicture} documentPictureInPicture
  *   Document Picture-in-Picture configuration.
  *   <br>
