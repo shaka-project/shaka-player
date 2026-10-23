@@ -19,7 +19,8 @@ goog.requireType('shaka.ui.Controls');
 
 
 /**
- * Restores the default subtitle style.
+ * Restores the default subtitle style: the style given by the
+ * captionsStyleDefaults configuration, or the default style of the player.
  *
  * @extends {shaka.ui.Element}
  * @final
@@ -88,10 +89,12 @@ shaka.ui.TextStyleResetButton = class extends shaka.ui.Element {
 
   /** @private */
   reset_() {
-    // An undefined value restores the default value of the setting.
+    // A setting not given by the application is undefined, which restores the
+    // default value of the player.
+    const defaults = this.controls.getConfig().captionsStyleDefaults;
     const textDisplayer = {};
     for (const key of shaka.ui.TextStyleResetButton.STYLE_SETTINGS_) {
-      textDisplayer[key] = undefined;
+      textDisplayer[key] = defaults[key];
     }
     this.player.configure({textDisplayer});
   }
@@ -100,7 +103,8 @@ shaka.ui.TextStyleResetButton = class extends shaka.ui.Element {
 
 /**
  * The text displayer settings changed by the subtitle style menus.  Other
- * settings, like the subtitle delay, are not part of the style.
+ * settings, like the subtitle delay, are not part of the style, and are
+ * ignored in captionsStyleDefaults.
  *
  * @const {!Array<string>}
  * @private

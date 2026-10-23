@@ -140,6 +140,7 @@ shaka.test.FakeDemoMain = class {
         'captions-position',
         'captions-style-reset',
       ],
+      captionsStyleDefaults: {},
       documentPictureInPicture: {
         enabled: true,
         preferInitialWindowPlacement: false,
