@@ -236,7 +236,10 @@ describe('Player', () => {
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .timeoutAfter(40)
+          // The second playback covers all 42 seconds of the presentation.
+          // The waiter does not speed up playback on Tizen, so allow time to
+          // play it in real time.
+          .timeoutAfter(60)
           .failOnTimeout(true);
       // wait for Dynamic to static
       await waiter.waitUntilVodTransition(video);
