@@ -543,6 +543,14 @@ describe('Player', () => {
         expect(status).toBe(expectedStatus);
       }
 
+      /**
+       * @suppress {accessControls}
+       * @param {!shaka.util.Error} error
+       */
+      async function raiseError(error) {
+        await player.onError_(error);
+      }
+
       function multiVariantManifest() {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
@@ -585,6 +593,31 @@ describe('Player', () => {
 
         expect(variant.disabledUntilTime).toBe(0);
       });
+
+      it('keeps stream disabled after a critical error until retry',
+          async () => {
+            multiVariantManifest();
+
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+
+            const variant = manifest.variants[0];
+            const videoStream =
+            /** @type {shaka.extern.Stream} */ (variant.video);
+
+            player.disableStream(videoStream, disableTimeInSeconds);
+
+            onError.and.stub();
+            await raiseError(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.NETWORK,
+                shaka.util.Error.Code.HTTP_ERROR));
+
+            expect(variant.disabledUntilTime).toBeGreaterThan(Date.now()/1000);
+
+            expect(player.retryStreaming()).toBe(true);
+
+            expect(variant.disabledUntilTime).toBe(0);
+          });
 
       it('does not restore stream if disabled time did not elapsed',
           async () => {
@@ -5648,6 +5681,24 @@ describe('Player', () => {
       // When we have nothing loaded, we go back to not audio-only status.
       expect(player.isAudioOnly()).toBe(false);
     });
+
+    it('is not audio-only when some variants carry video', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isAudioOnly()).toBe(false);
+    });
   });
 
   describe('isVideoOnly', () => {
@@ -5685,6 +5736,43 @@ describe('Player', () => {
 
       await player.unload();
       // When we have nothing loaded, we go back to not video-only status.
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants carry audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants mux audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.codecs = 'avc1.4d401f,mp4a.40.2';
+          });
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
       expect(player.isVideoOnly()).toBe(false);
     });
   });

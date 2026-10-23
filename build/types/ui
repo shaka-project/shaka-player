@@ -68,6 +68,8 @@
 +../../ui/text_size.js
 +../../ui/text_style_preview.js
 +../../ui/text_style_reset_button.js
++../../ui/text_window_color.js
++../../ui/text_window_opacity.js
 +../../ui/toggle_stereoscopic.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

@@ -221,30 +221,12 @@ module.exports = (config) => {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
-      // the demo's config tab will register with shakaDemoMain, and will be
-      // tested in test/demo/demo_unit.js
-      'demo/config.js',
-
       // cajon module (an AMD variant of requirejs) next
       'node_modules/cajon/cajon.js',
 
-      // define the test namespace next (shaka.test)
-      'test/test/namespace.js',
-
-      // test utilities next, which fill in that namespace
-      'test/test/util/*.js',
-
-      // validate_cmcd_keys.js builds Sets at module-eval time from CMCD_KEYS.
-      // CMCD_KEYS (cmcd_keys.js) is not required by the main library. Load it
-      // explicitly here, before the cml-cmcd test utilities, so the Sets are
-      // built correctly. Its transitive deps (CMCD_V1_KEYS, CMCD_REQUEST_KEYS,
-      // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by
-      // cmcd_manager.
-      'third_party/cml-cmcd/cmcd_keys.js',
-
-      // cml-cmcd test-only helpers (CmcdReportRecorder, validateCmcd, etc.)
-      // These use goog.provide so must be loaded before the integration tests.
-      'test/test/util/cml-cmcd/*.js',
+      // The test setup files (test utilities, etc.) use the library when they
+      // load, so test/test/boot.js loads them once the library is loaded.
+      // See setupFiles below.
 
       // bootstrapping for the test suite last; this will load the actual tests
       'test/test/boot.js',
@@ -508,6 +490,33 @@ module.exports = (config) => {
   }
 
   const clientArgs = config.client.args[0];
+
+  // These are loaded in order by boot.js, after the library and before the
+  // tests.
+  clientArgs.setupFiles = resolveGlobs([
+    // the demo's config tab will register with shakaDemoMain, and will be
+    // tested in test/demo/demo_unit.js
+    'demo/config.js',
+
+    // define the test namespace next (shaka.test)
+    'test/test/namespace.js',
+
+    // test utilities next, which fill in that namespace
+    'test/test/util/*.js',
+
+    // validate_cmcd_keys.js builds Sets at module-eval time from CMCD_KEYS.
+    // CMCD_KEYS (cmcd_keys.js) is not required by the main library. Load it
+    // explicitly here, before the cml-cmcd test utilities, so the Sets are
+    // built correctly. Its transitive deps (CMCD_V1_KEYS, CMCD_REQUEST_KEYS,
+    // CMCD_RESPONSE_KEYS, CMCD_EVENT_KEYS) are already loaded by
+    // cmcd_manager.
+    'third_party/cml-cmcd/cmcd_keys.js',
+
+    // cml-cmcd test-only helpers (CmcdReportRecorder, validateCmcd, etc.)
+    // These use goog.provide so must be loaded before the integration tests.
+    'test/test/util/cml-cmcd/*.js',
+  ]);
+
   clientArgs.testFiles = [];
 
   if (settings.test_custom_asset) {
