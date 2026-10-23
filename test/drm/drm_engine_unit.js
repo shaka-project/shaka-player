@@ -1674,6 +1674,32 @@ describe('DrmEngine', () => {
             })));
       });
 
+      it('closes a session whose license request fails while others are open',
+          async () => {
+            await initAndAttach();
+            await sendEncryptedEvent('cenc', new Uint8Array(1));
+            await sendEncryptedEvent('cenc', new Uint8Array(2));
+
+            const netError = new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.NETWORK,
+                shaka.util.Error.Code.BAD_HTTP_STATUS,
+                'http://abc.drm/license', 403);
+            const operation = shaka.util.AbortableOperation.failed(netError);
+            fakeNetEngine.request.and.returnValue(operation);
+
+            const message = new Uint8Array(0);
+            session1.on['message']({target: session1, message: message});
+            await shaka.test.Util.shortDelay();
+
+            // Another session is still open, so the failure is not dispatched
+            // and the failed session is dropped.  Dropping it must close it,
+            // since destroy() only closes the sessions it still tracks.
+            expect(onErrorSpy).not.toHaveBeenCalled();
+            expect(session1.close).toHaveBeenCalled();
+            expect(session2.close).not.toHaveBeenCalled();
+          });
+
       /**
        * @param {string=} expectedUrl
        * @param {string=} messageType
