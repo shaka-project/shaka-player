@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.15.65](https://github.com/shaka-project/shaka-player/compare/v4.15.64...v4.15.65) (2026-10-23)
+
+
+### Bug Fixes
+
+* **DASH:** Honor SegmentTemplate@endNumber ([#10785](https://github.com/shaka-project/shaka-player/issues/10785)) ([b1c8d06](https://github.com/shaka-project/shaka-player/commit/b1c8d068cf79a80a64f345fcf55b4b7e7dae25ea))
+* End a network outage with an error instead of switching variants forever ([#10784](https://github.com/shaka-project/shaka-player/issues/10784)) ([b424302](https://github.com/shaka-project/shaka-player/commit/b424302b01e5a16169b9c58181b3726428f97f46)), closes [#10782](https://github.com/shaka-project/shaka-player/issues/10782)
+* **WebVTT:** Anchor vertical cues to the correct edge ([#10775](https://github.com/shaka-project/shaka-player/issues/10775)) ([2d3fd59](https://github.com/shaka-project/shaka-player/commit/2d3fd590a51a88306b259044cac2eb6ad31706a0))
+* **WebVTT:** Clamp cue box size to the space its anchor leaves ([#10766](https://github.com/shaka-project/shaka-player/issues/10766)) ([7c0a8c4](https://github.com/shaka-project/shaka-player/commit/7c0a8c4de75eb94938901eb3ef9a9fcf5b065f02))
+
 ## [4.15.64](https://github.com/shaka-project/shaka-player/compare/v4.15.63...v4.15.64) (2026-10-16)
 
 
