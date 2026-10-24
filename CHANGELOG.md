@@ -1,5 +1,41 @@
 # Changelog
 
+## [5.4.0](https://github.com/shaka-project/shaka-player/compare/v5.3.0...v5.4.0) (2026-10-24)
+
+
+### Features
+
+* **offline:** Add APIs to remove orphaned segments and EME sessions ([#10788](https://github.com/shaka-project/shaka-player/issues/10788)) ([d49c11d](https://github.com/shaka-project/shaka-player/commit/d49c11dcb3fd22872634bb7a6cdbcffb9488e026))
+* **Text:** Add textDisplayer.fontVariant config ([#10759](https://github.com/shaka-project/shaka-player/issues/10759)) ([62b7ba8](https://github.com/shaka-project/shaka-player/commit/62b7ba880c9ebc80640ed92dc19cb92169ea870d))
+* **Text:** Add textDisplayer.windowColor and windowOpacity config ([#10761](https://github.com/shaka-project/shaka-player/issues/10761)) ([a7cd82c](https://github.com/shaka-project/shaka-player/commit/a7cd82c582e501ccc4bbd0187f1074aa3dd1d95a))
+* **TS:** Add in-band SCTE-35 support for transport streams ([#10755](https://github.com/shaka-project/shaka-player/issues/10755)) ([e741f7a](https://github.com/shaka-project/shaka-player/commit/e741f7adc23d503af231242b3684e0391cc3314c))
+* **UI:** Add captionsStyleDefaults config ([#10810](https://github.com/shaka-project/shaka-player/issues/10810)) ([8d88815](https://github.com/shaka-project/shaka-player/commit/8d88815c4b3d489a5492ca16a1afedd1bff61214)), closes [#10793](https://github.com/shaka-project/shaka-player/issues/10793)
+* **UI:** Add more subtitle font styles and captionsFontStyles config ([#10771](https://github.com/shaka-project/shaka-player/issues/10771)) ([a8ad466](https://github.com/shaka-project/shaka-player/commit/a8ad466a264309f9b7e794576f33901e6767a1cf))
+* **UI:** Add subtitle window color and opacity menus ([#10770](https://github.com/shaka-project/shaka-player/issues/10770)) ([0223754](https://github.com/shaka-project/shaka-player/commit/0223754419613b47df1865b7bab4e89346086b43)), closes [#10686](https://github.com/shaka-project/shaka-player/issues/10686)
+
+
+### Bug Fixes
+
+* Align skip range API behavior with its documentation ([#10753](https://github.com/shaka-project/shaka-player/issues/10753)) ([677b2ab](https://github.com/shaka-project/shaka-player/commit/677b2ab2fc26ebe5eab6eae48bc3fbdad4c109cc)), closes [#10752](https://github.com/shaka-project/shaka-player/issues/10752)
+* **CMCD:** Keep request URIs intact in CMCD query mode ([#10779](https://github.com/shaka-project/shaka-player/issues/10779)) ([c5c4a5d](https://github.com/shaka-project/shaka-player/commit/c5c4a5d5a7a078fb792524183fa669efe1641ab3))
+* **DASH:** Honor SegmentTemplate@endNumber ([#10785](https://github.com/shaka-project/shaka-player/issues/10785)) ([612cdb4](https://github.com/shaka-project/shaka-player/commit/612cdb4c87e6126b3452ebb4197d1b9da33f8359))
+* **DRM:** Close sessions dropped after a failed license request ([#10804](https://github.com/shaka-project/shaka-player/issues/10804)) ([863aba2](https://github.com/shaka-project/shaka-player/commit/863aba2c0b406996f393c3a05e3851b4e130c9c4))
+* End a network outage with an error instead of switching variants forever ([#10784](https://github.com/shaka-project/shaka-player/issues/10784)) ([d882ca8](https://github.com/shaka-project/shaka-player/commit/d882ca8105c09241f56ae8b73a4aa8eb5d527f75)), closes [#10782](https://github.com/shaka-project/shaka-player/issues/10782)
+* Fix relative request URIs failing with CMCD query mode ([#10764](https://github.com/shaka-project/shaka-player/issues/10764)) ([0b0d4a8](https://github.com/shaka-project/shaka-player/commit/0b0d4a80e800dec9e4b01a3b7a6680413e0a9014))
+* **HLS:** Fall back to redundant variant URIs when a media playlist fails ([#10787](https://github.com/shaka-project/shaka-player/issues/10787)) ([cd0493f](https://github.com/shaka-project/shaka-player/commit/cd0493f085235d90ceef6217ca50282a18a5a843)), closes [#10751](https://github.com/shaka-project/shaka-player/issues/10751)
+* **HLS:** Keep the live availability window anchored to the playlist ([#10741](https://github.com/shaka-project/shaka-player/issues/10741)) ([d5dec3c](https://github.com/shaka-project/shaka-player/commit/d5dec3c700c7dd7a1cfb8619c0fd619d85073dd2)), closes [#9346](https://github.com/shaka-project/shaka-player/issues/9346)
+* **MSE:** Fall back to MediaSource reset when changeType fails ([#10807](https://github.com/shaka-project/shaka-player/issues/10807)) ([b1c2359](https://github.com/shaka-project/shaka-player/commit/b1c2359c240ecd16f33ec795cea386f2028ea106))
+* **MSE:** Keep playback position after a MediaSource reset ([#10806](https://github.com/shaka-project/shaka-player/issues/10806)) ([2d52a4d](https://github.com/shaka-project/shaka-player/commit/2d52a4d47f665de883f04fbe76147d96b97bf64e))
+* Play multiplexed MP4 when forceTransmux is enabled ([#10765](https://github.com/shaka-project/shaka-player/issues/10765)) ([23d9bd1](https://github.com/shaka-project/shaka-player/commit/23d9bd1ef8416fa5cbef3573ab3f9017f2232e13)), closes [#10762](https://github.com/shaka-project/shaka-player/issues/10762)
+* Resolve relative track URIs against the page in add*Track methods ([#10786](https://github.com/shaka-project/shaka-player/issues/10786)) ([14b4b39](https://github.com/shaka-project/shaka-player/commit/14b4b391e177e3a1ed6f469840986228188d6c69)), closes [#10750](https://github.com/shaka-project/shaka-player/issues/10750)
+* Stop applying Safari 8-12 MSE workarounds on PlayStation ([#10794](https://github.com/shaka-project/shaka-player/issues/10794)) ([8cbf5d6](https://github.com/shaka-project/shaka-player/commit/8cbf5d6da1bca2e9dfc3c3ec63b944cc27e8e190)), closes [#10783](https://github.com/shaka-project/shaka-player/issues/10783)
+* **Text:** Allow any CSS font family in textDisplayer.fontFamily ([#10756](https://github.com/shaka-project/shaka-player/issues/10756)) ([9e562a3](https://github.com/shaka-project/shaka-player/commit/9e562a3423d5eabc15c7e38645c866e3b0a8d7fb))
+* **TS:** Play H.264 and H.265 streams whose GOPs span segments ([#10704](https://github.com/shaka-project/shaka-player/issues/10704)) ([ed8e14d](https://github.com/shaka-project/shaka-player/commit/ed8e14db624bea92239f46ec24fa319149e20699)), closes [#10703](https://github.com/shaka-project/shaka-player/issues/10703)
+* **TTML:** Resolve cells and other units in a region's origin and extent ([#10778](https://github.com/shaka-project/shaka-player/issues/10778)) ([197f653](https://github.com/shaka-project/shaka-player/commit/197f653cc150fda60411eb6db5f7a2d7aed7739d))
+* **UI:** Fix translation of the subtitle style "Default" option ([#10805](https://github.com/shaka-project/shaka-player/issues/10805)) ([8f8cf07](https://github.com/shaka-project/shaka-player/commit/8f8cf0720c760d15a6f2eaf3693e3705069e27ce)), closes [#10791](https://github.com/shaka-project/shaka-player/issues/10791)
+* **WebVTT:** Anchor vertical cues to the correct edge ([#10775](https://github.com/shaka-project/shaka-player/issues/10775)) ([404ae7e](https://github.com/shaka-project/shaka-player/commit/404ae7e6ede70db33d52a9e8cc93b86231ea8901))
+* **WebVTT:** Clamp cue box size to the space its anchor leaves ([#10766](https://github.com/shaka-project/shaka-player/issues/10766)) ([c9fe2a3](https://github.com/shaka-project/shaka-player/commit/c9fe2a349e3b62c6956b10fc05229f4382df3ab7))
+
 ## [5.3.0](https://github.com/shaka-project/shaka-player/compare/v5.2.0...v5.3.0) (2026-10-16)
 
 
