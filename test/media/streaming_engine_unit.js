@@ -1144,7 +1144,8 @@ describe('StreamingEngine', () => {
 
     expect(mediaSourceEngine.setStreamProperties)
         .toHaveBeenCalledWith('video', 0, lt20, gt40, false,
-            videoStream.mimeType, videoStream.codecs, streamsByType);
+            videoStream.mimeType, videoStream.codecs, streamsByType,
+            jasmine.any(Function));
   });
 
   // Regression test for https://github.com/shaka-project/shaka-player/issues/3717

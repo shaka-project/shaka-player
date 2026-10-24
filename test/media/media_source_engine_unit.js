@@ -17,6 +17,7 @@ let MockTimeRanges;
 /**
  * @typedef {{
  *   abort: jasmine.Spy,
+ *   changeType: jasmine.Spy,
  *   appendBuffer: jasmine.Spy,
  *   remove: jasmine.Spy,
  *   updating: boolean,
@@ -2164,6 +2165,64 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('changeType codec switching', () => {
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, fakeVideoStream);
+    initObject.set(ContentType.AUDIO, fakeAudioStream);
+    const newMimeType = 'video/mp4; codecs="hvc1.1.6.L93.90"';
+
+    /** @type {!jasmine.Spy} */
+    let changeTypeSpy;
+    /** @type {!jasmine.Spy} */
+    let onBeforeResetSpy;
+
+    beforeEach(/** @suppress {visibility} */ async () => {
+      await mediaSourceEngine.init(initObject, false);
+      changeTypeSpy = videoSourceBuffer.changeType;
+      onBeforeResetSpy = jasmine.createSpy('onBeforeReset')
+          .and.returnValue(Promise.resolve());
+      spyOn(mediaSourceEngine, 'getInfoAboutResetOrChangeType_')
+          .and.returnValue({
+            type: shaka.media.MediaSourceEngine.ResetMode_.CHANGE_TYPE,
+            newMimeType,
+            transmuxer: null,
+          });
+      createMediaSourceSpy.calls.reset();
+    });
+
+    /** @return {!Promise} */
+    function setStreamProperties() {
+      return mediaSourceEngine.setStreamProperties(
+          ContentType.VIDEO, /* timestampOffset= */ 0,
+          /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity,
+          /* ignoreTimestampOffset= */ false, 'video/mp4', 'hvc1.1.6.L93.90',
+          initObject, Util.spyFunc(onBeforeResetSpy));
+    }
+
+    it('uses changeType when it succeeds', async () => {
+      await setStreamProperties();
+      expect(changeTypeSpy).toHaveBeenCalledWith(newMimeType);
+      expect(onBeforeResetSpy).not.toHaveBeenCalled();
+      expect(createMediaSourceSpy).not.toHaveBeenCalled();
+    });
+
+    it('falls back to a MediaSource reset when changeType throws',
+        async () => {
+          changeTypeSpy.and.throwError(new Error('NotSupportedError'));
+          await setStreamProperties();
+          expect(changeTypeSpy).toHaveBeenCalledWith(newMimeType);
+          expect(onBeforeResetSpy).toHaveBeenCalled();
+          expect(createMediaSourceSpy).toHaveBeenCalled();
+        });
+
+    it('resolves changeType with false when it throws', async () => {
+      changeTypeSpy.and.throwError(new Error('NotSupportedError'));
+      const changed = await mediaSourceEngine.changeType(
+          ContentType.VIDEO, newMimeType, null);
+      expect(changed).toBe(false);
+    });
+  });
+
   describe('destroy', () => {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
@@ -2302,6 +2361,7 @@ describe('MediaSourceEngine', () => {
   function createMockSourceBuffer() {
     return {
       abort: jasmine.createSpy('abort'),
+      changeType: jasmine.createSpy('changeType'),
       appendBuffer: jasmine.createSpy('appendBuffer'),
       remove: jasmine.createSpy('remove'),
       updating: false,
