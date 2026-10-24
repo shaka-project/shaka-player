@@ -160,6 +160,14 @@ shaka.extern.AbrManager = class {
    * @exportDoc
    */
   configure(config) {}
+
+  /**
+   * Set the player interface the buffer length and position
+   *
+   * @param {shaka.extern.AbrManager.PlayerInterface} playerInterface
+   * @exportDoc
+   */
+  setPlayerInterface(playerInterface) {}
 };
 
 
@@ -207,3 +215,21 @@ shaka.extern.AbrManager.DisableStreamCallback;
  * @exportDoc
  */
 shaka.extern.AbrManager.Factory;
+
+
+/**
+ * @typedef {{
+ *   getPresentationTime: function():number,
+ *   getBufferedInfo: function():!Array<!shaka.extern.BufferedRange>,
+ *   getCurrentVariantTotalBandwidth: function():(number|null),
+ * }}
+ *
+ * @property {function():number} getPresentationTime
+ *   Get the position in the presentation (in seconds) of the content that the
+ *   viewer is seeing on screen right now.
+ * @property {function():!Array<!shaka.extern.BufferedRange>} getBufferedInfo
+ *   The total buffer information length.
+ * @property {function():(number|null)} getCurrentVariantTotalBandwidth
+ *   The current bandwidth play by the player
+ */
+shaka.extern.AbrManager.PlayerInterface;

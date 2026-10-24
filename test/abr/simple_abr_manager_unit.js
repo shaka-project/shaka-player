@@ -529,4 +529,137 @@ describe('SimpleAbrManager', () => {
       expect(restrictVideoCallback).not.toHaveBeenCalled();
     });
   });
+
+  describe('minimum buffer ahead', /** @suppress {accessControls} */ () => {
+    /** @type {(number|null)} */
+    let currentBandwidth;
+
+    /** @type {number} */
+    let presentationTime;
+
+    /** @type {!Array<!shaka.extern.BufferedRange>} */
+    let bufferedRanges;
+
+    beforeEach(() => {
+      config.minBufferAheadToUpgrade = 15;
+      abrManager.configure(config);
+
+      currentBandwidth = 1e6;
+      presentationTime = 100;
+      bufferedRanges = [{start: 100, end: 120}];
+
+      /** @type {shaka.extern.AbrManager.PlayerInterface} */
+      const playerInterface = {
+        getPresentationTime: () => presentationTime,
+        getBufferedInfo: () => bufferedRanges,
+        getCurrentVariantTotalBandwidth: () => currentBandwidth,
+      };
+
+      abrManager.setPlayerInterface(playerInterface);
+    });
+
+    it('allows upgrade with sufficient buffer ahead', () => {
+      bufferedRanges = [{start: 100, end: 120}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade with insufficient buffer ahead', () => {
+      bufferedRanges = [{start: 100, end: 110}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('allows upgrade at the exact buffer threshold', () => {
+      bufferedRanges = [{start: 100, end: 115}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('allows downgrade regardless of buffer', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[0])).toBe(true);
+    });
+
+    it('allows equivalent bandwidth regardless of buffer', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[1])).toBe(true);
+    });
+
+    it('allows initial selection without a current variant', () => {
+      currentBandwidth = null;
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade when buffer is empty', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade when playback is before the buffer', () => {
+      bufferedRanges = [{start: 110, end: 140}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade when playback is after the buffer', () => {
+      bufferedRanges = [{start: 70, end: 90}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('does not count buffered data after a gap', () => {
+      bufferedRanges = [
+        {start: 100, end: 105},
+        {start: 110, end: 140},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('uses the range containing playback position', () => {
+      presentationTime = 115;
+      bufferedRanges = [
+        {start: 90, end: 105},
+        {start: 110, end: 135},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade when playback is inside a gap', () => {
+      presentationTime = 107;
+      bufferedRanges = [
+        {start: 100, end: 105},
+        {start: 110, end: 140},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade at the end of a buffered range', () => {
+      presentationTime = 120;
+      bufferedRanges = [{start: 100, end: 120}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+  });
 });
