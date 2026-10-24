@@ -186,6 +186,21 @@ describe('TtmlTextParser', () => {
       expect(p.opacity).toBe(1);
     });
 
+    it('hides the content which overflows a region by default', () => {
+      /**
+       * @param {string} overflow
+       * @return {string}
+       */
+      const getOverflow = (overflow) => parse(
+          `<layout><region xml:id="r1" ${overflow}/></layout>`,
+          '<body region="r1"><div>' +
+          '<p begin="0s" end="1s">Test</p>' +
+          '</div></body>').region.overflow;
+      expect(getOverflow('')).toBe('hidden');
+      expect(getOverflow('tts:overflow="hidden"')).toBe('hidden');
+      expect(getOverflow('tts:overflow="visible"')).toBe('');
+    });
+
     it('resolves the padding in em with the font size of the region', () => {
       /**
        * @param {string} fontSize
@@ -2361,6 +2376,232 @@ describe('TtmlTextParser', () => {
         },
         {startTime: 62.05, endTime: 3723.2});
   });
+
+  it('supports the alignment, position and delimiters of ruby', () => {
+    verifyHelper(
+        [{
+          startTime: 1,
+          endTime: 2,
+          payload: '',
+          nestedCues: [{
+            rubyTag: 'ruby',
+            // The initial value of tts:rubyAlign.
+            rubyAlign: 'center',
+            nestedCues: [
+              {payload: 'Base', rubyTag: null},
+              {payload: '(', rubyTag: 'rp'},
+              {
+                payload: 'Text',
+                rubyTag: 'rt',
+                rubyAlign: 'center',
+                // The initial value of tts:rubyPosition.
+                rubyPosition: Cue.rubyPosition.OUTSIDE,
+              },
+              {payload: ')', rubyTag: 'rp'},
+            ],
+          }, {
+            rubyTag: 'ruby',
+            rubyAlign: 'space-around',
+            nestedCues: [
+              {payload: 'Base'},
+              {
+                payload: 'Text',
+                rubyTag: 'rt',
+                rubyAlign: 'space-around',
+                rubyPosition: Cue.rubyPosition.AFTER,
+              },
+            ],
+          }],
+        }],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div>' +
+        '<p begin="00:01.00" end="00:02.00">' +
+        '<span tts:ruby="container"><span tts:ruby="base">Base</span>' +
+        '<span tts:ruby="delimiter">(</span>' +
+        '<span tts:ruby="text">Text</span>' +
+        '<span tts:ruby="delimiter">)</span></span>' +
+        '<span tts:ruby="container" tts:rubyAlign="spaceAround">' +
+        '<span tts:ruby="base">Base</span>' +
+        '<span tts:ruby="text" tts:rubyPosition="after">Text</span>' +
+        '</span></p></div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 1, endTime: 2});
+  });
+
+  it('rearranges ruby containers into one ruby per base', () => {
+    verifyHelper(
+        [{
+          startTime: 1,
+          endTime: 2,
+          payload: '',
+          nestedCues: [{
+            // The ruby container only holds the rubies.
+            rubyTag: null,
+            nestedCues: [{
+              rubyTag: 'ruby',
+              nestedCues: [{
+                // The annotations of the second text container are nested.
+                rubyTag: 'ruby',
+                nestedCues: [
+                  {payload: 'B1'},
+                  {
+                    payload: 'A1',
+                    rubyTag: 'rt',
+                    rubyPosition: Cue.rubyPosition.AFTER,
+                  },
+                ],
+              }, {
+                payload: 'T1',
+                rubyTag: 'rt',
+                rubyPosition: Cue.rubyPosition.BEFORE,
+                // It is kept from its text container.
+                fontSize: '0.5c',
+              }],
+            }, {
+              rubyTag: 'ruby',
+              nestedCues: [{
+                rubyTag: 'ruby',
+                nestedCues: [
+                  {payload: 'B2'},
+                  {payload: 'A2', rubyTag: 'rt'},
+                ],
+              }, {
+                payload: 'T2',
+                rubyTag: 'rt',
+                fontSize: '0.5c',
+              }],
+            }],
+          }],
+        }],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div>' +
+        '<p begin="00:01.00" end="00:02.00">' +
+        '<span tts:ruby="container">' +
+        '<span tts:ruby="baseContainer">' +
+        '<span tts:ruby="base">B1</span><span tts:ruby="base">B2</span>' +
+        '</span>' +
+        '<span tts:ruby="textContainer" tts:rubyPosition="before" ' +
+        'tts:fontSize="0.5c">' +
+        '<span tts:ruby="text">T1</span><span tts:ruby="text">T2</span>' +
+        '</span>' +
+        '<span tts:ruby="textContainer" tts:rubyPosition="after">' +
+        '<span tts:ruby="text">A1</span><span tts:ruby="text">A2</span>' +
+        '</span>' +
+        '</span></p></div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 1, endTime: 2});
+  });
+
+  it('supports tts:rubyReserve', () => {
+    verifyHelper(
+        [
+          // The annotations are half the font size by default.
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            rubyReserve: 'both 0.5em',
+          },
+          // A percentage is relative to the font size.
+          {startTime: 2, endTime: 3, payload: 'Test', rubyReserve: 'after 1em'},
+          {
+            startTime: 3,
+            endTime: 4,
+            payload: 'Test',
+            rubyReserve: 'outside 1c',
+          },
+          {startTime: 4, endTime: 5, payload: 'Test', rubyReserve: ''},
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div>' +
+        '<p begin="00:01.00" end="00:02.00" tts:rubyReserve="both">Test</p>' +
+        '<p begin="00:02.00" end="00:03.00" tts:rubyReserve="after 100%">' +
+        'Test</p>' +
+        '<p begin="00:03.00" end="00:04.00" tts:rubyReserve="outside 1c">' +
+        'Test</p>' +
+        '<p begin="00:04.00" end="00:05.00" tts:rubyReserve="none">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 1, endTime: 5});
+  });
+
+  it('defaults the font size to one cell and the font family', () => {
+    const time = {
+      periodStart: 0,
+      segmentStart: 0,
+      segmentEnd: 10,
+      vttOffset: 0,
+      isMpegTs: false,
+    };
+    verifyHelper(
+        [{startTime: 1, endTime: 2, payload: 'Test', fontSize: ''}],
+        '<tt><body><div>' +
+        '<p begin="00:01.00" end="00:02.00">Test</p>' +
+        '</div></body></tt>',
+        time,
+        // The content inherits them from the body.
+        {
+          startTime: 1,
+          endTime: 2,
+          fontSize: '1c',
+          fontFamily: 'Courier New,Liberation Mono,Courier,monospace',
+        },
+        {startTime: 1, endTime: 2, fontSize: ''});
+    verifyHelper(
+        [{startTime: 1, endTime: 2, payload: 'Test'}],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<body tts:fontSize="2c" tts:fontFamily="sansSerif"><div>' +
+        '<p begin="00:01.00" end="00:02.00">Test</p>' +
+        '</div></body></tt>',
+        time,
+        {startTime: 1, endTime: 2, fontSize: '2c', fontFamily: 'sans-serif'},
+        {startTime: 1, endTime: 2, fontSize: ''});
+  });
+
+  it('supports font sizes and line heights relative to the root container',
+      () => {
+        verifyHelper(
+            [{
+              startTime: 1,
+              endTime: 2,
+              payload: 'Test',
+              fontSize: '6.667rh',
+              lineHeight: '7rh',
+            }, {
+              startTime: 2,
+              endTime: 3,
+              payload: 'Test',
+              fontSize: '5rw',
+            }],
+            '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div>' +
+            '<p begin="00:01.00" end="00:02.00" tts:fontSize="6.667rh" ' +
+            'tts:lineHeight="7rh">Test</p>' +
+            '<p begin="00:02.00" end="00:03.00" tts:fontSize="5rw">Test</p>' +
+            '</div></body></tt>',
+            {
+              periodStart: 0,
+              segmentStart: 0,
+              segmentEnd: 10,
+              vttOffset: 0,
+              isMpegTs: false,
+            },
+            {startTime: 1, endTime: 3});
+      });
 
   it('inserts line breaks for <br> tags', () => {
     verifyHelper(
