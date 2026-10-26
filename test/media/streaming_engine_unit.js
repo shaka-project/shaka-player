@@ -3387,6 +3387,126 @@ describe('StreamingEngine', () => {
       expect(onError).toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
+
+    describe('with adaptBufferingGoalOnQuotaExceededError', () => {
+      /** @type {{audio: number, video: number}} */
+      let quotaErrors;
+      /** @type {number} */
+      let quotaSeconds;
+
+      /**
+       * @param {boolean} adaptBufferingGoal
+       */
+      function setUpQuota(adaptBufferingGoal) {
+        setupVod();
+
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().streaming;
+        config.rebufferingGoal = 1;
+        config.bufferingGoal = 30;
+        config.adaptBufferingGoalOnQuotaExceededError = adaptBufferingGoal;
+
+        mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+        createStreamingEngine(config);
+
+        // Reject a segment that does not fit next to what is buffered ahead
+        // of the playhead.  Content behind the playhead is ignored, as if
+        // MediaSource evicted it on its own.
+        quotaErrors = {audio: 0, video: 0};
+        const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
+        const appendBufferSpy = jasmine.createSpy('appendBuffer');
+        mediaSourceEngine.appendBuffer = appendBufferSpy;
+        appendBufferSpy.and.callFake((type, data, reference) => {
+          if (reference && type != ContentType.TEXT) {
+            const bufferedAhead = mediaSourceEngine.bufferedAheadOfImpl(
+                type, presentationTimeInSeconds);
+            const duration = reference.endTime - reference.startTime;
+            if (bufferedAhead + duration > quotaSeconds) {
+              if (type == ContentType.AUDIO) {
+                quotaErrors.audio++;
+              } else {
+                quotaErrors.video++;
+              }
+              throw new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.MEDIA,
+                  shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+                  type);
+            }
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return originalAppendBuffer.call(
+              mediaSourceEngine, type, data, reference);
+        });
+      }
+
+      /**
+       * @param {function()=} callback Executed each time the clock ticks.
+       */
+      async function play(callback) {
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+        playing = true;
+        await runTest(callback);
+      }
+
+      it('reduces the buffering goal to what fit in one step', async () => {
+        // Two 10 second segments fit, the third does not.
+        quotaSeconds = 21;
+        setUpQuota(/* adaptBufferingGoal= */ true);
+
+        await play();
+
+        expect(quotaErrors).toEqual({audio: 1, video: 1});
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('uses the reduction schedule when disabled', async () => {
+        quotaSeconds = 21;
+        setUpQuota(/* adaptBufferingGoal= */ false);
+
+        await play();
+
+        expect(quotaErrors.audio + quotaErrors.video).toBeGreaterThan(2);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('uses the reduction schedule when no segment fits', async () => {
+        // Only one segment fits, so there is nothing to keep next to it.
+        quotaSeconds = 15;
+        setUpQuota(/* adaptBufferingGoal= */ true);
+
+        await play();
+
+        expect(quotaErrors.audio + quotaErrors.video).toBeGreaterThan(2);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('falls back to the reduction schedule if the quota shrinks',
+          async () => {
+            quotaSeconds = 21;
+            setUpQuota(/* adaptBufferingGoal= */ true);
+
+            // After the first error the goal is lowered to what fit.  Once
+            // the quota shrinks below that, not even one segment fits next to
+            // the buffer, so the reduction schedule has to take over.
+            await play(() => {
+              if (presentationTimeInSeconds >= 15) {
+                quotaSeconds = 12;
+              }
+            });
+
+            expect(quotaErrors.video).toBeGreaterThan(1);
+            expect(onError).not.toHaveBeenCalled();
+            expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+          });
+    });
   });
 
   describe('VOD drift', () => {

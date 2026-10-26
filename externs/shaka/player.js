@@ -2079,6 +2079,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   dontChooseCodecs: boolean,
  *   shouldFixTimestampOffset: boolean,
  *   avoidEvictionOnQuotaExceededError: boolean,
+ *   adaptBufferingGoalOnQuotaExceededError: boolean,
  *   crossBoundaryStrategy: shaka.config.CrossBoundaryStrategy,
  *   returnToEndOfLiveWindowWhenOutside: boolean,
  *   stopFetchingOnPause: boolean,
@@ -2328,6 +2329,16 @@ shaka.extern.SpeechToTextConfiguration;
  *   is <code>true</code>.
  * @property {boolean} avoidEvictionOnQuotaExceededError
  *   Avoid evict content on QuotaExceededError.
+ *   <br>
+ *   Defaults to <code>false</code>.
+ * @property {boolean} adaptBufferingGoalOnQuotaExceededError
+ *   If true, on QuotaExceededError the buffering goal is lowered in one step to
+ *   what was buffered ahead of the playhead minus the rejected segment, and
+ *   the segment is retried once the buffer has played down to that goal.
+ *   If not even one segment fits next to the playhead, the default behavior
+ *   is used: the buffering goal is lowered in fixed steps and the segment is
+ *   retried after 4 seconds.  Has no effect if
+ *   <code>avoidEvictionOnQuotaExceededError</code> is true.
  *   <br>
  *   Defaults to <code>false</code>.
  * @property {shaka.config.CrossBoundaryStrategy} crossBoundaryStrategy
