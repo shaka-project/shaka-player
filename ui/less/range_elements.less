@@ -208,6 +208,11 @@
   z-index: -1;
 }
 
+/* Leave room below the seek bar so near misses do not activate a button. */
+.shaka-seek-bar-container:not(.shaka-hidden) + .shaka-controls-button-panel {
+  padding-top: calc(2 * var(--shaka-track-h));
+}
+
 .shaka-ad-markers,
 .shaka-chapter-markers {
   .overlay-child();
