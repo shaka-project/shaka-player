@@ -350,23 +350,25 @@ describe('UI', () => {
     it('does not activate buttons just below the seek bar', async () => {
       videoContainer.style.width = '600px';
       const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
-        controlPanelElements: ['fullscreen'],
+        controlPanelElements: [],
       });
       const controls = ui.getControls();
       player = controls.getLocalPlayer();
       spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
       controls.seekTo(50, false);
       controls.getControlsContainer().setAttribute('shown', 'true');
+      controls.getControlsContainer().setAttribute('casting', 'true');
 
       const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
-      const fullscreen = videoContainer.querySelector(
-          '.shaka-fullscreen-button');
-      // Test button hit areas even on devices without fullscreen support.
-      shaka.ui.Utils.setDisplay(fullscreen, true);
+      const panel = videoContainer.querySelector(
+          '.shaka-controls-button-panel');
+      const button = document.createElement('button');
+      panel.appendChild(button);
+      const onClick = jasmine.createSpy('onClick');
+      button.addEventListener('click', () => Util.spyFunc(onClick)());
       const seekRect = seekBar.getBoundingClientRect();
-      const buttonRect = fullscreen.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
       const x = buttonRect.left + buttonRect.width / 2;
-      const toggleFullscreen = spyOn(controls, 'toggleFullScreen');
       for (const y of [seekRect.bottom - 1, seekRect.bottom + 1]) {
         const target = document.elementFromPoint(x, y);
         expect(target).not.toBeNull();
@@ -374,12 +376,14 @@ describe('UI', () => {
           UiUtils.simulateEvent(target, 'click');
         }
       }
-      expect(toggleFullscreen).not.toHaveBeenCalled();
+      expect(onClick).not.toHaveBeenCalled();
 
       // The guard space must not cover the button itself.
       const buttonTarget = document.elementFromPoint(
           x, buttonRect.top + buttonRect.height / 2);
-      expect(buttonTarget.closest('button')).toBe(fullscreen);
+      expect(buttonTarget.closest('button')).toBe(button);
+      UiUtils.simulateEvent(buttonTarget, 'click');
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     for (const addSeekBar of [false, true]) {
@@ -388,10 +392,11 @@ describe('UI', () => {
         videoContainer.style.width = '600px';
         const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
           addSeekBar: addSeekBar,
-          controlPanelElements: ['fullscreen'],
+          controlPanelElements: [],
         });
         const controls = ui.getControls();
         controls.getControlsContainer().setAttribute('shown', 'true');
+        controls.getControlsContainer().setAttribute('casting', 'true');
         if (addSeekBar) {
           const seekBar = /** @type {!HTMLElement} */ (
             videoContainer.querySelector('.shaka-seek-bar-container'));
@@ -399,15 +404,13 @@ describe('UI', () => {
         }
         const panel = videoContainer.querySelector(
             '.shaka-controls-button-panel');
-        const fullscreen = videoContainer.querySelector(
-            '.shaka-fullscreen-button');
-        // Test button hit areas even on devices without fullscreen support.
-        shaka.ui.Utils.setDisplay(fullscreen, true);
+        const button = document.createElement('button');
+        panel.appendChild(button);
         const panelRect = panel.getBoundingClientRect();
-        const buttonRect = fullscreen.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
         const target = document.elementFromPoint(
             buttonRect.left + buttonRect.width / 2, panelRect.top + 1);
-        expect(target.closest('button')).toBe(fullscreen);
+        expect(target.closest('button')).toBe(button);
       });
     }
 
