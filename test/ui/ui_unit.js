@@ -349,6 +349,8 @@ describe('UI', () => {
 
     it('does not activate buttons just below the seek bar', async () => {
       videoContainer.style.width = '600px';
+      spyOn(shaka.ui.Controls.prototype, 'isFullScreenSupported')
+          .and.returnValue(false);
       const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
         controlPanelElements: ['fullscreen'],
       });
@@ -361,6 +363,8 @@ describe('UI', () => {
       const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
       const fullscreen = videoContainer.querySelector(
           '.shaka-fullscreen-button');
+      // Test button hit areas even on devices without fullscreen support.
+      shaka.ui.Utils.setDisplay(fullscreen, true);
       const seekRect = seekBar.getBoundingClientRect();
       const buttonRect = fullscreen.getBoundingClientRect();
       const x = buttonRect.left + buttonRect.width / 2;
@@ -384,6 +388,8 @@ describe('UI', () => {
       it('keeps buttons clickable below an absent or hidden seek bar ' +
           addSeekBar, async () => {
         videoContainer.style.width = '600px';
+        spyOn(shaka.ui.Controls.prototype, 'isFullScreenSupported')
+            .and.returnValue(false);
         const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
           addSeekBar: addSeekBar,
           controlPanelElements: ['fullscreen'],
@@ -399,6 +405,8 @@ describe('UI', () => {
             '.shaka-controls-button-panel');
         const fullscreen = videoContainer.querySelector(
             '.shaka-fullscreen-button');
+        // Test button hit areas even on devices without fullscreen support.
+        shaka.ui.Utils.setDisplay(fullscreen, true);
         const panelRect = panel.getBoundingClientRect();
         const buttonRect = fullscreen.getBoundingClientRect();
         const target = document.elementFromPoint(
