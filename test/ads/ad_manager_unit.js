@@ -168,7 +168,7 @@ describe('Ad manager', () => {
   it('routes native HLS creative metadata to the SVTA parser', async () => {
     Object.assign(mockVideo, {style: document.createElement('video').style});
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'com.apple.quicktime.HLS', startTime: 0,
       endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
     try {
@@ -186,7 +186,7 @@ describe('Ad manager', () => {
     config.disableHLSInterstitial = true;
     adManager.configure(config);
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'com.apple.hls.interstitial', startTime: 0,
       endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
     try {
@@ -203,7 +203,7 @@ describe('Ad manager', () => {
     config.disableSVTA = true;
     adManager.configure(config);
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'urn:svta:advertising-wg:ad-creative-signaling',
       startTime: 0, endTime: 10,
       values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
