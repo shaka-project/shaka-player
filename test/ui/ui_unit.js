@@ -349,8 +349,6 @@ describe('UI', () => {
 
     it('does not activate buttons just below the seek bar', async () => {
       videoContainer.style.width = '600px';
-      spyOn(shaka.ui.Controls.prototype, 'isFullScreenSupported')
-          .and.returnValue(false);
       const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
         controlPanelElements: ['fullscreen'],
       });
@@ -388,8 +386,6 @@ describe('UI', () => {
       it('keeps buttons clickable below an absent or hidden seek bar ' +
           addSeekBar, async () => {
         videoContainer.style.width = '600px';
-        spyOn(shaka.ui.Controls.prototype, 'isFullScreenSupported')
-            .and.returnValue(false);
         const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
           addSeekBar: addSeekBar,
           controlPanelElements: ['fullscreen'],
