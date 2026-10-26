@@ -359,7 +359,8 @@ describe('UI', () => {
       controls.getControlsContainer().setAttribute('shown', 'true');
 
       const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
-      const fullscreen = videoContainer.querySelector('.shaka-fullscreen-button');
+      const fullscreen = videoContainer.querySelector(
+          '.shaka-fullscreen-button');
       const seekRect = seekBar.getBoundingClientRect();
       const buttonRect = fullscreen.getBoundingClientRect();
       const x = buttonRect.left + buttonRect.width / 2;
@@ -394,8 +395,10 @@ describe('UI', () => {
             videoContainer.querySelector('.shaka-seek-bar-container'));
           shaka.ui.Utils.setDisplay(seekBar, false);
         }
-        const panel = videoContainer.querySelector('.shaka-controls-button-panel');
-        const fullscreen = videoContainer.querySelector('.shaka-fullscreen-button');
+        const panel = videoContainer.querySelector(
+            '.shaka-controls-button-panel');
+        const fullscreen = videoContainer.querySelector(
+            '.shaka-fullscreen-button');
         const panelRect = panel.getBoundingClientRect();
         const buttonRect = fullscreen.getBoundingClientRect();
         const target = document.elementFromPoint(
