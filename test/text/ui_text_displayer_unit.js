@@ -1313,6 +1313,125 @@ describe('UITextDisplayer', () => {
     expect(cueElement.style.fontSize).toBe('');
   });
 
+  describe('fontScaleFactor', () => {
+    beforeEach(() => {
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+      config.suspendRenderingWhenHidden = false;
+      config.fontScaleFactor = 2;
+      textDisplayer.configure(config);
+      textDisplayer.setTextVisibility(true);
+    });
+
+    /**
+     * @param {string} text
+     * @return {!Array<!shaka.text.Cue>}
+     */
+    function parseVtt(text) {
+      return new shaka.text.VttTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text)),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 100,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          null, []);
+    }
+
+    /**
+     * @param {string} body
+     * @return {!Array<!shaka.text.Cue>}
+     */
+    function parseTtml(body) {
+      return new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(
+              '<tt xmlns="http://www.w3.org/ns/ttml" ' +
+              'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+              body + '</tt>')),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 100,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          null, []);
+    }
+
+    /**
+     * @param {!Array<!shaka.text.Cue>} cues
+     * @param {string} text
+     * @return {!Promise<number>} The computed font size of the innermost
+     *   element containing the text, in pixels.
+     */
+    async function getFontSize(cues, text) {
+      textDisplayer.append(cues);
+      await updateCaptions();
+      const textContainer =
+          videoContainer.querySelector('.shaka-text-container');
+      const elements = Array.from(textContainer.querySelectorAll('*'))
+          .filter((e) => e.textContent.trim() == text);
+      const element = elements[elements.length - 1];
+      expect(element).toBeTruthy();
+      return parseFloat(getComputedStyle(element).fontSize);
+    }
+
+    /** @return {number} */
+    function getBaseFontSize() {
+      return parseFloat(getComputedStyle(
+          videoContainer.querySelector('.shaka-text-container')).fontSize);
+    }
+
+    it('scales CEA-608/708 cues only once', async () => {
+      const cue = new shaka.text.Cue(0, 100, '');
+      const nestedCue = shaka.cea.CeaUtils.createStyledCue(
+          0, 100, /* underline= */ false, /* italics= */ true,
+          'white', 'black');
+      nestedCue.payload = 'Captain\'s log.';
+      cue.nestedCues = [nestedCue];
+
+      const fontSize = await getFontSize([cue], 'Captain\'s log.');
+      expect(fontSize).toBeCloseTo(2 * getBaseFontSize(), 1);
+    });
+
+    it('scales deeply nested WebVTT cues only once', async () => {
+      const cues = parseVtt(
+          'WEBVTT\n\n' +
+          '00:00:00.000 --> 00:01:40.000\n' +
+          '<c>one <c>two <c>three <c>four</c></c></c></c>\n');
+
+      const fontSize = await getFontSize(cues, 'four');
+      expect(fontSize).toBeCloseTo(2 * getBaseFontSize(), 1);
+    });
+
+    it('does not scale nested WebVTT font sizes in em again', async () => {
+      const cues = parseVtt(
+          'WEBVTT\n\n' +
+          'STYLE\n::cue(.big) { font-size: 150%; }\n\n' +
+          '00:00:00.000 --> 00:01:40.000\n' +
+          '<c>one <c>two <c.big>three</c></c></c>\n');
+
+      const fontSize = await getFontSize(cues, 'three');
+      expect(fontSize).toBeCloseTo(2 * 1.5 * getBaseFontSize(), 1);
+    });
+
+    it('scales nested TTML cues only once', async () => {
+      const cues = parseTtml(
+          '<body><div><p begin="0s" end="100s">' +
+          '<span>one <span>two</span></span>' +
+          '<span tts:fontSize="10px">three</span>' +
+          '</p></div></body>');
+
+      // The default cell resolution is 32 by 15 cells, and the default font
+      // size is 1c.
+      const cellHeight = videoContainerHeight / 15;
+      expect(await getFontSize(cues, 'two')).toBeCloseTo(2 * cellHeight, 1);
+      expect(await getFontSize([], 'three')).toBeCloseTo(2 * 10, 1);
+    });
+  });
+
   // eslint-disable-next-line @stylistic/max-len
   it('shows example text only when no cue is active during preview', async () => {
     const config =
