@@ -320,11 +320,17 @@ shaka.test.Util = class {
    * @return {!Promise<!ArrayBuffer>}
    */
   static async fetch(uri) {
-    const response = await fetch(uri);
+    // A network error from fetch() doesn't say which URI failed, which makes
+    // flaky failures hard to diagnose.  So attach the URI to every failure.
+    const fail = (reason) => {
+      throw new Error('shaka.test.Util.fetch failed: ' + uri + ': ' + reason);
+    };
+
+    const response = await fetch(uri).catch(fail);
     if (!response.ok) {
-      throw new Error('shaka.test.Util.fetch failed: ' + uri);
+      fail('HTTP status ' + response.status);
     }
-    return response.arrayBuffer();
+    return response.arrayBuffer().catch(fail);
   }
 
   /**
