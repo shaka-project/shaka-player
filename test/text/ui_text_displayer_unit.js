@@ -337,7 +337,11 @@ describe('UITextDisplayer', () => {
       expect(wrapper.style.width).toBe('100%');
       expect(wrapper.parentElement.style.width).toBe('100%');
       expect(element.parentElement.style.width).toBe('100%');
-      expect(element.style.alignSelf).toBe('self-end');
+      // Older browsers don't support self-end in flex layout, and get the
+      // flex-end fallback instead.
+      const alignSelf = CSS.supports('align-self', 'self-end') ?
+          'self-end' : 'flex-end';
+      expect(element.style.alignSelf).toBe(alignSelf);
 
       // The words of the paragraph are not floated, which would reverse them.
       for (const child of Array.from(element.childNodes)) {
