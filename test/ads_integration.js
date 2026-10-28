@@ -189,6 +189,24 @@ describe('Ads', () => {
 
       await player.unload();
     });
+
+    it('can be destroyed during an ad on a single media element', async () => {
+      goog.asserts.assert(adManager, 'Must have adManager');
+
+      player.configure('ads.supportsMultipleMediaElements', false);
+
+      await player.load('/base/test/test/assets/hls-interstitial/main.m3u8');
+      video.play();
+
+      // Wait a maximum of 10 seconds before the ad starts playing.
+      await waiter.timeoutAfter(10)
+          .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+      // This must not leave an unhandled rejection behind, which would fail
+      // this test.
+      await player.destroy();
+      await shaka.test.Util.shortDelay();
+    });
   });
 
   describe('support MPD Alternate', () => {
