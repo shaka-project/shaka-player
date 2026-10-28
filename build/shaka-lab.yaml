@@ -254,9 +254,17 @@ ChromeAndroid:
     - *basic_chrome_config
     - *android_chrome_config
 
-ChromecastUltra:
+Chromecast1stGen:
+  # This is a very low-performing device, and many of our tests don't work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
   browser: chromecast
-  version: Ultra
+  version: 1st-gen
+
+Chromecast3rdGen:
+  browser: chromecast
+  version: 3rd-gen
 
 ChromecastGTV:
   browser: chromecast
@@ -275,14 +283,6 @@ ChromecastSpeaker:
   disabled: true
   browser: chromecast
   version: speaker
-
-ChromecastV1:
-  # This is a very low-performing device, and many of our tests don't work here.
-  # Do not run tests here by default.
-  # This device can still be requested explicitly in the Selenium workflow.
-  disabled: true
-  browser: chromecast
-  version: v1
 
 ChromecastStreamer:
   # This is publicly the "Google TV Streamer", but it's still a Chromecast, too.
