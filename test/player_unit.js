@@ -169,6 +169,9 @@ describe('Player', () => {
       preferredAudioLanguage: 'en',
       abrFactory: () => abrManager,
       textDisplayFactory: () => textDisplayer,
+      // Otherwise, the resolution of the screen of the device running the tests
+      // would filter out variants in their manifests.
+      ignoreHardwareResolution: true,
     });
 
     onError = jasmine.createSpy('error event');
