@@ -178,6 +178,9 @@ describe('Player', () => {
       ],
       abrFactory: () => abrManager,
       textDisplayFactory: (player) => textDisplayer,
+      // Otherwise, the resolution of the screen of the device running the tests
+      // would filter out variants in their manifests.
+      ignoreHardwareResolution: true,
     });
 
     onError = jasmine.createSpy('error event');
