@@ -40,6 +40,20 @@ describe('LCEVC Integration', () => {
 
     compiledShaka =
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+
+    // The decoder is only loaded where these tests can run, since it takes
+    // enough memory to crash some devices.
+    if (!isPlatformUnsupported()) {
+      // The decoder is a UMD module.  Hide the AMD loader while it loads, so
+      // that it defines the LCEVCdec global instead of an AMD module.
+      const define = window['define'];
+      window['define'] = undefined;
+      try {
+        await loadScript('node_modules/lcevc_dec.js/dist/lcevc_dec.min.js');
+      } finally {
+        window['define'] = define;
+      }
+    }
   });
 
   beforeEach(async () => {

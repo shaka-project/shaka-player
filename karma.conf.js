@@ -211,12 +211,17 @@ module.exports = (config) => {
       // codem-isoboxer module next
       'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
 
-      // LCEVC decoder libraries (.wasm & .js)
+      // LCEVC decoder libraries (.wasm & .js).  These are loaded on demand by
+      // the LCEVC tests, since the decoder takes enough memory at startup to
+      // crash low-memory devices that can't run those tests anyway.
       {
         pattern: 'node_modules/lcevc_dec.js/dist/liblcevc_dpi.wasm',
         included: false,
       },
-      'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
+      {
+        pattern: 'node_modules/lcevc_dec.js/dist/lcevc_dec.min.js',
+        included: false,
+      },
 
       // load closure base, the deps tree, and the uncompiled library
       'test/test/closure-boot.js',
