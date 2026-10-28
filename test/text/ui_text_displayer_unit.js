@@ -260,13 +260,18 @@ describe('UITextDisplayer', () => {
      * them.
      *
      * @param {!shaka.text.Cue} paragraph
+     * @param {shaka.text.Cue.textAlign=} containerAlign The alignment of the
+     *   containers.
      * @return {!Promise<!HTMLElement>} The element of the paragraph.
      */
-    async function showParagraph(paragraph) {
+    async function showParagraph(paragraph,
+        containerAlign = shaka.text.Cue.textAlign.CENTER) {
       const body = new shaka.text.Cue(0, 100, '');
       body.isContainer = true;
+      body.textAlign = containerAlign;
       const div = new shaka.text.Cue(0, 100, '');
       div.isContainer = true;
+      div.textAlign = containerAlign;
       body.nestedCues = [div];
       div.nestedCues = [paragraph];
 
@@ -347,6 +352,34 @@ describe('UITextDisplayer', () => {
       for (const child of Array.from(element.childNodes)) {
         expect(/** @type {!HTMLElement} */ (child).style.cssFloat).toBe('');
       }
+    });
+
+    it('centers paragraphs in containers aligned to the start', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      paragraph.textAlign = Cue.textAlign.CENTER;
+      paragraph.nestedCues = [span('Centered')];
+      const element = await showParagraph(paragraph, Cue.textAlign.START);
+
+      expect(element.parentElement.style.alignItems).toBe('flex-start');
+      expect(element.style.alignSelf).toBe('center');
+    });
+
+    it('aligns the box of paragraphs by their position alignment', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      // A block at the end, whose lines are aligned to its start.
+      paragraph.positionAlign = Cue.positionAlign.RIGHT;
+      paragraph.textAlign = Cue.textAlign.START;
+      paragraph.nestedCues = [span('First'), lineBreak(), span('Second')];
+      const element = await showParagraph(paragraph);
+
+      // Older browsers don't support self-end in flex layout, and get the
+      // flex-end fallback instead.
+      const alignSelf = CSS.supports('align-self', 'self-end') ?
+          'self-end' : 'flex-end';
+      expect(element.style.alignSelf).toBe(alignSelf);
+      expect(element.style.textAlign).toBe('start');
     });
 
     it('keeps the display of ruby', async () => {
