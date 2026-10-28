@@ -2075,7 +2075,9 @@ describe('TtmlTextParser', () => {
             startTime: 62.05,
             endTime: 3723.2,
             payload: 'Test',
-            direction: Cue.direction.HORIZONTAL_LEFT_TO_RIGHT,
+            // The direction of the content overrides the one of the writing
+            // mode.
+            direction: Cue.direction.HORIZONTAL_RIGHT_TO_LEFT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -2095,6 +2097,51 @@ describe('TtmlTextParser', () => {
         },
         {startTime: 62.05, endTime: 3723.2, region: {id: 'subtitleArea'}},
         {startTime: 62.05, endTime: 3723.2});
+  });
+
+  it('supports unicodeBidi and the direction of the content', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 1,
+            payload: '',
+            // The direction of the content overrides the one of the writing
+            // mode of the region.
+            direction: Cue.direction.HORIZONTAL_RIGHT_TO_LEFT,
+            unicodeBidi: 'bidi-override',
+            nestedCues: [
+              // The direction is inherited, unlike unicodeBidi.
+              {
+                payload: 'A ',
+                direction: Cue.direction.HORIZONTAL_RIGHT_TO_LEFT,
+                unicodeBidi: '',
+              },
+              {
+                payload: 'B',
+                direction: Cue.direction.HORIZONTAL_LEFT_TO_RIGHT,
+                unicodeBidi: 'embed',
+              },
+            ],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><layout>' +
+        '<region xml:id="r1" tts:writingMode="lrtb" tts:unicodeBidi="embed"/>' +
+        '</layout></head>' +
+        '<body><div>' +
+        '<p begin="0s" end="1s" region="r1" tts:direction="rtl" ' +
+        'tts:unicodeBidi="bidiOverride">' +
+        'A <span tts:direction="ltr" tts:unicodeBidi="embed">B</span></p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 1});
   });
 
   it('supports textCombine setting', () => {
