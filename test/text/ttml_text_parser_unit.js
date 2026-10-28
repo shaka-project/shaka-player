@@ -4150,6 +4150,37 @@ describe('TtmlTextParser', () => {
         {startTime: 0, endTime: 3});
   });
 
+  it('scales lengths in pixels with the extent of the root container', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 1,
+            payload: 'Test',
+            fontSize: '5rh',
+            lineHeight: '7.5rh',
+            textStrokeWidth: '0.5rh',
+            letterSpacing: '5rw',
+            textShadow: '5rw -5rh 0.5rh red, -5rw 5rh blue',
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
+        'tts:extent="640px 480px">' +
+        '<body><div>' +
+        '<p begin="0s" end="1s" tts:fontSize="24px" tts:lineHeight="36px" ' +
+        'tts:textOutline="red 2.4px" tts:letterSpacing="32px" ' +
+        'tts:textShadow="32px -24px 2.4px red, -32px 24px blue">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 1});
+  });
+
   it('supports styles nested in regions', () => {
     verifyHelper(
         [
