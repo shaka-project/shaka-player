@@ -129,6 +129,25 @@ filterDescribe('shaka.msf.draft22.MessageWriter', isMSFSupported, () => {
     });
   });
 
+  describe('nextObjectFilterParam', () => {
+    it('should frame Next Object without a length or location fields', () => {
+      writer.marshalSubscribe({
+        requestId: BigInt(4),
+        namespace: ['ns'],
+        trackName: 'a',
+        params: [writer.nextObjectFilterParam()],
+      });
+
+      expectMessage([0x03], [
+        0x04, // requestId
+        0x01, 0x02, 0x6e, 0x73, // namespace ['ns']
+        0x01, 0x61, // 'a'
+        0x01, // parameter count
+        0x21, 0x05, // LOCATION_FILTER, Next Object
+      ]);
+    });
+  });
+
   describe('fillCurrentGroupParam', () => {
     it('should ask for the current Group as Relative Start 1', () => {
       const param = writer.fillCurrentGroupParam();
