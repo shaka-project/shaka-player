@@ -892,6 +892,76 @@ describe('UITextDisplayer', () => {
     expect(cueElement.textContent).toBe('Hidden');
   });
 
+  it('applies the bidirectional embedding level of the cues', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Override');
+    cue.direction = shaka.text.Cue.direction.HORIZONTAL_RIGHT_TO_LEFT;
+    cue.unicodeBidi = 'bidi-override';
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const cueElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-container > div'));
+    expect(cueElement.style.direction).toBe('rtl');
+    expect(cueElement.style.unicodeBidi).toBe('bidi-override');
+  });
+
+  it('falls back to the prefixed bidirectional embedding level', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Isolated');
+    cue.unicodeBidi = 'isolate';
+    // An older browser which only supports the prefixed value.  The
+    // prototype which defines the property depends on the browser.
+    const prototypes = [];
+    for (let p = Object.getPrototypeOf(document.createElement('div').style);
+      p; p = Object.getPrototypeOf(p)) {
+      prototypes.push(p);
+    }
+    const style = /** @type {!Object} */ (prototypes.find((p) =>
+      Object.getOwnPropertyDescriptor(p, 'unicodeBidi')) || prototypes[0]);
+    const descriptor =
+        Object.getOwnPropertyDescriptor(style, 'unicodeBidi');
+    const values = new WeakMap();
+    Object.defineProperty(style, 'unicodeBidi', {
+      configurable: true,
+      // The accessors need the style they are called on, as "this".
+      /**
+       * @this {!CSSStyleDeclaration}
+       * @return {string}
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      get() {
+        return values.get(this) || '';
+      },
+      /**
+       * @this {!CSSStyleDeclaration}
+       * @param {string} value
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      set(value) {
+        if (value != 'isolate') {
+          values.set(this, value);
+        }
+      },
+    });
+
+    try {
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([cue]);
+      await updateCaptions();
+
+      const cueElement = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container > div'));
+      expect(cueElement.style.unicodeBidi).toBe('-webkit-isolate');
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(style, 'unicodeBidi', descriptor);
+      } else {
+        delete style['unicodeBidi'];
+      }
+    }
+  });
+
   it('does not wrap the lines of cues which should not wrap', async () => {
     const cue = new shaka.text.Cue(0, 100, 'Test');
     cue.wrapLine = false;
