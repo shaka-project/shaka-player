@@ -1615,26 +1615,27 @@ describe('Player', () => {
   describe('supports nextUrl', () => {
     const urlWithNextUrl = 'test:sintel_next_url_compiled';
 
-    it('with preload', async () => {
-      player.configure('streaming.preloadNextUrlWindow', 30);
+    /** @return {!Promise} */
+    async function playToNextUrl() {
       await player.load(urlWithNextUrl);
       await video.play();
       await waiter.timeoutAfter(30).waitForEnd(video);
       expect(player.getAssetUri()).toBe(urlWithNextUrl);
-      // Delay needed to load the next URL.
-      await shaka.test.Util.delay(1);
+      // The next URL is loaded on the media element's ended event, which some
+      // platforms (such as the Google TV Streamer) fire more than a second
+      // after the end is reached.
+      await waiter.timeoutAfter(10).waitForEvent(player, 'loaded');
       expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    }
+
+    it('with preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 30);
+      await playToNextUrl();
     });
 
     it('without preload', async () => {
       player.configure('streaming.preloadNextUrlWindow', 0);
-      await player.load(urlWithNextUrl);
-      await video.play();
-      await waiter.timeoutAfter(30).waitForEnd(video);
-      expect(player.getAssetUri()).toBe(urlWithNextUrl);
-      // Delay needed to load the next URL.
-      await shaka.test.Util.delay(1);
-      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+      await playToNextUrl();
     });
   });
 
