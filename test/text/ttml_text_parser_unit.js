@@ -4052,6 +4052,57 @@ describe('TtmlTextParser', () => {
         {startTime: 0, endTime: 1});
   });
 
+  it('supports multiRowAlign', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 1,
+            payload: 'Test',
+            // The block is at the end, and its lines are aligned to its start.
+            positionAlign: Cue.positionAlign.RIGHT,
+            textAlign: Cue.textAlign.START,
+          },
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            // The start of right to left text is on the right.
+            positionAlign: Cue.positionAlign.RIGHT,
+            textAlign: Cue.textAlign.END,
+          },
+          {
+            startTime: 2,
+            endTime: 3,
+            payload: 'Test',
+            positionAlign: Cue.positionAlign.CENTER,
+            textAlign: Cue.textAlign.CENTER,
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
+        'xmlns:ebutts="urn:ebu:tt:style">' +
+        '<head><styling>' +
+        '<style xml:id="s1" tts:textAlign="end" ' +
+        'ebutts:multiRowAlign="start"/>' +
+        '<style xml:id="s2" ebutts:multiRowAlign="end"/>' +
+        '<style xml:id="s3" ebutts:multiRowAlign="auto"/>' +
+        '</styling></head>' +
+        '<body><div>' +
+        '<p begin="0s" end="1s" style="s1">Test</p>' +
+        '<p begin="1s" end="2s" style="s2" tts:direction="rtl" ' +
+        'tts:textAlign="start">Test</p>' +
+        '<p begin="2s" end="3s" style="s3" tts:textAlign="center">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 3});
+  });
+
   it('supports styles nested in regions', () => {
     verifyHelper(
         [
