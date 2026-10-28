@@ -673,6 +673,37 @@ describe('UITextDisplayer', () => {
     expect(textContainer.textContent).toBe('OneTwo');
   });
 
+  it('stacks the cues of a region in their block flow direction', async () => {
+    const Cue = shaka.text.Cue;
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'vertical';
+    cueRegion.height = 80;
+    cueRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.width = 80;
+    cueRegion.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    const container = new Cue(0, 100, '');
+    container.isContainer = true;
+    container.region = cueRegion;
+    container.writingMode = Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    container.nestedCues = [new Cue(0, 100, 'First')];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([container]);
+    await updateCaptions();
+
+    const regionElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-region'));
+    // Older browsers, like Tizen 3, only have the prefixed property.
+    expect(regionElement.style.getPropertyValue('writing-mode') ||
+        regionElement.style.getPropertyValue('-webkit-writing-mode'))
+        .toBe('vertical-rl');
+    // A vertical container fills its region along its lines.
+    const containerElement = /** @type {!HTMLElement} */ (
+      regionElement.firstElementChild);
+    expect(containerElement.style.height).toBe('100%');
+    expect(containerElement.style.width).toBe('');
+  });
+
   it('creates separate elements for cue regions', async () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
