@@ -889,7 +889,7 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
             () => new shaka.msf.draft22.MessageWriter(codec));
       });
 
-      it('writes the nested LOCATION_FILTER as Relative Start', async () => {
+      it('pairs Next Object with a Relative Start fill', async () => {
         // Draft-22 replaced the filter's length with a Location Filter Type.
         // Relative Start is 0x01 and carries one field, so the bytes happen to
         // match what draft-20 writes for a one-byte value; the nested writer
@@ -900,15 +900,75 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         const params = payload.subarray(
             1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
         expect(Array.from(params)).toEqual([
-          0x03, // Parameter count
+          0x04, // Parameter count
           0x10, 0x01, // FORWARD = 1
           0x10, 0x00, // delta 0x10 -> SUBSCRIBER_PRIORITY = 0
-          0x03, 0x04, // delta 0x03 -> FILL_PARAMETERS, 4 bytes:
+          0x01, 0x05, // delta 0x01 -> LOCATION_FILTER, Next Object
+          0x02, 0x04, // delta 0x02 -> FILL_PARAMETERS, 4 bytes:
           0x01, // Parameter count
           0x21, // LOCATION_FILTER, no length:
           0x01, 0x01, // Relative Start, StartGroup = 1
         ]);
       });
+
+      it('does not add Next Object without a fill', async () => {
+        const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+        await shaka.test.Util.shortDelay();
+        responses.enqueue(subscribeOk());
+        await subscribed;
+
+        const params = subscribePayload().subarray(
+            1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+        expect(Array.from(params)).toEqual([
+          0x02, // Parameter count
+          0x10, 0x01, // FORWARD = 1
+          0x10, 0x00, // SUBSCRIBER_PRIORITY = 0
+        ]);
+      });
+
+      for (const [group, object] of [[0, 0], [7, 3]]) {
+        it(`preserves an explicit start at {${group}, ${object}} with a fill`,
+            async () => {
+              const subscribed = session.subscribe(
+                  NAMESPACE, TRACK, () => {},
+                  {group: BigInt(group), object: BigInt(object)},
+                  /* joinCurrentGroup= */ true);
+              await shaka.test.Util.shortDelay();
+              responses.enqueue(subscribeOk());
+              await subscribed;
+
+              const params = subscribePayload().subarray(
+                  1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+              const filter = group || object ?
+                  [0x01, 0x02, group, object] : [];
+              expect(Array.from(params)).toEqual([
+                group || object ? 0x04 : 0x03, // Parameter count
+                0x10, 0x01, // FORWARD = 1
+                0x10, 0x00, // SUBSCRIBER_PRIORITY = 0
+                ...filter, // Absolute Start, or unfiltered at the origin
+                group || object ? 0x02 : 0x03, // FILL_PARAMETERS delta
+                0x04, // Length
+                0x01, 0x21, 0x01, 0x01, // Relative Start 1 fill
+              ]);
+            });
+      }
+
+      it('delivers the fill before the subscription', async () => {
+        const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+        await deliverToSubscription(alias, 5, 2);
+        expect(received.length).toBe(0);
+
+        await readFetchStream(groupStartFor(0, 5, 2));
+        expect(receivedLocations()).toEqual(['5:0', '5:1', '5:2']);
+      });
+
+      it('does not wait for a fill on a track with nothing published',
+          async () => {
+            const alias = await subscribeJoining(subscribeOkAt(null));
+            await deliverToSubscription(alias, 0, 0);
+
+            expect(receivedLocations()).toEqual(['0:0']);
+          });
     });
   });
 });
