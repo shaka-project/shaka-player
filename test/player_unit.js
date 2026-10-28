@@ -2216,6 +2216,21 @@ describe('Player', () => {
       await player.load(preloadManager);
     });
 
+    it('reports no bandwidth estimate before the first load', async () => {
+      // Regression test for #10824: before load() creates the AbrManager,
+      // asking for the estimate threw and broke Content Steering reloads.
+      const parser = new shaka.test.FakeManifestParser(manifest);
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      await preloadManager.waitForFinish();
+
+      expect(parser.playerInterface.getBandwidthEstimate()).toBeNaN();
+      await preloadManager.destroy();
+    });
+
     describe('prefetches the segment that contains the start time', () => {
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
