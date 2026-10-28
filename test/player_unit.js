@@ -6456,6 +6456,76 @@ describe('Player', () => {
     });
   });
 
+  describe('MSF live start', () => {
+    beforeEach(() => {
+      const timeline = new shaka.msf.MSFPresentationTimeline();
+      timeline.setStatic(false);
+      manifest.type = shaka.media.ManifestParser.MSF;
+      manifest.presentationTimeline = timeline;
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (!stream) {
+            continue;
+          }
+          const isVideo = stream.type == ContentType.VIDEO;
+          const refs = [];
+          // A retained older GOP ensures startup does not choose the start
+          // of the DVR window. Audio frames have different boundaries.
+          for (let i = 0; i < 15; i++) {
+            const start = 100 + i / 10 + (isVideo ? 0 : -0.02);
+            const ref = new shaka.media.SegmentReference(
+                start, start + 0.1, () => [], 0, null, null, 0, 0, Infinity);
+            if (isVideo && i % 10) {
+              ref.markAsNonIndependent();
+            }
+            refs.push(ref);
+          }
+          stream.segmentIndex = new shaka.media.SegmentIndex(refs);
+          timeline.notifySegments(refs);
+        }
+      }
+      timeline.lockStartTime();
+    });
+
+    it('starts at the current GOP with audio covering its keyframe',
+        async () => {
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('also aligns audio when segment boundary startup is requested',
+        async () => {
+          player.configure('streaming.startAtSegmentBoundary', true);
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('aligns startup when the application already selected a variant',
+        async () => {
+          player.addEventListener('streaming', () => {
+            const track = player.getVariantTracks()[0];
+            player.selectVariantTrack(track);
+          });
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('preserves an explicit start time', async () => {
+      await player.load(fakeManifestUri, 100.3, fakeMimeType);
+      expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(100.3);
+    });
+
+    it('starts audio-only content at the last available audio frame',
+        async () => {
+          for (const variant of manifest.variants) {
+            variant.video = null;
+          }
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)())
+              .toBeCloseTo(101.38, 6);
+        });
+  });
+
   describe('config streaming.startAtSegmentBoundary', () => {
     // Test for https://github.com/shaka-project/shaka-player/issues/4188
     // In that issue, using streaming.startAtSegmentBoundary in v4.0.0 caused

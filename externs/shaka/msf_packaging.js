@@ -97,6 +97,7 @@ shaka.extern.MsfTrackDescription;
  *   timestampOffset: number,
  *   discontinuitySequence: number,
  *   group: (bigint|undefined),
+ *   independent: boolean,
  * }}
  *
  * @property {number} startTime
@@ -109,6 +110,8 @@ shaka.extern.MsfTrackDescription;
  *   Added to the media's own timestamps at append time. Zero unless the
  *   packaging shifts media off its own timeline, as mpeg2ts does to stay
  *   monotonic across a PCR discontinuity.
+ * @property {boolean} independent
+ *   Whether decoding can begin at this segment.
  * @property {number} discontinuitySequence
  *   Increments whenever the media timeline is discontinuous with the previous
  *   segment, or -1 when the packaging cannot have discontinuities. Downstream

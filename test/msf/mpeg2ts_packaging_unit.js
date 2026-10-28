@@ -796,6 +796,8 @@ filterDescribe('shaka.msf.packaging.Mpeg2ts', isMSFSupported, () => {
 
       expect(segments.length).toBe(2);
       expect(segments[1].data).toEqual(openingMidGop());
+      expect(segments.map((segment) => segment.independent))
+          .toEqual([true, false]);
     });
 
     it('trusts the catalog when it guarantees random access', () => {
