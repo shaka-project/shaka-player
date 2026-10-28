@@ -4153,7 +4153,8 @@ describe('TtmlTextParser', () => {
             startTime: 1,
             endTime: 2,
             payload: '',
-            lineHeight: '',
+            // The initial line height is "normal".
+            lineHeight: 'normal',
             nestedCues: [
               // The line height does not apply to spans.
               {payload: 'Span', lineHeight: ''},
