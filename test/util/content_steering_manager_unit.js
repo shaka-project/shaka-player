@@ -11,7 +11,11 @@ describe('ContentSteeringManager', () => {
   /** @type {!shaka.util.ContentSteeringManager} */
   let manager;
 
+  /** @type {number} */
+  let bandwidthEstimate;
+
   beforeEach(() => {
+    bandwidthEstimate = 1e6;
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
@@ -27,7 +31,7 @@ describe('ContentSteeringManager', () => {
       updateDuration: fail,
       newDrmInfo: fail,
       onManifestUpdated: fail,
-      getBandwidthEstimate: () => 1e6,
+      getBandwidthEstimate: () => bandwidthEstimate,
       onMetadata: () => {},
       disableStream: (stream) => {},
       addFont: (name, url) => {},
@@ -154,6 +158,47 @@ describe('ContentSteeringManager', () => {
       expect(newLocations.length).toBe(1);
       expect(newLocations[0]).toBe('http://cdn-b/');
     });
+
+    // A preload started before the first load() has no bandwidth estimate yet.
+    // See #10824.
+    for (const [type, prefix] of [
+      [shaka.media.ManifestParser.DASH, '_DASH'],
+      [shaka.media.ManifestParser.HLS, '_HLS'],
+    ]) {
+      it(`omits throughput without an estimate for ${type}`, async () => {
+        bandwidthEstimate = NaN;
+        manager.setManifestType(type);
+        const manifest = JSON.stringify({
+          'VERSION': 1,
+          'TTL': 1,
+          'RELOAD-URI': 'http://foo.bar/update',
+          'PATHWAY-PRIORITY': [
+            'cdn-b',
+            'cdn-a',
+          ],
+        });
+        fakeNetEngine.setResponseText('http://foo.bar/manifest', manifest);
+
+        await manager.requestInfo('http://foo.bar/manifest');
+
+        const manifestUpdate = JSON.stringify({
+          'VERSION': 1,
+          'TTL': 1,
+          'RELOAD-URI': 'http://foo.bar/update',
+          'PATHWAY-PRIORITY': [
+            'cdn-b',
+          ],
+        });
+        const updateUrl = `http://foo.bar/update?${prefix}_pathway=cdn-b`;
+        fakeNetEngine.setResponseText(updateUrl, manifestUpdate);
+
+        await shaka.test.Util.delay(1);
+
+        const newLocations = manager.getLocations('foo');
+        expect(newLocations.length).toBe(1);
+        expect(newLocations[0]).toBe('http://cdn-b/');
+      });
+    }
 
     it('not send value for unknown manifest', async () => {
       const manifest = JSON.stringify({
