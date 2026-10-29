@@ -702,7 +702,8 @@ describe('TtmlTextParser', () => {
             startTime: 62.03,
             endTime: 62.05,
             nestedCues: [{
-              payload: ' A B C ',
+              // The spaces at the start and at the end of a line are removed.
+              payload: 'A B C',
               startTime: 62.03,
               endTime: 62.05,
             }],
@@ -757,7 +758,7 @@ describe('TtmlTextParser', () => {
             startTime: 62.03,
             endTime: 62.05,
             nestedCues: [{
-              payload: ' A B C ',
+              payload: 'A B C',
               startTime: 62.03,
               endTime: 62.05,
             }],
@@ -2113,7 +2114,7 @@ describe('TtmlTextParser', () => {
             nestedCues: [
               // The direction is inherited, unlike unicodeBidi.
               {
-                payload: 'A ',
+                payload: 'A \u200b',
                 direction: Cue.direction.HORIZONTAL_RIGHT_TO_LEFT,
                 unicodeBidi: '',
               },
@@ -3665,6 +3666,12 @@ describe('TtmlTextParser', () => {
               {
                 startTime: 0,
                 endTime: 60,
+                // The space between the spans, which can be broken.
+                payload: ' \u200b',
+              },
+              {
+                startTime: 0,
+                endTime: 60,
                 payload: 'Test with spanStyle',
                 // Style from spanStyle, overrides regionStyle
                 backgroundColor: 'white',
@@ -3765,7 +3772,9 @@ describe('TtmlTextParser', () => {
               {
                 startTime: 0,
                 endTime: 60,
-                payload: ' A',
+                // The spaces at the start and at the end of a line are
+                // removed.
+                payload: 'A',
                 fontSize: '16px',
               },
               {
@@ -3777,7 +3786,7 @@ describe('TtmlTextParser', () => {
               {
                 startTime: 0,
                 endTime: 60,
-                payload: 'B ',
+                payload: 'B',
                 fontSize: '16px',
               },
             ],
@@ -3829,7 +3838,7 @@ describe('TtmlTextParser', () => {
             fontWeight: Cue.fontWeight.BOLD,
             nestedCues: [
               {
-                payload: 'Anonymous ',
+                payload: 'Anonymous \u200b',
                 fontStyle: Cue.fontStyle.ITALIC,
                 fontWeight: Cue.fontWeight.BOLD,
               },
@@ -3879,7 +3888,7 @@ describe('TtmlTextParser', () => {
             textDecoration: [],
             nestedCues: [
               {
-                payload: 'Underlined ',
+                payload: 'Underlined \u200b',
                 textDecoration: [
                   Cue.textDecoration.OVERLINE,
                   Cue.textDecoration.UNDERLINE,
@@ -3925,7 +3934,7 @@ describe('TtmlTextParser', () => {
             textStrokeColor: 'red',
             textStrokeWidth: '2px',
             nestedCues: [
-              {payload: 'Outlined '},
+              {payload: 'Outlined \u200b'},
               {payload: 'Not outlined', textStrokeWidth: '0'},
             ],
           },
@@ -4079,7 +4088,7 @@ describe('TtmlTextParser', () => {
             visibility: 'hidden',
             nestedCues: [
               // The visibility of the parent is inherited by the displayer.
-              {payload: 'Hidden ', visibility: ''},
+              {payload: 'Hidden \u200b', visibility: ''},
               {payload: 'Visible', visibility: 'visible'},
             ],
           },
@@ -4097,6 +4106,54 @@ describe('TtmlTextParser', () => {
           isMpegTs: false,
         },
         {startTime: 0, endTime: 1});
+  });
+
+  it('presents the spaces between texts while both are presented', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 2,
+            payload: '',
+            nestedCues: [
+              // The space at the end of a text is presented with the next
+              // text, like the words of a roll-up caption.
+              {payload: 'One', startTime: 0, endTime: 2},
+              {payload: ' \u200b', startTime: 1, endTime: 2},
+              {payload: 'two', startTime: 1, endTime: 2},
+            ],
+          },
+          {
+            startTime: 2,
+            endTime: 4,
+            payload: '',
+            nestedCues: [
+              // The white space between two elements is presented while both
+              // are.
+              {payload: 'three', startTime: 2, endTime: 3},
+              {payload: ' \u200b', startTime: 2, endTime: 3},
+              {payload: 'four', startTime: 2, endTime: 4},
+            ],
+          },
+        ],
+        '<tt>' +
+        '<body><div>' +
+        '<p begin="0s" end="2s">\n' +
+        '  <span>One </span><span begin="1s">two</span>\n' +
+        '</p>' +
+        '<p begin="2s" end="4s">\n' +
+        '  <span end="1s">three</span>\n' +
+        '  <span>four</span>\n' +
+        '</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 4});
   });
 
   it('animates regions', () => {
@@ -4158,6 +4215,31 @@ describe('TtmlTextParser', () => {
           {startTime: 10, endTime: 18});
     });
   }
+
+  it('presents the initial font in the regions of nested content', () => {
+    verifyHelper(
+        [{startTime: 0, endTime: 1, payload: 'Test'}],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><layout><region xml:id="r1"/></layout></head>' +
+        '<body><div region="r1">' +
+        '<p begin="0s" end="1s">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 1, fontSize: '1c'},
+        {
+          startTime: 0,
+          endTime: 1,
+          region: {id: 'r1'},
+          fontSize: '1c',
+          fontFamily: 'Courier New,Liberation Mono,Courier,monospace',
+        });
+  });
 
   it('supports multiRowAlign', () => {
     verifyHelper(
@@ -4329,7 +4411,7 @@ describe('TtmlTextParser', () => {
             payload: '',
             wrapLine: false,
             nestedCues: [
-              {payload: 'Anonymous ', wrapLine: false},
+              {payload: 'Anonymous \u200b', wrapLine: false},
               {payload: 'Span', wrapLine: false},
               {payload: 'Wrapped', wrapLine: true},
             ],
@@ -4362,7 +4444,7 @@ describe('TtmlTextParser', () => {
             // 150% of the 50% of the region.
             fontSize: '75%',
             nestedCues: [
-              {payload: 'Inherited ', fontSize: '75%'},
+              {payload: 'Inherited \u200b', fontSize: '75%'},
               // 200% of the 75% of the paragraph.
               {payload: 'Relative', fontSize: '150%'},
               {
