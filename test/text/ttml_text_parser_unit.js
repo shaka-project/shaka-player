@@ -4099,6 +4099,66 @@ describe('TtmlTextParser', () => {
         {startTime: 0, endTime: 1});
   });
 
+  it('animates regions', () => {
+    verifyHelper(
+        [
+          {startTime: 0, endTime: 1, payload: 'Test', region: {opacity: 0}},
+          {startTime: 1, endTime: 2, payload: 'Test', region: {opacity: 0.5}},
+          {startTime: 2, endTime: 3, payload: 'Test', region: {opacity: 0}},
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><layout>' +
+        '<region xml:id="r1" tts:opacity="0">' +
+        '<set begin="1s" end="2s" tts:opacity="0.5"/>' +
+        '</region>' +
+        '</layout></head>' +
+        '<body><div>' +
+        '<p begin="0s" end="3s" region="r1">Test</p>' +
+        '</div></body></tt>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 10,
+          vttOffset: 0,
+          isMpegTs: false,
+        },
+        {startTime: 0, endTime: 3});
+  });
+
+  for (const target of ['element', 'region']) {
+    it(`preserves overlapping ${target} animations with an offset`, () => {
+      const sets =
+          '<set begin="1s" end="4s" tts:opacity="0.5"/>' +
+          '<set begin="2s" end="3s" tts:opacity="0.75"/>' +
+          '<set begin="6s" tts:opacity="0.25"/>';
+      const region = target == 'region';
+      verifyHelper(
+          [
+            [10, 11, 1],
+            [11, 12, 0.5],
+            [12, 13, 0.75],
+            [13, 14, 0.5],
+            [14, 16, 1],
+            [16, 18, 0.25],
+          ].map(([startTime, endTime, opacity]) => Object.assign(
+              {startTime, endTime, payload: 'Test'},
+              region ? {region: {opacity}} : {opacity})),
+          '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+          '<head><layout><region xml:id="r1">' +
+          (region ? sets : '') + '</region></layout></head>' +
+          '<body><div><p begin="0s" end="8s" region="r1">' +
+          (region ? '' : sets) + 'Test</p></div></body></tt>',
+          {
+            periodStart: 10,
+            segmentStart: 10,
+            segmentEnd: 18,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          {startTime: 10, endTime: 18});
+    });
+  }
+
   it('supports multiRowAlign', () => {
     verifyHelper(
         [
