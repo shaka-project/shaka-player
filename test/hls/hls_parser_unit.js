@@ -7805,6 +7805,24 @@ describe('HlsParser', () => {
     const manifestUri = 'https://example.com/master.m3u8';
     fakeNetEngine.setResponseValue(manifestUri, manifestData);
 
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    const mediaPlaylist = (name) => [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXTINF:6,\n',
+      name + '.ts\n',
+      '#EXT-X-ENDLIST\n',
+    ].join('');
+    fakeNetEngine
+        .setResponseText('https://example.com/red.m3u8', mediaPlaylist('red'))
+        .setResponseText('https://example.com/green.m3u8',
+            mediaPlaylist('green'))
+        .setResponseValue('https://example.com/red.ts', tsSegmentData)
+        .setResponseValue('https://example.com/green.ts', tsSegmentData);
+
     const manifest = await parser.start(manifestUri, playerInterface);
 
     // 2 audio renditions x 2 video renditions (RED via the variant's own
@@ -7819,6 +7837,16 @@ describe('HlsParser', () => {
         manifest.variants.map((v) => v.audio.label).sort();
     expect(audioLabels).toEqual(['English', 'English', 'Spanish', 'Spanish']);
 
+    // Every combination of the renditions appears exactly once, and the
+    // variants share one stream per rendition.
+    const pairs =
+        manifest.variants.map((v) => v.video.label + '+' + v.audio.label);
+    expect(pairs.sort()).toEqual([
+      'GREEN+English', 'GREEN+Spanish', 'RED+English', 'RED+Spanish',
+    ]);
+    expect(new Set(manifest.variants.map((v) => v.video)).size).toBe(2);
+    expect(new Set(manifest.variants.map((v) => v.audio)).size).toBe(2);
+
     const redVariant = manifest.variants.find((v) => v.video.label == 'RED');
     expect(redVariant.video.primary).toBe(true);
     expect(redVariant.video.roles).toEqual(['public.main']);
@@ -7826,6 +7854,15 @@ describe('HlsParser', () => {
     const greenVariant =
         manifest.variants.find((v) => v.video.label == 'GREEN');
     expect(greenVariant.video.primary).toBe(false);
+
+    // The URI-less RED rendition plays the variant's own playlist, and GREEN
+    // plays the one from its rendition.
+    await redVariant.video.createSegmentIndex();
+    await greenVariant.video.createSegmentIndex();
+    expect(redVariant.video.segmentIndex.get(0).getUris())
+        .toEqual(['https://example.com/red.ts']);
+    expect(greenVariant.video.segmentIndex.get(0).getUris())
+        .toEqual(['https://example.com/green.ts']);
   });
 
   it('names the video track via a URI-less VIDEO rendition', async () => {
