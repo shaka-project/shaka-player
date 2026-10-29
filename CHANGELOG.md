@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.2.16](https://github.com/shaka-project/shaka-player/compare/v5.2.15...v5.2.16) (2026-10-29)
+
+
+### Bug Fixes
+
+* **Ads:** Fix unhandled rejections when unloading during an ad ([#10842](https://github.com/shaka-project/shaka-player/issues/10842)) ([3614c15](https://github.com/shaka-project/shaka-player/commit/3614c152ab19bee445963316e9c028e0f7218281))
+* **Cast:** Reject Opus on the 1st-gen Chromecast ([#10844](https://github.com/shaka-project/shaka-player/issues/10844)) ([0c2ac47](https://github.com/shaka-project/shaka-player/commit/0c2ac476fea870959194935273e51059a0be5e39))
+* **DRM:** Close sessions dropped after a failed license request ([#10804](https://github.com/shaka-project/shaka-player/issues/10804)) ([2e991c1](https://github.com/shaka-project/shaka-player/commit/2e991c1d92f5898b05e93ae800898c6e2787542f))
+* **HLS:** Fall back to redundant variant URIs when a media playlist fails ([#10787](https://github.com/shaka-project/shaka-player/issues/10787)) ([44724e2](https://github.com/shaka-project/shaka-player/commit/44724e27ff39cae83326a91ee5aa88bc80f28f02)), closes [#10751](https://github.com/shaka-project/shaka-player/issues/10751)
+* **MSE:** Fall back to MediaSource reset when changeType fails ([#10807](https://github.com/shaka-project/shaka-player/issues/10807)) ([eb729d9](https://github.com/shaka-project/shaka-player/commit/eb729d96270b3a85cdc96f38a26e648973668541))
+* **MSE:** Keep playback position after a MediaSource reset ([#10806](https://github.com/shaka-project/shaka-player/issues/10806)) ([8656096](https://github.com/shaka-project/shaka-player/commit/86560962efe16b6c0fb65ba6b538cfeb6ec7d22a))
+* **Preload:** Keep Content Steering updating when preloading before the first load ([#10826](https://github.com/shaka-project/shaka-player/issues/10826)) ([ffbad76](https://github.com/shaka-project/shaka-player/commit/ffbad7628279540909fd8c352c1f286e9a1e0bc1)), closes [#10824](https://github.com/shaka-project/shaka-player/issues/10824)
+* Resolve relative track URIs against the page in add*Track methods ([#10786](https://github.com/shaka-project/shaka-player/issues/10786)) ([cb344e5](https://github.com/shaka-project/shaka-player/commit/cb344e5a5fa0eb94e75cf934789828afac850e4a)), closes [#10750](https://github.com/shaka-project/shaka-player/issues/10750)
+
 ## [5.2.15](https://github.com/shaka-project/shaka-player/compare/v5.2.14...v5.2.15) (2026-10-23)
 
 
