@@ -679,6 +679,39 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(stream.segmentIndex).toBeNull();
     });
 
+    it('keeps the next group when an object of a group completes late',
+        () => {
+          // The objects of consecutive groups arrive on different streams, so
+          // the last object of a group can complete after the first object of
+          // the next one.  Indexing it used to drop the next group's
+          // references, its keyframe included, leaving a gap of a whole GOP.
+          const stream = makeStream();
+          stream.createSegmentIndex();
+          const callback = objectCallbacks[0];
+
+          const deliver = (group, startTime) => {
+            const segment = fakeSegment();
+            segment.startTime = startTime;
+            nextSegments = [segment];
+            callback(fakeObject(group));
+          };
+
+          deliver(0, 0);
+          deliver(0, 1);
+          // The first two objects of group 1 beat the last one of group 0.
+          deliver(1, 3);
+          deliver(1, 4);
+          deliver(0, 2);
+
+          const index = stream.segmentIndex;
+          goog.asserts.assert(index, 'Segment index should exist!');
+          const startTimes = [];
+          for (let i = 0; i < index.getNumReferences(); i++) {
+            startTimes.push(index.get(i).startTime);
+          }
+          expect(startTimes).toEqual([0, 1, 2, 3, 4]);
+        });
+
     it('withdraws a subscription that closed before SUBSCRIBE_OK', async () => {
       // Until the SUBSCRIBE_OK lands there is no Track Alias, so there is
       // nothing to unsubscribe with. A track closed in that window used to be
