@@ -382,9 +382,15 @@ describe('HlsParser', () => {
     // audio and the video, otherwise they are out of sync.
     const activeVariant = player.getManifest().variants.find(
         (variant) => variant.id == activeTrack.id);
-    const getStartTimesBySequence = (stream) => {
+    const getStartTimesBySequence = async (stream) => {
+      // After an ABR switch, the segment index of the new stream is created
+      // asynchronously, so it may not exist yet.
+      if (!stream.segmentIndex) {
+        await stream.createSegmentIndex();
+      }
       const startTimes = new Map();
       const segmentIndex = stream.segmentIndex;
+      goog.asserts.assert(segmentIndex, 'segment index must be non-null');
       const firstPosition = segmentIndex.getNumEvicted();
       const endPosition = firstPosition + segmentIndex.getNumReferences();
       for (let position = firstPosition; position < endPosition; position++) {
@@ -394,8 +400,8 @@ describe('HlsParser', () => {
       }
       return startTimes;
     };
-    const videoStartTimes = getStartTimesBySequence(activeVariant.video);
-    const audioStartTimes = getStartTimesBySequence(activeVariant.audio);
+    const videoStartTimes = await getStartTimesBySequence(activeVariant.video);
+    const audioStartTimes = await getStartTimesBySequence(activeVariant.audio);
     expect(audioStartTimes.size).toBeGreaterThan(0);
     for (const [sequence, startTime] of audioStartTimes) {
       expect(startTime).withContext('sequence ' + sequence)
