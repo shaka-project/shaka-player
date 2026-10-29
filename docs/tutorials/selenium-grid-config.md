@@ -78,6 +78,9 @@ browser made available to Karma.  Within each of those keys are the following:
        and must match the string and case used in the Selenium node config.
  - `disabled` (optional): If true, this browser is disabled and will not be
        used unless explicitly requested.
+ - `timeout_minutes` (optional): How long the tests may run on this browser in
+       the lab's GitHub Actions workflow before it gives up.  The default is
+       35.  Slow devices may need more.
  - `extra_configs` (optional): An array of dictionaries of extra configs which
        will be merged with the WebDriver launcher config in Karma.
 

@@ -265,6 +265,9 @@ Chromecast1stGen:
 Chromecast3rdGen:
   browser: chromecast
   version: 3rd-gen
+  # A full run takes about 32 minutes here even when everything passes, which
+  # leaves too little margin under the default.
+  timeout_minutes: 50
 
 ChromecastGTV:
   browser: chromecast
