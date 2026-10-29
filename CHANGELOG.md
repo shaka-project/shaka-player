@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.15.66](https://github.com/shaka-project/shaka-player/compare/v4.15.65...v4.15.66) (2026-10-29)
+
+
+### Bug Fixes
+
+* **Ads:** Fix unhandled rejections when unloading during an ad ([#10842](https://github.com/shaka-project/shaka-player/issues/10842)) ([4c95ad2](https://github.com/shaka-project/shaka-player/commit/4c95ad2ad6038dbc51c13490d894d864d4af2750))
+* **Cast:** Reject Opus on the 1st-gen Chromecast ([#10844](https://github.com/shaka-project/shaka-player/issues/10844)) ([0dc2e34](https://github.com/shaka-project/shaka-player/commit/0dc2e3480e71d786868e84a630bec0b5317c8f22))
+* **DRM:** Close sessions dropped after a failed license request ([#10804](https://github.com/shaka-project/shaka-player/issues/10804)) ([1a866eb](https://github.com/shaka-project/shaka-player/commit/1a866eb037b3854a66fe3ccbabff6588653f9fbf))
+
 ## [4.15.65](https://github.com/shaka-project/shaka-player/compare/v4.15.64...v4.15.65) (2026-10-23)
 
 
