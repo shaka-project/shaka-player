@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.56](https://github.com/shaka-project/shaka-player/compare/v4.16.55...v4.16.56) (2026-10-29)
+
+
+### Bug Fixes
+
+* **Text:** Align wrapped lines correctly on older browsers ([#10851](https://github.com/shaka-project/shaka-player/issues/10851)) ([5e3879b](https://github.com/shaka-project/shaka-player/commit/5e3879b4bae492a2af4d842e1d009825a1ef4d29))
+
 ## [4.16.55](https://github.com/shaka-project/shaka-player/compare/v4.16.54...v4.16.55) (2026-10-29)
 
 
