@@ -578,6 +578,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         data: new Uint8Array([0x01]),
         timestampOffset: 0,
         discontinuitySequence: 0,
+        independent: true,
       };
     }
 
@@ -657,6 +658,40 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     afterEach(() => {
       shaka.msf.PackagingRegistry.unregisterPackaging(PACKAGING);
     });
+
+    it('waits for an independent segment before starting the stream',
+        async () => {
+          const stream = makeStream();
+          let ready = false;
+          const indexCreated = stream.createSegmentIndex().then(() => {
+            ready = true;
+          });
+          const dependent = fakeSegment();
+          dependent.startTime = 1;
+          dependent.independent = false;
+          nextSegments = [dependent];
+          objectCallbacks[0](fakeObject(0));
+          await shaka.test.Util.shortDelay();
+
+          expect(ready).toBe(false);
+          expect(stream.segmentIndex.getIteratorForTime(1.5)).toBeNull();
+
+          const independent = fakeSegment();
+          independent.startTime = 2;
+          independent.independent = true;
+          nextSegments = [independent];
+          objectCallbacks[0](fakeObject(0));
+          await indexCreated;
+
+          const following = fakeSegment();
+          following.startTime = 3;
+          following.independent = false;
+          nextSegments = [following];
+          objectCallbacks[0](fakeObject(1));
+          const iterator = stream.segmentIndex.getIteratorForTime(3.5);
+          expect(iterator.next().value.startTime).toBe(2);
+          expect(iterator.next().value.isIndependent()).toBe(false);
+        });
 
     it('stops adding segments when the index closes mid-object', () => {
       // Reporting a completed group to ABR can pick a new variant and switch
@@ -832,6 +867,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         data: new Uint8Array([0x01]),
         timestampOffset: 0,
         discontinuitySequence: 0,
+        independent: true,
         group: BigInt(group),
       };
     }
@@ -1188,6 +1224,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         data: new Uint8Array([0x01]),
         timestampOffset: 0,
         discontinuitySequence: 0,
+        independent: true,
       };
     }
 

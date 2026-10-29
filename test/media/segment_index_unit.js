@@ -818,6 +818,49 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     describe('getIteratorForTime', () => {
+      it('starts at the previous independent full reference', () => {
+        const refs = [
+          makeReference(uri(10.11), 10, 11),
+          makeReference(uri(11.12), 11, 12),
+          makeReference(uri(12.13), 12, 13),
+        ];
+        refs[1].markAsNonIndependent();
+        refs[2].markAsNonIndependent();
+        const index = new shaka.media.SegmentIndex(refs);
+        const iterator = index.getIteratorForTime(12.5);
+        expect(iterator.next().value).toBe(refs[0]);
+        expect(iterator.next().value).toBe(refs[1]);
+        expect(iterator.next().value).toBe(refs[2]);
+        expect(index.getIteratorForTime(12.5, true).next().value).toBe(refs[2]);
+        expect(index.getIteratorForTime(12.5, false, true).next().value)
+            .toBe(refs[0]);
+      });
+
+      it('does not start from a dependent reference after eviction', () => {
+        const refs = [
+          makeReference(uri(10.11), 10, 11),
+          makeReference(uri(11.12), 11, 12),
+          makeReference(uri(12.13), 12, 13),
+        ];
+        refs[1].markAsNonIndependent();
+        const index = new shaka.media.SegmentIndex(refs);
+        index.evict(11);
+        expect(index.getIteratorForTime(11.5)).toBeNull();
+        expect(index.getIteratorForTime(12.5).next().value).toBe(refs[2]);
+      });
+
+      it('does not walk back across a discontinuity', () => {
+        const refs = [
+          makeReference(uri(10.11), 10, 11),
+          makeReference(uri(11.12), 11, 12),
+        ];
+        refs[0].discontinuitySequence = 0;
+        refs[1].discontinuitySequence = 1;
+        refs[1].markAsNonIndependent();
+        const index = new shaka.media.SegmentIndex(refs);
+        expect(index.getIteratorForTime(11.5)).toBeNull();
+      });
+
       it('begins with an independent partial segment', () => {
         // This test contains its own segment refs, which are manipulated to
         // look a little different from the more general ones used elsewhere.
