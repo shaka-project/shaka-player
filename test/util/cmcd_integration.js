@@ -465,9 +465,10 @@ describe('CmcdManager integration', () => {
           recorder.clear();
           // Soft wait: this test validates nor only when present and asserts
           // nothing about how many segment reports arrive, so a slow browser
-          // delivering fewer than 2 must not fail it.
+          // delivering none must not fail it.  Only wait for one, since a
+          // slow device may have requested all but the last segment already.
           const reports = await recorder.waitForSegments(
-              {count: 2, rejectOnTimeout: false});
+              {count: 1, rejectOnTimeout: false});
           // nor appears only when shaka knows the next segment URL. Not
           // all streams or buffer states guarantee it. Validate when
           // present. In v2, nor is a STRING_LIST inner list → decoded as
@@ -500,9 +501,11 @@ describe('CmcdManager integration', () => {
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
       // After movement, the 'playing' event has fired and reporter has sta=p.
       // Clear buffering-phase reports and capture new ones during playback.
+      // Only wait for one, since a slow device may have requested all but the
+      // last segment already.
       recorder.clear();
       const reports = await recorder.waitForSegments(
-          {count: 2, rejectOnTimeout: false});
+          {count: 1, rejectOnTimeout: false});
       const staValues = reports.map((r) => decodeCmcdFromReport(r)['sta']);
       const staFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
@@ -524,9 +527,11 @@ describe('CmcdManager integration', () => {
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
       // Clear pre-play reports; wait for fresh reports from active playback.
+      // Only wait for one, since a slow device may have requested all but the
+      // last segment already.
       recorder.clear();
       const reports = await recorder.waitForSegments(
-          {count: 2, rejectOnTimeout: false});
+          {count: 1, rejectOnTimeout: false});
       // At least one of mtp (measured) or rtp (requested) should be present.
       const throughputFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
@@ -825,9 +830,11 @@ describe('CmcdManager integration', () => {
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
       // Clear pre-play reports; wait for fresh segment reports from playback.
+      // Only wait for one, since a slow device may have requested all but the
+      // last segment already.
       recorder.clear();
       const reports = await recorder.waitForSegments(
-          {count: 2, rejectOnTimeout: false});
+          {count: 1, rejectOnTimeout: false});
       const staPlayFound = reports.some((r) => {
         const decoded = decodeCmcdFromReport(r);
         return decoded['sta'] === 'p';
