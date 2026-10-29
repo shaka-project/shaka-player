@@ -708,6 +708,52 @@ describe('UITextDisplayer', () => {
     expect(cueElement.style.whiteSpace).toBe('pre');
   });
 
+  describe('white space', () => {
+    /**
+     * @param {string} payload
+     * @return {!Promise<string>} The white-space style of the cue's element.
+     */
+    async function whiteSpaceFor(payload) {
+      const cue = new shaka.text.Cue(0, 100, payload);
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([cue]);
+      await updateCaptions();
+
+      const cueElement = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container > div'));
+      return cueElement.style.whiteSpace;
+    }
+
+    // Older browsers count the space at a soft wrap when aligning a line with
+    // pre-wrap, but not with pre-line, which lays out the same text when it
+    // would not collapse any of it.
+    it('uses pre-line when it would collapse nothing', async () => {
+      expect(await whiteSpaceFor('Two words\nand a new line'))
+          .toBe('pre-line');
+    });
+
+    it('uses pre-line with trailing spaces, kept as nbsp', async () => {
+      expect(await whiteSpaceFor('Trailing spaces  ')).toBe('pre-line');
+    });
+
+    it('uses pre-wrap to keep a run of spaces', async () => {
+      expect(await whiteSpaceFor('Two  spaces')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the start of a line', async () => {
+      expect(await whiteSpaceFor(' Leading space')).toBe('pre-wrap');
+      expect(await whiteSpaceFor('Line\n indented')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the end of a line', async () => {
+      expect(await whiteSpaceFor('Trailing \nspace')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep tabs', async () => {
+      expect(await whiteSpaceFor('A\ttab')).toBe('pre-wrap');
+    });
+  });
+
   describe('regions sized in lines', () => {
     /**
      * @param {number} lines
