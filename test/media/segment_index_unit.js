@@ -564,6 +564,47 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
   });
 
+  describe('insert', () => {
+    /** @type {!shaka.media.SegmentIndex} */
+    let index1;
+
+    beforeEach(() => {
+      index1 = new shaka.media.SegmentIndex([actual1, actual2]);
+    });
+
+    it('appends a reference after the last one', () => {
+      index1.insert(actual3);
+      expect(index1.references).toEqual([actual1, actual2, actual3]);
+    });
+
+    it('inserts a late reference without dropping the next ones', () => {
+      const late = makeReference(uri(15), 15, 20);
+      const shorter = makeReference(uri(10), 10, 15);
+      index1 = new shaka.media.SegmentIndex([actual1, shorter, actual3]);
+
+      index1.insert(late);
+      expect(index1.references).toEqual([actual1, shorter, late, actual3]);
+    });
+
+    it('replaces a reference with the same start time', () => {
+      // 0.24 microseconds: an insignificant rounding error.
+      const replacement = makeReference(uri(10), 10 + 0.24e-6, 20);
+
+      index1.insert(replacement);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[1]).toBe(replacement);
+    });
+
+    it('ignores a reference before the first one', () => {
+      index1 = new shaka.media.SegmentIndex([actual2, actual3]);
+      const position = index1.find(10);
+
+      index1.insert(actual1);
+      expect(index1.references).toEqual([actual2, actual3]);
+      expect(index1.find(10)).toBe(position);
+    });
+  });
+
   describe('evict', () => {
     /** @type {!shaka.media.SegmentIndex} */
     let index1;
@@ -1156,7 +1197,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
    * @param {number} endTime
    * @param {!Array<!shaka.media.SegmentReference>=} partialReferences
    * @param {?shaka.extern.aesKey=} aesKey
-   * @return {shaka.media.SegmentReference}
+   * @return {!shaka.media.SegmentReference}
    */
   function makeReference(uri, startTime, endTime, partialReferences = [],
       aesKey = null) {
