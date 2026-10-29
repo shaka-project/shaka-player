@@ -4,6 +4,9 @@
     "rules": {
       "at-rule-prelude-no-invalid": null,
       "color-function-alias-notation": null,
+      "declaration-block-no-redundant-longhand-properties": [true, {
+        "ignoreShorthands": ["inset"]
+      }],
       "declaration-block-single-line-max-declarations": null,
       "declaration-property-value-keyword-no-deprecated": null,
       "declaration-property-value-no-unknown": null,
@@ -16,6 +19,9 @@
         ]
       }],
       "no-descending-specificity": null,
+      "property-disallowed-list": [["/^inset(-|$)/"], {
+        "message": "Older browsers like Tizen 3 and Chromecast 1st gen don't support the inset properties.  Use the .inset() mixin from ui/less/general.less, or top, right, bottom, and left in plain CSS"
+      }],
       "property-no-vendor-prefix": null,
       "selector-no-vendor-prefix": null,
       "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh", "vw", "dvh", "dvw"],

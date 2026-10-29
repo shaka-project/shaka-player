@@ -46,7 +46,12 @@ body {
 
 #welcome {
   position: absolute;
-  inset: 0;
+
+  /* Not the "inset" shorthand, which older Cast devices don't support. */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 
   /* Make sure the idle cards sit above everything in the Player UI.  That way,
    * they will be visible on top until we decide to hide them and show the
