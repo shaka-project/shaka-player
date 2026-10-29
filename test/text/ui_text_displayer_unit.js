@@ -493,6 +493,51 @@ describe('UITextDisplayer', () => {
     }
   });
 
+  describe('white space', () => {
+    /**
+     * @param {string} payload
+     * @return {string} The white-space style of the cue's element.
+     */
+    function whiteSpaceFor(payload) {
+      const cue = new shaka.text.Cue(0, 100, payload);
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([cue]);
+      updateCaptions();
+
+      const cueElement = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container > div'));
+      return cueElement.style.whiteSpace;
+    }
+
+    // Older browsers count the space at a soft wrap when aligning a line with
+    // pre-wrap, but not with pre-line, which lays out the same text when it
+    // would not collapse any of it.
+    it('uses pre-line when it would collapse nothing', () => {
+      expect(whiteSpaceFor('Two words\nand a new line')).toBe('pre-line');
+    });
+
+    it('uses pre-line with trailing spaces, kept as nbsp', () => {
+      expect(whiteSpaceFor('Trailing spaces  ')).toBe('pre-line');
+    });
+
+    it('uses pre-wrap to keep a run of spaces', () => {
+      expect(whiteSpaceFor('Two  spaces')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the start of a line', () => {
+      expect(whiteSpaceFor(' Leading space')).toBe('pre-wrap');
+      expect(whiteSpaceFor('Line\n indented')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the end of a line', () => {
+      expect(whiteSpaceFor('Trailing \nspace')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep tabs', () => {
+      expect(whiteSpaceFor('A\ttab')).toBe('pre-wrap');
+    });
+  });
+
   it('does not lose second item in a region', () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
