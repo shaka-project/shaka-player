@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.3.3](https://github.com/shaka-project/shaka-player/compare/v5.3.2...v5.3.3) (2026-10-29)
+
+
+### Bug Fixes
+
+* **Ads:** Fix unhandled rejections when unloading during an ad ([#10842](https://github.com/shaka-project/shaka-player/issues/10842)) ([144f216](https://github.com/shaka-project/shaka-player/commit/144f216aeedc78fd811d91d400d24102eb6b2f6a))
+* **Ads:** Link SVTA pods and slots carried separately ([#10808](https://github.com/shaka-project/shaka-player/issues/10808)) ([498453b](https://github.com/shaka-project/shaka-player/commit/498453b1dc6bede0aaa2c0ce7fe29f47bcb06215))
+* **Cast:** Reject Opus on the 1st-gen Chromecast ([#10844](https://github.com/shaka-project/shaka-player/issues/10844)) ([89a3439](https://github.com/shaka-project/shaka-player/commit/89a34396c6aceff84fc9191e020ab2e4a24da02f))
+* **DRM:** Close sessions dropped after a failed license request ([#10804](https://github.com/shaka-project/shaka-player/issues/10804)) ([bad01c7](https://github.com/shaka-project/shaka-player/commit/bad01c78a1c650d325f87467189e592992e84014))
+* **HLS:** Fall back to redundant variant URIs when a media playlist fails ([#10787](https://github.com/shaka-project/shaka-player/issues/10787)) ([1bcb8c2](https://github.com/shaka-project/shaka-player/commit/1bcb8c2c27d155c84539b56afa893ff9dd438881)), closes [#10751](https://github.com/shaka-project/shaka-player/issues/10751)
+* **MSE:** Fall back to MediaSource reset when changeType fails ([#10807](https://github.com/shaka-project/shaka-player/issues/10807)) ([7602b56](https://github.com/shaka-project/shaka-player/commit/7602b5678cd77afce9a3ed2da8f1b5b0bcd94722))
+* **MSE:** Keep playback position after a MediaSource reset ([#10806](https://github.com/shaka-project/shaka-player/issues/10806)) ([885ded0](https://github.com/shaka-project/shaka-player/commit/885ded02e33c09bbd914a01f5da0c62628479714))
+* **MSF:** Keep the next group when an object of a group completes late ([#10856](https://github.com/shaka-project/shaka-player/issues/10856)) ([cb0c310](https://github.com/shaka-project/shaka-player/commit/cb0c3107cd27022af22cd9c96f2b80adcc2063b5)), closes [#10823](https://github.com/shaka-project/shaka-player/issues/10823)
+* **MSF:** Set Next Object filter for draft-22 live joins ([#10829](https://github.com/shaka-project/shaka-player/issues/10829)) ([b2023ab](https://github.com/shaka-project/shaka-player/commit/b2023ab7dc3a2588194d86a6eb6e80176c3d6416)), closes [#10828](https://github.com/shaka-project/shaka-player/issues/10828)
+* **Preload:** Keep Content Steering updating when preloading before the first load ([#10826](https://github.com/shaka-project/shaka-player/issues/10826)) ([a699b1c](https://github.com/shaka-project/shaka-player/commit/a699b1c58779aa79ba6a02fe78ad5e7dd01537ff)), closes [#10824](https://github.com/shaka-project/shaka-player/issues/10824)
+* Resolve relative track URIs against the page in add*Track methods ([#10786](https://github.com/shaka-project/shaka-player/issues/10786)) ([541546d](https://github.com/shaka-project/shaka-player/commit/541546d10a5ba3ebbf44c479a86a8dfa357b3ec4)), closes [#10750](https://github.com/shaka-project/shaka-player/issues/10750)
+* **TTML:** Default paragraph line height to normal ([#10835](https://github.com/shaka-project/shaka-player/issues/10835)) ([bdb87eb](https://github.com/shaka-project/shaka-player/commit/bdb87eba019f6b828b0ffebb6c071e4b00fe405f))
+* **UI:** Avoid compounding caption font size with nested cues ([#10820](https://github.com/shaka-project/shaka-player/issues/10820)) ([6e86254](https://github.com/shaka-project/shaka-player/commit/6e862546800b854cb9e683072c2e75d8662eff3d))
+* **UI:** Fix translation of the subtitle style "Default" option ([#10805](https://github.com/shaka-project/shaka-player/issues/10805)) ([2b116d5](https://github.com/shaka-project/shaka-player/commit/2b116d556b73d9fdf740db065cd110b9112d6990)), closes [#10791](https://github.com/shaka-project/shaka-player/issues/10791)
+
 ## [5.3.2](https://github.com/shaka-project/shaka-player/compare/v5.3.1...v5.3.2) (2026-10-23)
 
 
