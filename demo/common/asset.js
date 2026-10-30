@@ -57,6 +57,17 @@ const ShakaDemoAssetInfo = class {
     this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
+    /** @type {!Map<string, string>} */
+    this.certificates = new Map();
+    /**
+     * Preserves DRM blocks configuration for custom assets.
+     * @type {?Array<{
+     *   licenseServerUri: string,
+     *   certificateUri: string,
+     *   drmSystem: string
+     * }>}
+     */
+    this.drmInfos = null;
     /** @type {?string} */
     this.description = null;
     /** @type {boolean} */
@@ -315,6 +326,23 @@ const ShakaDemoAssetInfo = class {
    */
   getLicenseServers() {
     return this.licenseServers;
+  }
+
+  /**
+   * @param {string} keySystem
+   * @param {string} certificate
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addCertificate(keySystem, certificate) {
+    this.certificates.set(keySystem, certificate);
+    return this;
+  }
+
+  /**
+   * @return {!Map<string, string>}
+   */
+  getCertificates() {
+    return this.certificates;
   }
 
   /**
@@ -586,14 +614,15 @@ const ShakaDemoAssetInfo = class {
       config.drm.servers = config.drm.servers || {};
       licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
-        if (this.certificateUri || this.licenseRequestHeaders.size) {
+        const cert = (this.certificates && this.certificates.get(key)) ||
+            this.certificateUri;
+        if (cert || this.licenseRequestHeaders.size) {
           if (!config.drm.advanced[key]) {
             config.drm.advanced[key] =
                 ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
           }
-          if (this.certificateUri) {
-            config.drm.advanced[key].serverCertificateUri =
-                this.certificateUri;
+          if (cert) {
+            config.drm.advanced[key].serverCertificateUri = cert;
           }
           if (this.licenseRequestHeaders.size) {
             this.licenseRequestHeaders.forEach((headerValue, headerName) => {
