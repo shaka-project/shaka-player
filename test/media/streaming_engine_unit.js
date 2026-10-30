@@ -3388,23 +3388,37 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
 
-    describe('with adaptBufferingGoalOnQuotaExceededError', () => {
+    describe('with a quota smaller than the buffering goal', () => {
       /** @type {{audio: number, video: number}} */
       let quotaErrors;
       /** @type {number} */
       let quotaSeconds;
 
       /**
-       * @param {boolean} adaptBufferingGoal
+       * Default quota: a segment fits if, together with what is buffered
+       * ahead of the playhead, it lasts no more than quotaSeconds.
+       *
+       * @param {string} type
+       * @param {!shaka.media.SegmentReference} reference
+       * @param {number} bufferedAhead
+       * @return {boolean}
        */
-      function setUpQuota(adaptBufferingGoal) {
+      function fitsInSeconds(type, reference, bufferedAhead) {
+        const duration = reference.endTime - reference.startTime;
+        return bufferedAhead + duration <= quotaSeconds;
+      }
+
+      /**
+       * @param {function(string, !shaka.media.SegmentReference,
+       *     number):boolean=} fits Decides whether a segment fits.
+       */
+      function setUpQuota(fits = fitsInSeconds) {
         setupVod();
 
         const config =
             shaka.util.PlayerConfiguration.createDefault().streaming;
         config.rebufferingGoal = 1;
         config.bufferingGoal = 30;
-        config.adaptBufferingGoalOnQuotaExceededError = adaptBufferingGoal;
 
         mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
         createStreamingEngine(config);
@@ -3422,8 +3436,7 @@ describe('StreamingEngine', () => {
           if (reference && type != ContentType.TEXT) {
             const bufferedAhead = mediaSourceEngine.bufferedAheadOfImpl(
                 type, presentationTimeInSeconds);
-            const duration = reference.endTime - reference.startTime;
-            if (bufferedAhead + duration > quotaSeconds) {
+            if (!fits(type, reference, bufferedAhead)) {
               if (type == ContentType.AUDIO) {
                 quotaErrors.audio++;
               } else {
@@ -3456,7 +3469,7 @@ describe('StreamingEngine', () => {
       it('reduces the buffering goal to what fit in one step', async () => {
         // Two 10 second segments fit, the third does not.
         quotaSeconds = 21;
-        setUpQuota(/* adaptBufferingGoal= */ true);
+        setUpQuota();
 
         await play();
 
@@ -3465,21 +3478,10 @@ describe('StreamingEngine', () => {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
       });
 
-      it('uses the reduction schedule when disabled', async () => {
-        quotaSeconds = 21;
-        setUpQuota(/* adaptBufferingGoal= */ false);
-
-        await play();
-
-        expect(quotaErrors.audio + quotaErrors.video).toBeGreaterThan(2);
-        expect(onError).not.toHaveBeenCalled();
-        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
-      });
-
       it('uses the reduction schedule when no segment fits', async () => {
         // Only one segment fits, so there is nothing to keep next to it.
         quotaSeconds = 15;
-        setUpQuota(/* adaptBufferingGoal= */ true);
+        setUpQuota();
 
         await play();
 
@@ -3491,7 +3493,7 @@ describe('StreamingEngine', () => {
       it('falls back to the reduction schedule if the quota shrinks',
           async () => {
             quotaSeconds = 21;
-            setUpQuota(/* adaptBufferingGoal= */ true);
+            setUpQuota();
 
             // After the first error the goal is lowered to what fit.  Once
             // the quota shrinks below that, not even one segment fits next to
@@ -3506,6 +3508,39 @@ describe('StreamingEngine', () => {
             expect(onError).not.toHaveBeenCalled();
             expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
           });
+
+      it('lowers the goal again for a heavier segment', async () => {
+        // The video quota is in bytes, and the third video segment weighs
+        // three times as much as the others (VBR).  The goal derived from
+        // the light segments is then too high for it, so it is rejected again
+        // once the buffer is down to that goal, and the goal is lowered again.
+        const quotaBytes = 32000;
+        setUpQuota((type, reference) => {
+          if (type != ContentType.VIDEO) {
+            return true;
+          }
+          const segments = segmentData[ContentType.VIDEO].segments;
+          const duration = segmentData[ContentType.VIDEO].segmentDuration;
+          const buffered = mediaSourceEngine.segments[ContentType.VIDEO];
+          let bytesAhead = 0;
+          segments.forEach((segment, i) => {
+            const start = Math.max(i * duration, presentationTimeInSeconds);
+            const end = (i + 1) * duration;
+            if (buffered[i] && end > start) {
+              bytesAhead += segment.byteLength * (end - start) / duration;
+            }
+          });
+          const segment = segments[reference.startTime / duration];
+          return bytesAhead + segment.byteLength <= quotaBytes;
+        });
+        segmentData[ContentType.VIDEO].segments[2] = new ArrayBuffer(30000);
+
+        await play();
+
+        expect(quotaErrors.video).toBeGreaterThan(1);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
     });
   });
 

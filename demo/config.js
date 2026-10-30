@@ -812,8 +812,6 @@ shakaDemo.Config = class {
             'streaming.shouldFixTimestampOffset')
         .addBoolInput_('Avoid eviction on QuotaExceededError',
             'streaming.avoidEvictionOnQuotaExceededError')
-        .addBoolInput_('Adapt buffering goal on QuotaExceededError',
-            'streaming.adaptBufferingGoalOnQuotaExceededError')
         .addSelectInput_('Cross Boundary Strategy',
             'streaming.crossBoundaryStrategy',
             strategyOptions, strategyOptionsNames)
