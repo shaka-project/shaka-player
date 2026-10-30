@@ -14,6 +14,7 @@
 +../../lib/msf/packaging/locmaf.js
 +../../lib/msf/packaging/mpeg2ts_program.js
 +../../lib/msf/packaging/mpeg2ts.js
++../../lib/msf/packaging/mmtp.js
 +../../lib/msf/msf_classes.js
 +../../lib/msf/msf_parser.js
 +../../lib/msf/msf_presentation_timeline.js

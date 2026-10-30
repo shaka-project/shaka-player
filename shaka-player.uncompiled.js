@@ -40,6 +40,7 @@ goog.require('shaka.msf.packaging.Cmaf');
 goog.require('shaka.msf.packaging.Loc');
 goog.require('shaka.msf.packaging.Locmaf');
 goog.require('shaka.msf.packaging.Mpeg2ts');
+goog.require('shaka.msf.packaging.Mmtp');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpFetchPlugin');
 goog.require('shaka.net.HttpXHRPlugin');
