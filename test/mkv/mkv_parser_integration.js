@@ -239,6 +239,42 @@ describe('MkvParser integration', () => {
     expect(video.currentTime).toBeGreaterThanOrEqual(goal);
   }
 
+  it('buffers MP3 continuously across clusters', async () => {
+    skipOnChromecastLinux(true);
+    await requireSupport(videoTypes.avc);
+    await requireSupport(audioTypes.mp3);
+    await player.load(base + 'avc-mp3-srt.mkv');
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitUntilBuffered(video, 3.8);
+    const audio = player.getBufferedInfo().audio;
+    expect(audio.length).toBe(1);
+    expect(audio[0].start).toBeLessThan(0.1);
+    expect(audio[0].end).toBeGreaterThan(3.8);
+  });
+
+  it('seeks to unbuffered raw MP3 and resumes playback', async () => {
+    skipOnChromecastLinux(true);
+    await requireSupport(videoTypes.avc);
+    await requireSupport(audioTypes.mp3);
+    if (!shaka.mkv.MatroskaCodecs.usesRawMpegAudio(shaka.mkv.CodecId.MP3)) {
+      pending('Requires raw MPEG audio output.');
+    }
+    player.configure({
+      streaming: {
+        segmentPrefetchLimit: 0,
+        inaccurateManifestTolerance: 0,
+      },
+    });
+    await player.load(base + 'avc-mp3-srt.mkv', 2.5);
+    await waiter.timeoutAfter(10).failOnTimeout(true)
+        .waitUntilBuffered(video, 0.2);
+    // Starting in a later cluster leaves the backwards seek unbuffered,
+    // independently of how quickly the remaining segments are downloaded.
+    expect(player.getBufferedInfo().audio.every(
+        (range) => range.start > 0.5)).toBe(true);
+    await seekAndPlay(0.5, 1.5);
+  });
+
   for (const audio of ['aac', 'mp3']) {
     it('seeks across clusters with ' + audio + ' and resumes playback',
         async () => {
