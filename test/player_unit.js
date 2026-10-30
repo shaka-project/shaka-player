@@ -2234,6 +2234,38 @@ describe('Player', () => {
       await preloadManager.destroy();
     });
 
+    describe('initial variant choice', () => {
+      // See #10825.
+      it('starts from the playing asset\'s bandwidth estimate', async () => {
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        abrManager.getBandwidthEstimate.and.returnValue(30e6);
+        // The test AbrManager is shared with the player, so only look at the
+        // calls made for the preload.
+        abrManager.configure.calls.reset();
+
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        expect(abrManager.configure).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              defaultBandwidthEstimate: 30e6,
+              useNetworkInformation: false,
+            }));
+        await preloadManager.destroy();
+      });
+
+      it('keeps the configured ABR settings before any load', async () => {
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        expect(abrManager.configure).toHaveBeenCalledWith(
+            player.getConfiguration().abr);
+        await preloadManager.destroy();
+      });
+    });
+
     describe('prefetches the segment that contains the start time', () => {
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 

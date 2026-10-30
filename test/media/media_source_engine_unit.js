@@ -1404,6 +1404,58 @@ describe('MediaSourceEngine', () => {
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
 
+    for (const adaptation of [false, true]) {
+      it('anchors raw audio after ' + (adaptation ? 'adaptation' : 'seek') +
+          ' with a segments-mode manifest', async () => {
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().mediaSource;
+        config.forceTransmux = true;
+        mediaSourceEngine.configure(config);
+        mockTransmuxer.convertCodecs.and.returnValue('audio/mpeg');
+        mockTransmuxer.transmux.and.returnValue(Promise.resolve({
+          data: buffer,
+          init: null,
+        }));
+        const stream = makeFakeStream('audio/x-matroska');
+        stream.fullMimeTypes = new Set([stream.mimeType]);
+        const initObject = new Map();
+        initObject.set(ContentType.AUDIO, stream);
+        audioSourceBuffer.mode = 'sequence';
+        await mediaSourceEngine.init(initObject, /* sequenceMode= */ false);
+
+        const reference = dummyReference(0, 1000);
+        reference.startTime = 2;
+        reference.timestampOffset = 0;
+        // The same segment was appended before the buffer was cleared.
+        // MSE advanced the generated timestamps, while StreamingEngine still
+        // remembers the requested offset and will not set it again.
+        audioSourceBuffer.timestampOffset = 3;
+        const appendAudio = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, reference, fakeStream,
+            /* hasClosedCaptions= */ false, /* seeked= */ !adaptation,
+            adaptation);
+        await Util.shortDelay();
+        expect(audioSourceBuffer.timestampOffset).toBe(2);
+        expect(audioSourceBuffer.abort).toHaveBeenCalled();
+        audioSourceBuffer.updateend();
+        await appendAudio;
+
+        // A following segment keeps MSE's generated timestamps rather than
+        // resetting the parser and starting a new coded frame group.
+        audioSourceBuffer.abort.calls.reset();
+        audioSourceBuffer.timestampOffset = 3;
+        reference.startTime = 3;
+        const appendNext = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, reference, fakeStream,
+            /* hasClosedCaptions= */ false);
+        await Util.shortDelay();
+        expect(audioSourceBuffer.timestampOffset).toBe(3);
+        expect(audioSourceBuffer.abort).not.toHaveBeenCalled();
+        audioSourceBuffer.updateend();
+        await appendNext;
+      });
+    }
+
     // Regression test for the interaction between the legacy Edge rounding
     // workaround in setTimestampOffset_ and the per-segment recalculation of
     // the timestamp offset.  The workaround adds 0.001 to any negative offset

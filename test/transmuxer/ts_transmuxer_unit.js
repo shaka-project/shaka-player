@@ -439,4 +439,29 @@ describe('TsTransmuxer', () => {
       });
     }
   });
+
+  describe('packed audio', () => {
+    it('is not mistaken for MPEG audio by bytes inside a frame', async () => {
+      // An ADTS frame (AAC-LC, 48 kHz, stereo) whose payload is a run of 0xff
+      // bytes, which reads as a chain of MPEG audio frame headers.
+      const frame = new Uint8Array([
+        0xff, 0xf1, 0x4c, 0x80, 0x01, 0xff, 0xfc,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      ]);
+      // An empty ID3 tag, as packed audio starts with one.
+      const id3 = new Uint8Array([0x49, 0x44, 0x33, 0x04, 0, 0, 0, 0, 0, 0]);
+      const data = Uint8ArrayUtils.concat(id3, frame, frame);
+      stream.type = ContentType.AUDIO;
+      stream.mimeType = 'audio/mp2t';
+      stream.codecs = 'mp4a.40.2';
+
+      const result = await transmuxer.transmux(
+          data, stream, reference, /* duration= */ 0.08, ContentType.AUDIO);
+
+      expect(stream.audioSamplingRate).toBe(48000);
+      expect(result).toEqual(jasmine.objectContaining({
+        data: jasmine.any(Uint8Array),
+      }));
+    });
+  });
 });

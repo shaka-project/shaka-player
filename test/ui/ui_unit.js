@@ -3329,7 +3329,7 @@ describe('UI', () => {
       });
     });
 
-    describe('keyboard during a seek bar drag', () => {
+    describe('seek bar interactions', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
       /** @type {shaka.Player} */
@@ -3410,6 +3410,97 @@ describe('UI', () => {
       function pressKey(key) {
         seekBar.dispatchEvent(createKeydownEvent(key));
       }
+
+      /**
+       * @param {number} deltaY
+       * @param {!WheelEventInit=} options
+       * @return {!WheelEvent}
+       */
+      function scroll(deltaY, options = {}) {
+        const event = new WheelEvent('wheel', Object.assign({
+          deltaY,
+          bubbles: true,
+          cancelable: true,
+        }, options));
+        seekBar.dispatchEvent(event);
+        return event;
+      }
+
+      for (const deltaY of [-100, 100]) {
+        for (const playing of [false, true]) {
+          it(`seeks with wheel delta ${deltaY} while playing=${playing}`,
+              async () => {
+                if (playing) {
+                  video.play();
+                }
+                const time = video.currentTime;
+                const expected = time + (deltaY > 0 ? -1 : 1);
+                const event = scroll(deltaY);
+
+                expect(video.currentTime).toBe(expected);
+                expect(parseFloat(seekBar.value)).toBe(expected);
+                expect(video.paused).toBe(!playing);
+                expect(controls.isSeeking()).toBe(false);
+                expect(event.defaultPrevented).toBe(true);
+
+                // No delayed seek may overwrite a subsequent playback update.
+                video.currentTime = 70;
+                await Util.delay(0.6);
+
+                expect(video.currentTime).toBe(70);
+                expect(video.paused).toBe(!playing);
+              });
+        }
+      }
+
+      it('accumulates wheel events from the current playback time', () => {
+        video.currentTime = 60;
+        scroll(-100);
+        scroll(-100);
+        scroll(-100);
+        expect(video.currentTime).toBe(63);
+        scroll(100);
+        expect(video.currentTime).toBe(62);
+      });
+
+      it('clamps wheel seeks to the live seek range', () => {
+        Util.funcSpy(player.seekRange).and.returnValue({start: 20, end: 80});
+        video.currentTime = 20.5;
+        scroll(100);
+        expect(video.currentTime).toBe(20);
+        video.currentTime = 79.5;
+        scroll(-100);
+        expect(video.currentTime).toBe(80);
+      });
+
+      it('ignores zoom gestures and horizontal scrolling', () => {
+        expect(scroll(-100, {ctrlKey: true}).defaultPrevented).toBe(false);
+        expect(scroll(-100, {metaKey: true}).defaultPrevented).toBe(false);
+        expect(scroll(0, {deltaX: 100}).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(50);
+      });
+
+      it('ignores the wheel while disabled or hidden', () => {
+        seekBar.disabled = true;
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        seekBar.disabled = false;
+        spyOn(controls, 'isOpaque').and.returnValue(false);
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(50);
+      });
+
+      it('lets the wheel take over a drag', async () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+        scroll(-100);
+        expect(video.currentTime).toBe(dragTime + 1);
+        expect(controls.isSeeking()).toBe(false);
+
+        mouseEvent('mousemove', positionOfBar(0.75), document);
+        mouseEvent('mouseup', positionOfBar(0.75), document);
+        await Util.delay(0.3);
+        expect(video.currentTime).toBe(dragTime + 1);
+      });
 
       it('seeks from where the drag left the bar', () => {
         mouseEvent('mousedown', positionOfBar(0.25));
