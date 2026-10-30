@@ -710,13 +710,16 @@ describe('Player Load Graph', () => {
           destination, async () => {
         /** @type {!Array<!shaka.media.MediaSourceEngine>} */
         const engines = [];
-        const createMediaSourceEngine = player.createMediaSourceEngine;
-        player.createMediaSourceEngine = (...args) => {
-          const engine = createMediaSourceEngine(...args);
-          spyOn(engine, 'destroy').and.callThrough();
-          engines.push(engine);
-          return engine;
-        };
+        spyOn(player, 'createMediaSourceEngine').and.callFake(
+            (mediaElement, textDisplayer, playerInterface, lcevcDec,
+                config) => {
+              const engine = new shaka.media.MediaSourceEngine(
+                  mediaElement, textDisplayer, playerInterface, config,
+                  lcevcDec);
+              spyOn(engine, 'destroy').and.callThrough();
+              engines.push(engine);
+              return engine;
+            });
 
         await passingThrough('unload', () => {
           return goTo(destination, destination == 'attach' ? video2 : video);
