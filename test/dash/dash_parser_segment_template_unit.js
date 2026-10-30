@@ -1174,15 +1174,15 @@ describe('DashParser SegmentTemplate', () => {
         info.unscaledPresentationTimeOffset = 0;
         const index = await makeTimelineSegmentIndex(info, false);
 
-        // The initial template should contain a timeline of 5
+        // The initial template should contain a timeline of 10
         // initial ranges.
         expect(index.getTimeline().length).toBe(10);
 
-        // The same 5 ranges are now shifted by PTO and not by
+        // The same 10 ranges are now shifted by PTO and not by
         // their internal timestamps.
         // cached: |--|--|--|--|--|
         // next:      |--|--|--|--|--|
-        //         shift is 1x the timescale = 1 range.
+        //         shift is 1x the timescale = 1 second.
         //         the last range shall be added to the cache.
         const nextInfo = makeTemplateInfo(makeRanges(0, 2.0, 10));
         nextInfo.unscaledPresentationTimeOffset = 90000;
@@ -1194,11 +1194,102 @@ describe('DashParser SegmentTemplate', () => {
         // The last segment is the new one, based on the cached
         // presentationTimeOffset.
         expect(timeline[timeline.length - 1]).toEqual({
-          start: 20,
+          start: 19,
           unscaledStart: 1710000,
-          end: 22,
+          end: 21,
           unscaledEnd: 1890000,
         });
+      });
+
+      for (const delta of [-1, 1]) {
+        it(`keeps times and URLs when PTO changes by ${delta}s`, async () => {
+          const info = makeTemplateInfo(makeRanges(0, 2, 10));
+          info.unscaledPresentationTimeOffset = 900000;
+          info.scaledPresentationTimeOffset = 10;
+          info.mediaTemplate = '$Number$-$Time$';
+          const index = await makeTimelineSegmentIndex(info, false);
+          index.evict(4);
+          const iterator = index.getIteratorForTime(18);
+          expect(iterator.next().value.startTime).toBe(18);
+
+          const nextInfo = makeTemplateInfo(makeRanges(4 - delta, 2, 10));
+          nextInfo.unscaledPresentationTimeOffset = (10 + delta) * 90000;
+          nextInfo.scaledPresentationTimeOffset = 10 + delta;
+          nextInfo.mediaTemplate = info.mediaTemplate;
+          for (let i = 0; i < nextInfo.timeline.length; i++) {
+            nextInfo.timeline[i].segmentPosition = i + 3;
+          }
+          index.appendTemplateInfo(nextInfo, 0, 24);
+
+          const reference = iterator.next().value;
+          expect(reference.startTime).toBe(20);
+          expect(reference.endTime).toBe(22);
+          expect(reference.timestampOffset).toBe(-10);
+          expect(reference.getUris()[0].includes('11-2700000')).toBe(true);
+          expect(index.find(20)).toBe(10);
+        });
+      }
+
+      it('preserves iterator times when an earlier period grows', async () => {
+        // Manifest excerpts from issue #10604.  The filler period is reused
+        // with an earlier start and PTO, while the programme period disappears.
+        const makeIndex = async (pto, time, repeats, number, start, end) => {
+          const ranges = makeRanges((time - pto) / 90000, 3.2, repeats + 1);
+          for (let i = 0; i < ranges.length; i++) {
+            ranges[i].unscaledStart = time + i * 288000 - pto;
+            ranges[i].unscaledEnd = time + (i + 1) * 288000 - pto;
+            ranges[i].start = ranges[i].unscaledStart / 90000;
+            ranges[i].end = ranges[i].unscaledEnd / 90000;
+            ranges[i].segmentPosition = number + i;
+          }
+          const info = makeTemplateInfo(ranges);
+          info.unscaledPresentationTimeOffset = pto;
+          info.scaledPresentationTimeOffset = pto / 90000;
+          parser.stop();
+          parser = Dash.makeDashParser();
+          const segmentIndex = await makeTimelineSegmentIndex(info, false);
+          segmentIndex.release();
+          segmentIndex.appendTemplateInfo(info, start, end, null, true);
+          return segmentIndex;
+        };
+        const filler = await makeIndex(13242059339, 13245984960, 4, 45993,
+            147133.992666666, 147193.61);
+        const programme = await makeIndex(13247424960, 13247424960, 52, 45998,
+            147193.61, Infinity);
+        const index = new shaka.media.MetaSegmentIndex();
+        index.appendSegmentIndex(filler);
+        index.appendSegmentIndex(programme);
+        const iterator = index.getIteratorForTime(147344.01);
+        const before = iterator.next().value;
+
+        const update = await makeIndex(13239353340, 13246560960, 57, 45995,
+            147103.926, Infinity);
+        // Use the same parsed template data as the incoming manifest update.
+        const info = makeTemplateInfo(update.getTimeline());
+        info.unscaledPresentationTimeOffset = 13239353340;
+        info.scaledPresentationTimeOffset = 13239353340 / 90000;
+        filler.appendTemplateInfo(info, 147103.926, Infinity, null, true);
+
+        const after = iterator.current();
+        expect(after.startTime).toBeCloseTo(before.startTime, 2);
+        expect(after.endTime).toBeCloseTo(before.endTime, 2);
+        expect(filler.getTimeline()[iterator.currentPosition()].segmentPosition)
+            .toBe(46045);
+        for (const range of filler.getTimeline()) {
+          expect(range.start).toBeCloseTo(range.unscaledStart / 90000, 6);
+          expect(range.end).toBeCloseTo(range.unscaledEnd / 90000, 6);
+        }
+
+        const restored = await makeIndex(13247424900, 13247136960, 57, 45997,
+            147193.61, Infinity);
+        const restoredInfo = makeTemplateInfo(restored.getTimeline());
+        restoredInfo.unscaledPresentationTimeOffset = 13247424900;
+        restoredInfo.scaledPresentationTimeOffset = 13247424900 / 90000;
+        programme.appendTemplateInfo(
+            restoredInfo, 147193.61, Infinity, null, true);
+        expect(iterator.current().startTime).toBeCloseTo(before.startTime, 2);
+        expect(iterator.next().value.startTime)
+            .toBeCloseTo(before.endTime, 2);
       });
     });
 
