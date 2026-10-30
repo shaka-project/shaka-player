@@ -338,6 +338,79 @@ describe('MediaSourceEngine', () => {
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
   });
 
+  for (const type of [ContentType.AUDIO, ContentType.VIDEO]) {
+    it('preserves ' + type + ' when removing the other buffer', async () => {
+      await mediaSourceEngine.init(new Map([
+        [ContentType.AUDIO, getFakeStream(metadata.audio)],
+        [ContentType.VIDEO, getFakeStream(metadata.video)],
+      ]), false);
+      await mediaSourceEngine.setDuration(presentationDuration);
+      await Promise.all([
+        appendInit(ContentType.AUDIO),
+        appendInit(ContentType.VIDEO),
+      ]);
+      await Promise.all([
+        append(ContentType.AUDIO, 0),
+        append(ContentType.VIDEO, 0),
+      ]);
+      const remaining = mediaSource.sourceBuffers[
+          type == ContentType.AUDIO ? 0 : 1];
+      const end = mediaSourceEngine.bufferEnd(type);
+      const removedType = type == ContentType.AUDIO ?
+          ContentType.VIDEO : ContentType.AUDIO;
+
+      await mediaSourceEngine.removeSourceBuffer(removedType);
+      expect(mediaSource.sourceBuffers.length).toBe(1);
+      expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+      expect(mediaSourceEngine.bufferEnd(type)).toBe(end);
+      expect(mediaSource.duration).toBe(presentationDuration);
+      await append(type, 1);
+      expect(mediaSourceEngine.bufferEnd(type)).toBeGreaterThan(end);
+    });
+
+    it('preserves ' + type + ' output when removing the other TS output',
+        async () => {
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.forceTransmux = true;
+          mediaSourceEngine.configure(config);
+          const stream = shaka.test.StreamingEngineUtil.createMockVideoStream(
+              7, 'video/mp2t');
+          stream.codecs = 'avc1.42c00c,mp4a.40.2';
+          await mediaSourceEngine.init(
+              new Map([[ContentType.VIDEO, stream]]), false,
+              shaka.media.ManifestParser.HLS);
+          await mediaSourceEngine.setDuration(20);
+          const asset = '/base/test/test/assets/' +
+              'hls-ts-muxed-and-separate-audio/video_180_';
+          const first = await Util.fetch(asset + '0.ts');
+          const second = await Util.fetch(asset + '1.ts');
+          const reference = new shaka.media.SegmentReference(
+              0, 2, () => [asset + '0.ts'], 0, null, null, 0, 0, Infinity);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, first, reference, stream, false);
+          const remaining = mediaSource.sourceBuffers[
+              type == ContentType.AUDIO ? 0 : 1];
+          const end = mediaSourceEngine.bufferEnd(type);
+          expect(end).toBeGreaterThan(0);
+
+          const removedType = type == ContentType.AUDIO ?
+              ContentType.VIDEO : ContentType.AUDIO;
+          await mediaSourceEngine.removeSourceBuffer(removedType);
+          expect(mediaSource.sourceBuffers.length).toBe(1);
+          expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+          expect(mediaSourceEngine.bufferEnd(type)).toBe(end);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, second,
+              new shaka.media.SegmentReference(
+                  2, 4, () => [asset + '1.ts'], 0, null, null, 0, 0, Infinity),
+              stream, false);
+          expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+          expect(mediaSourceEngine.bufferEnd(type)).toBeGreaterThan(end);
+          expect(mediaSource.duration).toBe(20);
+        });
+  }
+
   it('removes segments', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));

@@ -586,6 +586,202 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('removeSourceBuffer', () => {
+    beforeEach(() => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+    });
+
+    for (const type of [ContentType.AUDIO, ContentType.VIDEO]) {
+      it('removes only ' + type + ' without resetting MSE', async () => {
+        await mediaSourceEngine.init(new Map([
+          [ContentType.AUDIO, fakeAudioStream],
+          [ContentType.VIDEO, fakeVideoStream],
+        ]), false);
+        const removed = type == ContentType.AUDIO ?
+            audioSourceBuffer : videoSourceBuffer;
+        const otherType = type == ContentType.AUDIO ?
+            ContentType.VIDEO : ContentType.AUDIO;
+        const remaining = type == ContentType.AUDIO ?
+            videoSourceBuffer : audioSourceBuffer;
+        const oldUpdateEnd = removed.updateend;
+        createMediaSourceSpy.calls.reset();
+
+        await mediaSourceEngine.removeSourceBuffer(type);
+        // A queued event from the detached buffer must not consume a new op.
+        oldUpdateEnd();
+        await mediaSourceEngine.removeSourceBuffer(type);
+
+        expect(mockMediaSource.removeSourceBuffer)
+            .toHaveBeenCalledOnceWith(removed);
+        expect(createMediaSourceSpy).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.hasSourceBufferFor(type)).toBe(false);
+        expect(mediaSourceEngine.hasSourceBufferFor(otherType)).toBe(true);
+        expect(removed.removeEventListener).toHaveBeenCalledTimes(2);
+        expect(remaining.removeEventListener).not.toHaveBeenCalled();
+        const append = mediaSourceEngine.appendBuffer(
+            otherType, buffer, null, fakeStream, false);
+        remaining.updateend();
+        await append;
+        expect(remaining.appendBuffer).toHaveBeenCalledOnceWith(buffer);
+      });
+    }
+
+    it('waits for an append and discards queued and new work', async () => {
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      const first = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream, false);
+      const queued = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer2, null, fakeStream, false);
+      const removal = mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer3, null, fakeStream, false);
+      expect(mockMediaSource.removeSourceBuffer).not.toHaveBeenCalled();
+
+      audioSourceBuffer.updateend();
+      await Promise.all([first, queued, removal]);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledOnceWith(buffer);
+      await mediaSourceEngine.clear(ContentType.AUDIO);
+      await mediaSourceEngine.remove(ContentType.AUDIO, 0, 10);
+      await mediaSourceEngine.flush(ContentType.AUDIO);
+      await mediaSourceEngine.destroy();
+    });
+
+    it('allows retrying when native removal fails', async () => {
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      mockMediaSource.removeSourceBuffer.and.throwError('removal failed');
+      await expectAsync(
+          mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO))
+          .toBeRejected();
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(true);
+
+      mockMediaSource.removeSourceBuffer.and.stub();
+      await mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(false);
+    });
+
+    it('serializes repeated removal of the same buffer', async () => {
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      await Promise.all([
+        mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO),
+        mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO),
+      ]);
+      expect(mockMediaSource.removeSourceBuffer).toHaveBeenCalledTimes(1);
+      await mediaSourceEngine.endOfStream();
+      await mediaSourceEngine.destroy();
+    });
+
+    it('waits for cleanup of the last buffer before resetting', async () => {
+      const Decryptor = shaka.media.ClearKeyWebCryptoDecryptor;
+      spyOn(Decryptor, 'shouldUse').and.returnValue(true);
+      const cleanup = Promise.withResolvers();
+      // Hold cleanup for the instances created internally by MSE.
+      // eslint-disable-next-line no-restricted-syntax
+      spyOn(Decryptor.prototype, 'destroy').and.returnValue(cleanup.promise);
+      const streams = new Map([[ContentType.AUDIO, fakeAudioStream]]);
+      await mediaSourceEngine.init(streams, false);
+      createMediaSourceSpy.calls.reset();
+      const removal = mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+      await Util.shortDelay();
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(false);
+      const reset = mediaSourceEngine.reset(streams);
+      await Util.shortDelay();
+      expect(createMediaSourceSpy).not.toHaveBeenCalled();
+      cleanup.resolve();
+      await Promise.all([removal, reset]);
+      expect(createMediaSourceSpy).toHaveBeenCalledTimes(1);
+      await mediaSourceEngine.destroy();
+    });
+
+    for (const rejects of [false, true]) {
+      it('discards pending transmuxing when it ' +
+          (rejects ? 'rejects' : 'resolves') + ' after removal', async () => {
+        await mediaSourceEngine.init(
+            new Map([[ContentType.VIDEO, fakeTransportStream]]), false);
+        const result = Promise.withResolvers();
+        mockTransmuxer.transmux.and.returnValue(result.promise);
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, fakeStream, false);
+        await mediaSourceEngine.removeSourceBuffer(ContentType.VIDEO);
+        if (rejects) {
+          result.reject(new Error('worker destroyed'));
+        } else {
+          result.resolve({init: buffer2, data: buffer3});
+        }
+        await expectAsync(append).toBeResolved();
+        expect(videoSourceBuffer.appendBuffer).not.toHaveBeenCalled();
+        expect(mockTransmuxer.destroy).toHaveBeenCalled();
+      });
+    }
+  });
+
+  describe('remaining outputs of split content', () => {
+    beforeEach(async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      const placeholder = makeFakeStream('audio/mp4');
+      placeholder.isAudioMuxedInVideo = true;
+      await mediaSourceEngine.init(new Map([
+        [ContentType.VIDEO, fakeVideoStream],
+        [ContentType.AUDIO, placeholder],
+      ]), true);
+    });
+
+    for (const type of [ContentType.AUDIO, ContentType.VIDEO]) {
+      it('routes operations to the remaining ' + type, async () => {
+        const removedType = type == ContentType.AUDIO ?
+            ContentType.VIDEO : ContentType.AUDIO;
+        const remaining = type == ContentType.AUDIO ?
+            audioSourceBuffer : videoSourceBuffer;
+        const removed = type == ContentType.AUDIO ?
+            videoSourceBuffer : audioSourceBuffer;
+        await mediaSourceEngine.removeSourceBuffer(removedType);
+
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, fakeStream, false);
+        remaining.updateend();
+        await append;
+        expect(remaining.appendBuffer).toHaveBeenCalledOnceWith(buffer);
+        expect(removed.appendBuffer).not.toHaveBeenCalled();
+
+        const remove = mediaSourceEngine.remove(ContentType.VIDEO, 0, 10);
+        remaining.updateend();
+        await remove;
+        const clear = mediaSourceEngine.clear(ContentType.VIDEO);
+        remaining.updateend();
+        await clear;
+        await mediaSourceEngine.resync(ContentType.VIDEO, 20);
+        await mediaSourceEngine.flush(ContentType.VIDEO);
+        await mediaSourceEngine.setStreamProperties(
+            ContentType.VIDEO, 20, 1, 30, false,
+            type == ContentType.AUDIO ? 'audio/mp4' : 'video/mp4', '',
+            new Map([[type, type == ContentType.AUDIO ?
+                fakeAudioStream : fakeVideoStream]]));
+
+        expect(remaining.remove).toHaveBeenCalledTimes(2);
+        expect(remaining.timestampOffset).toBe(20);
+        expect(remaining.appendWindowStart).toBe(1);
+        expect(remaining.appendWindowEnd).toBe(30);
+        expect(removed.remove).not.toHaveBeenCalled();
+        expect(removed.abort).not.toHaveBeenCalled();
+      });
+    }
+
+    it('does not duplicate operations on audio', async () => {
+      const remove = mediaSourceEngine.remove(ContentType.AUDIO, 0, 10);
+      audioSourceBuffer.updateend();
+      await remove;
+      expect(audioSourceBuffer.remove).toHaveBeenCalledOnceWith(0, 10);
+      expect(videoSourceBuffer.remove).not.toHaveBeenCalled();
+    });
+  });
+
   describe('bufferStart and bufferEnd', () => {
     beforeEach(async () => {
       const initObject = new Map();
@@ -2098,6 +2294,79 @@ describe('MediaSourceEngine', () => {
       await mediaSourceEngine.reset_(initObject);
     }
 
+    it('creates a video queue after audio-only playback', async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      mockMediaSource.durationGetter.and.returnValue(100);
+      await mediaSourceEngine.reset(initObject);
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream, false);
+      videoSourceBuffer.updateend();
+      await append;
+      expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(100);
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledOnceWith(buffer);
+      await mediaSourceEngine.destroy();
+    });
+
+    it('creates queues for both outputs of one muxed TS stream', async () => {
+      mockTransmuxer.convertCodecs.and.callFake((type) =>
+        type == ContentType.AUDIO ? 'audio/mp4' : 'video/mp4');
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.forceTransmux = true;
+      mediaSourceEngine.configure(config);
+      const stream = makeFakeStream('video/mp2t');
+      stream.codecs = 'mp4a.40.2,avc1.42E01E';
+      await mediaSourceEngine.reset(new Map([[ContentType.VIDEO, stream]]));
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(true);
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.VIDEO))
+          .toBe(true);
+      await mediaSourceEngine.endOfStream();
+      await mediaSourceEngine.destroy();
+    });
+
+    it('does not remove a replacement from a preceding reset', async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      await mediaSourceEngine.init(
+          new Map([[ContentType.AUDIO, fakeAudioStream]]), false);
+      const original = audioSourceBuffer;
+      const reset = mediaSourceEngine.reset(initObject);
+      const removal = mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+      audioSourceBuffer = createMockSourceBuffer();
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      await Promise.all([reset, removal]);
+      expect(mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO))
+          .toBe(true);
+      expect(mockMediaSource.removeSourceBuffer).toHaveBeenCalledOnceWith(
+          original);
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream, false);
+      audioSourceBuffer.updateend();
+      await append;
+      await mediaSourceEngine.destroy();
+    });
+
+    it('restores a removed buffer with a subsequent reset', async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      await mediaSourceEngine.init(initObject, false);
+      await mediaSourceEngine.removeSourceBuffer(ContentType.AUDIO);
+      audioSourceBuffer = createMockSourceBuffer();
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      await mediaSourceEngine.reset(initObject);
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream, false);
+      audioSourceBuffer.updateend();
+      await append;
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledOnceWith(buffer);
+      await mediaSourceEngine.destroy();
+    });
+
     /** @suppress {visibility} */
     function simulatePlaybackBeginning() {
       mediaSourceEngine.playbackHasBegun_ = true;
@@ -2396,6 +2665,7 @@ describe('MediaSourceEngine', () => {
       readyState: 'open',
       sourceBuffers: document.createElement('div'),
       addSourceBuffer: jasmine.createSpy('addSourceBuffer'),
+      removeSourceBuffer: jasmine.createSpy('removeSourceBuffer'),
       endOfStream: jasmine.createSpy('endOfStream'),
       durationGetter: jasmine.createSpy('duration getter'),
       durationSetter: jasmine.createSpy('duration setter'),
