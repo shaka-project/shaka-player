@@ -31,9 +31,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    // Enable the mouse wheel so that every timestamp stays reachable:
-    // a wheel tick always seeks by exactly one second, even when the bar
-    // has fewer pixels than the content has seconds.
     super(parent, controls,
         [
           'shaka-seek-bar-container',
@@ -42,8 +39,27 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-seek-bar',
           'shaka-no-propagation',
           'shaka-show-controls-on-mouse-over',
-        ],
-        /* enableWheel= */ true);
+        ]);
+
+    // Seek through the same path as the keyboard controls.  The generic
+    // range wheel handler only changes the bar and schedules a seek, allowing
+    // playback updates to overwrite the value before that seek runs.
+    this.eventManager.listen(this.container, 'wheel', (e) => {
+      const event = /** @type {!WheelEvent} */ (e);
+      if (event.ctrlKey || event.metaKey || !event.deltaY ||
+          this.bar.disabled || !this.controls.isOpaque() ||
+          !this.video.duration || !this.isShowing()) {
+        return;
+      }
+
+      event.preventDefault();
+      const range = this.player.seekRange();
+      const currentTime = this.controls.isSeeking() ?
+          this.getValue() : this.video.currentTime;
+      const newTime = currentTime + (event.deltaY > 0 ? -1 : 1);
+      this.controls.seekTo(
+          Math.max(range.start, Math.min(range.end, newTime)), false);
+    });
 
     /** @private {!HTMLElement} */
     this.adMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
