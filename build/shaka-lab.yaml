@@ -276,7 +276,8 @@ ChromecastGTV:
 ChromecastHub:
   browser: chromecast
   version: hub
-  # Disabled by default until we resolve issues with autoplay on Fuchsia.
+  # Disabled by default because the device stops responding partway through a
+  # full test run, apparently from resources that accumulate during playback.
   disabled: true
 
 ChromecastSpeaker:
