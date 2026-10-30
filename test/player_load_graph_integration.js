@@ -193,6 +193,44 @@ describe('Player Load Graph', () => {
     expect(getVisitedStates()).not.toContain('load');
   });
 
+  it('destroy during load destroys every media source engine', async () => {
+    createPlayer();
+    const engines = trackMediaSourceEngines();
+
+    await player.attach(video);
+
+    const load = player.load('test:sintel');
+    const destroy = player.destroy();
+
+    await expectAsync(load).toBeRejected();
+    await destroy;
+
+    expect(engines.length).toBeGreaterThan(0);
+    for (const engine of engines) {
+      expect(engine.destroy).toHaveBeenCalled();
+    }
+  });
+
+  it('destroy during attach destroys every media source engine', async () => {
+    createPlayer();
+    const engines = trackMediaSourceEngines();
+
+    await player.attach(video);
+
+    // Moving to another media element detaches from the first one before
+    // attaching, which gives destroy() a chance to start in between.
+    const attach = player.attach(video2);
+    const destroy = player.destroy();
+
+    await expectAsync(attach).toBeRejected();
+    await destroy;
+
+    expect(engines.length).toBeGreaterThan(0);
+    for (const engine of engines) {
+      expect(engine.destroy).toHaveBeenCalled();
+    }
+  });
+
   // When |destroy| is called, the player should move through the unload state
   // on its way to the detached state.
   it('destroy will unload and then detach', async () => {
@@ -708,18 +746,7 @@ describe('Player Load Graph', () => {
       ['detach', 'attach', 'media-source', 'load', 'src-equals']) {
       it('destroys every media source engine after unload goes to ' +
           destination, async () => {
-        /** @type {!Array<!shaka.media.MediaSourceEngine>} */
-        const engines = [];
-        spyOn(player, 'createMediaSourceEngine').and.callFake(
-            (mediaElement, textDisplayer, playerInterface, lcevcDec,
-                config) => {
-              const engine = new shaka.media.MediaSourceEngine(
-                  mediaElement, textDisplayer, playerInterface, config,
-                  lcevcDec);
-              spyOn(engine, 'destroy').and.callThrough();
-              engines.push(engine);
-              return engine;
-            });
+        const engines = trackMediaSourceEngines();
 
         await passingThrough('unload', () => {
           return goTo(destination, destination == 'attach' ? video2 : video);
@@ -879,6 +906,26 @@ describe('Player Load Graph', () => {
       states.push(call[0].state);
     }
     return states;
+  }
+
+  /**
+   * Record every media source engine the player creates from now on, with a
+   * spy on its destroy method.
+   *
+   * @return {!Array<!shaka.media.MediaSourceEngine>}
+   */
+  function trackMediaSourceEngines() {
+    /** @type {!Array<!shaka.media.MediaSourceEngine>} */
+    const engines = [];
+    spyOn(player, 'createMediaSourceEngine').and.callFake(
+        (mediaElement, textDisplayer, playerInterface, lcevcDec, config) => {
+          const engine = new shaka.media.MediaSourceEngine(
+              mediaElement, textDisplayer, playerInterface, config, lcevcDec);
+          spyOn(engine, 'destroy').and.callThrough();
+          engines.push(engine);
+          return engine;
+        });
+    return engines;
   }
 
   /**
