@@ -347,6 +347,73 @@ describe('UI', () => {
       videoContainer.appendChild(video);
     });
 
+    it('does not activate buttons just below the seek bar', async () => {
+      videoContainer.style.width = '600px';
+      const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+        controlPanelElements: [],
+      });
+      const controls = ui.getControls();
+      player = controls.getLocalPlayer();
+      spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+      controls.seekTo(50, false);
+      controls.getControlsContainer().setAttribute('shown', 'true');
+      controls.getControlsContainer().setAttribute('casting', 'true');
+
+      const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
+      const panel = videoContainer.querySelector(
+          '.shaka-controls-button-panel');
+      const button = document.createElement('button');
+      panel.appendChild(button);
+      const onClick = jasmine.createSpy('onClick');
+      button.addEventListener('click', () => Util.spyFunc(onClick)());
+      const seekRect = seekBar.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      const x = buttonRect.left + buttonRect.width / 2;
+      for (const y of [seekRect.bottom - 1, seekRect.bottom + 1]) {
+        const target = document.elementFromPoint(x, y);
+        expect(target).not.toBeNull();
+        if (target) {
+          UiUtils.simulateEvent(target, 'click');
+        }
+      }
+      expect(onClick).not.toHaveBeenCalled();
+
+      // The guard space must not cover the button itself.
+      const buttonTarget = document.elementFromPoint(
+          x, buttonRect.top + buttonRect.height / 2);
+      expect(buttonTarget.closest('button')).toBe(button);
+      UiUtils.simulateEvent(buttonTarget, 'click');
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    for (const addSeekBar of [false, true]) {
+      it('keeps buttons clickable below an absent or hidden seek bar ' +
+          addSeekBar, async () => {
+        videoContainer.style.width = '600px';
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+          addSeekBar: addSeekBar,
+          controlPanelElements: [],
+        });
+        const controls = ui.getControls();
+        controls.getControlsContainer().setAttribute('shown', 'true');
+        controls.getControlsContainer().setAttribute('casting', 'true');
+        if (addSeekBar) {
+          const seekBar = /** @type {!HTMLElement} */ (
+            videoContainer.querySelector('.shaka-seek-bar-container'));
+          shaka.ui.Utils.setDisplay(seekBar, false);
+        }
+        const panel = videoContainer.querySelector(
+            '.shaka-controls-button-panel');
+        const button = document.createElement('button');
+        panel.appendChild(button);
+        const panelRect = panel.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const target = document.elementFromPoint(
+            buttonRect.left + buttonRect.width / 2, panelRect.top + 1);
+        expect(target.closest('button')).toBe(button);
+      });
+    }
+
     it('goes into fullscreen on double click', async () => {
       if (!document.fullscreenEnabled) {
         pending('This test requires fullscreen support, which is unavailable.');
