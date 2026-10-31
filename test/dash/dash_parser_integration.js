@@ -263,4 +263,32 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('plays video to the end when @endNumber stops audio early', async () => {
+    const netEngine = player.getNetworkingEngine();
+    const SegmentType =
+        compiledShaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    /** @type {!Array<string>} */
+    const requestedUris = [];
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == SegmentType) {
+        requestedUris.push(request.uris[0]);
+      }
+    });
+
+    await player.load(
+        '/base/test/test/assets/clear-encrypted/end-number-short-audio.mpd');
+    await video.play();
+    await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+
+    expect(requestedUris.some((uri) => uri.includes('clear-a-s1.mp4')))
+        .toBe(true);
+    expect(requestedUris.some((uri) => uri.includes('clear-a-s2.mp4')))
+        .toBe(false);
+    expect(requestedUris.some((uri) => uri.includes('clear-v-s2.mp4')))
+        .toBe(true);
+
+    await player.unload();
+  });
 });
