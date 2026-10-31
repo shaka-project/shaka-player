@@ -3387,6 +3387,161 @@ describe('StreamingEngine', () => {
       expect(onError).toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
+
+    describe('with a quota smaller than the buffering goal', () => {
+      /** @type {{audio: number, video: number}} */
+      let quotaErrors;
+      /** @type {number} */
+      let quotaSeconds;
+
+      /**
+       * Default quota: a segment fits if, together with what is buffered
+       * ahead of the playhead, it lasts no more than quotaSeconds.
+       *
+       * @param {string} type
+       * @param {!shaka.media.SegmentReference} reference
+       * @param {number} bufferedAhead
+       * @return {boolean}
+       */
+      function fitsInSeconds(type, reference, bufferedAhead) {
+        const duration = reference.endTime - reference.startTime;
+        return bufferedAhead + duration <= quotaSeconds;
+      }
+
+      /**
+       * @param {function(string, !shaka.media.SegmentReference,
+       *     number):boolean=} fits Decides whether a segment fits.
+       */
+      function setUpQuota(fits = fitsInSeconds) {
+        setupVod();
+
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().streaming;
+        config.rebufferingGoal = 1;
+        config.bufferingGoal = 30;
+
+        mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+        createStreamingEngine(config);
+
+        // Reject a segment that does not fit next to what is buffered ahead
+        // of the playhead.  Content behind the playhead is ignored, as if
+        // MediaSource evicted it on its own.
+        quotaErrors = {audio: 0, video: 0};
+        const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
+        const appendBufferSpy = jasmine.createSpy('appendBuffer');
+        mediaSourceEngine.appendBuffer = appendBufferSpy;
+        appendBufferSpy.and.callFake((type, data, reference) => {
+          if (reference && type != ContentType.TEXT) {
+            const bufferedAhead = mediaSourceEngine.bufferedAheadOfImpl(
+                type, presentationTimeInSeconds);
+            if (!fits(type, reference, bufferedAhead)) {
+              if (type == ContentType.AUDIO) {
+                quotaErrors.audio++;
+              } else {
+                quotaErrors.video++;
+              }
+              throw new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.MEDIA,
+                  shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+                  type);
+            }
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return originalAppendBuffer.call(
+              mediaSourceEngine, type, data, reference);
+        });
+      }
+
+      /**
+       * @param {function()=} callback Executed each time the clock ticks.
+       */
+      async function play(callback) {
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+        playing = true;
+        await runTest(callback);
+      }
+
+      it('reduces the buffering goal to what fit in one step', async () => {
+        // Two 10 second segments fit, the third does not.
+        quotaSeconds = 21;
+        setUpQuota();
+
+        await play();
+
+        expect(quotaErrors).toEqual({audio: 1, video: 1});
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('uses the reduction schedule when no segment fits', async () => {
+        // Only one segment fits, so there is nothing to keep next to it.
+        quotaSeconds = 15;
+        setUpQuota();
+
+        await play();
+
+        expect(quotaErrors.audio + quotaErrors.video).toBeGreaterThan(2);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('falls back to the reduction schedule if the quota shrinks',
+          async () => {
+            quotaSeconds = 21;
+            setUpQuota();
+
+            // After the first error the goal is lowered to what fit.  Once
+            // the quota shrinks below that, not even one segment fits next to
+            // the buffer, so the reduction schedule has to take over.
+            await play(() => {
+              if (presentationTimeInSeconds >= 15) {
+                quotaSeconds = 12;
+              }
+            });
+
+            expect(quotaErrors.video).toBeGreaterThan(1);
+            expect(onError).not.toHaveBeenCalled();
+            expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+          });
+
+      it('lowers the goal again for a heavier segment', async () => {
+        // The video quota is in bytes, and the third video segment weighs
+        // three times as much as the others (VBR).  The goal derived from
+        // the light segments is then too high for it, so it is rejected again
+        // once the buffer is down to that goal, and the goal is lowered again.
+        const quotaBytes = 32000;
+        setUpQuota((type, reference) => {
+          if (type != ContentType.VIDEO) {
+            return true;
+          }
+          const segments = segmentData[ContentType.VIDEO].segments;
+          const duration = segmentData[ContentType.VIDEO].segmentDuration;
+          const buffered = mediaSourceEngine.segments[ContentType.VIDEO];
+          let bytesAhead = 0;
+          segments.forEach((segment, i) => {
+            const start = Math.max(i * duration, presentationTimeInSeconds);
+            const end = (i + 1) * duration;
+            if (buffered[i] && end > start) {
+              bytesAhead += segment.byteLength * (end - start) / duration;
+            }
+          });
+          const segment = segments[reference.startTime / duration];
+          return bytesAhead + segment.byteLength <= quotaBytes;
+        });
+        segmentData[ContentType.VIDEO].segments[2] = new ArrayBuffer(30000);
+
+        await play();
+
+        expect(quotaErrors.video).toBeGreaterThan(1);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('VOD drift', () => {
