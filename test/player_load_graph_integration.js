@@ -704,6 +704,35 @@ describe('Player Load Graph', () => {
       });
     });
 
+    for (const destination of
+      ['detach', 'attach', 'media-source', 'load', 'src-equals']) {
+      it('destroys every media source engine after unload goes to ' +
+          destination, async () => {
+        /** @type {!Array<!shaka.media.MediaSourceEngine>} */
+        const engines = [];
+        spyOn(player, 'createMediaSourceEngine').and.callFake(
+            (mediaElement, textDisplayer, playerInterface, lcevcDec,
+                config) => {
+              const engine = new shaka.media.MediaSourceEngine(
+                  mediaElement, textDisplayer, playerInterface, config,
+                  lcevcDec);
+              spyOn(engine, 'destroy').and.callThrough();
+              engines.push(engine);
+              return engine;
+            });
+
+        await passingThrough('unload', () => {
+          return goTo(destination, destination == 'attach' ? video2 : video);
+        });
+        await player.destroy();
+
+        expect(engines.length).toBeGreaterThan(0);
+        for (const engine of engines) {
+          expect(engine.destroy).toHaveBeenCalled();
+        }
+      });
+    }
+
     /**
      * Put the player into the specific state. This method's purpose is to make
      * it easier to see when the test is assuming the starting state of the
