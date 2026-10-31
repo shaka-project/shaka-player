@@ -3840,6 +3840,41 @@ describe('StreamingEngine', () => {
       expect(secondRequest.abort).toHaveBeenCalled();
     });
 
+    it('does not fail if segment index is released while creating it',
+        async () => {
+          await prepareForAbort();
+
+          /** @type {shaka.net.NetworkingEngine.PendingRequest} */
+          const secondRequest = lastPendingRequest;
+
+          // The first call to createSegmentIndex() finishes without leaving
+          // a segment index behind, as if the index was closed (for example
+          // by an unload) while it was being created.  Later calls work.
+          const segmentIndex = newVariant.video.segmentIndex;
+          expect(segmentIndex).not.toBe(null);
+          newVariant.video.segmentIndex = null;
+          const firstCall = Promise.withResolvers();
+          let calls = 0;
+          newVariant.video.createSegmentIndex = () => {
+            calls++;
+            if (calls == 1) {
+              return firstCall.promise;
+            }
+            newVariant.video.segmentIndex = segmentIndex;
+            return Promise.resolve();
+          };
+
+          streamingEngine.switchVariant(
+              newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+          firstCall.resolve();
+
+          // The abort decision is skipped, so the pending request goes on.
+          await bufferAndCheck(/* didAbort= */ false);
+
+          expect(secondRequest.abort).not.toHaveBeenCalled();
+          expect(onError).not.toHaveBeenCalled();
+        });
+
     it('still aborts if new segment size unknown', async () => {
       const videoStream = manifest.variants[1].video;
       videoStream.bandwidth = 10;
