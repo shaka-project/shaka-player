@@ -327,7 +327,12 @@ shakaDemo.Main = class {
           }
         }
       }
-      if (this.selectedAsset.certificateUri) {
+      if (this.selectedAsset.certificates &&
+          this.selectedAsset.certificates.size) {
+        for (const [key, cert] of this.selectedAsset.certificates) {
+          addLine('certificate (' + key + ')', cert);
+        }
+      } else if (this.selectedAsset.certificateUri) {
         addLine('certificate', this.selectedAsset.certificateUri);
       }
       fillInTemplate('RE:uris', uriLines.join('\n'));
