@@ -3419,6 +3419,129 @@ describe('Player', () => {
       expect(variant.id).toBe(newTrack.id);
     });
 
+    it('switches streams before playhead startup', () => {
+      const newTrack = player.getVariantTracks().filter((t) => !t.active)[0];
+      const p = /** @type {?} */ (player);
+      p.playhead_ = null;
+      streamingEngine.getCurrentVariant.and.returnValue(null);
+
+      player.selectVariantTrack(newTrack);
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(1);
+      const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(variant.id).toBe(newTrack.id);
+    });
+
+    it('uses a variant selected from the streaming event for startup',
+        async () => {
+          await player.unload();
+          streamingEngine.switchVariant.calls.reset();
+          const targetId = 101;
+          const onStreaming = () => {
+            player.removeEventListener('streaming', onStreaming);
+            const target = player.getVariantTracks().find(
+                (track) => track.id == targetId);
+            goog.asserts.assert(target, 'target track must be available');
+            player.selectVariantTrack(target);
+          };
+          player.addEventListener('streaming', onStreaming);
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(1);
+          const selected = streamingEngine.switchVariant.calls.argsFor(0)[0];
+          expect(selected.id).toBe(targetId);
+          const current = /** @type {?} */ (
+            Util.invokeSpy(streamingEngine.getCurrentVariant));
+          expect(current.id).toBe(targetId);
+        });
+
+    it('sets up the playhead for a streaming-event selection at a ' +
+        'segment boundary', async () => {
+      await player.unload();
+      player.configure('streaming.startAtSegmentBoundary', true);
+      streamingEngine.switchVariant.calls.reset();
+      const targetId = 101;
+      const onStreaming = () => {
+        player.removeEventListener('streaming', onStreaming);
+        const target = player.getVariantTracks().find(
+            (track) => track.id == targetId);
+        goog.asserts.assert(target, 'target track must be available');
+        player.selectVariantTrack(target);
+      };
+      player.addEventListener('streaming', onStreaming);
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(1);
+      const selected = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(selected.id).toBe(targetId);
+      const current = /** @type {?} */ (
+        Util.invokeSpy(streamingEngine.getCurrentVariant));
+      expect(current.id).toBe(targetId);
+      const p = /** @type {?} */ (player);
+      expect(p.playhead_).toBeTruthy();
+    });
+
+    it('switches audio before playhead startup', () => {
+      const p = /** @type {?} */ (player);
+      p.playhead_ = null;
+      const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+      goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+
+      player.selectAudioTrack(newAudioTrack);
+
+      expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(1);
+      const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(variant.language).toBe('es');
+    });
+
+    it('uses an audio track selected from the streaming event for startup',
+        async () => {
+          await player.unload();
+          streamingEngine.switchVariant.calls.reset();
+          // No variant is active yet when 'streaming' fires, so
+          // getAudioTracks() is empty there; a track obtained elsewhere (here,
+          // the one the loaded player reported) must still be honored.
+          const newAudioTrack = audioTracks.find((t) => t.language == 'es');
+          const onStreaming = () => {
+            player.removeEventListener('streaming', onStreaming);
+            goog.asserts.assert(newAudioTrack, 'audio track must be non-null');
+            player.selectAudioTrack(newAudioTrack);
+          };
+          player.addEventListener('streaming', onStreaming);
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          expect(streamingEngine.switchVariant).toHaveBeenCalledTimes(1);
+          const selected = streamingEngine.switchVariant.calls.argsFor(0)[0];
+          expect(selected.language).toBe('es');
+          expect(getActiveVariantTrack().language).toBe('es');
+        });
+
+    it('uses a text track selected from the streaming event for startup',
+        async () => {
+          await player.unload();
+          streamingEngine.switchTextStream.calls.reset();
+          // preferredText is Spanish; the listener picks English instead.
+          const targetId = 51;
+          const onStreaming = () => {
+            player.removeEventListener('streaming', onStreaming);
+            const target = player.getTextTracks().find(
+                (track) => track.id == targetId);
+            goog.asserts.assert(target, 'target track must be available');
+            player.selectTextTrack(target);
+          };
+          player.addEventListener('streaming', onStreaming);
+
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          expect(streamingEngine.switchTextStream).toHaveBeenCalledTimes(1);
+          const selected = streamingEngine.switchTextStream.calls.argsFor(0)[0];
+          expect(selected.id).toBe(targetId);
+          expect(getActiveTextTrack().id).toBe(targetId);
+        });
+
     it('offers video tracks paired with their own audio group', async () => {
       // Like HLS content with a different AUDIO group per video quality: the
       // same "English" audio, but HE-AAC for the low resolution and AAC-LC
