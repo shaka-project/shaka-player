@@ -104,6 +104,7 @@ shakaDemo.Custom = class {
    * @param {function(!HTMLInputElement, !Element)} setup
    * @param {function(!Element, !shakaDemo.Input)} onChange
    * @param {boolean=} isTextArea
+   * @return {!shakaDemo.TextInput}
    * @private
    */
   makeField_(container, name, setup, onChange, isTextArea) {
@@ -112,6 +113,7 @@ shakaDemo.Custom = class {
         new shakaDemo.TextInput(container, name, onChange, isTextArea);
     input.extra().textContent = name;
     setup(input.input(), input.container());
+    return input;
   }
 
   /**
@@ -121,6 +123,7 @@ shakaDemo.Custom = class {
    * @param {function(!HTMLInputElement, !Element)} setup
    * @param {function(!Element, !shakaDemo.Input)} onChange
    * @param {!Array<string>} values
+   * @return {!shakaDemo.DatalistInput}
    * @private
    */
   makeDatalistInput_(container, name, setup, onChange, values) {
@@ -129,6 +132,7 @@ shakaDemo.Custom = class {
         new shakaDemo.DatalistInput(container, name, onChange, values);
     input.extra().textContent = name;
     setup(input.input(), input.container());
+    return input;
   }
 
   /**
@@ -397,80 +401,336 @@ shakaDemo.Custom = class {
    */
   makeAssetDialogContentsDrm_(assetInProgress, inputsToCheck) {
     const drmDiv = document.createElement('div');
-    const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
-    const container = new shakaDemo.InputContainer(
-        drmDiv, /* headerText= */ null, containerStyle,
-        /* docLink= */ null);
 
-    // The license server and drm system fields need to know each others
-    // contents, and react to each others changes, to work.
-    // To simplify things, this method picks out the process of setting license
-    // server URLs; it can be called within both fields.
-    let licenseServerUrlInput;
-    let customDrmSystemInput;
-    const setLicenseServerURLs = () => {
-      const licenseServerURL = licenseServerUrlInput.value;
-      const customDRMSystem = customDrmSystemInput.value;
-      if (licenseServerURL) {
-        assetInProgress.licenseServers.clear();
-        if (customDRMSystem) {
-          assetInProgress.licenseServers.set(customDRMSystem, licenseServerURL);
+    /**
+     * @typedef {{
+     *   licenseServerUri: string,
+     *   certificateUri: string,
+     *   drmSystem: string,
+     * }}
+     */
+    let DrmInfo;
+
+    /**
+     * @typedef {{
+     *   blockDiv: !Element,
+     *   licenseUrlInput: !HTMLInputElement,
+     *   licenseInputWrapper: !shakaDemo.Input,
+     *   licenseError: !Element,
+     *   certUrlInput: !HTMLInputElement,
+     *   certInputWrapper: !shakaDemo.Input,
+     *   drmSystemInput: !HTMLInputElement,
+     *   drmInputWrapper: !shakaDemo.Input,
+     *   drmError: !Element,
+     *   addButton: !Element,
+     *   removeButton: !Element,
+     * }}
+     */
+    let DrmBlock;
+
+    /** @type {!Array<!DrmBlock>} */
+    const blocks = [];
+
+    /** @type {!Array<!DrmInfo>} */
+    const initialInfos = [];
+
+    if (assetInProgress.drmInfos && assetInProgress.drmInfos.length > 0) {
+      for (const info of assetInProgress.drmInfos) {
+        initialInfos.push({
+          licenseServerUri: info.licenseServerUri || '',
+          certificateUri: info.certificateUri || '',
+          drmSystem: info.drmSystem || '',
+        });
+      }
+    } else if (assetInProgress.licenseServers.size == 1) {
+      const drmSys = Array.from(assetInProgress.licenseServers.keys())[0];
+      const licenseUri = assetInProgress.licenseServers.get(drmSys);
+      const certUri = (assetInProgress.certificates &&
+          assetInProgress.certificates.get(drmSys)) ||
+          assetInProgress.certificateUri || '';
+      initialInfos.push({
+        licenseServerUri: licenseUri,
+        certificateUri: certUri,
+        drmSystem: drmSys,
+      });
+    } else if (assetInProgress.licenseServers.size > 1) {
+      const common = shakaDemo.Main.commonDrmSystems;
+      const firstCommonSys = common[0];
+      const firstUrl = assetInProgress.licenseServers.get(firstCommonSys);
+      const isLegacyWildcard = firstUrl &&
+          assetInProgress.licenseServers.size === common.length &&
+          common.every(
+              (sys) => assetInProgress.licenseServers.get(sys) === firstUrl);
+      if (isLegacyWildcard) {
+        initialInfos.push({
+          licenseServerUri: firstUrl,
+          certificateUri: assetInProgress.certificateUri || '',
+          drmSystem: '',
+        });
+      } else {
+        assetInProgress.licenseServers.forEach((url, key) => {
+          const cert = (assetInProgress.certificates &&
+              assetInProgress.certificates.get(key)) ||
+              assetInProgress.certificateUri || '';
+          initialInfos.push({
+            licenseServerUri: url,
+            certificateUri: cert,
+            drmSystem: key,
+          });
+        });
+      }
+    }
+
+    if (initialInfos.length == 0) {
+      initialInfos.push({
+        licenseServerUri: '',
+        certificateUri: assetInProgress.certificateUri || '',
+        drmSystem: '',
+      });
+    }
+
+    const validateAndSync_ = () => {
+      /** @type {!Map<string, number>} */
+      const drmSystemCounts = new Map();
+      let wildcardCount = 0;
+
+      for (const block of blocks) {
+        const drmSys = block.drmSystemInput.value.trim();
+        if (drmSys) {
+          drmSystemCounts.set(drmSys, (drmSystemCounts.get(drmSys) || 0) + 1);
         } else {
-          // Make a license server entry for every common DRM plugin.
-          for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
-            assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
+          wildcardCount++;
+        }
+      }
+
+      const coveredCommon = shakaDemo.Main.commonDrmSystems.filter((sys) => {
+        return (drmSystemCounts.get(sys) || 0) > 0;
+      });
+      const allCommonCovered =
+          coveredCommon.length === shakaDemo.Main.commonDrmSystems.length;
+
+      let allValid = true;
+
+      for (const block of blocks) {
+        const drmSys = block.drmSystemInput.value.trim();
+        const licenseUrl = block.licenseUrlInput.value.trim();
+        const certUrl = block.certUrlInput.value.trim();
+
+        // 1. License Server URL validation
+        let licenseErrorMessage = '';
+        if ((drmSys || certUrl) && !licenseUrl) {
+          licenseErrorMessage = 'License Server URL is required';
+        }
+        block.licenseError.textContent = licenseErrorMessage;
+        block.licenseInputWrapper.setValid(!licenseErrorMessage);
+        if (licenseErrorMessage) {
+          allValid = false;
+        }
+
+        // 2. DRM System validation
+        let drmErrorMessage = '';
+        if (drmSys) {
+          if ((drmSystemCounts.get(drmSys) || 0) > 1) {
+            drmErrorMessage = 'Duplicate DRM system';
+          }
+        } else {
+          if (wildcardCount > 1) {
+            drmErrorMessage = 'Only one wildcard ("all") DRM system allowed';
+          } else if (licenseUrl && allCommonCovered) {
+            drmErrorMessage =
+                'All common DRM systems are already explicitly configured';
           }
         }
-      } else {
+        block.drmError.textContent = drmErrorMessage;
+        block.drmInputWrapper.setValid(!drmErrorMessage);
+        if (drmErrorMessage) {
+          allValid = false;
+        }
+      }
+
+      // Update button visibility
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        if (i === blocks.length - 1) {
+          block.addButton.classList.remove('hidden');
+        } else {
+          block.addButton.classList.add('hidden');
+        }
+        if (blocks.length > 1) {
+          block.removeButton.classList.remove('hidden');
+        } else {
+          block.removeButton.classList.add('hidden');
+        }
+      }
+
+      if (allValid) {
         assetInProgress.licenseServers.clear();
+        assetInProgress.certificates.clear();
+
+        // 1. Set explicit DRM systems
+        /** @type {!Set<string>} */
+        const configuredKeys = new Set();
+        for (const block of blocks) {
+          const drmSys = block.drmSystemInput.value.trim();
+          const licenseUrl = block.licenseUrlInput.value.trim();
+          const certUrl = block.certUrlInput.value.trim();
+          if (drmSys && licenseUrl) {
+            assetInProgress.licenseServers.set(drmSys, licenseUrl);
+            configuredKeys.add(drmSys);
+            if (certUrl) {
+              assetInProgress.certificates.set(drmSys, certUrl);
+            }
+          }
+        }
+
+        // 2. Set wildcard (blank) DRM systems for remaining common systems
+        for (const block of blocks) {
+          const drmSys = block.drmSystemInput.value.trim();
+          const licenseUrl = block.licenseUrlInput.value.trim();
+          const certUrl = block.certUrlInput.value.trim();
+          if (!drmSys && licenseUrl) {
+            for (const commonSys of shakaDemo.Main.commonDrmSystems) {
+              if (!configuredKeys.has(commonSys)) {
+                assetInProgress.licenseServers.set(commonSys, licenseUrl);
+                configuredKeys.add(commonSys);
+                if (certUrl) {
+                  assetInProgress.certificates.set(commonSys, certUrl);
+                }
+              }
+            }
+          }
+        }
+
+        const firstCert = assetInProgress.certificates.values().next().value;
+        assetInProgress.certificateUri = firstCert || null;
+
+        assetInProgress.drmInfos = blocks.map((b) => ({
+          licenseServerUri: b.licenseUrlInput.value.trim(),
+          certificateUri: b.certUrlInput.value.trim(),
+          drmSystem: b.drmSystemInput.value.trim(),
+        }));
       }
     };
 
-    // Make the license server URL field.
-    const licenseSetup = (input, container) => {
-      licenseServerUrlInput = input;
-      const drmSystems = assetInProgress.licenseServers.keys();
-      // Custom assets have only a single license server URL, no matter how
-      // many key systems they have. Thus, it's safe to say that the license
-      // server URL associated with the first key system is the asset's
-      // over-all license server URL.
-      const drmSystem = drmSystems.next();
-      if (drmSystem && drmSystem.value) {
-        input.value = assetInProgress.licenseServers.get(drmSystem.value);
-      }
-    };
-    const licenseOnChange = (input) => {
-      setLicenseServerURLs();
-    };
-    this.makeField_(
-        container, 'Custom License Server URL', licenseSetup, licenseOnChange);
+    /**
+     * @param {!DrmInfo} initialInfo
+     */
+    const addBlock = (initialInfo) => {
+      const blockDiv = document.createElement('div');
+      blockDiv.classList.add('drm-block');
+      drmDiv.appendChild(blockDiv);
 
-    // Make the license certificate URL field.
-    const certSetup = (input, container) => {
-      if (assetInProgress.certificateUri) {
-        input.value = assetInProgress.certificateUri;
-      }
-    };
-    const certOnChange = (input) => {
-      assetInProgress.certificateUri = input.value;
-    };
-    this.makeField_(
-        container, 'Custom License Certificate URL', certSetup, certOnChange);
+      const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+      const container = new shakaDemo.InputContainer(
+          blockDiv, 'DRM Configuration', containerStyle,
+          /* docLink= */ null);
 
-    // Make the drm system field.
-    const drmSetup = (input, container) => {
-      customDrmSystemInput = input;
-      if (assetInProgress.licenseServers.size == 1) {
-        const drmSystems = assetInProgress.licenseServers.keys();
-        input.value = Array.from(drmSystems)[0];
+      const licenseError = document.createElement('span');
+      licenseError.classList.add('mdl-textfield__error');
+
+      const licenseSetup = (input, cont) => {
+        input.value = initialInfo.licenseServerUri;
+        input.addEventListener('input', () => validateAndSync_());
+        inputsToCheck.push(input);
+        cont.appendChild(licenseError);
+      };
+      const licenseOnChange = (input, wrapper) => {
+        validateAndSync_();
+      };
+      const licenseInputWrapper = this.makeField_(
+          container, 'Custom License Server URL', licenseSetup,
+          licenseOnChange);
+      const licenseUrlInput = licenseInputWrapper.input();
+
+      const certSetup = (input, cont) => {
+        input.value = initialInfo.certificateUri;
+        input.addEventListener('input', () => validateAndSync_());
+      };
+      const certOnChange = (input, wrapper) => {
+        validateAndSync_();
+      };
+      const certInputWrapper = this.makeField_(
+          container, 'Custom License Certificate URL', certSetup,
+          certOnChange);
+      const certUrlInput = certInputWrapper.input();
+
+      const drmError = document.createElement('span');
+      drmError.classList.add('mdl-textfield__error');
+
+      const drmSetup = (input, cont) => {
+        input.value = initialInfo.drmSystem;
+        input.addEventListener('input', () => validateAndSync_());
+        inputsToCheck.push(input);
+        cont.appendChild(drmError);
+      };
+      const drmOnChange = (input, wrapper) => {
+        validateAndSync_();
+      };
+      const drmInputWrapper = this.makeDatalistInput_(
+          container, 'Custom DRM System', drmSetup, drmOnChange,
+          shakaDemo.Main.commonDrmSystems);
+      const drmSystemInput = drmInputWrapper.input();
+
+      const buttonRow = document.createElement('div');
+      buttonRow.classList.add('drm-button-row');
+      blockDiv.appendChild(buttonRow);
+
+      const buttonStyle = shakaDemo.Custom.ButtonStyle_.RAISED;
+      const addButton = this.makeButton_('+ Add DRM', buttonStyle, () => {
+        addBlock({licenseServerUri: '', certificateUri: '', drmSystem: ''});
+        componentHandler.upgradeDom();
+        validateAndSync_();
+      });
+      const removeButton = this.makeButton_('Remove DRM', buttonStyle, () => {
+        removeBlock(blockObj);
+      });
+      buttonRow.appendChild(addButton);
+      buttonRow.appendChild(removeButton);
+
+      /** @type {!DrmBlock} */
+      const blockObj = {
+        blockDiv,
+        licenseUrlInput,
+        licenseInputWrapper,
+        licenseError,
+        certUrlInput,
+        certInputWrapper,
+        drmSystemInput,
+        drmInputWrapper,
+        drmError,
+        addButton,
+        removeButton,
+      };
+      blocks.push(blockObj);
+    };
+
+    /**
+     * @param {!DrmBlock} blockToRemove
+     */
+    const removeBlock = (blockToRemove) => {
+      const licIdx = inputsToCheck.indexOf(blockToRemove.licenseUrlInput);
+      if (licIdx >= 0) {
+        inputsToCheck.splice(licIdx, 1);
       }
+      const drmIdx = inputsToCheck.indexOf(blockToRemove.drmSystemInput);
+      if (drmIdx >= 0) {
+        inputsToCheck.splice(drmIdx, 1);
+      }
+
+      drmDiv.removeChild(blockToRemove.blockDiv);
+
+      const blockIdx = blocks.indexOf(blockToRemove);
+      if (blockIdx >= 0) {
+        blocks.splice(blockIdx, 1);
+      }
+
+      validateAndSync_();
     };
-    const drmOnChange = (input) => {
-      setLicenseServerURLs();
-    };
-    this.makeDatalistInput_(
-        container, 'Custom DRM System', drmSetup, drmOnChange,
-        shakaDemo.Main.commonDrmSystems);
+
+    for (const info of initialInfos) {
+      addBlock(info);
+    }
+    validateAndSync_();
 
     return drmDiv;
   }
