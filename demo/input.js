@@ -91,6 +91,9 @@ shakaDemo.Input = class {
     if (valid) {
       this.input_.setCustomValidity('');  // valid
       this.container_.classList.remove('is-invalid');
+      if (this.container_.parentElement) {
+        this.container_.parentElement.classList.remove('is-invalid');
+      }
     } else {
       this.input_.setCustomValidity('invalid');  // any message will do
       this.container_.parentElement.classList.add('is-invalid');
