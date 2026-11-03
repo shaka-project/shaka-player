@@ -121,6 +121,42 @@ filterDescribe('shaka.msf.JoinGate', isMSFSupported, () => {
     expect(received).toEqual(['5:3']);
   });
 
+  it('stops waiting soon for a fill whose stream never shows up',
+      async () => {
+        gate.expect(locationOf(5, 2), /* timeoutSeconds= */ 10,
+            /* startTimeoutSeconds= */ 0.05);
+        gate.fromSubscription(objectAt(5, 3));
+
+        await shaka.test.Util.delay(0.2);
+
+        expect(received).toEqual(['5:3']);
+      });
+
+  it('waits the full timeout once the fill stream shows up', async () => {
+    gate.expect(locationOf(5, 2), /* timeoutSeconds= */ 0.5,
+        /* startTimeoutSeconds= */ 0.05);
+    gate.fromSubscription(objectAt(5, 3));
+    gate.fillStarted();
+
+    await shaka.test.Util.delay(0.2);
+    expect(received).toEqual([]);
+
+    await shaka.test.Util.delay(0.6);
+    expect(received).toEqual(['5:3']);
+  });
+
+  it('skips the start timeout for a fill stream that beat the answer',
+      async () => {
+        gate.fillStarted();
+        gate.expect(locationOf(5, 2), /* timeoutSeconds= */ 10,
+            /* startTimeoutSeconds= */ 0.05);
+        gate.fromSubscription(objectAt(5, 3));
+
+        await shaka.test.Util.delay(0.2);
+
+        expect(received).toEqual([]);
+      });
+
   it('waits for the fill stream when the answer could not say', () => {
     gate.expect(undefined, /* timeoutSeconds= */ 10);
     gate.fromSubscription(objectAt(5, 3));
