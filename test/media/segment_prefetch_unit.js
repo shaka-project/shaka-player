@@ -167,6 +167,35 @@ describe('SegmentPrefetch', () => {
       expect(op).toBeNull();
       await expectSegmentsPrefetched(1, 1);
     });
+
+    it('does not reuse failed prefetches', async () => {
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      fetchDispatcher.and.callFake(() => {
+        return new shaka.net.NetworkingEngine.PendingRequest(
+            Promise.reject(error), () => Promise.resolve(),
+            new shaka.net.NetworkingEngine.NumBytesRemainingClass());
+      });
+
+      const reference = makeReference(uri('0.10'), 0, 10);
+      const initReference =
+          new shaka.media.InitSegmentReference(() => ['init.mp4'], 0, 500);
+      reference.initSegmentReference = initReference;
+      stream = createStream();
+      stream.segmentIndex = new shaka.media.SegmentIndex([reference]);
+      segmentPrefetch.switchStream(stream);
+
+      await expectAsync(
+          segmentPrefetch.prefetchSegmentsByTime(reference.startTime))
+          .toBeRejectedWith(error);
+
+      // They are fetched again when they are needed, instead of reusing the
+      // failures.
+      expect(segmentPrefetch.getPrefetchedSegment(reference)).toBeNull();
+      expect(segmentPrefetch.getPrefetchedSegment(initReference)).toBeNull();
+    });
   });
 
   describe('clearAll', () => {
