@@ -1392,6 +1392,86 @@ describe('MediaSourceEngine', () => {
       });
     });
 
+    // See https://github.com/shaka-project/shaka-player/issues/10887
+    describe('with audio segments not cut on a frame boundary', () => {
+      // 5s segments of 44.1kHz AAC hold 215, 215 and then 216 frames of 1024
+      // samples, so the first frame of each one drifts from the playlist
+      // start time by up to a frame and then comes back.
+      const frameDuration = 1024 / 44100;
+      const frameCounts = [215, 215, 216, 215, 215, 216];
+
+      /** @type {!jasmine.Spy} */
+      let getTimestampSpy;
+
+      /**
+       * @param {number} startTime
+       * @param {number} timestamp
+       * @param {boolean=} seeked
+       */
+      const appendSegment = async (startTime, timestamp, seeked = false) => {
+        getTimestampSpy.and.returnValue({
+          timestamp,
+          metadata: [],
+          scte35: [],
+          startsMidGop: false,
+        });
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, dummyReference(startTime, startTime + 5),
+            fakeStream, /* hasClosedCaptions= */ false, seeked);
+        audioSourceBuffer.updateend();
+        await append;
+      };
+
+      beforeEach(async () => {
+        const initObject = new Map();
+        initObject.set(ContentType.AUDIO, fakeAudioStream);
+        await mediaSourceEngine.init(initObject, /* sequenceMode= */ false,
+            shaka.media.ManifestParser.HLS);
+        getTimestampSpy =
+            spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata');
+      });
+
+      it('keeps the timestampOffset while they carry on', async () => {
+        let timestamp = 100;
+        for (let i = 0; i < frameCounts.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          await appendSegment(i * 5, timestamp);
+          if (i == 0) {
+            expect(audioSourceBuffer.timestampOffset).toBeCloseTo(-100, 6);
+            audioSourceBuffer.abort.calls.reset();
+          }
+          timestamp += frameCounts[i] * frameDuration;
+        }
+
+        // Every segment lands right after the one before, not on the
+        // playlist grid, so there is no gap or overlap to be heard.
+        expect(audioSourceBuffer.abort).not.toHaveBeenCalled();
+        expect(audioSourceBuffer.timestampOffset).toBeCloseTo(-100, 6);
+      });
+
+      it('moves the timestampOffset after a jump in the timeline', async () => {
+        await appendSegment(0, 100);
+        audioSourceBuffer.abort.calls.reset();
+
+        await appendSegment(5, 130);
+
+        expect(audioSourceBuffer.abort).toHaveBeenCalled();
+        expect(audioSourceBuffer.timestampOffset).toBeCloseTo(-125, 6);
+      });
+
+      it('moves the timestampOffset after a seek', async () => {
+        await appendSegment(0, 100);
+        audioSourceBuffer.abort.calls.reset();
+
+        const timestamp = 100 + frameCounts[0] * frameDuration;
+        await appendSegment(5, timestamp, /* seeked= */ true);
+
+        expect(audioSourceBuffer.abort).toHaveBeenCalled();
+        expect(audioSourceBuffer.timestampOffset)
+            .toBeCloseTo(5 - timestamp, 6);
+      });
+    });
+
     // Chromium, Gecko and WebKit have all been measured to place the first
     // frame exactly on appendWindowStart for a negative timestampOffset, so
     // the fudge from https://github.com/shaka-project/shaka-player/issues/1281
