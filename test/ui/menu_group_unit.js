@@ -494,18 +494,42 @@ describe('MenuGroup', () => {
       expect(focus).toHaveBeenCalledTimes(1);
     });
 
-    it('loops Tab inside the innermost level', () => {
+    it('wraps the arrow keys inside the innermost level', () => {
       get('test-outer-button').click();
       get('test-inner-button').click();
       const back = getBackButton('test-inner-menu');
       const last = get('test-menu-c-button');
       const focus = spyOn(back, 'focus').and.callThrough();
       focusForKeyboardTest(last);
-      const event = createKeydownEvent('Tab');
+      const event = createKeydownEvent('ArrowDown');
       last.dispatchEvent(event);
       expect(event.defaultPrevented).toBe(true);
       expect(focus).toHaveBeenCalled();
-      window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
+    });
+
+    it('returns one level on ArrowLeft', () => {
+      get('test-outer-button').click();
+      const innerButton = get('test-inner-button');
+      innerButton.click();
+      const focus = spyOn(innerButton, 'focus').and.callThrough();
+      const button = get('test-menu-b-button');
+      focusForKeyboardTest(button);
+      const event = createKeydownEvent('ArrowLeft');
+      button.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(isShown(get('test-inner-menu'))).toBe(false);
+      expect(isShown(get('test-outer-menu'))).toBe(true);
+      expect(focus).toHaveBeenCalled();
+    });
+
+    it('gives its elements menu item roles', () => {
+      const menu = get('test-outer-menu');
+      for (const child of Array.from(menu.childNodes)) {
+        if (child.nodeName == 'BUTTON') {
+          expect(/** @type {!HTMLElement} */ (child).getAttribute('role'))
+              .toMatch(/^menuitem/);
+        }
+      }
     });
 
     it('marks its elements as being in a menu group', () => {

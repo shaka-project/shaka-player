@@ -78,6 +78,59 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Gives the buttons placed directly in a menu the role of a menu item, so
+   * that the menu only contains menu items.  Toggle buttons become menu item
+   * checkboxes, which report their state with aria-checked instead of
+   * aria-pressed.  Buttons that already have a role keep it.
+   *
+   * @param {!HTMLElement} menu
+   */
+  static setMenuItemRoles(menu) {
+    for (const node of Array.from(menu.childNodes)) {
+      if (node.nodeName != 'BUTTON') {
+        continue;
+      }
+      const child = /** @type {!HTMLElement} */ (node);
+      if (child.hasAttribute('role')) {
+        continue;
+      }
+      if (child.hasAttribute('aria-pressed') &&
+          !child.hasAttribute('aria-haspopup')) {
+        child.setAttribute('role', 'menuitemcheckbox');
+        child.setAttribute('aria-checked', child.getAttribute('aria-pressed'));
+      } else {
+        child.setAttribute('role', 'menuitem');
+      }
+      // aria-pressed is only allowed on buttons.  A menu item that opens a
+      // submenu shows its state in its label instead.
+      child.removeAttribute('aria-pressed');
+    }
+  }
+
+
+  /**
+   * Sets the state of a toggle button, which may be a menu item checkbox.
+   * See setMenuItemRoles().
+   *
+   * @param {!HTMLElement} button
+   * @param {boolean} pressed
+   */
+  static setPressed(button, pressed) {
+    const value = pressed ? 'true' : 'false';
+    switch (button.getAttribute('role')) {
+      case 'menuitemcheckbox':
+        button.setAttribute('aria-checked', value);
+        break;
+      case 'menuitem':
+        break;
+      default:
+        button.setAttribute('aria-pressed', value);
+        break;
+    }
+  }
+
+
+  /**
    * Clears out a submenu, preserving its "back to overflow menu" button so
    * the submenu can be rebuilt from scratch.
    *

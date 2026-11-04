@@ -116,6 +116,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     this.decreaseButton_ = shaka.util.Dom.createButton();
     this.decreaseButton_.classList.add('shaka-playback-rate-step-btn');
     this.decreaseButton_.classList.add('shaka-no-propagation');
+    this.decreaseButton_.setAttribute('role', 'menuitem');
     this.decreaseButton_.setAttribute('aria-label', '−');
     this.decreaseButton_.textContent = '−';
     sliderRow.appendChild(this.decreaseButton_);
@@ -140,6 +141,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     this.increaseButton_ = shaka.util.Dom.createButton();
     this.increaseButton_.classList.add('shaka-playback-rate-step-btn');
     this.increaseButton_.classList.add('shaka-no-propagation');
+    this.increaseButton_.setAttribute('role', 'menuitem');
     this.increaseButton_.setAttribute('aria-label', '+');
     this.increaseButton_.textContent = '+';
     sliderRow.appendChild(this.increaseButton_);

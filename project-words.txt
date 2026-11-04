@@ -2,6 +2,7 @@
 abrstatuschanged
 abrtest
 haspopup
+menuitemcheckbox
 menuitemradio
 adblocker
 audiofocuspaused

@@ -167,6 +167,7 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
         shaka.log.alwaysWarn('Unrecognized context menu element:', name);
       }
     }
+    shaka.ui.Utils.setMenuItemRoles(this.contextMenu_);
   }
 };
 

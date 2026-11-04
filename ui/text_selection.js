@@ -44,9 +44,9 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     }
 
     if (hasTrack) {
-      this.button.ariaPressed = 'true';
+      shaka.ui.Utils.setPressed(this.button, true);
     } else {
-      this.button.ariaPressed = 'false';
+      shaka.ui.Utils.setPressed(this.button, false);
     }
 
     this.addOffOption_();
@@ -103,11 +103,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     if (hasTrack) {
       this.icon.use(shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS']);
-      this.button.ariaPressed = 'true';
+      shaka.ui.Utils.setPressed(this.button, true);
     } else {
       this.icon.use(
           shaka.ui.Enums.MaterialDesignSVGIcons['CLOSED_CAPTIONS_OFF']);
-      this.button.ariaPressed = 'false';
+      shaka.ui.Utils.setPressed(this.button, false);
     }
 
     this.controls.dispatchEvent(

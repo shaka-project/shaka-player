@@ -480,21 +480,26 @@ describe('UI', () => {
         expect(document.activeElement).toBe(rateButton);
       });
 
-      it('loops Tab and Shift+Tab inside the PiP menu', async () => {
-        await controls.togglePiP();
-        rateButton.focus();
-        const forward = createKeydownEvent('Tab');
-        rateButton.dispatchEvent(forward);
-        expect(forward.defaultPrevented).toBe(true);
-        expect(frame.contentDocument.activeElement).toBe(pipButton);
-        frame.contentWindow.dispatchEvent(
-            new KeyboardEvent('keyup', {key: 'Tab'}));
-        pipButton.dispatchEvent(createKeydownEvent('Shift'));
-        const backward = createKeydownEvent('Tab');
-        pipButton.dispatchEvent(backward);
-        expect(backward.defaultPrevented).toBe(true);
-        expect(frame.contentDocument.activeElement).toBe(rateButton);
-      });
+      it('moves with the arrow keys and closes on Tab in the PiP menu',
+          async () => {
+            await controls.togglePiP();
+            pipButton.focus();
+            const down = createKeydownEvent('ArrowDown');
+            pipButton.dispatchEvent(down);
+            expect(down.defaultPrevented).toBe(true);
+            expect(frame.contentDocument.activeElement).toBe(rateButton);
+
+            const opener = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-overflow-menu-button'));
+            const tab = createKeydownEvent('Tab');
+            rateButton.dispatchEvent(tab);
+            frame.contentWindow.dispatchEvent(
+                new KeyboardEvent('keyup', {key: 'Tab'}));
+            expect(tab.defaultPrevented).toBe(false);
+            const menu = videoContainer.querySelector('.shaka-overflow-menu');
+            expect(menu.classList.contains('shaka-hidden')).toBe(true);
+            expect(frame.contentDocument.activeElement).toBe(opener);
+          });
 
       it('does not trap keys from the original window while in PiP',
           async () => {
@@ -622,26 +627,155 @@ describe('UI', () => {
           });
 
           for (const backwards of [false, true]) {
-            it(backwards ? 'loops Shift+Tab to the last control' :
-              'loops Tab to the back button', () => {
-              const first = /** @type {!HTMLElement} */ (
-                menu.querySelector('.shaka-back-to-overflow-button'));
-              const last = /** @type {!HTMLElement} */ (
-                menu.querySelector('.shaka-playback-rate-presets')
-                    .lastElementChild);
-              const target = backwards ? last : first;
-              const source = backwards ? first : last;
-              const focus = spyOn(target, 'focus').and.callThrough();
-              focusForKeyboardTest(source);
+            it(backwards ? 'closes on Shift+Tab' : 'closes on Tab', () => {
+              const opener = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector(inOverflow ?
+                  '.shaka-overflow-menu-button' :
+                  '.shaka-playbackrate-button'));
+              const focus = spyOn(opener, 'focus').and.callThrough();
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              focusForKeyboardTest(chosen);
               if (backwards) {
-                source.dispatchEvent(createKeydownEvent('Shift'));
+                chosen.dispatchEvent(createKeydownEvent('Shift'));
               }
               const event = createKeydownEvent('Tab');
-              source.dispatchEvent(event);
-              expect(event.defaultPrevented).toBe(true);
-              expect(focus).toHaveBeenCalled();
+              chosen.dispatchEvent(event);
               window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
               window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Shift'}));
+              // The browser moves the focus on from the opening button.
+              expect(event.defaultPrevented).toBe(false);
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              expect(opener.getAttribute('aria-expanded')).toBe('false');
+              expect(focus).toHaveBeenCalled();
+            });
+          }
+
+          /**
+           * @param {!HTMLElement} source
+           * @param {string} key
+           * @return {!KeyboardEvent}
+           */
+          function pressMenuKey(source, key) {
+            focusForKeyboardTest(source);
+            const event = createKeydownEvent(key);
+            source.dispatchEvent(event);
+            return event;
+          }
+
+          it('moves the focus with the arrow keys, Home and End', () => {
+            const back = /** @type {!HTMLElement} */ (
+              menu.querySelector('.shaka-back-to-overflow-button'));
+            const presets = Array.from(menu.querySelectorAll(
+                '.shaka-playback-rate-presets > button'));
+            const first = /** @type {!HTMLElement} */ (presets[0]);
+            const second = /** @type {!HTMLElement} */ (presets[1]);
+            const beforeLast = /** @type {!HTMLElement} */ (
+              presets[presets.length - 2]);
+            const last = /** @type {!HTMLElement} */ (
+              presets[presets.length - 1]);
+            // Each target is different, so that each one is spied once.
+            const expectFocus = (source, key, target) => {
+              const focus = spyOn(target, 'focus').and.callThrough();
+              const event = pressMenuKey(source, key);
+              expect(event.defaultPrevented).toBe(true);
+              expect(focus).toHaveBeenCalledTimes(1);
+            };
+            expectFocus(first, 'ArrowDown', second);
+            expectFocus(last, 'ArrowUp', beforeLast);
+            expectFocus(first, 'End', last);
+            expectFocus(second, 'Home', back);
+          });
+
+          it('leaves the other keys to the playback rate slider', () => {
+            const slider = /** @type {!HTMLElement} */ (
+              menu.querySelector('.shaka-playback-rate-slider'));
+            const [decrease, increase] = Array.from(menu.querySelectorAll(
+                '.shaka-playback-rate-step-btn'));
+            const toSlider = spyOn(slider, 'focus').and.callThrough();
+            expect(pressMenuKey(/** @type {!HTMLElement} */ (decrease),
+                'ArrowDown').defaultPrevented).toBe(true);
+            expect(toSlider).toHaveBeenCalledTimes(1);
+
+            for (const key of ['ArrowLeft', 'ArrowRight', 'Home', 'End']) {
+              expect(pressMenuKey(slider, key).defaultPrevented).toBe(false);
+            }
+            expect(menu.classList.contains('shaka-hidden')).toBe(false);
+
+            const toIncrease = spyOn(increase, 'focus').and.callThrough();
+            expect(pressMenuKey(slider, 'ArrowDown').defaultPrevented)
+                .toBe(true);
+            expect(toIncrease).toHaveBeenCalledTimes(1);
+          });
+
+          it('wraps the arrow keys, skipping hidden and disabled items',
+              () => {
+                const presets =
+                    menu.querySelector('.shaka-playback-rate-presets');
+                const hidden = /** @type {!HTMLElement} */ (
+                  presets.lastElementChild);
+                hidden.classList.add('shaka-hidden');
+                const disabled = /** @type {!HTMLButtonElement} */ (
+                  hidden.previousElementSibling);
+                disabled.disabled = true;
+                const last = /** @type {!HTMLElement} */ (
+                  disabled.previousElementSibling);
+                const back = /** @type {!HTMLElement} */ (
+                  menu.querySelector('.shaka-back-to-overflow-button'));
+
+                const toBack = spyOn(back, 'focus').and.callThrough();
+                expect(pressMenuKey(last, 'ArrowDown').defaultPrevented)
+                    .toBe(true);
+                expect(toBack).toHaveBeenCalledTimes(1);
+
+                const toLast = spyOn(last, 'focus').and.callThrough();
+                expect(pressMenuKey(back, 'ArrowUp').defaultPrevented)
+                    .toBe(true);
+                expect(toLast).toHaveBeenCalledTimes(1);
+              });
+
+          it('does not intercept the arrow keys outside the menu', () => {
+            const event = pressMenuKey(video, 'ArrowDown');
+            expect(event.defaultPrevented).toBe(false);
+          });
+
+          if (inOverflow) {
+            it('returns to the parent menu on ArrowLeft', () => {
+              const button = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector('.shaka-playbackrate-button'));
+              const focus = spyOn(button, 'focus').and.callThrough();
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const event = pressMenuKey(chosen, 'ArrowLeft');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              expect(button.closest('.shaka-hidden')).toBe(null);
+              expect(focus).toHaveBeenCalledTimes(1);
+            });
+
+            it('opens a submenu on ArrowRight', () => {
+              const back = /** @type {!HTMLElement} */ (
+                menu.querySelector('.shaka-back-to-overflow-button'));
+              back.click();
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              const button = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector('.shaka-playbackrate-button'));
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const focus = spyOn(chosen, 'focus').and.callThrough();
+              const event = pressMenuKey(button, 'ArrowRight');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(false);
+              expect(button.getAttribute('aria-expanded')).toBe('true');
+              expect(focus).toHaveBeenCalledTimes(1);
+            });
+          } else {
+            it('does not close a standalone menu on ArrowLeft', () => {
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const event = pressMenuKey(chosen, 'ArrowLeft');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(false);
             });
           }
 
@@ -665,27 +799,6 @@ describe('UI', () => {
                   expect(document.activeElement).toBe(button);
                 }
               });
-
-          it('skips hidden and disabled controls at the end', () => {
-            const presets = menu.querySelector('.shaka-playback-rate-presets');
-            const hidden = /** @type {!HTMLElement} */ (
-              presets.lastElementChild);
-            hidden.classList.add('shaka-hidden');
-            const disabled = /** @type {!HTMLButtonElement} */ (
-              hidden.previousElementSibling);
-            disabled.disabled = true;
-            const last = /** @type {!HTMLElement} */ (
-              disabled.previousElementSibling);
-            const first = /** @type {!HTMLElement} */ (
-              menu.querySelector('.shaka-back-to-overflow-button'));
-            const focus = spyOn(first, 'focus').and.callThrough();
-            focusForKeyboardTest(last);
-            const event = createKeydownEvent('Tab');
-            last.dispatchEvent(event);
-            expect(event.defaultPrevented).toBe(true);
-            expect(focus).toHaveBeenCalled();
-            window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
-          });
 
           it('does not intercept Tab outside the menu', () => {
             focusForKeyboardTest(video);
@@ -817,19 +930,20 @@ describe('UI', () => {
         });
       }
 
-      it('keeps the submenu tab cycle in fullscreen', () => {
+      it('closes a submenu on Tab and moves on from its opener', () => {
         last.click();
         const rate = /** @type {!HTMLElement} */ (
           videoContainer.querySelector('.shaka-playbackrate-button'));
         rate.click();
-        const back = /** @type {!HTMLElement} */ (
-          menu.querySelector('.shaka-back-to-overflow-button'));
         const end = /** @type {!HTMLElement} */ (
           menu.querySelector('.shaka-playback-rate-presets').lastElementChild);
         focusForKeyboardTest(end);
-        const focus = spyOn(back, 'focus').and.callThrough();
+        // The overflow menu button is the last control, so Tab wraps from it
+        // to the first one.
+        const focus = spyOn(first, 'focus').and.callThrough();
         const event = createKeydownEvent('Tab');
         end.dispatchEvent(event);
+        expect(menu.classList.contains('shaka-hidden')).toBe(true);
         expect(event.defaultPrevented).toBe(true);
         expect(focus).toHaveBeenCalled();
       });
@@ -1110,6 +1224,49 @@ describe('UI', () => {
             'shaka-fullscreen-button')[0];
         expect(muteButton.hasAttribute('aria-pressed')).toBe(true);
         expect(fullscreenButton.hasAttribute('aria-pressed')).toBe(true);
+      });
+
+      it('has menu item roles in the overflow menu', async () => {
+        const config = {
+          controlPanelElements: ['overflow_menu'],
+          overflowMenuButtons: ['mute', 'playback_rate', 'captions'],
+          customContextMenu: false,
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const overflowMenu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-overflow-menu');
+        const buttons = Array.from(overflowMenu.childNodes)
+            .filter((child) => child.nodeName == 'BUTTON')
+            .map((child) => /** @type {!HTMLElement} */ (child));
+        expect(buttons.length).toBe(3);
+        for (const button of buttons) {
+          expect(button.getAttribute('role')).toMatch(/^menuitem/);
+          // Only buttons outside menus can be pressed.
+          expect(button.hasAttribute('aria-pressed')).toBe(false);
+        }
+
+        // Toggle buttons report their state as menu item checkboxes.
+        const muteButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-mute-button');
+        expect(muteButton.getAttribute('role')).toBe('menuitemcheckbox');
+        video.muted = false;
+        video.dispatchEvent(new Event('volumechange'));
+        expect(muteButton.getAttribute('aria-checked')).toBe('false');
+        video.muted = true;
+        video.dispatchEvent(new Event('volumechange'));
+        expect(muteButton.getAttribute('aria-checked')).toBe('true');
+        expect(muteButton.hasAttribute('aria-pressed')).toBe(false);
+
+        // Buttons that open a submenu are plain menu items.
+        const captionsButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-button');
+        expect(captionsButton.getAttribute('role')).toBe('menuitem');
+
+        for (const back of Array.from(videoContainer.querySelectorAll(
+            '.shaka-back-to-overflow-button'))) {
+          expect(back.getAttribute('role')).toBe('menuitem');
+        }
       });
 
       it('has aria-hidden on SVG icons', async () => {
