@@ -1791,6 +1791,333 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           });
     });
 
+    describe('ad creative signaling event timeline', () => {
+      const EVENT_TYPE = 'urn:svta:advertising-wg:ad-creative-signaling';
+
+      /** @type {!jasmine.Spy} */
+      let onRegionSpy;
+
+      beforeEach(() => {
+        onRegionSpy = jasmine.createSpy('onTimelineRegionAdded');
+        playerInterface.onTimelineRegionAdded =
+            shaka.test.Util.spyFunc(onRegionSpy);
+      });
+
+      /**
+       * @param {!Object=} extra
+       * @return {msfCatalog.Track}
+       */
+      function adCreativeTrack(extra) {
+        return /** @type {msfCatalog.Track} */ (Object.assign({
+          name: 'ad-creative',
+          packaging: 'eventtimeline',
+          eventType: EVENT_TYPE,
+          isLive: true,
+        }, extra || {}));
+      }
+
+      /**
+       * A two-slot pod, as in the draft's worked example.
+       *
+       * @param {number=} duration
+       * @return {!Object}
+       */
+      function podEnvelope(duration = 45.045) {
+        return {
+          version: 2,
+          type: 'pod',
+          payload: [{
+            start: 0,
+            duration,
+            slots: [
+              {type: 'linear', start: 0, duration: 30.03,
+                identifiers: [{scheme: 'urn:smpte:ul', value: 'ad1'}],
+                tracking: [{type: 'impression',
+                  urls: ['https://example.com/imp?a=1&b=2']}]},
+              {type: 'linear', start: 30.03, duration: duration - 30.03,
+                identifiers: [{scheme: 'urn:smpte:ul', value: 'ad2'}]},
+            ],
+          }],
+        };
+      }
+
+      /**
+       * @param {!Array<!Object>} records
+       * @param {number=} object
+       */
+      function deliver(records, object = 0) {
+        const subscription = lastSubscribeTo('ad-creative');
+        expect(subscription).not.toBeNull();
+        subscription.callback(timelineObject(records, object));
+      }
+
+      /** @return {!Array<shaka.extern.TimelineRegionInfo>} */
+      function regions() {
+        return onRegionSpy.calls.allArgs().map((args) => args[0]);
+      }
+
+      it('reports a pod as a region spanning it', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 480500, data: podEnvelope(), sig: 'ignored'}]);
+
+        expect(regions()).toEqual([jasmine.objectContaining({
+          schemeIdUri: EVENT_TYPE,
+          startTime: 480.5,
+          endTime: 480.5 + 45.045,
+          id: 'msf_m_480500',
+        })]);
+      });
+
+      it('carries the envelope as the DASH ad creative signaling parser ' +
+          'reads it', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 480500, data: podEnvelope()}]);
+
+        const result =
+            shaka.ads.SvtaInterstitialParser.parseRegion(regions()[0]);
+        expect(result.interstitials.length).toBe(2);
+        const [first, second] = result.interstitials;
+        expect(first).toEqual(jasmine.objectContaining({
+          startTime: 480.5,
+          endTime: 480.5 + 30.03,
+          playbackMode: 'embedded',
+          podPosition: 1,
+          podSize: 2,
+        }));
+        // An ampersand in the JSON survives the trip through the Event text.
+        expect(first.adCreativeSignaling.tracking[0].urls).toEqual(
+            ['https://example.com/imp?a=1&b=2']);
+        expect(second.startTime).toBeCloseTo(480.5 + 30.03, 6);
+        expect(second.endTime).toBeCloseTo(480.5 + 45.045, 6);
+      });
+
+      it('names a pod by its index, whatever it carries', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 1000, data: podEnvelope()}], /* object= */ 0);
+        // The publisher repeats it in the next Group, and then sends a
+        // different record at the same index.
+        deliver([{m: 1000, data: podEnvelope()}], /* object= */ 0);
+        deliver([{m: 1000, data: podEnvelope(60)}], /* object= */ 1);
+
+        expect(regions().map((region) => region.id)).toEqual(
+            ['msf_m_1000', 'msf_m_1000']);
+      });
+
+      it('places a Location with the media timeline its depends names',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack(),
+              adCreativeTrack({depends: ['history']})]);
+            lastSubscribeTo('history').callback(
+                timelineObject([[0, [0, 0], 0], [2002, [1, 0], 0]]));
+
+            deliver([{l: [1, 0], data: podEnvelope(15)}]);
+
+            expect(regions()).toEqual([jasmine.objectContaining({
+              startTime: 2.002,
+              endTime: 2.002 + 15,
+              id: 'msf_l_1,0',
+            })]);
+          });
+
+      it('ends a region without timed payload where it starts', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 2000, data: {version: 2, type: 'trackingEvent',
+          payload: [{type: 'impression', urls: ['https://example.com/']}]}}]);
+
+        expect(regions()).toEqual([jasmine.objectContaining({
+          startTime: 2, endTime: 2})]);
+      });
+
+      it('discards a record without an envelope', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([
+          {m: 1000, data: 'not an object'},
+          {m: 2000, data: [podEnvelope()]},
+          {m: 3000, data: podEnvelope()},
+        ]);
+
+        expect(regions().map((region) => region.startTime)).toEqual([3]);
+      });
+
+      describe('through the ad manager', () => {
+        /** @type {!shaka.Player} */
+        let player;
+        /** @type {!shaka.test.FakeVideo} */
+        let video;
+        /** @type {!shaka.test.FakeNetworkingEngine} */
+        let adNetworking;
+        /** @type {!shaka.extern.IAdManager} */
+        let adManager;
+        /** @type {!Array<!shaka.extern.IAd>} */
+        let startedAds;
+
+        beforeEach(() => {
+          video = new shaka.test.FakeVideo();
+          Object.assign(video, {style: document.createElement('video').style});
+          video.readyState = 4;
+          video.duration = Infinity;
+          player = new shaka.Player(null, null, (instance) => {
+            adNetworking = new shaka.test.FakeNetworkingEngine();
+            adNetworking.setDefaultValue(new ArrayBuffer(0));
+            instance.createNetworkingEngine = () => adNetworking;
+          });
+          spyOn(player, 'getMediaElement').and.returnValue(video);
+          spyOn(player, 'isRemotePlayback').and.returnValue(false);
+          spyOn(deviceDetected, 'getDeviceType')
+              .and.returnValue(shaka.device.IDevice.DeviceType.TV);
+
+          const manager = player.getAdManager();
+          goog.asserts.assert(manager, 'The ads build has an ad manager');
+          adManager = manager;
+          const adsConfig = shaka.util.PlayerConfiguration.createDefault().ads;
+          adsConfig.customPlayheadTracker = false;
+          adsConfig.supportsMultipleMediaElements = false;
+          adsConfig.allowStartInMiddleOfInterstitial = false;
+          adManager.configure(adsConfig);
+          startedAds = [];
+          adManager.addEventListener(shaka.ads.Utils.AD_STARTED, (event) => {
+            startedAds.push(event['ad']);
+          });
+
+          // What the player does with each region the parser reports.
+          onRegionSpy.and.callFake((region) => {
+            adManager.onDASHMetadata(region);
+          });
+        });
+
+        afterEach(async () => {
+          try {
+            adManager.release();
+          } finally {
+            jasmine.clock().uninstall();
+          }
+          await player.destroy();
+        });
+
+        /** @param {number} position */
+        function advance(position) {
+          video.currentTime = position;
+          jasmine.clock().tick(25);
+        }
+
+        /** @return {!Array<string>} */
+        function requested() {
+          return adNetworking.request.calls.allArgs()
+              .map((args) => args[1].uris[0]);
+        }
+
+        /** Lets the ad manager schedule what it was handed. */
+        async function settle() {
+          for (let i = 0; i < 20; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await Promise.resolve();
+          }
+        }
+
+        /** @return {!Object} */
+        function trackedPod() {
+          return {
+            version: 2,
+            type: 'pod',
+            payload: [{
+              start: 0,
+              duration: 20,
+              tracking: [
+                {type: 'podStart', urls: ['pod-start']},
+                {type: 'podEnd', urls: ['pod-end']},
+              ],
+              slots: [
+                {type: 'linear', start: 0, duration: 10,
+                  identifiers: [{scheme: 'test', value: 'first'}],
+                  tracking: [
+                    {type: 'impression', urls: ['first-impression?a=1&b=2']},
+                    {type: 'complete', urls: ['first-complete']},
+                  ]},
+                {type: 'linear', start: 10, duration: 10,
+                  identifiers: [{scheme: 'test', value: 'second'}],
+                  tracking: [
+                    {type: 'impression', urls: ['second-impression']},
+                    {type: 'complete', urls: ['second-complete']},
+                  ]},
+              ],
+            }],
+          };
+        }
+
+        it('plays a pod as embedded ads and sends its beacons', async () => {
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 100; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(requested()).toEqual([
+            'pod-start', 'first-impression?a=1&b=2', 'first-complete',
+            'second-impression', 'second-complete', 'pod-end',
+          ]);
+          expect(startedAds.map((ad) => ad.getPositionInSequence()))
+              .toEqual([1, 2]);
+          expect(startedAds[0].getSequenceLength()).toBe(2);
+          expect(startedAds[0].isClientRendering()).toBe(false);
+        });
+
+        it('measures a pod repeated in later Groups once', async () => {
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          advance(100);
+          // The independent Object of the next Group repeats the record.
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 105; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(requested().filter((uri) => uri == 'pod-start').length)
+              .toBe(1);
+          expect(startedAds.length).toBe(2);
+        });
+
+        it('schedules nothing when SVTA is disabled', async () => {
+          const adsConfig = shaka.util.PlayerConfiguration.createDefault().ads;
+          adsConfig.customPlayheadTracker = false;
+          adsConfig.disableSVTA = true;
+          adManager.configure(adsConfig);
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 100; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(onRegionSpy).toHaveBeenCalledTimes(1);
+          expect(requested()).toEqual([]);
+          expect(startedAds).toEqual([]);
+        });
+      });
+    });
+
     describe('seeking', () => {
       /** @type {!shaka.test.FakeVideo} */
       let video;
