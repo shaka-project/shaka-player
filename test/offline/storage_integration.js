@@ -1306,9 +1306,126 @@ filterDescribe('Storage', storageSupport, () => {
       expect(remainingKeys).toEqual(ownedKeys);
     });
 
+    it('references stored segments before the download ends', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      // The stored content references every segment stored so far, so none of
+      // them would be orphaned if the download were interrupted now.
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDB = await waitForReferencedSegments(3);
+      expect(manifestDB.isIncomplete).toBe(true);
+      /** @type {!Array<number>} */
+      const storedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(getReferencedSegmentKeys(manifestDB))
+          .toEqual(jasmine.arrayWithExactContents(storedKeys));
+
+      /** @type {!Array<shaka.extern.StoredContent>} */
+      const contents = await storage.list();
+      expect(contents.length).toBe(1);
+      expect(contents[0].isIncomplete).toBe(true);
+      expect(contents[0].size).toBe(3 * 16);
+
+      lastSegment.resolve();
+      const stored = await storeOperation.promise;
+      expect(stored.isIncomplete).toBe(false);
+      expect(stored.size).toBe(4 * 16);
+    });
+
+    it('removes referenced segments if aborted mid-store', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+
+      const abort = storeOperation.abort();
+      lastSegment.resolve();
+      await abort;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
+
+      expect(await storage.list()).toEqual([]);
+      expect(await withActiveCell((cell) => cell.getAllSegmentKeys()))
+          .toEqual([]);
+    });
+
+    /**
+     * Makes the request for the given segment wait until the returned promise
+     * is resolved.
+     *
+     * @param {string} uri
+     * @return {!Promise.PromiseWithResolvers}
+     */
+    function blockSegment(uri) {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const block = Promise.withResolvers();
+      netEngine.setResponse(uri, async () => {
+        await block.promise;
+        return new ArrayBuffer(16);
+      });
+      return block;
+    }
+
+    /**
+     * Waits until the only stored content references at least the given
+     * number of segments.
+     *
+     * @param {number} count
+     * @return {!Promise<shaka.extern.ManifestDB>}
+     */
+    async function waitForReferencedSegments(count) {
+      /* eslint-disable no-await-in-loop */
+      for (let attempt = 0; attempt < 100; attempt++) {
+        /** @type {!Array<shaka.extern.ManifestDB>} */
+        const manifests = await withActiveCell(async (cell) => {
+          return Array.from((await cell.getAllManifests()).values());
+        });
+        if (manifests.length) {
+          expect(manifests.length).toBe(1);
+          if (getReferencedSegmentKeys(manifests[0]).length >= count) {
+            return manifests[0];
+          }
+        }
+        await Util.shortDelay();
+      }
+      /* eslint-enable no-await-in-loop */
+      throw new Error('The stored content references too few segments');
+    }
+
+    /**
+     * @param {shaka.extern.ManifestDB} manifestDB
+     * @return {!Array<number>}
+     */
+    function getReferencedSegmentKeys(manifestDB) {
+      /** @type {!Set<number>} */
+      const keys = new Set();
+      for (const stream of manifestDB.streams) {
+        for (const segment of stream.segments) {
+          if (!segment.pendingSegmentRefId) {
+            keys.add(segment.dataKey);
+          }
+          if (segment.initSegmentKey != null &&
+              !segment.pendingInitSegmentRefId) {
+            keys.add(segment.initSegmentKey);
+          }
+        }
+      }
+      return Array.from(keys);
+    }
+
     it('does not remove orphaned segments while storing', async () => {
-      // Block the network so that the store will not finish.  Its segments are
-      // not referenced by its manifest until then.
+      // Block the network so that the store will not finish.  The segments
+      // stored in the meantime may not be referenced by its manifest yet.
       /** @type {!Promise.PromiseWithResolvers} */
       const hangingPromise = netEngine.delayNextRequest();
       /** @type {!shaka.extern.IAbortableOperation} */

@@ -53,8 +53,9 @@ shaka.extern.MsfPackaging = class {
 
   /**
    * Creates a segmenter for the track this instance described. Called each
-   * time the stream's segment index is created, so a track that is unsubscribed
-   * and resubscribed starts from a clean segmenter.
+   * time the stream's segment index is created or its subscription is
+   * replaced, so a track that is unsubscribed and resubscribed starts from a
+   * clean segmenter.
    *
    * @param {shaka.extern.MsfCodec=} codec The negotiated draft's primitive
    *   codec. A packaging whose objects carry MoQT-encoded fields -- Object
@@ -145,6 +146,16 @@ shaka.extern.MsfSegmenter = class {
    * @exportDoc
    */
   push(obj) {}
+
+  /**
+   * Frees whatever the segmenter holds. Called once, when the parser drops
+   * the segmenter: its stream is closed, its subscription is replaced after a
+   * seek, push() failed, or the parser stops. push() is not called after it.
+   * Implementing this is optional.
+   *
+   * @exportDoc
+   */
+  release() {}
 };
 
 
