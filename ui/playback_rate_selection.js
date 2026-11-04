@@ -155,6 +155,9 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
       this.stepRate_(this.controls.getConfig().playbackRateSliderStep);
     });
 
+    shaka.ui.Utils.onForcedColorsChange(
+        this.eventManager, () => this.updateColors_());
+
     // Preset pill buttons (horizontal)
 
     const presetsRow = shaka.util.Dom.createHTMLElement('div');
@@ -308,7 +311,10 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateColors_() {
-    const colors = this.config_.playbackRateBarColors;
+    let colors = this.config_.playbackRateBarColors;
+    if (shaka.ui.Utils.isForcedColorsActive()) {
+      colors = {base: 'CanvasText', level: 'Highlight'};
+    }
 
     const value = this.rateSlider_.getValue();
     const min = this.rateSlider_.getMin();
@@ -317,14 +323,9 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // Convert current value to percentage within slider range.
     const percent = ((value - min) / (max - min)) * 100;
 
-    const gradient = ['to right'];
-    gradient.push(colors.level + '0%');
-    gradient.push(colors.level + percent + '%');
-    gradient.push(colors.base + percent + '%');
-    gradient.push(colors.base + '100%');
-
-    this.rateSlider_.setBackground(
-        'linear-gradient(' + gradient.join(',') + ')');
+    this.rateSlider_.setBackground('linear-gradient(to right, ' +
+        `${colors.level} 0%, ${colors.level} ${percent}%, ` +
+        `${colors.base} ${percent}%, ${colors.base} 100%)`);
   }
 
   /** @private */

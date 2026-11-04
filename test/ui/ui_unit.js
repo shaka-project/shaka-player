@@ -3244,6 +3244,98 @@ describe('UI', () => {
           });
     });
 
+    describe('in forced colors mode', () => {
+      /** @type {boolean} */
+      let forcedColorsActive;
+      /** @type {!shaka.util.FakeEventTarget} */
+      let forcedColorsQuery;
+
+      /** @param {boolean} active */
+      function setForcedColors(active) {
+        forcedColorsActive = active;
+        forcedColorsQuery.dispatchEvent(new shaka.util.FakeEvent('change'));
+      }
+
+      /**
+       * @param {string} className
+       * @return {string}
+       */
+      function getBackground(className) {
+        const element = /** @type {!HTMLElement} */ (
+          videoContainer.getElementsByClassName(className)[0]);
+        return element.style.background.toLowerCase();
+      }
+
+      beforeEach(() => {
+        forcedColorsActive = false;
+        forcedColorsQuery = new shaka.util.FakeEventTarget();
+        Object.defineProperty(forcedColorsQuery, 'matches', {
+          get: () => forcedColorsActive,
+        });
+        spyOn(window, 'matchMedia').and.callThrough()
+            .withArgs('(forced-colors: active)')
+            .and.returnValue(forcedColorsQuery);
+      });
+
+      it('paints the volume bar with system colors', async () => {
+        forcedColorsActive = true;
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['volume'],
+        });
+        video.dispatchEvent(new Event('volumechange'));
+
+        const background = getBackground('shaka-volume-bar-container');
+        expect(background).toContain('highlight');
+        expect(background).toContain('canvastext');
+      });
+
+      it('repaints the volume bar when the mode changes', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['volume'],
+        });
+        video.dispatchEvent(new Event('volumechange'));
+        expect(getBackground('shaka-volume-bar-container'))
+            .not.toContain('highlight');
+
+        setForcedColors(true);
+        expect(getBackground('shaka-volume-bar-container'))
+            .toContain('highlight');
+
+        setForcedColors(false);
+        expect(getBackground('shaka-volume-bar-container'))
+            .not.toContain('highlight');
+      });
+
+      it('paints the playback rate slider with system colors', async () => {
+        forcedColorsActive = true;
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['overflow_menu'],
+          overflowMenuButtons: ['playback_rate'],
+        });
+
+        const background =
+            getBackground('shaka-playback-rate-slider-container');
+        expect(background).toContain('highlight');
+        expect(background).toContain('canvastext');
+      });
+    });
+
+    // A missing space between a color and its stop made any named color an
+    // invalid gradient, which the browser ignored.
+    it('accepts named colors for the volume bar', async () => {
+      await UiUtils.createUIThroughAPI(videoContainer, video, {
+        controlPanelElements: ['volume'],
+        volumeBarColors: {base: 'gray', level: 'red'},
+      });
+      video.dispatchEvent(new Event('volumechange'));
+
+      const container = /** @type {!HTMLElement} */ (
+        videoContainer.getElementsByClassName(
+            'shaka-volume-bar-container')[0]);
+      expect(container.style.background).toContain('red');
+      expect(container.style.background).toContain('gray');
+    });
+
     describe('seek bar thumbnail preview', () => {
       /** @type {shaka.ui.Controls} */
       let controls;

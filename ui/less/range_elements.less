@@ -212,3 +212,33 @@
 .shaka-chapter-markers {
   .overlay-child();
 }
+
+/* In forced colors mode (e.g. Windows high contrast), the browser drops the
+ * background gradients that paint the progress of the range elements and
+ * forces a color on the thumb and on the transparent borders of the seek bar.
+ * Opt the range elements out, and paint them with system colors instead (the
+ * gradients use system colors in this mode, see
+ * shaka.ui.Utils.isForcedColorsActive). */
+@media (forced-colors: active) {
+  .shaka-range-container {
+    forced-color-adjust: none;
+  }
+
+  /* The thumbnail preview lives inside the seek bar container, but it should
+   * follow the forced colors. */
+  .shaka-player-ui-thumbnail-container {
+    forced-color-adjust: auto;
+  }
+
+  .shaka-range-element {
+    &::-webkit-slider-thumb {
+      background: CanvasText;
+      box-shadow: 0 0 0 2px Canvas;
+    }
+
+    &::-moz-range-thumb {
+      background: CanvasText;
+      box-shadow: 0 0 0 2px Canvas;
+    }
+  }
+}

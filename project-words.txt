@@ -15,6 +15,7 @@ autoplaying
 boundarycrossed
 bufferappending
 canupdatestarttime
+canvastext
 captionselectionupdated
 caststatuschanged
 channelcount

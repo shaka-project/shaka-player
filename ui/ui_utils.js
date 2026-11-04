@@ -110,6 +110,42 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Whether the browser is in forced colors mode (e.g. Windows high contrast).
+   *
+   * In that mode the browser drops the background gradients that range
+   * elements use to paint their progress, so their containers opt out of
+   * forced colors in CSS and must be painted with system colors instead of
+   * the configured ones.
+   *
+   * @return {boolean}
+   */
+  static isForcedColorsActive() {
+    return !!window.matchMedia &&
+        window.matchMedia('(forced-colors: active)').matches;
+  }
+
+
+  /**
+   * Calls the callback when the browser enters or leaves forced colors mode.
+   *
+   * @param {!shaka.util.EventManager} eventManager
+   * @param {function()} callback
+   */
+  static onForcedColorsChange(eventManager, callback) {
+    if (!window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(forced-colors: active)');
+    // Old browsers (e.g. Safari < 14) only support the deprecated
+    // addListener(), and they don't have a forced colors mode anyway.
+    if (!mediaQuery.addEventListener) {
+      return;
+    }
+    eventManager.listen(mediaQuery, 'change', callback);
+  }
+
+
+  /**
    * Depending on the value of display, sets/removes the css class of element to
    * either display it or hide it.
    *

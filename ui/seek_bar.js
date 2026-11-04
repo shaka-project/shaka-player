@@ -113,6 +113,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markChapters_();
     });
 
+    shaka.ui.Utils.onForcedColorsChange(this.eventManager, () => {
+      this.update();
+      this.markAdBreaks_();
+      this.markChapters_();
+    });
+
     /** @private {ResizeObserver} */
     this.resizeObserver_ = null;
 
@@ -466,7 +472,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   update() {
-    const colors = this.config_.seekBarColors;
+    const colors = this.getColors_();
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
     let bufferedStart = 0;
@@ -529,7 +535,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.makeColor_(colors.base, bufferEndFraction),
       ];
       this.container.style.background =
-          'linear-gradient(' + gradient.join(',') + ')';
+          `linear-gradient(${gradient.join(',')})`;
     }
   }
 
@@ -546,7 +552,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const rects = [];
-    const adBreakColor = this.config_.seekBarColors.adBreaks;
+    const adBreakColor = this.getColors_().adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
       // Post-roll ads are marked as starting at -1 in CS IMA ads.
@@ -587,7 +593,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   markChapters_() {
-    const color = this.config_.seekBarColors.chapters;
+    const color = this.getColors_().chapters;
 
     const chapters = this.controls.getChapters();
 
@@ -658,13 +664,38 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
 
   /**
+   * In forced colors mode, the configured colors are replaced with system
+   * colors, so that the seek bar follows the user's palette.  Markers stay
+   * disabled if they are disabled in the configuration.
+   *
+   * @return {shaka.extern.UISeekBarColors}
+   * @private
+   */
+  getColors_() {
+    const colors = this.config_.seekBarColors;
+    if (!shaka.ui.Utils.isForcedColorsActive()) {
+      return colors;
+    }
+    // Markers are drawn as gaps in the track.
+    const markerColor = (color) =>
+      (!color || color === 'transparent') ? color : 'Canvas';
+    return {
+      base: 'GrayText',
+      buffered: 'CanvasText',
+      played: 'Highlight',
+      adBreaks: markerColor(colors.adBreaks),
+      chapters: markerColor(colors.chapters),
+    };
+  }
+
+  /**
    * @param {string} color
    * @param {number} fraction
    * @return {string}
    * @private
    */
   makeColor_(color, fraction) {
-    return color + ' ' + (fraction * 100) + '%';
+    return `${color} ${fraction * 100}%`;
   }
 
   /**

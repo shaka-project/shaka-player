@@ -63,6 +63,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
         'caststatuschanged',
         () => this.onPresentationVolumeChange_());
 
+    shaka.ui.Utils.onForcedColorsChange(
+        this.eventManager, () => this.updateColors_());
+
     this.eventManager.listenMulti(this.adManager,
         [shaka.ads.Utils.AD_VOLUME_CHANGED, shaka.ads.Utils.AD_MUTED],
         () => this.onAdVolumeChange_());
@@ -129,14 +132,14 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
   /** @private */
   updateColors_() {
-    const colors = this.config_.volumeBarColors;
-    const gradient = ['to right'];
-    gradient.push(colors.level + this.getValue() + '%');
-    gradient.push(colors.base + this.getValue() + '%');
-    gradient.push(colors.base + '100%');
-
-    this.container.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
+    let colors = this.config_.volumeBarColors;
+    if (shaka.ui.Utils.isForcedColorsActive()) {
+      colors = {base: 'CanvasText', level: 'Highlight'};
+    }
+    const value = this.getValue();
+    this.container.style.background = 'linear-gradient(to right, ' +
+        `${colors.level} ${value}%, ${colors.base} ${value}%, ` +
+        `${colors.base} 100%)`;
   }
 
   /** @override */
