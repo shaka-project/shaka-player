@@ -1029,6 +1029,50 @@ describe('MediaSourceEngine', () => {
           data, 0, 10, 'foo://bar', 1);
     });
 
+    describe('text timestamp offset taken from video', () => {
+      /** @param {string} manifestType */
+      const initVideoAndText = async (manifestType) => {
+        const initObject = new Map();
+        initObject.set(ContentType.VIDEO, fakeVideoStream);
+        initObject.set(ContentType.TEXT, fakeTextStream);
+        await mediaSourceEngine.init(
+            initObject, /* sequenceMode= */ false, manifestType);
+        spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+            .and.returnValue({
+              timestamp: 5,
+              metadata: [],
+              scte35: [],
+            });
+      };
+
+      const appendVideoSegment = async () => {
+        // Starts at 7 with a media timestamp of 5, so the offset is 2.
+        const reference = dummyReference(7, 10);
+        reference.discontinuitySequence = 1;
+        const p = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, reference, fakeStream,
+            /* hasClosedCaptions= */ false);
+        videoSourceBuffer.updateend();
+        await p;
+      };
+
+      it('is forwarded for HLS with its discontinuity sequence', async () => {
+        await initVideoAndText(shaka.media.ManifestParser.HLS);
+        await appendVideoSegment();
+        expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(2, 1);
+      });
+
+      // In DASH the text stream gets its own offset through
+      // setStreamProperties(), and it can be in a later Period than the
+      // video when the current Period has no text.  The video offset would
+      // then put the cues in the wrong Period.
+      it('is not forwarded for DASH', async () => {
+        await initVideoAndText(shaka.media.ManifestParser.DASH);
+        await appendVideoSegment();
+        expect(mockTextEngine.setTimestampOffset).not.toHaveBeenCalled();
+      });
+    });
+
     it('appends transmuxed data', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
