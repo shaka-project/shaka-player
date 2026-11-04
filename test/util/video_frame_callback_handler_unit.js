@@ -150,7 +150,7 @@ describe('VideoFrameCallbackHandler', () => {
       fireLastRegisteredCallback();
     });
 
-    it('stays armed when the user callback throws', () => {
+    it('stops and cancels the successor when the user callback throws', () => {
       mockVideo = createMockVideoWithRVFC();
       handler = new VideoFrameCallbackHandler(mockVideo);
       const callbackSpy = jasmine.createSpy('userCallback')
@@ -158,10 +158,10 @@ describe('VideoFrameCallbackHandler', () => {
 
       handler.start(shaka.test.Util.spyFunc(callbackSpy));
       expect(() => fireLastRegisteredCallback()).toThrow(new Error('boom'));
-      expect(() => fireLastRegisteredCallback()).toThrow(new Error('boom'));
 
-      expect(callbackSpy).toHaveBeenCalledTimes(2);
-      expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(3);
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+      expect(mockVideo.requestVideoFrameCallback).toHaveBeenCalledTimes(2);
+      expect(mockVideo.cancelVideoFrameCallback).toHaveBeenCalledOnceWith(2);
     });
 
     it('cancels the re-registered callback when released mid-loop', () => {
