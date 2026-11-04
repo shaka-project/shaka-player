@@ -969,6 +969,46 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
             expect(receivedLocations()).toEqual(['0:0']);
           });
+
+      it('stops waiting soon for a fill stream that never shows up',
+          async () => {
+            // A relay that cannot fill should open the stream and reset it,
+            // but a reset can lose the FETCH_HEADER, and some relays open
+            // nothing at all.
+            const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+            await deliverToSubscription(alias, 5, 2);
+            expect(received.length).toBe(0);
+
+            // Well short of the two seconds a fill that has started gets.
+            await shaka.test.Util.delay(1);
+
+            expect(receivedLocations()).toEqual(['5:2']);
+          });
+
+      it('keeps waiting for a fill stream that has shown up', async () => {
+        /** @type {ReadableStreamDefaultController} */
+        let controller;
+        const stream = new ReadableStream({
+          start: (c) => {
+            controller = c;
+            // The FETCH_HEADER, with the SUBSCRIBE's Request ID, and nothing
+            // after it yet.
+            c.enqueue(new Uint8Array(bytesOf(0)));
+          },
+        });
+
+        const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+        const read = readFetchStream(new shaka.msf.Reader(
+            new Uint8Array([]), stream, new shaka.msf.draft18.Codec()));
+        await deliverToSubscription(alias, 5, 2);
+
+        await shaka.test.Util.delay(1);
+        expect(received.length).toBe(0);
+
+        controller.close();
+        await read;
+        expect(receivedLocations()).toEqual(['5:2']);
+      });
     });
   });
 });
