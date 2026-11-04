@@ -3,6 +3,12 @@
 # Any changes should be made there to be synced across shaka-project repos.
 name: Validate PR Title
 
+# Read only permissions, to make pull_request_target safe to use.  We still
+# want pull_request_target so that this required check runs automatically
+# without waiting on maintainer approval, and so that PRs cannot modify it.
+permissions:
+  pull-requests: read
+
 on:
   # NOTE: The automated PRs from release-please-action do not seem to trigger
   # any of the default PR triggers (opened, synchronize, reopened).  So we need
