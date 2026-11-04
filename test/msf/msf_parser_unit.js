@@ -567,6 +567,17 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let objectCallbacks;
     /** @type {!jasmine.Spy} */
     let unsubscribeSpy;
+    /**
+     * What happened to each segmenter the packaging created, in order.
+     *
+     * @type {!Array<{pushes: number, releases: number,
+     *                pushedAfterRelease: boolean}>}
+     */
+    let segmenters;
+    /** @type {boolean} */
+    let segmentersHaveRelease;
+    /** @type {?shaka.util.Error} */
+    let nextPushError;
 
     /**
      * @return {!shaka.extern.MsfSegment}
@@ -640,6 +651,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       objectCallbacks = [];
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
+      segmenters = [];
+      segmentersHaveRelease = true;
+      nextPushError = null;
 
       shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
         return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
@@ -650,7 +664,27 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             }),
             initSegmentReference: null,
           }),
-          createSegmenter: () => ({push: () => nextSegments}),
+          createSegmenter: () => {
+            const record =
+                {pushes: 0, releases: 0, pushedAfterRelease: false};
+            segmenters.push(record);
+            const segmenter = /** @type {?} */ ({
+              push: () => {
+                record.pushedAfterRelease ||= record.releases > 0;
+                record.pushes++;
+                if (nextPushError) {
+                  throw nextPushError;
+                }
+                return nextSegments;
+              },
+            });
+            if (segmentersHaveRelease) {
+              segmenter.release = () => {
+                record.releases++;
+              };
+            }
+            return segmenter;
+          },
         }));
       });
     });
@@ -842,6 +876,110 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
               shaka.util.Error.Code.MSF_SUBSCRIBE_FAILED,
               'video0',
               'refused')));
+    });
+
+    describe('segmenter release', () => {
+      it('releases the segmenter when the index closes', () => {
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        callback(fakeObject(0));
+
+        stream.closeSegmentIndex();
+        expect(segmenters.length).toBe(1);
+        expect(segmenters[0].releases).toBe(1);
+
+        // An object still in flight from the closed subscription.
+        callback(fakeObject(0));
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].pushedAfterRelease).toBe(false);
+      });
+
+      it('releases the old segmenter when the subscription is replaced',
+          () => {
+            const stream = makeStream();
+            stream.createSegmentIndex();
+            const oldCallback = objectCallbacks[0];
+
+            /** @type {?} */
+            const p = parser;
+            p.resubscribe_(p.activeStreams_.get('/video0'), null);
+
+            expect(segmenters.length).toBe(2);
+            expect(segmenters[0].releases).toBe(1);
+            expect(segmenters[1].releases).toBe(0);
+
+            oldCallback(fakeObject(0));
+            objectCallbacks[1](fakeObject(0));
+            expect(segmenters[0].pushes).toBe(0);
+            expect(segmenters[1].pushes).toBe(1);
+          });
+
+      it('releases the segmenter when push() fails', async () => {
+        const stream = makeStream();
+        const indexCreated = stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        nextPushError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MEDIA,
+            shaka.util.Error.Code.TRANSMUXING_FAILED);
+
+        callback(fakeObject(0));
+        await expectAsync(indexCreated).toBeRejected();
+        expect(segmenters[0].releases).toBe(1);
+
+        callback(fakeObject(1));
+        stream.closeSegmentIndex();
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].releases).toBe(1);
+      });
+
+      it('releases the segmenters of open streams when the parser stops',
+          async () => {
+            const stream = makeStream();
+            stream.createSegmentIndex();
+            const callback = objectCallbacks[0];
+
+            await parser.stop();
+            expect(segmenters[0].releases).toBe(1);
+
+            callback(fakeObject(0));
+            // StreamingEngine may still close the index afterwards.
+            stream.closeSegmentIndex();
+            expect(segmenters[0].pushes).toBe(0);
+            expect(segmenters[0].releases).toBe(1);
+          });
+
+      it('does not feed a segmenter released by an ABR switch', () => {
+        // The bandwidth sample of a completed group can make ABR close the
+        // stream synchronously, before the object reaches the segmenter.
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        playerInterface.onSegmentReceived = () => {
+          stream.closeSegmentIndex();
+        };
+
+        callback(fakeObject(0));
+        callback(fakeObject(1));
+        expect(segmenters[0].releases).toBe(1);
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].pushedAfterRelease).toBe(false);
+      });
+
+      it('works with segmenters that do not implement release()', () => {
+        segmentersHaveRelease = false;
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        objectCallbacks[0](fakeObject(0));
+
+        /** @type {?} */
+        const p = parser;
+        expect(() => p.resubscribe_(p.activeStreams_.get('/video0'), null))
+            .not.toThrow();
+        expect(() => stream.closeSegmentIndex()).not.toThrow();
+        expect(segmenters.length).toBe(2);
+      });
     });
   });
 
