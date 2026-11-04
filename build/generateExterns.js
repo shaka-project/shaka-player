@@ -27,7 +27,7 @@
  * Circular deps between source files will not be resolved, and deps not
  * represented in goog.provide/goog.require will not be discovered.
  *
- * Arguments: --output <EXTERNS> <INPUT> [<INPUT> ...]
+ * Arguments: --output <EXTERNS> [--input-list <FILE>] <INPUT> [<INPUT> ...]
  */
 
 // Load required modules.
@@ -907,7 +907,7 @@ function generateShakaNamespaceTypedef(names) {
 
 /**
  * Generate externs from exported code.
- * Arguments: --output <EXTERNS> <INPUT> [<INPUT> ...]
+ * Arguments: --output <EXTERNS> [--input-list <FILE>] <INPUT> [<INPUT> ...]
  *
  * @param {!Array<string>} args The args to this script, not counting node and
  *   the script name itself.
@@ -923,6 +923,10 @@ function main(args) {
       ++i;
     } else if (args[i] == '--namespace-typedef') {
       namespaceTypedefPath = args[i + 1];
+      ++i;
+    } else if (args[i] == '--input-list') {
+      inputPaths.push(...fs.readFileSync(args[i + 1], 'utf8')
+          .split(/\r?\n/).filter((path) => path));
       ++i;
     } else {
       inputPaths.push(args[i]);
