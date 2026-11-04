@@ -106,6 +106,34 @@ filterDescribe('LOCParser', isMSFSupported, () => {
     });
   }
 
+  describe('video frame marking', () => {
+    it('reads the I bit of the short form', () => {
+      const parser = locParser(FRAME);
+      // S=1 E=1 I=1 D=0.
+      expect(parser.parse(moqObject([
+        {type: 0x09, value: new Uint8Array([0xe0])},
+      ])).independent).toBe(true);
+      // S=1 E=1 I=0 D=1.
+      expect(parser.parse(moqObject([
+        {type: 0x09, value: new Uint8Array([0xd0])},
+      ])).independent).toBe(false);
+    });
+
+    it('reads the I bit of the scalable form', () => {
+      const parser = locParser(FRAME);
+      // S=1 E=1 I=1 D=0 B=1 TID=2, layer ID 1, base layer picture index 7.
+      expect(parser.parse(moqObject([
+        {type: 0x09, value: new Uint8Array([0xea, 0x01, 0x07])},
+      ])).independent).toBe(true);
+    });
+
+    it('reports nothing when the property is absent', () => {
+      const parser = locParser(FRAME);
+      expect(parser.parse(moqObject([{type: 0x10, value: 1000000}]))
+          .independent).toBe(null);
+    });
+  });
+
   describe('object property types', () => {
     it('delta decodes the type of every property after the first', () => {
       // Timestamp (0x10) then Timescale (0x08) cannot both be expressed by an
