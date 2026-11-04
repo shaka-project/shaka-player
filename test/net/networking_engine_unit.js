@@ -97,6 +97,136 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(request.attempt).toBe(1);
     });
 
+    // A mid-body failure must not restart a streamDataCallback request at
+    // byte 0. Without a committed offset, every delivered byte is skipped.
+    it('resumes a byte range after streamed bytes', async () => {
+      const retryParameters = {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      };
+      const ranges = [];
+      const plugin = jasmine.createSpy('stream resume').and.callFake(
+          (uri, request) => {
+            ranges.push(request.headers['Range']);
+            if (ranges.length == 1) {
+              const pending = (async () => {
+                await request.streamDataCallback(new Uint8Array([1, 2, 3, 4]));
+                throw error;
+              })();
+              return new shaka.util.AbortableOperation(pending, () => {});
+            }
+            return shaka.util.AbortableOperation.completed(createResponse());
+          });
+      shaka.net.NetworkingEngine.registerScheme('streamresume', plugin);
+      try {
+        const request = shaka.net.NetworkingUtils.createSegmentRequest(
+            ['streamresume://seg.m4s'],
+            /* start= */ 0,
+            /* end= */ 99,
+            retryParameters,
+            () => Promise.resolve());
+        await networkingEngine.request(requestType, request).promise;
+      } finally {
+        shaka.net.NetworkingEngine.unregisterScheme('streamresume');
+      }
+      expect(ranges).toEqual(['bytes=0-99', 'bytes=4-99']);
+    });
+
+    // The callback reports how many bytes end on a complete mdat. The rest
+    // of the chunk stays uncommitted because a retry resends that whole chunk.
+    it('resumes at the committed mdat boundary', async () => {
+      const retryParameters = {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      };
+      const ranges = [];
+      let resets = 0;
+      const plugin = jasmine.createSpy('mdat resume').and.callFake(
+          (uri, request) => {
+            ranges.push(request.headers['Range']);
+            if (ranges.length == 1) {
+              const pending = (async () => {
+                const data = new Uint8Array(10);
+                await request.streamDataCallback(data);
+                throw error;
+              })();
+              return new shaka.util.AbortableOperation(pending, () => {});
+            }
+            return shaka.util.AbortableOperation.completed(createResponse());
+          });
+      shaka.net.NetworkingEngine.registerScheme('mdatresume', plugin);
+      try {
+        const callback = () => Promise.resolve(6);
+        callback['streamDataReset'] = () => {
+          resets++;
+        };
+        const request = shaka.net.NetworkingUtils.createSegmentRequest(
+            ['mdatresume://seg.m4s'],
+            /* start= */ 0,
+            /* end= */ 99,
+            retryParameters,
+            callback);
+        await networkingEngine.request(requestType, request).promise;
+      } finally {
+        shaka.net.NetworkingEngine.unregisterScheme('mdatresume');
+      }
+      expect(resets).toBe(1);
+      expect(ranges).toEqual(['bytes=0-99', 'bytes=6-99']);
+    });
+
+    it('does not resume a byte range when the callback fails', async () => {
+      const retryParameters = {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      };
+      const ranges = [];
+      const plugin = jasmine.createSpy('stream resume fail').and.callFake(
+          (uri, request) => {
+            ranges.push(request.headers['Range']);
+            if (ranges.length == 1) {
+              const pending = (async () => {
+                try {
+                  const data = new Uint8Array([1, 2, 3, 4]);
+                  await request.streamDataCallback(data);
+                } catch (e) {
+                  // The callback rejected, so those bytes must not count.
+                }
+                throw error;
+              })();
+              return new shaka.util.AbortableOperation(pending, () => {});
+            }
+            return shaka.util.AbortableOperation.completed(createResponse());
+          });
+      shaka.net.NetworkingEngine.registerScheme('streamresumefail', plugin);
+      try {
+        const request = shaka.net.NetworkingUtils.createSegmentRequest(
+            ['streamresumefail://seg.m4s'],
+            /* start= */ 0,
+            /* end= */ 99,
+            retryParameters,
+            () => Promise.reject(error));
+        await networkingEngine.request(requestType, request).promise;
+      } finally {
+        shaka.net.NetworkingEngine.unregisterScheme('streamresumefail');
+      }
+      expect(ranges).toEqual(['bytes=0-99', 'bytes=0-99']);
+    });
+
     it('will retry twice', async () => {
       const request = createRequest('reject://foo', {
         maxAttempts: 3,
