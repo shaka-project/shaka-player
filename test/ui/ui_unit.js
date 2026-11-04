@@ -3086,6 +3086,76 @@ describe('UI', () => {
       });
     });
 
+    describe('tooltips', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let playButton;
+      /** @type {!HTMLElement} */
+      let muteButton;
+
+      beforeEach(async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['play_pause', 'mute', 'overflow_menu'],
+          overflowMenuButtons: ['loop'],
+          customContextMenu: false,
+          enableTooltips: true,
+        });
+        controlsContainer = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-controls-container'));
+        playButton = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-play-button'));
+        muteButton = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-mute-button'));
+      });
+
+      /** @return {boolean} */
+      function tooltipsDismissed() {
+        return controlsContainer.classList.contains(
+            'shaka-tooltips-dismissed');
+      }
+
+      it('are dismissed on Escape until the pointer moves', () => {
+        playButton.dispatchEvent(createKeydownEvent('Escape'));
+        expect(tooltipsDismissed()).toBe(true);
+
+        UiUtils.simulateEvent(muteButton, 'mouseover');
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('show again when the focus moves', () => {
+        playButton.dispatchEvent(createKeydownEvent('Escape'));
+        expect(tooltipsDismissed()).toBe(true);
+
+        muteButton.dispatchEvent(new Event('focusin', {bubbles: true}));
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('are not dismissed by other keys', () => {
+        playButton.dispatchEvent(createKeydownEvent('Shift'));
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('stay dismissed when Escape returns the focus to a menu button',
+          () => {
+            const overflowButton = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-overflow-menu-button'));
+            overflowButton.click();
+            const loop = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-loop-button'));
+            focusForKeyboardTest(loop);
+            const focus = spyOn(overflowButton, 'focus').and.callFake(() => {
+              // Moving the focus shows the tooltips again, so Escape has to
+              // dismiss them after the focus is back on the opening button.
+              overflowButton.dispatchEvent(
+                  new Event('focusin', {bubbles: true}));
+            });
+            loop.dispatchEvent(createKeydownEvent('Escape'));
+            expect(focus).toHaveBeenCalledTimes(1);
+            expect(tooltipsDismissed()).toBe(true);
+          });
+    });
+
     describe('seek bar thumbnail preview', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
