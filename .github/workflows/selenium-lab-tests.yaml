@@ -229,10 +229,14 @@ jobs:
       statuses: write
 
     # Only one run of this job is allowed at a time, since it uses physical
-    # resources in our lab.
+    # resources in our lab.  By default, a concurrency group holds only one
+    # running and one pending job, and a newer pending job cancels the older
+    # one.  "queue: max" turns the group into a real FIFO queue (up to 100
+    # pending jobs), so no lab run is dropped while waiting for a device.
     concurrency:
       group: selenium-lab-${{ matrix.browser }}
       cancel-in-progress: false
+      queue: max
 
     needs: [compute-sha, build-shaka, matrix-config]
     strategy:
