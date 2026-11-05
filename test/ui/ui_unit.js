@@ -3267,6 +3267,12 @@ describe('UI', () => {
       }
 
       beforeEach(() => {
+        // Forced colors mode is faked here, but browsers that really have it
+        // also support the CSS Color 4 system colors.  Older ones (e.g.
+        // Tizen) reject the whole gradient because of the unknown color.
+        if (!window.CSS || !CSS.supports('color', 'CanvasText')) {
+          pending('This platform does not support CSS system colors.');
+        }
         forcedColorsActive = false;
         forcedColorsQuery = new shaka.util.FakeEventTarget();
         Object.defineProperty(forcedColorsQuery, 'matches', {
