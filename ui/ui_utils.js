@@ -119,12 +119,12 @@ shaka.ui.Utils = class {
     const value = pressed ? 'true' : 'false';
     switch (button.getAttribute('role')) {
       case 'menuitemcheckbox':
-        button.setAttribute('aria-checked', value);
+        button.setAttribute('aria-checked', value.toString());
         break;
       case 'menuitem':
         break;
       default:
-        button.setAttribute('aria-pressed', value);
+        button.setAttribute('aria-pressed', value.toString());
         break;
     }
   }
