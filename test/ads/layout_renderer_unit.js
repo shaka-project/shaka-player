@@ -207,7 +207,10 @@ describe('LayoutRenderer', () => {
       // Firefox serializes the default z offset too ('left top 0px').
       expect(video.style.transformOrigin).toMatch(/^left top( 0px)?$/);
       expect(video.style.transform).toBe('scaleX(0.5) scaleY(0.5)');
-      expect(video.style.transition).toBe('transform 250ms');
+      // Check the longhands: older Chromium (e.g. Chromecast) serializes the
+      // shorthand with its defaults ('transform 250ms ease 0s').
+      expect(video.style.transitionProperty).toBe('transform');
+      expect(video.style.transitionDuration).toBe('250ms');
     });
 
     it('moves the primary video without a transition', () => {
