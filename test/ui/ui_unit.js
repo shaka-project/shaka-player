@@ -2733,6 +2733,94 @@ describe('UI', () => {
       });
     });
 
+    describe('focus indicator', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let button;
+
+      beforeEach(async () => {
+        jasmine.clock().install();
+
+        // Keep the controls from staying up just because the video is paused.
+        // Cast defaults fadeDelay to 3 seconds, so pin it.
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['play_pause'],
+          showUIOnPaused: false,
+          fadeDelay: 0,
+        });
+        controlsContainer = ui.getControls().getControlsContainer();
+        button = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-play-button'));
+      });
+
+      afterEach(() => {
+        jasmine.clock().uninstall();
+      });
+
+      /**
+       * Focuses |button| after the given user input.
+       *
+       * @param {string} input 'keydown' or 'mousedown'.
+       */
+      function focusButtonAfter(input) {
+        if (input == 'keydown') {
+          // An arrow key, as TV remotes and spatial navigation use to move
+          // the focus, and not Tab, which enables the focus ring by itself.
+          window.dispatchEvent(createKeydownEvent('ArrowDown'));
+        } else {
+          UiUtils.simulateEvent(button, input);
+        }
+        focusForKeyboardTest(button);
+        // Not every platform fires focusin when focusForKeyboardTest() had to
+        // fake the focus.
+        button.dispatchEvent(new FocusEvent('focusin', {bubbles: true}));
+      }
+
+      function isKeyboardNavigation() {
+        return controlsContainer.classList.contains(
+            'shaka-keyboard-navigation');
+      }
+
+      it('keeps the controls shown when a key moves the focus', () => {
+        focusButtonAfter('keydown');
+
+        expect(isKeyboardNavigation()).toBe(true);
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe('true');
+      });
+
+      it('ignores a focus that follows a click', () => {
+        window.dispatchEvent(createKeydownEvent('ArrowDown'));
+        focusButtonAfter('mousedown');
+
+        expect(isKeyboardNavigation()).toBe(false);
+      });
+
+      it('gives the focus back to the player when the controls hide', () => {
+        focusButtonAfter('mousedown');
+        const focus = spyOn(videoContainer, 'focus').and.callThrough();
+
+        UiUtils.simulateEvent(videoContainer, 'mousemove');
+        expect(controlsContainer.getAttribute('shown')).toBe('true');
+        expect(focus).not.toHaveBeenCalled();
+
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+        expect(focus).toHaveBeenCalledTimes(1);
+      });
+
+      it('leaves the focus alone when it is outside the controls', () => {
+        const focus = spyOn(videoContainer, 'focus');
+
+        UiUtils.simulateEvent(videoContainer, 'mousemove');
+        jasmine.clock().tick(5000);
+
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+        expect(focus).not.toHaveBeenCalled();
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;

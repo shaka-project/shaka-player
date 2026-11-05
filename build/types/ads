@@ -13,6 +13,7 @@
 +../../lib/ads/interstitial_ad_session.js
 +../../lib/ads/interstitial_static_ad.js
 +../../lib/ads/interstitial_tracker.js
++../../lib/ads/layout_renderer.js
 +../../lib/ads/media_tailor_ad.js
 +../../lib/ads/media_tailor_ad_manager.js
 +../../lib/ads/server_side_ad.js
