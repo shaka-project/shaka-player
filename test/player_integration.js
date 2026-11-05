@@ -1020,10 +1020,17 @@ describe('Player', () => {
     it('has the correct number of arguments in compiled callbacks', () => {
       // Get the default configuration for both the compiled & uncompiled
       // versions for comparison.
-      const compiledConfig = (new compiledShaka.Player()).getConfiguration();
-      const uncompiledConfig = (new shaka.Player()).getConfiguration();
+      const compiledPlayer = new compiledShaka.Player();
+      const uncompiledPlayer = new shaka.Player();
+      const compiledConfig = compiledPlayer.getConfiguration();
+      const uncompiledConfig = uncompiledPlayer.getConfiguration();
 
       compareConfigFunctions(compiledConfig, uncompiledConfig);
+
+      return Promise.all([
+        compiledPlayer.destroy(),
+        uncompiledPlayer.destroy(),
+      ]);
 
       /**
        * Find all the callbacks in the configuration recursively and compare
