@@ -1144,6 +1144,63 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(referencesOf(low)[0].timestampOffset).toBe(0);
     });
 
+    it('lines up renditions with different keyframe spacings', () => {
+      const [short, long] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 15},
+        {altGroup: 1, keyframeSpacing: 60},
+      ]);
+      short.createSegmentIndex();
+      // Groups 400 to 403 of the short-GOP track cover Objects 6000 to 6059.
+      deliver(0, [
+        fakeSegment(100, 400),
+        fakeSegment(102, 401),
+        fakeSegment(104, 402),
+        fakeSegment(106, 403),
+      ]);
+
+      // Group 100 of the long-GOP track starts at Object 6000 too, on a
+      // clock 4900 s ahead.
+      long.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 100)]);
+
+      const references = referencesOf(long);
+      expect(references[0].startTime).toBe(100);
+      expect(references[0].timestampOffset).toBe(-4900);
+    });
+
+    it('lines up a Group that starts inside an alternate Group', () => {
+      const [long, short] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 60},
+        {altGroup: 1, keyframeSpacing: 15},
+      ]);
+      long.createSegmentIndex();
+      // Objects 6000 to 6059, over 8 seconds.
+      deliver(0, [Object.assign(fakeSegment(100, 100), {duration: 8})]);
+
+      // Group 402 starts at Object 6030, half way into it.
+      short.createSegmentIndex();
+      deliver(1, [fakeSegment(5004, 402)]);
+
+      expect(referencesOf(short)[0].startTime).toBe(104);
+    });
+
+    it('does not take Group numbers of different spacings as alike', () => {
+      const [short, long] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 15},
+        {altGroup: 1, keyframeSpacing: 60},
+      ]);
+      short.createSegmentIndex();
+      // Group 5 of the short-GOP track starts at Object 75.
+      deliver(0, [fakeSegment(100, 5)]);
+
+      // Group 5 of the long-GOP track starts at Object 300, which nothing
+      // has placed yet.
+      long.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 5)]);
+
+      expect(referencesOf(long)[0].startTime).toBe(5000);
+    });
+
     it('does not line up tracks outside an alternate group', () => {
       const [first, second] = makeStreams([{}, {}]);
       first.createSegmentIndex();
