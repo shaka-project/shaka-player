@@ -173,9 +173,21 @@
 }
 
 @media (forced-colors: active) {
+  /* Forced colors keep the alpha of the backgrounds, which would let the
+   * video show through, so make them opaque. */
   .shaka-overflow-menu,
   .shaka-settings-menu,
-  .shaka-context-menu {
+  .shaka-context-menu,
+  .shaka-statistics-container,
+  .shaka-ad-statistics-container {
+    background: Canvas;
     border: 1px solid ButtonText;
+  }
+
+  /* Icons from a URL are drawn with a mask over their background color
+   * (currentColor), which forced colors would replace with Canvas.  This keeps
+   * their colors, but takes the forced text color of their parent. */
+  .shaka-ui-icon {
+    forced-color-adjust: preserve-parent-color;
   }
 }

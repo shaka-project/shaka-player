@@ -148,3 +148,17 @@
     }
   }
 }
+
+/* In forced colors mode (e.g. Windows high contrast), forced colors keep the
+ * alpha of the background, which would let the video show through. */
+@media (forced-colors: active) {
+  .shaka-tooltips-on {
+    & > .shaka-tooltip,
+    & > .shaka-tooltip-status {
+      &::after {
+        background: Canvas;
+        border: 1px solid CanvasText;
+      }
+    }
+  }
+}
