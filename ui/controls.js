@@ -2041,6 +2041,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     });
 
+    // Registered before the keyboard playback controls, which skip the keys
+    // that the menus use.
+    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
+      this.onMenuKeyDown_(/** @type {!KeyboardEvent} */(e));
+    });
+
     this.listenForControlsKeyEvents_(this.videoContainer_,
         () => !this.config_.enableKeyboardPlaybackControlsInWindow &&
               !this.isFullScreenEnabled());
@@ -2427,7 +2433,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onControlsKeyDown_(event) {
-    if (event.ctrlKey || event.metaKey) {
+    // A menu with the focus already used the key.  See onMenuKeyDown_().
+    if (event.ctrlKey || event.metaKey || event.defaultPrevented) {
       return;
     }
 
@@ -2895,8 +2902,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * Add behaviors for keyboard navigation.
    * 1. Add blue outline for focused elements.
    * 2. Allow exiting overflow settings menus by pressing Esc key.
-   * 3. When navigating on overflow settings menu by pressing Tab
-   *    key or Shift+Tab keys keep the focus inside overflow menu.
+   * 3. Tab and Shift+Tab leave an open settings menu, which closes it, as
+   *    described by the ARIA Authoring Practices for menu buttons.  The arrow
+   *    keys move the focus inside the menu.  See onMenuKeyDown_().
    *
    * @param {!KeyboardEvent} event
    * @private
@@ -2924,9 +2932,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     if (event.key == 'Tab') {
-      // An active menu has its own tab cycle, even in fullscreen.
-      if (anySettingsMenusAreOpen && this.keepFocusInMenu_(event)) {
-        return;
+      // Close the menu and move the focus to its opening button.  The browser
+      // then moves the focus to the next or previous control from there.
+      if (anySettingsMenusAreOpen) {
+        this.closeSettingsMenusAndRestoreFocus_();
       }
       const fullscreenElement =
           this.videoContainer_.ownerDocument.fullscreenElement;
@@ -2955,26 +2964,94 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Keeps keyboard focus within the open menu containing the active element.
-   * @param {!Event} event
-   * @return {boolean} Whether the focus is inside an open settings menu.
+   * Returns the nearest menu that contains an element.  The overflow menu
+   * contains its submenus, so each submenu needs to be told apart from it.
+   * @param {!Element} element
+   * @return {?Element}
    * @private
    */
-  keepFocusInMenu_(event) {
-    const activeElement = this.videoContainer_.ownerDocument.activeElement;
-    // The overflow menu stays open while a nested submenu is displayed.
-    // Use the nearest registered menu containing the focus, rather than the
-    // first open menu, so each submenu has its own tab cycle.
-    let settingsMenu = activeElement;
-    while (settingsMenu &&
-           !this.menus_.some((menu) => menu == settingsMenu)) {
-      settingsMenu = settingsMenu.parentElement;
+  getMenuOf_(element) {
+    const isMenu = (e) => this.menus_.includes(e) ||
+        this.contextMenus_.includes(e);
+    let menu = element.parentElement;
+    while (menu && !isMenu(menu)) {
+      menu = menu.parentElement;
     }
-    if (!settingsMenu || settingsMenu.classList.contains('shaka-hidden')) {
-      return false;
+    return menu;
+  }
+
+  /**
+   * Supports the keyboard interaction of the ARIA Authoring Practices for
+   * menus while the focus is in a menu item: the up and down arrows move the
+   * focus to the previous and next item, Home and End to the first and last
+   * one, the right arrow opens a submenu and the left arrow returns from it.
+   * The keys are not used for playback while a menu has the focus.
+   *
+   * @param {!KeyboardEvent} event
+   * @private
+   */
+  onMenuKeyDown_(event) {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey ||
+        event.metaKey || event.shiftKey) {
+      return;
     }
-    this.keepFocusInContainer_(event, settingsMenu);
-    return true;
+    const activeElement = /** @type {HTMLElement} */ (
+      this.videoContainer_.ownerDocument.activeElement);
+    const menu = activeElement && this.getMenuOf_(activeElement);
+    if (!menu || menu.classList.contains('shaka-hidden')) {
+      return;
+    }
+    // A slider, such as the one in the playback rate menu, uses the other
+    // keys itself.  It only takes part in the up and down navigation.
+    const isSlider = activeElement.tagName == 'INPUT';
+    if (isSlider && event.key != 'ArrowUp' && event.key != 'ArrowDown') {
+      return;
+    }
+    const items = Array.from(menu.querySelectorAll('button, input')).filter(
+        (item) => this.getMenuOf_(item) == menu &&
+            shaka.ui.Controls.canTakeFocus_(item));
+    const index = items.indexOf(activeElement);
+    const last = items.length - 1;
+    let target = null;
+    switch (event.key) {
+      case 'ArrowDown':
+        target = items[index < last ? index + 1 : 0];
+        break;
+      case 'ArrowUp':
+        target = items[index > 0 ? index - 1 : last];
+        break;
+      case 'Home':
+        target = items[0];
+        break;
+      case 'End':
+        target = items[last];
+        break;
+      case 'ArrowRight':
+        if (activeElement.getAttribute('aria-haspopup') == 'true') {
+          // Opening the submenu focuses its chosen item.
+          activeElement.click();
+        }
+        break;
+      case 'ArrowLeft': {
+        // A menu has its own back button before any nested submenu.
+        const backButton = shaka.ui.Utils.getDescendantIfExists(
+            /** @type {!HTMLElement} */ (menu),
+            'shaka-back-to-overflow-button');
+        // Only submenus return to a parent menu.  The back button of a
+        // standalone menu closes it.
+        if (menu.classList.contains('shaka-sub-menu') && backButton &&
+            shaka.ui.Controls.canTakeFocus_(backButton)) {
+          /** @type {!HTMLElement} */ (backButton).click();
+        }
+        break;
+      }
+      default:
+        return;
+    }
+    event.preventDefault();
+    if (target) {
+      target.focus();
+    }
   }
 
   /**

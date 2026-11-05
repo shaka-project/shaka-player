@@ -131,6 +131,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.MenuBase {
     /** @protected {!HTMLButtonElement}*/
     this.backButton = shaka.util.Dom.createButton();
     this.backButton.classList.add('shaka-back-to-overflow-button');
+    this.backButton.setAttribute('role', 'menuitem');
     this.menu.appendChild(this.backButton);
     this.eventManager.listen(this.backButton, 'click', () => {
       // Submenus return to their parent through the menu click listener.

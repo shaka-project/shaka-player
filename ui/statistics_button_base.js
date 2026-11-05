@@ -40,7 +40,7 @@ shaka.ui.StatisticsButtonBase = class extends shaka.ui.Element {
     this.statsButton.classList.add(buttonClass);
     this.statsButton.classList.add('shaka-tooltip');
     this.statsButton.classList.add('shaka-no-propagation');
-    this.statsButton.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.statsButton, false);
 
     /** @protected {!shaka.ui.Icon} */
     this.statsIcon = new shaka.ui.Icon(this.statsButton,
@@ -108,13 +108,13 @@ shaka.ui.StatisticsButtonBase = class extends shaka.ui.Element {
           shaka.ui.Enums.MaterialDesignSVGIcons['STATISTICS_OFF']);
       this.statsTimer.tickEvery(0.1);
       shaka.ui.Utils.setDisplay(this.statsContainer, true);
-      this.statsButton.ariaPressed = 'true';
+      shaka.ui.Utils.setPressed(this.statsButton, true);
     } else {
       this.statsIcon.use(
           shaka.ui.Enums.MaterialDesignSVGIcons['STATISTICS_ON']);
       this.statsTimer.stop();
       shaka.ui.Utils.setDisplay(this.statsContainer, false);
-      this.statsButton.ariaPressed = 'false';
+      shaka.ui.Utils.setPressed(this.statsButton, false);
     }
   }
 

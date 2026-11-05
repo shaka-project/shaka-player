@@ -42,7 +42,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.castButton_ = shaka.util.Dom.createButton();
     this.castButton_.classList.add('shaka-cast-button');
     this.castButton_.classList.add('shaka-tooltip');
-    this.castButton_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.castButton_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.castIcon_ = new shaka.ui.Icon(this.castButton_,
@@ -116,7 +116,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
     if (canCast) {
-      this.castButton_.ariaPressed = isCasting ? 'true' : 'false';
+      shaka.ui.Utils.setPressed(this.castButton_, isCasting);
     }
 
     this.setCurrentCastSelection_();

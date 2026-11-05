@@ -36,7 +36,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('shaka-tooltip');
     this.button_.classList.add('shaka-no-propagation');
-    this.button_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.button_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -142,7 +142,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     const label = this.localization.resolve(locId);
 
     this.button_.ariaLabel = label;
-    this.button_.ariaPressed = locId == LocIds.UNMUTE ? 'true' : 'false';
+    shaka.ui.Utils.setPressed(this.button_, locId == LocIds.UNMUTE);
     this.nameSpan_.textContent = label;
   }
 
