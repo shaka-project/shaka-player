@@ -1631,6 +1631,59 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(presentationTimeline().getSeekRangeStart()).toBe(40);
     });
 
+    it('limits the seek range to the accessible window', async () => {
+      givenAStartedParser();
+      await processCatalog(
+          [videoTrack({accessibleWindowTime: 30000}), timelineTrack()]);
+      const stream = videoStream();
+      stream.createSegmentIndex();
+      deliverSegments(stream, [100, 102]);
+
+      lastSubscribeTo('history').callback(timelineObject([
+        [40000, [20, 0], 0],
+        [100000, [50, 0], 0],
+        [102000, [51, 0], 0],
+      ]));
+
+      // The timeline describes from 40, but only the last 30 s are
+      // accessible.
+      expect(presentationTimeline().getSegmentAvailabilityEnd()).toBe(104);
+      expect(presentationTimeline().getSegmentAvailabilityStart()).toBe(74);
+      expect(presentationTimeline().getSeekRangeStart()).toBe(74);
+    });
+
+    it('keeps the timeline start when it is inside the accessible window',
+        async () => {
+          givenAStartedParser();
+          await processCatalog(
+              [videoTrack({accessibleWindowTime: 600000}), timelineTrack()]);
+          const stream = videoStream();
+          stream.createSegmentIndex();
+          deliverSegments(stream, [100, 102]);
+
+          lastSubscribeTo('history').callback(timelineObject([
+            [40000, [20, 0], 0],
+            [100000, [50, 0], 0],
+            [102000, [51, 0], 0],
+          ]));
+
+          expect(presentationTimeline().getSegmentAvailabilityStart())
+              .toBe(40);
+        });
+
+    it('does not offer a DVR window from accessibleWindowTime alone',
+        async () => {
+          // Without a media timeline nothing says where to subscribe from.
+          givenAStartedParser();
+          await processCatalog([videoTrack({accessibleWindowTime: 600000})]);
+          const stream = videoStream();
+          stream.createSegmentIndex();
+          deliverSegments(stream, [100, 102]);
+
+          expect(presentationTimeline().getSegmentAvailabilityStart())
+              .toBeGreaterThan(90);
+        });
+
     describe('SCTE-35 event timeline', () => {
       const Fixtures = shaka.test.Scte35;
 

@@ -118,6 +118,7 @@ msfCatalog.Accessibility;
  *   targetLatency: (number|undefined),
  *   trackDuration: (number|undefined),
  *   keyframeSpacing: (number|undefined),
+ *   accessibleWindowTime: (number|undefined),
  *   eventType: (string|undefined),
  *   parentName: (string|undefined),
  *   parentNamespace: (string|undefined),
