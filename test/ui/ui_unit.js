@@ -3183,6 +3183,8 @@ describe('UI', () => {
       let seekBar;
       /** @type {!HTMLElement} */
       let thumbnailContainer;
+      /** @type {!jasmine.Spy} */
+      let seekRangeSpy;
 
       beforeEach(async () => {
         Object.defineProperty(video, 'duration', {
@@ -3204,7 +3206,8 @@ describe('UI', () => {
         controls = ui.getControls();
         player = controls.getLocalPlayer();
         spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
-        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+        seekRangeSpy = spyOn(player, 'seekRange')
+            .and.returnValue({start: 0, end: 100});
 
         seekBar = UiUtils.getElementByClassName(
             videoContainer, 'shaka-seek-bar');
@@ -3241,6 +3244,86 @@ describe('UI', () => {
         // away on its own.
         await Util.delay(1.2);
         expect(thumbnailContainer.style.visibility).toBe('hidden');
+      });
+
+      it('follows a live seek range under a still pointer', () => {
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        const thumbnailTime = UiUtils.getElementByClassName(
+            thumbnailContainer, 'shaka-player-ui-thumbnail-time');
+
+        // The middle of the bar, where the thumb would be centered.
+        const rect = seekBar.getBoundingClientRect();
+        const clientX = rect.left + rect.width / 2;
+        seekBar.dispatchEvent(new MouseEvent('mousemove', {
+          clientX,
+          bubbles: true,
+        }));
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+        expect(thumbnailTime.textContent).toBe('-0:50');
+
+        // The live edge moves on while the pointer stays where it was, so
+        // the pointer is now over a different time.
+        seekRangeSpy.and.returnValue({start: 0, end: 200});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-1:40');
+      });
+
+      it('reuses the thumbnail while it covers a live pointer', async () => {
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        spyOn(player, 'getImageTracks').and.returnValue([
+          /** @type {shaka.extern.Track} */ ({}),
+        ]);
+        /** @type {shaka.extern.Thumbnail} */
+        const thumbnail = {
+          segment: null,
+          imageHeight: 0,
+          imageWidth: 0,
+          height: 90,
+          positionX: 0,
+          positionY: 0,
+          startTime: 40,
+          duration: 20,
+          uris: ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'],
+          startByte: 0,
+          endByte: null,
+          width: 160,
+          sprite: false,
+          mimeType: null,
+          codecs: null,
+        };
+        const getThumbnails = spyOn(player, 'getThumbnails')
+            .and.returnValue(Promise.resolve(thumbnail));
+        const thumbnailTime = UiUtils.getElementByClassName(
+            thumbnailContainer, 'shaka-player-ui-thumbnail-time');
+
+        const rect = seekBar.getBoundingClientRect();
+        seekBar.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: rect.left + rect.width / 2,
+          bubbles: true,
+        }));
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+        // Let the thumbnail be shown.
+        await shaka.test.Util.shortDelay();
+
+        // The window slides by a second: the pointer is over a later time,
+        // but at the same distance from the live edge and in the same
+        // thumbnail, so there is nothing to do.
+        seekRangeSpy.and.returnValue({start: 1, end: 101});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-0:50');
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+
+        // The window grows: the time changes, the thumbnail does not.
+        seekRangeSpy.and.returnValue({start: 0, end: 104});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-0:52');
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+
+        // Now the pointer is past the end of that thumbnail.
+        seekRangeSpy.and.returnValue({start: 0, end: 140});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-1:10');
+        expect(getThumbnails).toHaveBeenCalledTimes(2);
       });
 
       it('is not shown for keys that do not seek', async () => {
