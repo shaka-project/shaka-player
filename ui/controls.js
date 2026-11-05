@@ -273,9 +273,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.anySettingsMenusAreOpen()) {
         return;
       }
+      const wasShown = this.controlsContainer_.getAttribute('shown') != null;
       this.controlsContainer_.removeAttribute('shown');
       this.dispatchVisibilityEvent_();
       this.computeShakaTextContainerSize_();
+
+      // The hidden controls can still have the focus, and the next key press
+      // would then act on a control nobody can see.  Give the focus back to
+      // the player instead; the keyboard shortcuts keep working there, and
+      // Tab brings the controls back.  Only do it as the controls hide: this
+      // timer also fires while they are hidden, and on some platforms (e.g.
+      // Chromecast) focus() does not move the focus, so it would be retried
+      // every time.
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      if (wasShown && activeElement &&
+          activeElement != this.controlsContainer_ &&
+          this.controlsContainer_.contains(activeElement)) {
+        this.restoreFocus();
+      }
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -330,6 +345,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {?Element}
      */
     this.lostFocusElement_ = null;
+
+    /**
+     * Whether the last user input was a key press, as opposed to the mouse or
+     * a touch.
+     * @private {boolean}
+     */
+    this.lastInputWasKeyboard_ = false;
 
     /**
      * Checks whether the focus was lost because |lostFocusElement_| can no
@@ -1970,6 +1992,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
     });
 
+    // Tab is not the only way to move the focus with the keyboard: TV remotes
+    // and spatial navigation use the arrow keys, and the UI itself moves the
+    // focus in response to keys, e.g. when a menu opens or closes.  Whenever
+    // a control gets the focus because of a key, show the focus ring and keep
+    // the controls visible.  :focus-visible is not used for this: it is not
+    // supported everywhere (e.g. Tizen 3), and a focus() call matches it when
+    // the user has not clicked yet.
+    this.eventManager_.listen(this.controlsContainer_, 'focusin', () => {
+      if (this.lastInputWasKeyboard_ &&
+          !this.controlsContainer_.classList.contains(
+              'shaka-keyboard-navigation')) {
+        this.controlsContainer_.classList.add('shaka-keyboard-navigation');
+        this.computeOpacity();
+      }
+    });
+
+    // Capture these, so that a control that stops the propagation of an event
+    // cannot hide it.
+    this.eventManager_.listen(window, 'keydown', () => {
+      this.lastInputWasKeyboard_ = true;
+    }, {capture: true, passive: true});
+    const onPointerInput = () => {
+      this.lastInputWasKeyboard_ = false;
+    };
+    this.eventManager_.listen(window, 'mousedown', onPointerInput,
+        {capture: true, passive: true});
+    this.eventManager_.listen(window, 'touchstart', onPointerInput,
+        {capture: true, passive: true});
+
     // Hiding, disabling or removing the focused element moves the focus to
     // the body, and the keyboard controls go with it.  See restoreFocus().
     this.eventManager_.listen(this.videoContainer_, 'focusout', (e) => {
@@ -2851,7 +2902,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
       this.computeOpacity();
-      this.eventManager_.listen(window, 'mousedown', () => this.onMouseDown_());
     }
 
     // If escape key was pressed, close any open settings menus.
@@ -2957,16 +3007,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       event.preventDefault();
       firstShownChild.focus();
     }
-  }
-
-  /**
-   * For keyboard navigation, we use blue borders to highlight the active
-   * element. If we detect that a mouse is being used, remove the blue border
-   * from the active element.
-   * @private
-   */
-  onMouseDown_() {
-    this.eventManager_.unlisten(window, 'mousedown');
   }
 
   /**
