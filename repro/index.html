@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LL-HLS Shaka stall repro</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/controls.css" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #12141a;
+      --panel: #1c2030;
+      --border: #2e3548;
+      --text: #e8ecf5;
+      --muted: #9aa3b5;
+      --accent: #5b8cff;
+      --danger: #ff6b6b;
+      --ok: #63d391;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 10% -10%, #243056, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 20px; font-size: 0.95rem; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      background: #0f121a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 20px;
+      margin-top: 12px;
+    }
+    .flags label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .nums {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    button {
+      background: var(--accent);
+      color: #061018;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .video-wrap {
+      position: relative;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+    }
+    video { width: 100%; height: 100%; }
+    #log {
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+      max-height: 280px;
+      overflow: auto;
+      margin: 0;
+      color: #c9d2e3;
+    }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
+    .tag-ok { color: var(--ok); }
+    .tag-err { color: var(--danger); }
+    .tag-warn { color: #ffcc66; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>LL-HLS Shaka stall repro</h1>
+    <p class="sub">
+      Latest stable Shaka from jsDelivr. Point the manifest at the mitmproxy
+      reverse proxy (<code>http://127.0.0.1:8080/...</code>).
+    </p>
+
+    <section class="panel">
+      <div class="row">
+        <div>
+          <label for="manifest">Manifest URL</label>
+          <input id="manifest" type="text"
+                 value="http://127.0.0.1:8080/live/public/playlist.m3u8" />
+        </div>
+        <div class="actions">
+          <button id="load" type="button">Load</button>
+          <button id="stop" class="secondary" type="button">Stop</button>
+        </div>
+      </div>
+
+      <div class="flags">
+        <label>
+          <input id="ll" type="checkbox" checked />
+          streaming.lowLatencyMode
+        </label>
+        <label>
+          <input id="byterangeOpt" type="checkbox" checked />
+          hls.allowLowLatencyByteRangeOptimization
+        </label>
+        <label>
+          <input id="autoplay" type="checkbox" checked />
+          autoplay muted
+        </label>
+      </div>
+
+      <div class="nums">
+        <div>
+          <label for="stallTimeout">retryParameters.stallTimeout (ms)</label>
+          <input id="stallTimeout" type="number" min="0" step="100" value="5000" />
+        </div>
+        <div>
+          <label for="timeout">retryParameters.timeout (ms, 0 = none)</label>
+          <input id="timeout" type="number" min="0" step="100" value="0" />
+        </div>
+      </div>
+      <p class="meta" id="version">Loading Shaka…</p>
+    </section>
+
+    <section class="panel video-wrap">
+      <video id="video" poster=""></video>
+    </section>
+
+    <section class="panel">
+      <div class="actions" style="margin-bottom: 10px;">
+        <button id="clearLog" class="secondary" type="button">Clear log</button>
+      </div>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    const versionEl = document.getElementById('version');
+    const video = document.getElementById('video');
+    let player = null;
+    let playStartedAt = null;
+
+    function stamp() {
+      const now = new Date();
+      const abs = now.toISOString().slice(11, 23);
+      if (playStartedAt == null) return abs;
+      const elapsed = ((performance.now() - playStartedAt) / 1000).toFixed(1);
+      return `${abs} +${elapsed}s`;
+    }
+
+    function log(msg, cls) {
+      const line = document.createElement('div');
+      if (cls) line.className = cls;
+      line.textContent = `[${stamp()}] ${msg}`;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function formatError(error) {
+      if (!error) return String(error);
+      if (error instanceof shaka.util.Error) {
+        return `Shaka ${error.code} severity=${error.severity} ` +
+          `category=${error.category} data=${JSON.stringify(error.data)}`;
+      }
+      return error.message || String(error);
+    }
+
+    async function ensurePlayer() {
+      if (player) return player;
+      shaka.polyfill.installAll();
+      if (!shaka.Player.isBrowserSupported()) {
+        throw new Error('Browser not supported by Shaka');
+      }
+      player = new shaka.Player();
+      await player.attach(video);
+
+      player.addEventListener('error', (event) => {
+        log(`ERROR ${formatError(event.detail)}`, 'tag-err');
+      });
+      player.addEventListener('retry', (event) => {
+        const detail = event.detail || {};
+        log(
+          `RETRY attempt=${detail.attempt} type=${detail.type} ` +
+          `error=${formatError(detail.error)}`,
+          'tag-warn'
+        );
+      });
+      player.addEventListener('loading', () => log('loading'));
+      player.addEventListener('loaded', () => log('loaded', 'tag-ok'));
+      player.addEventListener('buffering', (event) => {
+        log(`buffering=${event.buffering}`);
+      });
+      player.addEventListener('stalldetected', () => {
+        log('stalldetected', 'tag-warn');
+      });
+
+      video.addEventListener('error', () => {
+        const mediaError = video.error;
+        if (!mediaError) return;
+        log(
+          `HTMLMediaElement error code=${mediaError.code} ` +
+          `message=${mediaError.message || ''}`,
+          'tag-err'
+        );
+      });
+
+      return player;
+    }
+
+    async function loadStream() {
+      const p = await ensurePlayer();
+      const manifest = document.getElementById('manifest').value.trim();
+      const lowLatencyMode = document.getElementById('ll').checked;
+      const byterangeOpt = document.getElementById('byterangeOpt').checked;
+      const stallTimeout = Number(document.getElementById('stallTimeout').value);
+      const timeout = Number(document.getElementById('timeout').value);
+      const autoplayMuted = document.getElementById('autoplay').checked;
+
+      playStartedAt = performance.now();
+      logEl.replaceChildren();
+      log(`load ${manifest}`);
+
+      p.configure({
+        streaming: {
+          lowLatencyMode,
+          retryParameters: {
+            maxAttempts: 4,
+            baseDelay: 200,
+            backoffFactor: 2,
+            fuzzFactor: 0.5,
+            timeout,
+            stallTimeout,
+            connectionTimeout: 10000,
+          },
+        },
+        hls: {
+          allowLowLatencyByteRangeOptimization: byterangeOpt,
+        },
+      });
+
+      if (autoplayMuted) {
+        video.muted = true;
+        video.autoplay = true;
+      }
+
+      await p.load(manifest);
+      versionEl.innerHTML =
+        `Shaka <span class="tag-ok">${shaka.Player.version}</span> · ` +
+        `LL=${lowLatencyMode} · byterangeOpt=${byterangeOpt} · ` +
+        `stallTimeout=${stallTimeout}ms`;
+      if (autoplayMuted) {
+        try { await video.play(); } catch (e) { log(`play() blocked: ${e}`, 'tag-warn'); }
+      }
+    }
+
+    async function stopStream() {
+      if (!player) return;
+      await player.unload();
+      log('stopped');
+    }
+
+    document.getElementById('load').addEventListener('click', () => {
+      loadStream().catch((e) => log(formatError(e), 'tag-err'));
+    });
+    document.getElementById('stop').addEventListener('click', () => {
+      stopStream().catch((e) => log(formatError(e), 'tag-err'));
+    });
+    document.getElementById('clearLog').addEventListener('click', () => {
+      logEl.replaceChildren();
+    });
+
+    versionEl.textContent = `Shaka ${shaka.Player.version} ready`;
+  </script>
+</body>
+</html>
