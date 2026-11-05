@@ -132,6 +132,16 @@ const ShakaDemoAssetInfo = class {
     this.storeCallback;
     /** @type {?function()} */
     this.unstoreCallback;
+    /** @type {?function()} */
+    this.pauseCallback;
+    /** @type {?function()} */
+    this.resumeCallback;
+    /**
+     * The offline URI of the content while it is being downloaded, once it is
+     * known.
+     * @type {?string}
+     */
+    this.downloadingOfflineUri = null;
     /** @type {?shaka.extern.StoredContent} */
     this.storedContent;
     /** @type {number} */
@@ -656,7 +666,15 @@ const ShakaDemoAssetInfo = class {
 
   /** @return {boolean} */
   isStored() {
-    return this.storedContent != null;
+    return this.storedContent != null && !this.storedContent.isIncomplete;
+  }
+
+  /**
+   * @return {boolean} Whether the asset was partially stored, and its download
+   *   can be resumed.
+   */
+  isPartiallyStored() {
+    return this.storedContent != null && this.storedContent.isIncomplete;
   }
 
   /** @return {!ShakaDemoAssetInfo} */

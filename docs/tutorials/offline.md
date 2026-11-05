@@ -9,6 +9,7 @@ support. After this tutorial you will know how to:
  - List downloaded content.
  - Play downloaded content.
  - Remove downloaded content.
+ - Pause and resume downloads.
 
 The app in this tutorial is very simple and only downloads one thing at a time,
 to simplify the UI.  `shaka.offline.Storage` will allow you to perform multiple
@@ -656,6 +657,88 @@ function createButton(text, action) {
 
 document.addEventListener('DOMContentLoaded', initApp);
 ```
+
+## Pausing and Resuming Downloads
+
+A download can be paused with `storage.pause`, and resumed later with
+`storage.resume`, even after the page has been closed and opened again.
+
+To pause a download, you need the offline URI of the content.  It is set in the
+`shaka.extern.StoredContent` given to the progress callback as soon as the
+content has been created in storage, before its segments are downloaded:
+
+```js
+let offlineUri = null;
+storage.configure('offline.progressCallback', (content, progress) => {
+  offlineUri = content.offlineUri;
+});
+
+const operation = storage.store(manifestUri, metadata);
+
+// Later, while the content is being downloaded:
+await storage.pause(offlineUri);
+```
+
+Once the download has been paused, the operation returned by `storage.store`
+resolves with the stored content, with `isIncomplete` set to `true`.  The
+segments downloaded so far are kept, and the content is returned by
+`storage.list` like any other content.  Incomplete content cannot be played
+yet.
+
+To resume the download, call `storage.resume` with the offline URI of the
+content:
+
+```js
+const content = await storage.resume(offlineUri).promise;
+```
+
+The manifest is downloaded again, and only the segments that are not stored yet
+are downloaded.  `storage.resume` returns an IAbortableOperation, just like
+`storage.store`, and the progress callback is called with the progress of the
+whole content.  If the manifest needs a MIME type to be parsed, pass the same
+one given to `storage.store` as the second argument.
+
+The tracks stored are the ones chosen when the download started, so they must
+still be in the manifest.  If they are not, the operation fails with
+`CANNOT_RESUME_CHANGED_CONTENT`, and the content can only be removed.
+
+Note: Aborting the operation returned by `storage.store` or `storage.resume`
+removes the content.  Pause it instead to keep what has been downloaded.
+
+## Interrupted Downloads
+
+If the page is closed or the app is killed while content is being downloaded,
+the content stays in storage with `isIncomplete` set to `true`.  The segments
+downloaded so far are kept, so the download can be resumed with `storage.resume`
+the next time the page is opened, just like a paused download:
+
+```js
+for (const content of await storage.list()) {
+  if (content.isIncomplete) {
+    storage.resume(content.offlineUri);
+  }
+}
+```
+
+A download running in one page cannot be resumed in another page of the same
+origin at the same time; `storage.resume` fails with
+`CANNOT_RESUME_WHILE_STORING`.  This needs the
+[Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API)
+to detect downloads running in other pages.  Without it, only downloads running
+in the same page are detected.
+
+The last segments written before the page was closed may not be referenced by
+the content yet, and are left in storage, taking up space.  To remove them,
+call `storage.removeOrphans` when the app starts, which also removes the
+persistent licenses of content that failed to be removed:
+
+```js
+await storage.removeOrphans();
+```
+
+It fails with `CANNOT_REMOVE_ORPHANS_WHILE_STORING` while content is being
+downloaded, since the segments of that download may not be referenced by the
+content yet either.
 
 ## Protected Content
 
