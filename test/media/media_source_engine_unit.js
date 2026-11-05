@@ -285,7 +285,14 @@ describe('MediaSourceEngine', () => {
     };
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // captureEvents() only keeps the last listener for each event, so don't
+    // let it check the listeners removed when the engine is destroyed.
+    audioSourceBuffer.removeEventListener.and.stub();
+    videoSourceBuffer.removeEventListener.and.stub();
+    // Destroying it again is harmless for tests that already did.
+    await mediaSourceEngine.destroy();
+
     mockTextEngine = null;
     shaka.text.TextEngine = originalTextEngine;
     // eslint-disable-next-line no-restricted-syntax
