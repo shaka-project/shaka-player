@@ -3226,6 +3226,31 @@ describe('UI', () => {
         seekBar.dispatchEvent(createKeydownEvent(key));
       }
 
+      /**
+       * Pins the bar to a known box and returns the clientX of its middle,
+       * where the thumb would be centered.  Older browsers (e.g. Tizen 3)
+       * truncate MouseEvent.clientX to an integer, which on a narrow bar is
+       * off by more than a second, so the middle has to be a whole pixel.
+       *
+       * @return {number}
+       */
+      function middleOfBar() {
+        const rect = seekBar.getBoundingClientRect();
+        const left = Math.round(rect.left);
+        // The thumb travels (width - 12) pixels: make that 200.
+        const width = 212;
+        spyOn(seekBar, 'getBoundingClientRect').and.returnValue(
+            /** @type {!DOMRect} */ ({
+              left,
+              right: left + width,
+              width,
+              top: rect.top,
+              bottom: rect.bottom,
+              height: rect.height,
+            }));
+        return left + width / 2;
+      }
+
       it('stays up while a seek key is held down', async () => {
         expect(thumbnailContainer.style.visibility).not.toBe('visible');
 
@@ -3251,11 +3276,8 @@ describe('UI', () => {
         const thumbnailTime = UiUtils.getElementByClassName(
             thumbnailContainer, 'shaka-player-ui-thumbnail-time');
 
-        // The middle of the bar, where the thumb would be centered.
-        const rect = seekBar.getBoundingClientRect();
-        const clientX = rect.left + rect.width / 2;
         seekBar.dispatchEvent(new MouseEvent('mousemove', {
-          clientX,
+          clientX: middleOfBar(),
           bubbles: true,
         }));
         expect(thumbnailContainer.style.visibility).toBe('visible');
@@ -3296,9 +3318,8 @@ describe('UI', () => {
         const thumbnailTime = UiUtils.getElementByClassName(
             thumbnailContainer, 'shaka-player-ui-thumbnail-time');
 
-        const rect = seekBar.getBoundingClientRect();
         seekBar.dispatchEvent(new MouseEvent('mousemove', {
-          clientX: rect.left + rect.width / 2,
+          clientX: middleOfBar(),
           bubbles: true,
         }));
         expect(getThumbnails).toHaveBeenCalledTimes(1);
