@@ -1655,6 +1655,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onContainerClick();
     });
 
+    // Tooltips dismissed with Escape show again once the pointer or the focus
+    // moves to another element.
+    const showTooltips = () => {
+      this.controlsContainer_.classList.remove('shaka-tooltips-dismissed');
+    };
+    this.eventManager_.listen(
+        this.controlsContainer_, 'mouseover', showTooltips);
+    this.eventManager_.listen(
+        this.controlsContainer_, 'focusin', showTooltips);
+
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
       if (this.config_.doubleClickForFullscreen &&
           this.isFullScreenSupported()) {
@@ -2907,6 +2917,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If escape key was pressed, close any open settings menus.
     if (event.key == 'Escape') {
       this.closeSettingsMenusAndRestoreFocus_();
+      // Tooltips are CSS-only, so hide them until the pointer or the focus
+      // moves (WCAG 1.4.13). This must come after the focus is restored,
+      // since moving the focus shows them again.
+      this.controlsContainer_.classList.add('shaka-tooltips-dismissed');
     }
 
     if (event.key == 'Tab') {
