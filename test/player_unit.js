@@ -1761,6 +1761,26 @@ describe('Player', () => {
       await player.load(preloadManager);
     });
 
+    it('does not leave a failed preload unhandled', async () => {
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      const parser = new shaka.test.FakeManifestParser(manifest);
+      parser.start.and.callFake(() => Promise.reject(error));
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      // Let the preload fail before anything waits on it.
+      await shaka.test.Util.shortDelay();
+
+      await expectAsync(preloadManager.waitForFinish())
+          .toBeRejectedWith(shaka.test.Util.jasmineError(error));
+      await preloadManager.destroy();
+    });
+
     it('reports no bandwidth estimate before the first load', async () => {
       // Regression test for #10824: before load() creates the AbrManager,
       // asking for the estimate threw and broke Content Steering reloads.
