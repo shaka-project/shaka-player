@@ -3091,6 +3091,62 @@ describe('Interstitial Ad manager', () => {
         jasmine.objectContaining(eventValue4));
   });
 
+  it('plays mid-roll when no video frames are presented', async () => {
+    // Video frame callbacks never run in a hidden page or for audio-only
+    // content, so the mid-roll must still be found on timeupdate.
+    /** @type {?} */ (deviceDetected.getDeviceType)
+        .and.returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
+    // Assigned, not spied on, because not every tested platform has it.
+    const requestVideoFrameCallback =
+        jasmine.createSpy('requestVideoFrameCallback').and.returnValue(1);
+    video.requestVideoFrameCallback =
+        shaka.test.Util.spyFunc(requestVideoFrameCallback);
+    // Not 0, which would keep the initial (pre-roll) check active.
+    let fakeCurrentTime = 1;
+    Object.defineProperty(video, 'currentTime', {
+      get: () => fakeCurrentTime,
+      set: (val) => {
+        fakeCurrentTime = val;
+      },
+      configurable: true,
+    });
+    Object.defineProperty(video, 'paused', {
+      get: () => false,
+      configurable: true,
+    });
+    const metadata = {
+      type: 'com.apple.quicktime.HLS',
+      startTime: 10,
+      endTime: null,
+      values: [
+        {
+          key: 'ID',
+          data: 'MIDROLL',
+        },
+        {
+          key: 'X-ASSET-URI',
+          data: 'http://foo.bar/test.m3u8',
+        },
+      ],
+    };
+    await addMetadata(metadata);
+
+    expect(requestVideoFrameCallback).toHaveBeenCalled();
+
+    video.dispatchEvent(new Event('timeupdate'));
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({type: 'ad-break-started'}));
+
+    fakeCurrentTime = 10.5;
+    video.dispatchEvent(new Event('timeupdate'));
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining({type: 'ad-break-started'}));
+  });
+
   it('jumping a mid-roll with JUMP restriction is not allowed', async () => {
     const metadata = {
       type: 'com.apple.quicktime.HLS',
