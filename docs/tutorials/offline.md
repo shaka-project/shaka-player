@@ -10,6 +10,7 @@ support. After this tutorial you will know how to:
  - Play downloaded content.
  - Remove downloaded content.
  - Pause and resume downloads.
+ - Play content while it is being downloaded.
 
 The app in this tutorial is very simple and only downloads one thing at a time,
 to simplify the UI.  `shaka.offline.Storage` will allow you to perform multiple
@@ -682,8 +683,9 @@ await storage.pause(offlineUri);
 Once the download has been paused, the operation returned by `storage.store`
 resolves with the stored content, with `isIncomplete` set to `true`.  The
 segments downloaded so far are kept, and the content is returned by
-`storage.list` like any other content.  Incomplete content cannot be played
-yet.
+`storage.list` like any other content.  Incomplete content can be played up to
+the segments stored so far; see
+[Playing Content While It Downloads](#playing-content-while-it-downloads).
 
 To resume the download, call `storage.resume` with the offline URI of the
 content:
@@ -739,6 +741,56 @@ await storage.removeOrphans();
 It fails with `CANNOT_REMOVE_ORPHANS_WHILE_STORING` while content is being
 downloaded, since the segments of that download may not be referenced by the
 content yet either.
+
+## Playing Content While It Downloads
+
+Content can be played while it is being downloaded, as soon as its offline URI
+is known.  Load it like any other offline content:
+
+```js
+let offlineUri = null;
+storage.configure('offline.progressCallback', (content, progress) => {
+  offlineUri = content.offlineUri;
+});
+
+const operation = storage.store(manifestUri, metadata);
+
+// Later, once offlineUri is set:
+await player.load(offlineUri);
+```
+
+The segments that are already stored are played right away.  When the player
+needs a segment that is not stored yet, it waits for it to be stored, just as it
+would wait for a slow network.  The segments of each track are downloaded in
+order, so playback from the start keeps up with the download, but seeking far
+ahead waits until the download gets there.
+
+The download can run in the same page or, where the
+[Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API)
+is available, in another page of the same origin.
+
+If the content is not being downloaded, for example because the download was
+paused or the page that downloaded it was closed, the player cannot wait for
+the missing segments.  Playing up to them works, but then the player raises a
+`SEGMENT_NOT_STORED` error for each track that needs them, and stops streaming.
+Once the download is resumed, call `player.retryStreaming()` to continue:
+
+```js
+player.addEventListener('error', (event) => {
+  if (event.detail.code == shaka.util.Error.Code.SEGMENT_NOT_STORED) {
+    // Offer to resume the download.
+  }
+});
+
+// Later, when the download is resumed:
+storage.resume(offlineUri);
+player.retryStreaming();
+```
+
+Note: The tracks, and for protected content, the licenses, are those stored
+when the content is loaded.  If the init data of protected content is only in
+its segments, its licenses are stored as those segments are downloaded, so it
+may not be playable until its download is complete.
 
 ## Protected Content
 

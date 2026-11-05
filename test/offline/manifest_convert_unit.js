@@ -130,6 +130,56 @@ describe('ManifestConverter', () => {
       verifyStream(variant.audio, manifestDb.streams[1], manifestDb.drmInfo);
     });
 
+    it('gives pending uris to segments not stored yet', () => {
+      const videoStream = createVideoStreamDB(1, [0]);
+      videoStream.segments[0].initSegmentKey = 4;
+      // These segments use a different init segment, which is not stored yet
+      // either.
+      for (const segment of videoStream.segments.slice(1)) {
+        segment.dataKey = 0;
+        segment.pendingSegmentRefId = 'segment-' + segment.startTime;
+        segment.initSegmentKey = 0;
+        segment.pendingInitSegmentRefId = 'init';
+      }
+
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        sessionIds: [],
+        drmInfo: null,
+        appMetadata: null,
+        creationTime: 0,
+        streams: [videoStream],
+        sequenceMode: false,
+        isIncomplete: true,
+      };
+
+      const converter = new shaka.offline.ManifestConverter(
+          'mechanism', 'cell', /* manifestKey= */ 7);
+      const manifest = converter.fromManifestDB(manifestDb);
+      const segmentIndex = /** @type {!shaka.media.SegmentIndex} */ (
+        manifest.variants[0].video.segmentIndex);
+      const refs = Array.from(segmentIndex);
+      expect(refs.length).toBe(3);
+
+      expect(refs[0].getUris()).toEqual(['offline:segment/mechanism/cell/1']);
+      expect(refs[0].initSegmentReference.getUris())
+          .toEqual(['offline:segment/mechanism/cell/4']);
+
+      expect(refs[1].getUris())
+          .toEqual(['offline:pending/mechanism/cell/7/1/1']);
+      expect(refs[2].getUris())
+          .toEqual(['offline:pending/mechanism/cell/7/1/2']);
+      // The segments that share an init segment share its uri too.
+      for (const ref of refs.slice(1)) {
+        expect(ref.initSegmentReference.getUris())
+            .toEqual(['offline:pending/mechanism/cell/7/1/1/init']);
+      }
+    });
+
     it('supports video-only content', () => {
       /** @type {shaka.extern.ManifestDB} */
       const manifestDb = {
