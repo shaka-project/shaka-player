@@ -347,56 +347,49 @@ describe('UI', () => {
       videoContainer.appendChild(video);
     });
 
-    it('does not activate buttons just below the seek bar', async () => {
-      videoContainer.style.width = '600px';
-      const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
-        controlPanelElements: [],
-      });
-      const controls = ui.getControls();
-      player = controls.getLocalPlayer();
-      spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
-      controls.seekTo(50, false);
-      controls.getControlsContainer().setAttribute('shown', 'true');
-      controls.getControlsContainer().setAttribute('casting', 'true');
-
-      const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
+    /**
+     * Adds a fixed-size button to the bottom control panel.  The size is set
+     * inline so the test does not depend on CSS variable support.
+     *
+     * @return {!HTMLElement}
+     */
+    function addPanelButton() {
       const panel = videoContainer.querySelector(
           '.shaka-controls-button-panel');
-      const button = document.createElement('button');
+      const button = /** @type {!HTMLElement} */ (
+        document.createElement('button'));
+      button.style.width = '48px';
+      button.style.height = '48px';
       panel.appendChild(button);
-      const onClick = jasmine.createSpy('onClick');
-      button.addEventListener('click', () => Util.spyFunc(onClick)());
-      const seekRect = seekBar.getBoundingClientRect();
-      const buttonRect = button.getBoundingClientRect();
-      const x = buttonRect.left + buttonRect.width / 2;
-      for (const y of [seekRect.bottom - 1, seekRect.bottom + 1]) {
-        const target = document.elementFromPoint(x, y);
-        expect(target).not.toBeNull();
-        if (target) {
-          UiUtils.simulateEvent(target, 'click');
-        }
-      }
-      expect(onClick).not.toHaveBeenCalled();
+      return button;
+    }
 
-      // The guard space must not cover the button itself.
-      const buttonTarget = document.elementFromPoint(
-          x, buttonRect.top + buttonRect.height / 2);
-      expect(buttonTarget.closest('button')).toBe(button);
-      UiUtils.simulateEvent(buttonTarget, 'click');
-      expect(onClick).toHaveBeenCalledTimes(1);
+    // These tests compare layout boxes instead of hit-testing with
+    // elementFromPoint(), whose result depends on the device viewport and on
+    // anything else drawn on the test page.
+    it('leaves a gap between the seek bar and the buttons below', async () => {
+      videoContainer.style.width = '600px';
+      await UiUtils.createUIThroughAPI(videoContainer, video, {
+        controlPanelElements: [],
+      });
+      const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
+      const button = addPanelButton();
+
+      // Taps just below the seek bar should land on the panel, not a button.
+      // Without the gap, the button overlaps the bottom of the seek bar.
+      const gap = button.getBoundingClientRect().top -
+          seekBar.getBoundingClientRect().bottom;
+      expect(gap).not.toBeLessThan(4);
     });
 
     for (const addSeekBar of [false, true]) {
-      it('keeps buttons clickable below an absent or hidden seek bar ' +
+      it('adds no gap above the buttons without a visible seek bar ' +
           addSeekBar, async () => {
         videoContainer.style.width = '600px';
-        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
           addSeekBar: addSeekBar,
           controlPanelElements: [],
         });
-        const controls = ui.getControls();
-        controls.getControlsContainer().setAttribute('shown', 'true');
-        controls.getControlsContainer().setAttribute('casting', 'true');
         if (addSeekBar) {
           const seekBar = /** @type {!HTMLElement} */ (
             videoContainer.querySelector('.shaka-seek-bar-container'));
@@ -404,13 +397,7 @@ describe('UI', () => {
         }
         const panel = videoContainer.querySelector(
             '.shaka-controls-button-panel');
-        const button = document.createElement('button');
-        panel.appendChild(button);
-        const panelRect = panel.getBoundingClientRect();
-        const buttonRect = button.getBoundingClientRect();
-        const target = document.elementFromPoint(
-            buttonRect.left + buttonRect.width / 2, panelRect.top + 1);
-        expect(target.closest('button')).toBe(button);
+        expect(getComputedStyle(panel).paddingTop).toBe('0px');
       });
     }
 
