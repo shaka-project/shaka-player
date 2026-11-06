@@ -642,6 +642,28 @@ describe('Player', () => {
             .toBe(false);
       });
 
+      /** @suppress {accessControls} */
+      function clearStreamingEngine() {
+        player.streamingEngine_ = null;
+      }
+
+      it('does nothing when the StreamingEngine is gone', async () => {
+        multiVariantManifest();
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const variant = manifest.variants[0];
+        const videoStream = /** @type {shaka.extern.Stream} */ (variant.video);
+
+        // A segment request can fail while the player unloads, after the
+        // StreamingEngine is gone but before the manifest is cleared.
+        clearStreamingEngine();
+
+        expect(player.disableStream(videoStream, disableTimeInSeconds))
+            .toBe(false);
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+
       describe('does not disable stream if there not alternate stream', () => {
         it('single audio multiple videos', async () => {
           manifest = shaka.test.ManifestGenerator.generate((manifest) => {
