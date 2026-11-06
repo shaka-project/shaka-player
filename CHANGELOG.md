@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.16.56](https://github.com/shaka-project/shaka-player/compare/v4.16.55...v4.16.56) (2026-11-06)
+
+
+### Bug Fixes
+
+* Avoid a TypeError when a stream fails during unload ([#10927](https://github.com/shaka-project/shaka-player/issues/10927)) ([99e8065](https://github.com/shaka-project/shaka-player/commit/99e8065be2be08b41c41bfefdc85fda43f8cd008))
+* **DASH:** Apply PTO timeline adjustment only once ([#10881](https://github.com/shaka-project/shaka-player/issues/10881)) ([4c2828d](https://github.com/shaka-project/shaka-player/commit/4c2828dd425c607f730314177fabfd4f7211abb3)), closes [#10604](https://github.com/shaka-project/shaka-player/issues/10604)
+* **DASH:** Avoid continuous manifest updates when minimumUpdatePeriod is 0 ([#10919](https://github.com/shaka-project/shaka-player/issues/10919)) ([2c0a937](https://github.com/shaka-project/shaka-player/commit/2c0a93791a14f1d84a3c869b4d1ad439fcdff870))
+* Don't reuse failed segment prefetches on retry ([#10902](https://github.com/shaka-project/shaka-player/issues/10902)) ([ec936f4](https://github.com/shaka-project/shaka-player/commit/ec936f417afca722e9160d995da39bdec14dc5d7))
+* Fix a MediaSource leak when unload() is interrupted ([#10886](https://github.com/shaka-project/shaka-player/issues/10886)) ([2871369](https://github.com/shaka-project/shaka-player/commit/28713691b5aad1caf025ef2d88330dd663088023))
+* Fix leaks and hangs when destroy() interrupts load() or attach() ([#10928](https://github.com/shaka-project/shaka-player/issues/10928)) ([fb44afc](https://github.com/shaka-project/shaka-player/commit/fb44afc21bc33fb7597cc006546f5ad694045209))
+* Fix TypeError when the segment index is released during a switch ([#10885](https://github.com/shaka-project/shaka-player/issues/10885)) ([ceef8ad](https://github.com/shaka-project/shaka-player/commit/ceef8adb075bf33727fbb9de27c547862b51100e))
+* **Text:** Align wrapped lines correctly on older browsers ([#10851](https://github.com/shaka-project/shaka-player/issues/10851)) ([5e3879b](https://github.com/shaka-project/shaka-player/commit/5e3879b4bae492a2af4d842e1d009825a1ef4d29))
+
+
+### Performance Improvements
+
+* Optimize large buffer comparison ([#10916](https://github.com/shaka-project/shaka-player/issues/10916)) ([5e23a2a](https://github.com/shaka-project/shaka-player/commit/5e23a2ad7a2f0a282a66303a67e52469950a4c37))
+
 ## [4.16.55](https://github.com/shaka-project/shaka-player/compare/v4.16.54...v4.16.55) (2026-10-29)
 
 
