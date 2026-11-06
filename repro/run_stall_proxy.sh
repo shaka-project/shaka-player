@@ -13,6 +13,8 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 VENV="${ROOT}/.venv"
 INPUT="${1:-${ORIGIN:-}}"
 PORT="${PORT:-8080}"
+# Bind all interfaces by default so a phone/tablet on the LAN can hit the proxy.
+BIND="${BIND:-0.0.0.0}"
 
 if [[ -z "${INPUT}" ]]; then
   echo "Usage: $0 <origin-or-playlist-url>" >&2
@@ -57,15 +59,19 @@ export STALL_ONCE="${STALL_ONCE:-1}"
 export STALL_VIDEO_ONLY="${STALL_VIDEO_ONLY:-1}"
 export STALL_REQUIRE_RANGE="${STALL_REQUIRE_RANGE:-0}"
 
+LAN_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+LAN_IP="${LAN_IP:-<this-machine-lan-ip>}"
 PLAYER_URL="http://127.0.0.1:${PORT}${PLAYLIST_PATH}"
+LAN_PLAYER_URL="http://${LAN_IP}:${PORT}${PLAYLIST_PATH}"
 
-echo "Proxy:  http://127.0.0.1:${PORT}  ->  ${ORIGIN}"
+echo "Proxy:  ${BIND}:${PORT}  ->  ${ORIGIN}"
 echo "Stall:  after ${STALL_AFTER_SECONDS}s of play, ${STALL_BYTES}B then ${STALL_MODE} ${STALL_SECONDS}s (once=${STALL_ONCE}, video_only=${STALL_VIDEO_ONLY}, require_range=${STALL_REQUIRE_RANGE})"
-echo "Player: ${PLAYER_URL}"
+echo "Player (local): ${PLAYER_URL}"
+echo "Player (LAN):   ${LAN_PLAYER_URL}"
 
 exec "${VENV}/bin/mitmdump" \
   -s "${ROOT}/stall_ll_hls_segment.py" \
   --mode "reverse:${ORIGIN}" \
-  --listen-host 127.0.0.1 \
+  --listen-host "${BIND}" \
   --listen-port "${PORT}" \
   --set ssl_insecure=true

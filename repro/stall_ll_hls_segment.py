@@ -9,7 +9,7 @@ Usage (reverse proxy — easiest with our origin):
   export ORIGIN=https://your-origin.example
   mitmdump -s repro/stall_ll_hls_segment.py \\
     --mode "reverse:$ORIGIN" \\
-    --listen-host 127.0.0.1 --listen-port 8080 \\
+    --listen-host 0.0.0.0 --listen-port 8080 \\
     --set ssl_insecure=true
 
 Point the player at http://127.0.0.1:8080/... instead of $ORIGIN/...

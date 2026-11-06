@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 .mitmproxy/
+# Keep vendor/*.compiled.js committed for offline A/B of the fix.
