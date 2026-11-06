@@ -263,4 +263,151 @@ describe('DashParser', () => {
 
     await player.unload();
   });
+
+  it('plays video to the end when @endNumber stops audio early', async () => {
+    const netEngine = player.getNetworkingEngine();
+    const SegmentType =
+        compiledShaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    /** @type {!Array<string>} */
+    const requestedUris = [];
+    netEngine.registerRequestFilter((type, request) => {
+      if (type == SegmentType) {
+        requestedUris.push(request.uris[0]);
+      }
+    });
+
+    await player.load(
+        '/base/test/test/assets/clear-encrypted/end-number-short-audio.mpd');
+    await video.play();
+    await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+
+    expect(requestedUris.some((uri) => uri.includes('clear-a-s1.mp4')))
+        .toBe(true);
+    expect(requestedUris.some((uri) => uri.includes('clear-a-s2.mp4')))
+        .toBe(false);
+    expect(requestedUris.some((uri) => uri.includes('clear-v-s2.mp4')))
+        .toBe(true);
+
+    await player.unload();
+  });
+
+  it('plays video to the end when @endNumber stops a SegmentTimeline early',
+      async () => {
+        const netEngine = player.getNetworkingEngine();
+        const SegmentType =
+            compiledShaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+        /** @type {!Array<string>} */
+        const requestedUris = [];
+        netEngine.registerRequestFilter((type, request) => {
+          if (type == SegmentType) {
+            requestedUris.push(request.uris[0]);
+          }
+        });
+
+        await player.load('/base/test/test/assets/clear-encrypted/' +
+            'end-number-timeline-short-audio.mpd');
+        await video.play();
+        await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+
+        expect(requestedUris.some((uri) => uri.includes('clear-a-s1.mp4')))
+            .toBe(true);
+        expect(requestedUris.some((uri) => uri.includes('clear-a-s2.mp4')))
+            .toBe(false);
+        expect(requestedUris.some((uri) => uri.includes('clear-v-s2.mp4')))
+            .toBe(true);
+
+        await player.unload();
+      });
+
+  describe('while the video is still buffering', () => {
+    /** @type {function()} */
+    let releaseVideo;
+
+    beforeEach(() => {
+      /** @type {!Promise} */
+      const videoReleased = new Promise((resolve) => {
+        releaseVideo = resolve;
+      });
+      // Hold the last video segment back, so the MediaSource has not ended
+      // when the playhead reaches the end of the audio.
+      player.getNetworkingEngine().registerResponseFilter(
+          async (type, response) => {
+            if (response.uri.includes('clear-v-s2.mp4')) {
+              await videoReleased;
+            }
+          });
+    });
+
+    /**
+     * @param {function():boolean} condition
+     * @param {string} what
+     * @return {!Promise}
+     */
+    async function waitUntil(condition, what) {
+      const start = Date.now();
+      while (!condition()) {
+        if (Date.now() - start > 20000) {
+          throw new Error('Timeout waiting for ' + what);
+        }
+        // eslint-disable-next-line no-await-in-loop
+        await shaka.test.Util.delay(0.1);
+      }
+    }
+
+    /** @return {!Promise} */
+    async function waitForAudioDetached() {
+      // Some platforms, like Tizen 3, only buffer once playback starts, so
+      // wait for the audio to be there before waiting for it to go away.
+      const getAudio = () => player.getBufferedInfo().audio;
+      await waitUntil(() => getAudio().length == 1 && getAudio()[0].end > 3.9,
+          'the audio to be buffered');
+      await waitUntil(() => !getAudio().length,
+          'the audio SourceBuffer to be removed');
+    }
+
+    it('detaches the audio to play the video-only tail', async () => {
+      await player.load(
+          '/base/test/test/assets/clear-encrypted/end-number-short-audio.mpd');
+      // Say what the media element did if the audio comes back.
+      /** @type {!Array<string>} */
+      const events = [];
+      for (const name of ['seeking', 'waiting', 'emptied', 'loadedmetadata']) {
+        eventManager.listen(video, name, () => {
+          events.push(name + '@' + video.currentTime.toFixed(3));
+        });
+      }
+      await video.play();
+      await waitForAudioDetached();
+      events.push('detached@' + video.currentTime.toFixed(3));
+      releaseVideo();
+
+      await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+      expect(player.getBufferedInfo().audio).withContext(events.join(', '))
+          .toEqual([]);
+      await player.unload();
+    });
+
+    it('restores the audio on a seek back', async () => {
+      await player.load(
+          '/base/test/test/assets/clear-encrypted/end-number-short-audio.mpd');
+      await video.play();
+      await waitForAudioDetached();
+      releaseVideo();
+      await waiter.timeoutAfter(20).failOnTimeout(true)
+          .waitUntilPlayheadReaches(video, 5);
+
+      video.currentTime = 1;
+      await waiter.timeoutAfter(20).failOnTimeout(true)
+          .waitUntilPlayheadReaches(video, 2);
+      const audio = player.getBufferedInfo().audio;
+      expect(audio.length).toBe(1);
+      expect(audio[0].start).toBeLessThanOrEqual(2);
+      expect(audio[0].end).toBeGreaterThan(3.9);
+
+      await waiter.timeoutAfter(30).failOnTimeout(true).waitForEnd(video);
+      await player.unload();
+    });
+  });
 });

@@ -316,6 +316,79 @@ describe('DashParser SegmentTemplate', () => {
         await Dash.testSegmentIndex(source, references);
       });
 
+      it('caps a SegmentTimeline', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="3"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="5" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 60);
+        // The last segment keeps its own end instead of reaching the period
+        // end, since nothing comes after it.
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('caps a SegmentTimeline with @startNumber > 1', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="10" endNumber="11"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="3" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 40);
+        const references = [
+          ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s11.mp4', 10, 20, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('finds no SegmentTimeline segment after @endNumber', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="3" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 40);
+        fakeNetEngine.setResponseText('https://foo', source);
+        const manifest = await parser.start('https://foo', playerInterface);
+        const stream = manifest.variants[0].video;
+        await stream.createSegmentIndex();
+        goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+
+        expect(stream.segmentIndex.find(15)).toBe(1);
+        expect(stream.segmentIndex.find(25)).toBe(null);
+      });
+
+      it('still stretches a SegmentTimeline it does not cap', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="3"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="2" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 31);
+        const lastRef = ManifestParser.makeReference('s3.mp4', 20, 31, baseUri);
+        lastRef.trueEndTime = 30;
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
       it('is inherited and only caps its own AdaptationSet', async () => {
         const source = [
           '<MPD type="static">',

@@ -28,6 +28,31 @@ describe('DefaultBrowser', () => {
   // off BrowserEngine.EDGE, which must mean EdgeHTML and nothing else.  The
   // matching integration test measures the real SourceBuffer behaviour that
   // justifies leaving every other engine out.
+  // Measured in the DASH @endNumber integration tests that detach the audio
+  // of a video-only tail.
+  describe('supportsSourceBufferRemoval', () => {
+    it('is true for Chrome', () => {
+      Util.setUserAgent(chrome);
+      Util.setVendor('Google Inc.');
+      expect(new shaka.device.DefaultBrowser().supportsSourceBufferRemoval())
+          .toBe(true);
+    });
+
+    it('is false for Firefox', () => {
+      Util.setUserAgent(firefox);
+      Util.setVendor('');
+      expect(new shaka.device.DefaultBrowser().supportsSourceBufferRemoval())
+          .toBe(false);
+    });
+
+    it('is true for Safari', () => {
+      Util.setUserAgent(safari);
+      Util.setVendor('Apple Computer, Inc.');
+      expect(new shaka.device.DefaultBrowser().supportsSourceBufferRemoval())
+          .toBe(true);
+    });
+  });
+
   describe('requiresTimestampOffsetFudge', () => {
     it('is true for legacy Edge', () => {
       Util.setUserAgent(legacyEdge);

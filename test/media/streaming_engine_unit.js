@@ -520,6 +520,225 @@ describe('StreamingEngine', () => {
     jasmine.clock().uninstall();
   });
 
+  describe('stream ending before the other one', () => {
+    /** @type {!jasmine.Spy} */
+    let supportsSourceBufferRemovalSpy;
+
+    beforeEach(() => {
+      // Do not depend on the browser running the tests.
+      supportsSourceBufferRemovalSpy = spyOn(
+          shaka.device.DeviceFactory.getDevice(),
+          'supportsSourceBufferRemoval').and.returnValue(true);
+    });
+
+    /**
+     * Sets up a VOD presentation whose video goes on to 40 seconds, and whose
+     * audio has |count| segments of |duration| seconds.
+     * @param {number} count
+     * @param {number=} duration
+     * @param {boolean=} multiPeriod Split the segment indexes by Period, like
+     *   multi-Period DASH does.
+     * @return {!Promise}
+     */
+    async function setupShortAudio(count, duration = 10, multiPeriod = false) {
+      setupVod();
+      const audio = /** @type {!shaka.extern.Stream} */ (audioStream);
+      const video = /** @type {!shaka.extern.Stream} */ (videoStream);
+      await audio.createSegmentIndex();
+      await video.createSegmentIndex();
+      const audioIndex = audio.segmentIndex;
+      const videoIndex = video.segmentIndex;
+      goog.asserts.assert(audioIndex && videoIndex, 'Missing segment index');
+
+      const audioReferences = [];
+      for (let i = 0; i < count; i++) {
+        const reference = audioIndex.get(i);
+        reference.startTime = i * duration;
+        reference.endTime = (i + 1) * duration;
+        audioReferences.push(reference);
+      }
+      segmentData[ContentType.AUDIO].segmentDuration = duration;
+      const audioSegmentDuration = duration;
+      segmentData[ContentType.AUDIO].segmentStartTimes =
+          [0, 1, 2, 3].map((i) => i * audioSegmentDuration);
+      const videoReferences = [0, 1, 2, 3].map((i) => videoIndex.get(i));
+      if (multiPeriod) {
+        /**
+         * @param {!Array<!shaka.media.SegmentReference>} references
+         * @return {!shaka.media.MetaSegmentIndex}
+         */
+        const byPeriod = (references) => {
+          const index = new shaka.media.MetaSegmentIndex();
+          index.appendSegmentIndex(
+              new shaka.media.SegmentIndex(references.slice(0, 2)));
+          index.appendSegmentIndex(
+              new shaka.media.SegmentIndex(references.slice(2)));
+          return index;
+        };
+        audio.segmentIndex = byPeriod(audioReferences);
+        video.segmentIndex = byPeriod(videoReferences);
+      } else {
+        audio.segmentIndex = new shaka.media.SegmentIndex(audioReferences);
+        video.segmentIndex = new shaka.media.SegmentIndex(videoReferences);
+      }
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+    }
+
+    async function start() {
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+    }
+
+    it('detaches the audio to play the video-only tail', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledWith(ContentType.AUDIO);
+      expect(mediaSourceEngine.segments[ContentType.AUDIO])
+          .toEqual([true, true, false, false]);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+    });
+
+    it('detaches the audio when it ends in an earlier Period', async () => {
+      await setupShortAudio(2, 10, /* multiPeriod= */ true);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledWith(ContentType.AUDIO);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+    });
+
+    it('recreates the MediaSource without the audio if it cannot remove it',
+        async () => {
+          supportsSourceBufferRemovalSpy.and.returnValue(false);
+          await setupShortAudio(2);
+          await start();
+
+          await runTest();
+
+          expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+          const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+          expect(streamsByType.has(ContentType.AUDIO)).toBe(false);
+          expect(streamsByType.has(ContentType.VIDEO)).toBe(true);
+          expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        });
+
+    it('does not detach before the buffered audio has played', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      /** @type {?number} */
+      let detachedAt = null;
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        detachedAt = presentationTimeInSeconds;
+        return Promise.resolve();
+      });
+      await runTest();
+
+      expect(detachedAt).toBe(20);
+    });
+
+    it('restores the audio on a seek back into it', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      let seekedBack = false;
+      await runTest(() => {
+        if (!seekedBack && presentationTimeInSeconds == 22) {
+          seekedBack = true;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+        }
+      });
+
+      expect(seekedBack).toBe(true);
+      expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+      // The audio ends again after the seek, so it is detached again.
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(2);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
+
+    it('restores the audio on a seek back during the detach', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      /** @type {function()} */
+      let finishRemoval = () => {};
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        return new Promise((resolve) => {
+          finishRemoval = resolve;
+        });
+      });
+      let seekedBack = false;
+      await runTest(() => {
+        if (!seekedBack && presentationTimeInSeconds == 22) {
+          seekedBack = true;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+          // The seek cannot reattach the audio until it is detached.
+          expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+          finishRemoval();
+        }
+      });
+
+      expect(seekedBack).toBe(true);
+      expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reset on a seek within the tail', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      let seeked = false;
+      await runTest(() => {
+        if (!seeked && presentationTimeInSeconds == 25) {
+          seeked = true;
+          presentationTimeInSeconds = 30;
+          streamingEngine.seeked();
+        }
+      });
+
+      expect(seeked).toBe(true);
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves a short tail to endOfStream', async () => {
+      // The audio ends at 39 seconds.
+      await setupShortAudio(4, 9.75);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
+
+    it('does not detach in live streams', async () => {
+      await setupShortAudio(2);
+      timeline.isDynamic.and.returnValue(true);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('live seekable range', () => {
     beforeEach(async () => {
       setupVod();
@@ -653,6 +872,7 @@ describe('StreamingEngine', () => {
     await runTest();
 
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
 
     // Verify buffers.
     expect(mediaSourceEngine.initSegments).toEqual({
