@@ -106,6 +106,45 @@ filterDescribe('Storage', checkStorageSupport, () => {
     await player.unload();
   });
 
+  it('plays content while it is being downloaded', async () => {
+    const url = '/base/test/test/assets/dash-aes-128/dash.mpd';
+
+    // Hold the download of the last segment.
+    /** @type {!Promise.PromiseWithResolvers} */
+    const lastSegment = Promise.withResolvers();
+    const netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter(async (type, request) => {
+      if (request.uris[0].includes('video=60000000')) {
+        await lastSegment.promise;
+      }
+    });
+
+    /** @type {!Promise.PromiseWithResolvers} */
+    const contentCreated = Promise.withResolvers();
+    storage.configure('offline.progressCallback', (content, progress) => {
+      if (content.offlineUri) {
+        contentCreated.resolve(content.offlineUri);
+      }
+    });
+
+    const storeOperation = storage.store(url);
+    const offlineUri = await contentCreated.promise;
+
+    await player.load(offlineUri);
+    await video.play();
+
+    // The segments stored so far can be played.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 2, 10);
+
+    // The last segment is played once it is stored.
+    lastSegment.resolve();
+    const stored = await storeOperation.promise;
+    expect(stored.isIncomplete).toBe(false);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 7, 20);
+
+    await player.unload();
+  });
+
   it('supports HLS AES-256 download and playback', async () => {
     const url = '/base/test/test/assets/hls-aes-256/media.m3u8';
     const metadata = {

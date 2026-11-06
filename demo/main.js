@@ -715,7 +715,13 @@ shakaDemo.Main = class {
       const offlineUri =
         /** @type {string} */ (asset.storedContent.offlineUri);
       return runDownload((storage) => {
-        return storage.resume(offlineUri, asset.mimeType || null);
+        const operation = storage.resume(offlineUri, asset.mimeType || null);
+        // If the content is being played, and streaming stopped at a segment
+        // that was not stored yet, continue it now that the download resumes.
+        if (this.player_.getAssetUri() == offlineUri) {
+          this.player_.retryStreaming();
+        }
+        return operation;
       });
     };
 
@@ -1603,14 +1609,29 @@ shakaDemo.Main = class {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
+   * @return {?string}  The offline URI of the asset, if it is stored or being
+   *   downloaded.  Content that is being downloaded can be played while its
+   *   download continues.
+   * @private
+   */
+  getOfflineUri_(asset) {
+    if (asset.isStored() && asset.storedContent.offlineUri) {
+      return asset.storedContent.offlineUri;
+    }
+    return asset.downloadingOfflineUri;
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
    * @return {!Promise<string>}
    * @private
    */
   async getManifestUri_(asset) {
     let manifestUri = asset.manifestUri;
-    // If we have a complete offline copy, use that.
-    if (asset.isStored() && asset.storedContent.offlineUri) {
-      manifestUri = asset.storedContent.offlineUri;
+    // If we have an offline copy, use that.
+    const offlineUri = this.getOfflineUri_(asset);
+    if (offlineUri) {
+      manifestUri = offlineUri;
     }
     // If it's a server side dai asset, request ad-containing manifest
     // from the ad manager.
@@ -1758,7 +1779,7 @@ shakaDemo.Main = class {
         itemConfig, this.desiredConfig_, itemConfig);
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, assetConfig, itemConfig);
-    const isOffline = asset.isStored() && asset.storedContent.offlineUri;
+    const isOffline = !!this.getOfflineUri_(asset);
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,
