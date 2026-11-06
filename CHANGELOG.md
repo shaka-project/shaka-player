@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.2.17](https://github.com/shaka-project/shaka-player/compare/v5.2.16...v5.2.17) (2026-11-06)
+
+
+### Bug Fixes
+
+* Avoid a TypeError when a stream fails during unload ([#10927](https://github.com/shaka-project/shaka-player/issues/10927)) ([50eee10](https://github.com/shaka-project/shaka-player/commit/50eee10b394dbf74e124f2b59fdde87729864397))
+* Avoid an unhandled rejection when a preload fails ([#10913](https://github.com/shaka-project/shaka-player/issues/10913)) ([1ec0c22](https://github.com/shaka-project/shaka-player/commit/1ec0c22c8d7f97596b420e09a72da868b2934d7d))
+* **DASH:** Apply PTO timeline adjustment only once ([#10881](https://github.com/shaka-project/shaka-player/issues/10881)) ([3b935f4](https://github.com/shaka-project/shaka-player/commit/3b935f4f819718d6489f250f4f7f3247c02faccc)), closes [#10604](https://github.com/shaka-project/shaka-player/issues/10604)
+* **DASH:** Avoid continuous manifest updates when minimumUpdatePeriod is 0 ([#10919](https://github.com/shaka-project/shaka-player/issues/10919)) ([194f63f](https://github.com/shaka-project/shaka-player/commit/194f63ffd83ff5d1abf42920a9a137cf886771dc))
+* Don't reuse failed segment prefetches on retry ([#10902](https://github.com/shaka-project/shaka-player/issues/10902)) ([8843db8](https://github.com/shaka-project/shaka-player/commit/8843db85907b10a60e15922639e65c411a0a3ce3))
+* Fix a MediaSource leak when unload() is interrupted ([#10886](https://github.com/shaka-project/shaka-player/issues/10886)) ([0e256fd](https://github.com/shaka-project/shaka-player/commit/0e256fd08c75b359e39e3dfeb107627c5ff2e1be))
+* Fix leaks and hangs when destroy() interrupts load() or attach() ([#10928](https://github.com/shaka-project/shaka-player/issues/10928)) ([3c5e038](https://github.com/shaka-project/shaka-player/commit/3c5e0389d2c36a68eeba0510c34d93f0b81fb539))
+* Fix TypeError when the segment index is released during a switch ([#10885](https://github.com/shaka-project/shaka-player/issues/10885)) ([02fb39f](https://github.com/shaka-project/shaka-player/commit/02fb39f299c1375d05c2a60f6e1fbf00fcaf3189))
+* **Preload:** Choose the initial variant from the player's bandwidth estimate ([#10827](https://github.com/shaka-project/shaka-player/issues/10827)) ([42023af](https://github.com/shaka-project/shaka-player/commit/42023af6b928b93b87d62f01c67b0dbd6ffb8115)), closes [#10825](https://github.com/shaka-project/shaka-player/issues/10825)
+* **Text:** Align wrapped lines correctly on older browsers ([#10851](https://github.com/shaka-project/shaka-player/issues/10851)) ([a022633](https://github.com/shaka-project/shaka-player/commit/a0226337f5587c640ad41cd3de2cf5e865dac618))
+* **UI:** Keep the seek bar preview in sync with the live seek range ([#10924](https://github.com/shaka-project/shaka-player/issues/10924)) ([dfb27fe](https://github.com/shaka-project/shaka-player/commit/dfb27fe254bcaffae79813d807eba7ae0703fa93))
+
+
+### Performance Improvements
+
+* Optimize large buffer comparison ([#10916](https://github.com/shaka-project/shaka-player/issues/10916)) ([576d346](https://github.com/shaka-project/shaka-player/commit/576d346d4dcc3af46057f9fcb77912401cc98d48))
+
 ## [5.2.16](https://github.com/shaka-project/shaka-player/compare/v5.2.15...v5.2.16) (2026-10-29)
 
 
