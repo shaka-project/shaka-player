@@ -1401,13 +1401,16 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
      *
      * @param {!shaka.extern.Stream} stream
      * @param {!Array<number>} startTimes
+     * @param {number=} secondsPerGroup How the Groups the segments arrive in
+     *   are numbered: one every this many seconds of media from 0.
      */
-    function deliverSegments(stream, startTimes) {
+    function deliverSegments(stream, startTimes, secondsPerGroup = 2) {
       const subscription = lastSubscribeTo('video0');
       expect(subscription).not.toBeNull();
       for (const startTime of startTimes) {
         nextSegments = [fakeSegment(startTime)];
-        subscription.callback(mediaObject(startTime));
+        subscription.callback(
+            mediaObject(Math.floor(startTime / secondsPerGroup)));
       }
       nextSegments = [];
     }
@@ -1566,6 +1569,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
       expect(presentationTimeline().getSegmentAvailabilityStart()).toBe(40);
       expect(presentationTimeline().getSegmentAvailabilityEnd()).toBe(104);
+      // And the seek range with it, though nothing before 100 has arrived:
+      // the timeline says where to subscribe to get it.
+      expect(presentationTimeline().getSeekRangeStart()).toBe(40);
     });
 
     describe('SCTE-35 event timeline', () => {
@@ -2165,8 +2171,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         expect(subscribes.length).toBe(before + 1);
         expect(lastSubscribeTo('video0').startLocation).toEqual(
             {group: BigInt(30), object: BigInt(0), subgroup: null});
-        // A seek names its own starting point; there is nothing to join.
-        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(false);
+        // A subscription only forwards what is published after it, so what
+        // was published from the seek point on has to be filled in.
+        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(true);
         // The old subscription is withdrawn: it delivers from where the
         // player no longer is.
         expect(unsubscribeSpy).toHaveBeenCalled();
@@ -2199,6 +2206,154 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             await shaka.test.Util.shortDelay();
 
             expect(subscribes.length).toBe(after);
+          });
+
+      it('jumps ahead within the past by starting over', async () => {
+        await givenALiveStreamWithTimeline();
+
+        seekTo(41);
+        await shaka.test.Util.shortDelay();
+        expect(lastSubscribeTo('video0').startLocation).toEqual(
+            {group: BigInt(20), object: BigInt(0), subgroup: null});
+
+        // The subscription from Group 20 would get to Group 30 in the end,
+        // but only after delivering everything in between.
+        seekTo(61);
+        await shaka.test.Util.shortDelay();
+
+        expect(lastSubscribeTo('video0').startLocation).toEqual(
+            {group: BigInt(30), object: BigInt(0), subgroup: null});
+      });
+
+      it('jumps a gap just short of the index instead of starting over',
+          async () => {
+            // Where a live start lands when another stream's Group began a
+            // little earlier than this one's.
+            await givenALiveStreamWithTimeline();
+            const before = subscribes.length;
+
+            seekTo(99.5);
+            await shaka.test.Util.shortDelay();
+
+            expect(subscribes.length).toBe(before);
+            expect(unsubscribeSpy).not.toHaveBeenCalled();
+          });
+
+      it('does not follow a timeline to Groups the live edge has not reached',
+          async () => {
+            // A media timeline that disagrees with the media puts a past time
+            // in a Group that has not been published.
+            // A subscription from there waits for it for minutes, while the
+            // one already following the live edge brings it anyway.
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack()]);
+            const stream = videoStream();
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+            // Groups numbered one every four seconds, where the timeline
+            // below says every two: the live edge is in Group 25.
+            deliverSegments(stream, [100, 102], /* secondsPerGroup= */ 4);
+            lastSubscribeTo('history').callback(timelineObject([
+              [40000, [20, 0], 0],
+              [60000, [30, 0], 0],
+              [100000, [50, 0], 0],
+              [102000, [51, 0], 0],
+            ]));
+            video = new shaka.test.FakeVideo();
+            parser.setMediaElement(
+                /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)));
+            const before = subscribes.length;
+
+            // The timeline puts 61 s in Group 30, which is ahead of Group 25,
+            // the first one the live subscription delivered.
+            seekTo(61);
+            await shaka.test.Util.shortDelay();
+
+            expect(subscribes.length).toBe(before);
+            expect(unsubscribeSpy).not.toHaveBeenCalled();
+          });
+
+      it('starts a stream switched to behind the live edge at the playhead',
+          async () => {
+            // An ABR switch after a seek into the DVR window. From the live
+            // edge the new stream would hold nothing the player can use.
+            const stream = await givenALiveStreamWithTimeline();
+            seekTo(61);
+            await shaka.test.Util.shortDelay();
+
+            stream.closeSegmentIndex();
+            video.currentTime = 65;
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+
+            expect(lastSubscribeTo('video0').startLocation).toEqual(
+                {group: BigInt(30), object: BigInt(0), subgroup: null});
+          });
+
+      it('starts a stream switched to at the live edge before any seek',
+          async () => {
+            // The playhead reads 0 until playback starts, which is no
+            // position to subscribe from.
+            const stream = await givenALiveStreamWithTimeline();
+
+            stream.closeSegmentIndex();
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+
+            expect(lastSubscribeTo('video0').startLocation).toBeNull();
+          });
+
+      it('moves to where the fill starts when it starts later', async () => {
+        // A relay fills only from what its cache still holds, however far
+        // back the timeline reaches, and StreamingEngine would never buffer
+        // that far ahead of the playhead.
+        await givenALiveStreamWithTimeline();
+        seekTo(41);
+        await shaka.test.Util.shortDelay();
+        const fill = lastSubscribeTo('video0');
+        expect(fill.startLocation).toEqual(
+            {group: BigInt(20), object: BigInt(0), subgroup: null});
+
+        nextSegments = [fakeSegment(80)];
+        fill.callback(mediaObject(40));
+        nextSegments = [];
+
+        expect(video.currentTime).toBe(80);
+      });
+
+      it('moves to the first Group start when nothing could be filled',
+          async () => {
+            // With nothing to fill, the subscription delivers from the
+            // middle of the live Group, where decoding cannot begin.
+            await givenALiveStreamWithTimeline();
+            seekTo(41);
+            await shaka.test.Util.shortDelay();
+            const fill = lastSubscribeTo('video0');
+
+            const dependent = fakeSegment(103);
+            dependent.independent = false;
+            nextSegments = [dependent];
+            fill.callback(mediaObject(51));
+            expect(video.currentTime).toBe(41);
+
+            nextSegments = [fakeSegment(104)];
+            fill.callback(mediaObject(52));
+            nextSegments = [];
+
+            expect(video.currentTime).toBe(104);
+          });
+
+      it('leaves the playhead alone when the fill starts where asked',
+          async () => {
+            await givenALiveStreamWithTimeline();
+            seekTo(41);
+            await shaka.test.Util.shortDelay();
+
+            nextSegments = [fakeSegment(40)];
+            lastSubscribeTo('video0').callback(mediaObject(20));
+            nextSegments = [];
+
+            expect(video.currentTime).toBe(41);
           });
 
       it('goes back to the live edge on a seek to live', async () => {

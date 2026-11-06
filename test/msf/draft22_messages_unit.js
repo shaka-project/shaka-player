@@ -148,9 +148,30 @@ filterDescribe('shaka.msf.draft22.MessageWriter', isMSFSupported, () => {
     });
   });
 
-  describe('fillCurrentGroupParam', () => {
+  describe('fillParam', () => {
+    it('should fill from a start in the past as Absolute Start', () => {
+      const param = writer.fillParam({group: BigInt(7), object: BigInt(3)});
+
+      expect(param.type).toBe(BigInt(0x23));
+      expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
+        0x01, // Parameter count
+        0x21, // LOCATION_FILTER, with no length
+        0x02, // Location Filter Type: Absolute Start
+        0x07, 0x03, // {7, 3}
+      ]);
+    });
+
+    it('should spell a fill from the origin', () => {
+      // Draft-22 reads two zeroed fields as {0, 0}, not as the Next Object.
+      const param = writer.fillParam({group: BigInt(0), object: BigInt(0)});
+
+      expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
+        0x01, 0x21, 0x02, 0x00, 0x00,
+      ]);
+    });
+
     it('should ask for the current Group as Relative Start 1', () => {
-      const param = writer.fillCurrentGroupParam();
+      const param = writer.fillParam(null);
 
       expect(param.type).toBe(BigInt(0x23));
       expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
