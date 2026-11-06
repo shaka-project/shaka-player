@@ -347,6 +347,60 @@ describe('UI', () => {
       videoContainer.appendChild(video);
     });
 
+    /**
+     * Adds a fixed-size button to the bottom control panel.  The size is set
+     * inline so the test does not depend on CSS variable support.
+     *
+     * @return {!HTMLElement}
+     */
+    function addPanelButton() {
+      const panel = videoContainer.querySelector(
+          '.shaka-controls-button-panel');
+      const button = /** @type {!HTMLElement} */ (
+        document.createElement('button'));
+      button.style.width = '48px';
+      button.style.height = '48px';
+      panel.appendChild(button);
+      return button;
+    }
+
+    // These tests compare layout boxes instead of hit-testing with
+    // elementFromPoint(), whose result depends on the device viewport and on
+    // anything else drawn on the test page.
+    it('leaves a gap between the seek bar and the buttons below', async () => {
+      videoContainer.style.width = '600px';
+      await UiUtils.createUIThroughAPI(videoContainer, video, {
+        controlPanelElements: [],
+      });
+      const seekBar = videoContainer.querySelector('.shaka-seek-bar-container');
+      const button = addPanelButton();
+
+      // Taps just below the seek bar should land on the panel, not a button.
+      // Without the gap, the button overlaps the bottom of the seek bar.
+      const gap = button.getBoundingClientRect().top -
+          seekBar.getBoundingClientRect().bottom;
+      expect(gap).not.toBeLessThan(4);
+    });
+
+    for (const addSeekBar of [false, true]) {
+      it('adds no gap above the buttons without a visible seek bar ' +
+          addSeekBar, async () => {
+        videoContainer.style.width = '600px';
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          addSeekBar: addSeekBar,
+          controlPanelElements: [],
+        });
+        if (addSeekBar) {
+          const seekBar = /** @type {!HTMLElement} */ (
+            videoContainer.querySelector('.shaka-seek-bar-container'));
+          shaka.ui.Utils.setDisplay(seekBar, false);
+        }
+        const panel = videoContainer.querySelector(
+            '.shaka-controls-button-panel');
+        expect(getComputedStyle(panel).paddingTop).toBe('0px');
+      });
+    }
+
     it('goes into fullscreen on double click', async () => {
       if (!document.fullscreenEnabled) {
         pending('This test requires fullscreen support, which is unavailable.');
