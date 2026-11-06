@@ -1,5 +1,36 @@
 # Changelog
 
+## [5.3.4](https://github.com/shaka-project/shaka-player/compare/v5.3.3...v5.3.4) (2026-11-06)
+
+
+### Bug Fixes
+
+* **Ads:** Detect mid-rolls when no video frames are presented ([#10925](https://github.com/shaka-project/shaka-player/issues/10925)) ([4b53b29](https://github.com/shaka-project/shaka-player/commit/4b53b290ac9928b84db1f0c433f4e479dacb951a))
+* **Ads:** Exclude embedded slots from the interstitial break count ([#10926](https://github.com/shaka-project/shaka-player/issues/10926)) ([a34df11](https://github.com/shaka-project/shaka-player/commit/a34df1119341f1c72afbb8f7ccb4661136248577))
+* Avoid a TypeError when a stream fails during unload ([#10927](https://github.com/shaka-project/shaka-player/issues/10927)) ([13c95f3](https://github.com/shaka-project/shaka-player/commit/13c95f34ab4f846df4a0da4a6308952bc6b68ec1))
+* Avoid an unhandled rejection when a preload fails ([#10913](https://github.com/shaka-project/shaka-player/issues/10913)) ([da207d3](https://github.com/shaka-project/shaka-player/commit/da207d364d0ca3cb243d8878a92d964c6b2b98a1))
+* **DASH:** Apply PTO timeline adjustment only once ([#10881](https://github.com/shaka-project/shaka-player/issues/10881)) ([012f2d9](https://github.com/shaka-project/shaka-player/commit/012f2d9134d5446949e560f2d6a9b2a9426c0370)), closes [#10604](https://github.com/shaka-project/shaka-player/issues/10604)
+* **DASH:** Avoid continuous manifest updates when minimumUpdatePeriod is 0 ([#10919](https://github.com/shaka-project/shaka-player/issues/10919)) ([6621d9f](https://github.com/shaka-project/shaka-player/commit/6621d9ff1a5e08aab3629424575e22b7bd4c8fab))
+* **DASH:** Keep the text timestamp offset when video is in another Period ([#10895](https://github.com/shaka-project/shaka-player/issues/10895)) ([4c6950a](https://github.com/shaka-project/shaka-player/commit/4c6950a1ab94a56e8669ca03f6340070e140fe0d))
+* Don't reuse failed segment prefetches on retry ([#10902](https://github.com/shaka-project/shaka-player/issues/10902)) ([031c17f](https://github.com/shaka-project/shaka-player/commit/031c17fe2f58e6ea1b347cd24b50c3b5304b8237))
+* Fix a MediaSource leak when unload() is interrupted ([#10886](https://github.com/shaka-project/shaka-player/issues/10886)) ([680afb5](https://github.com/shaka-project/shaka-player/commit/680afb515572572422c81ce64fcfcffd6cd42dcc))
+* Fix leaks and hangs when destroy() interrupts load() or attach() ([#10928](https://github.com/shaka-project/shaka-player/issues/10928)) ([44ad8ae](https://github.com/shaka-project/shaka-player/commit/44ad8ae265ee5a4c803756ec0b7d755f781a330a))
+* Fix TypeError when the segment index is released during a switch ([#10885](https://github.com/shaka-project/shaka-player/issues/10885)) ([3ca0b6c](https://github.com/shaka-project/shaka-player/commit/3ca0b6c2459b4c0ebe556142573ebce8bcedb480))
+* Make codec rejection in the MediaSource polyfill work ([#10868](https://github.com/shaka-project/shaka-player/issues/10868)) ([1e8d709](https://github.com/shaka-project/shaka-player/commit/1e8d70978a30add34b4a8d2823f51a09d3259303))
+* **MKV:** preserve raw MP3 continuity across clusters ([#10857](https://github.com/shaka-project/shaka-player/issues/10857)) ([8f1ac8f](https://github.com/shaka-project/shaka-player/commit/8f1ac8fc4b344b384b13f488e9d5ada7e806b813))
+* **MSF:** Stop waiting early for a fill fetch stream that never shows up ([#10898](https://github.com/shaka-project/shaka-player/issues/10898)) ([0c27a46](https://github.com/shaka-project/shaka-player/commit/0c27a465845b83e882d8ce2af16b58623c89d454)), closes [#10892](https://github.com/shaka-project/shaka-player/issues/10892)
+* **Preload:** Choose the initial variant from the player's bandwidth estimate ([#10827](https://github.com/shaka-project/shaka-player/issues/10827)) ([c33a7e8](https://github.com/shaka-project/shaka-player/commit/c33a7e81d3c3e3b731ed79cb98b7b9952f9af364)), closes [#10825](https://github.com/shaka-project/shaka-player/issues/10825)
+* **Text:** Align wrapped lines correctly on older browsers ([#10851](https://github.com/shaka-project/shaka-player/issues/10851)) ([bc6b3e6](https://github.com/shaka-project/shaka-player/commit/bc6b3e6d7e726634063b1b53666f55e66ef54909))
+* **UI:** Fix mouse wheel seeking on the seek bar ([#10880](https://github.com/shaka-project/shaka-player/issues/10880)) ([f6c4c00](https://github.com/shaka-project/shaka-player/commit/f6c4c005bcda2083f52dc7e31028f3687ff155e2)), closes [#10879](https://github.com/shaka-project/shaka-player/issues/10879)
+* **UI:** Keep the keyboard focus indicator visible over the video ([#10906](https://github.com/shaka-project/shaka-player/issues/10906)) ([f9a59bc](https://github.com/shaka-project/shaka-player/commit/f9a59bcf83f87b9cd87903ba91518ed8c9e2991f)), closes [#3146](https://github.com/shaka-project/shaka-player/issues/3146)
+* **UI:** Keep the seek bar preview in sync with the live seek range ([#10924](https://github.com/shaka-project/shaka-player/issues/10924)) ([cd026a3](https://github.com/shaka-project/shaka-player/commit/cd026a36a0f451affc1295e45f516abdf0eed499))
+* **UI:** Make tooltips dismissible and hoverable ([#10904](https://github.com/shaka-project/shaka-player/issues/10904)) ([d1175c5](https://github.com/shaka-project/shaka-player/commit/d1175c59afef5c02a5083dfe3a286947c0b84929)), closes [#3146](https://github.com/shaka-project/shaka-player/issues/3146)
+
+
+### Performance Improvements
+
+* Optimize large buffer comparison ([#10916](https://github.com/shaka-project/shaka-player/issues/10916)) ([7f61e6d](https://github.com/shaka-project/shaka-player/commit/7f61e6d140c70d6aec176ce11ace791a0eaf51ec))
+
 ## [5.3.3](https://github.com/shaka-project/shaka-player/compare/v5.3.2...v5.3.3) (2026-10-29)
 
 
