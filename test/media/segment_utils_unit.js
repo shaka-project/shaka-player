@@ -775,6 +775,33 @@ describe('SegmentUtils', () => {
     runCTRDecryptTest('AES-256-CTR', aes256Key, iv16);
     runGCMDecryptTest('AES-256-GCM', aes256Key);
 
+    // https://github.com/shaka-project/shaka-player/issues/10936
+    for (const sequence of [2147483648, 3000000000, 4294967297]) {
+      it(`derives implicit IV from media sequence ${sequence}`, async () => {
+        // RFC 8216: the IV is the media sequence number as a big-endian
+        // 128-bit integer.
+        const iv = new Uint8Array(16);
+        let remaining = sequence;
+        for (let i = 15; i >= 0; i--) {
+          iv[i] = remaining % 256;
+          remaining = Math.floor(remaining / 256);
+        }
+        const cryptoKey = await window.crypto.subtle.importKey(
+            'raw', aes128Key, {name: 'AES-CBC'}, false, ['decrypt']);
+        const ciphertext = await encryptSegmentCBC(aes128Key, iv);
+        const aesKey = {
+          bitsKey: 128,
+          blockCipherMode: 'CBC',
+          cryptoKey,
+          iv: undefined,
+          firstMediaSequenceNumber: sequence - 1,
+        };
+        const decrypted = await SegmentUtils.aesDecrypt(ciphertext, aesKey, 1);
+        expect(shaka.util.StringUtils.fromUTF8(decrypted))
+            .toBe('Shaka AES test segment');
+      });
+    }
+
     it('throws HLS_INVALID_GCM_SEGMENT if GCM segment too short', async () => {
       const aesKey = {
         bitsKey: 256,
