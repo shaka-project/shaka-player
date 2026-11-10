@@ -437,26 +437,31 @@ Controls which MoQT draft version(s) to negotiate with the server.
 
 | Value | WebTransport protocol strings offered | Description |
 |---|---|---|
-| `shaka.config.MsfVersion.AUTO` | `moqt-22`, `moqt-21`, `moqt-20`, `moqt-18` | Offer every supported draft, newest first (default). |
+| `shaka.config.MsfVersion.AUTO` | `moqt-23`, `moqt-22`, `moqt-21`, `moqt-20`, `moqt-18` | Offer every supported draft, newest first (default). |
+| `shaka.config.MsfVersion.DRAFT_23` | `moqt-23` | Force draft-23 only. |
 | `shaka.config.MsfVersion.DRAFT_22` | `moqt-22` | Force draft-22 only. |
 | `shaka.config.MsfVersion.DRAFT_21` | `moqt-21` | Force draft-21 only. |
 | `shaka.config.MsfVersion.DRAFT_20` | `moqt-20` | Force draft-20 only. |
 | `shaka.config.MsfVersion.DRAFT_18` | `moqt-18` | Force draft-18 only. |
 
-Draft-18, draft-20, draft-21 and draft-22 are one family. Draft-20 changed a
-single thing Shaka can observe -- FETCH lost its Fetch Type field and its Start
-and End Locations, which moved into the `LOCATION_FILTER` parameter -- and
-draft-21 changed nothing at all on the wire, only how the specification is
+Draft-18, draft-20, draft-21, draft-22 and draft-23 are one family. Draft-20
+changed a single thing Shaka can observe -- FETCH lost its Fetch Type field and
+its Start and End Locations, which moved into the `LOCATION_FILTER` parameter --
+and draft-21 changed nothing at all on the wire, only how the specification is
 organised. Draft-22 changed `LOCATION_FILTER` again: its value now leads with an
-explicit Location Filter Type instead of a length. So all four share one
-implementation, and the newer ones differ only in how that parameter is written
-and in the subprotocol string relays select.
+explicit Location Filter Type instead of a length. Draft-23 made the length of
+every control message a var int, answers FETCH with a `REQUEST_OK`, replaced
+`FORWARD` with `PAUSED`, dropped the length around `FILL_PARAMETERS`, and
+changed how fetch streams number Objects and mark the ends of ranges, Groups
+and the Track. So all five share one implementation, and the newer ones differ
+only in how those messages are written and read and in the subprotocol string
+relays select.
 
 ```js
 player.configure({
   manifest: {
     msf: {
-      version: shaka.config.MsfVersion.DRAFT_22,
+      version: shaka.config.MsfVersion.DRAFT_23,
     }
   }
 });

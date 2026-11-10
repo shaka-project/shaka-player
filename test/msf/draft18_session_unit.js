@@ -279,6 +279,97 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
             message: jasmine.stringMatching(
                 /code 16, reason "non-matching namespace"/),
           }));
+      expect(written.length).toBe(1);
+    });
+  });
+
+  describe('a request rejected with a Retry Interval', () => {
+    /**
+     * A REQUEST_ERROR with code EXCESSIVE_LOAD (0x9), the given Retry
+     * Interval and an empty Reason.
+     *
+     * @param {number} retryInterval The wait in milliseconds plus one.
+     * @return {!Uint8Array}
+     */
+    function requestError(retryInterval) {
+      const payload = bytesOf(0x9, retryInterval, 0);
+      return new Uint8Array([0x05, 0x00, payload.length].concat(payload));
+    }
+
+    /**
+     * Answers the request in flight, then waits for the session to act on
+     * the answer, which for a retry means opening the next request stream.
+     *
+     * @param {!Uint8Array} response
+     * @return {!Promise}
+     */
+    async function answer(response) {
+      responses.enqueue(response);
+      await shaka.test.Util.shortDelay();
+    }
+
+    it('is sent again with a new Request ID', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      await answer(requestError(1)); // Retry at once
+      await answer(subscribeOk());
+
+      expect(await subscribed).toBe(BigInt(7));
+      expect(written.length).toBe(2);
+      // Past the SUBSCRIBE type and its 16-bit Length.
+      expect(written[0][3]).toBe(0x00);
+      expect(written[1][3]).toBe(0x02);
+    });
+
+    it('is sent again when it was a FETCH', async () => {
+      const fetched = session.fetch(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      await answer(requestError(1));
+      await answer(fetchOk());
+
+      await expectAsync(fetched).toBeResolved();
+      expect(written.length).toBe(2);
+      expect(written[1][0]).toBe(0x16); // FETCH
+    });
+
+    it('fails after three retries', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      const outcome = expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(/code 9, reason "", retry after/),
+          }));
+      await shaka.test.Util.shortDelay();
+      for (let i = 0; i < 4; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        await answer(requestError(1));
+      }
+
+      await outcome;
+      expect(written.length).toBe(4);
+    });
+
+    it('fails at once when asked to wait too long', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      const outcome = expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(/retry after 3001 ms/),
+          }));
+      await shaka.test.Util.shortDelay();
+      await answer(requestError(3002));
+
+      await outcome;
+      expect(written.length).toBe(1);
+    });
+
+    it('is not sent again once the session is closing', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      const outcome = expectAsync(subscribed).toBeRejected();
+      await shaka.test.Util.shortDelay();
+      session.release();
+      await answer(requestError(1));
+
+      await outcome;
+      expect(written.length).toBe(1);
     });
   });
 
@@ -1114,6 +1205,324 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         await read;
         expect(receivedLocations()).toEqual(['5:2']);
       });
+    });
+  });
+
+  describe('in draft-23', () => {
+    // MSF_COMPRESSION = GZIP, as in the Track Properties tests.
+    const COMPRESSION = [0x78, 0x01];
+
+    beforeEach(() => {
+      session.release();
+      session = createSession(
+          () => new shaka.msf.draft23.MessageWriter(codec));
+    });
+
+    /**
+     * A control message framed the draft-23 way: a var int type and a var
+     * int Length.
+     *
+     * @param {number} type
+     * @param {!Array<number>} payload
+     * @return {!Uint8Array}
+     */
+    function message(type, payload) {
+      return new Uint8Array(
+          bytesOf(type, payload.length).concat(payload));
+    }
+
+    /**
+     * @return {!Uint8Array}
+     */
+    function subscribeOk23() {
+      return message(0x04, [
+        0x07, // Track Alias
+        0x01, // Parameter count
+        0x09, 0x00, 0x00, // LARGEST_OBJECT = {0, 0}
+      ]);
+    }
+
+    /**
+     * The Parameters of the SUBSCRIBE this session sent, past its one-byte
+     * type and one-byte Length and the fields ahead of them.
+     *
+     * @return {!Array<number>}
+     */
+    function subscribeParams() {
+      expect(written.length).toBe(1);
+      const bytes = written[0];
+      expect(bytes[0]).toBe(0x03); // SUBSCRIBE
+      expect(bytes[1]).toBe(bytes.length - 2); // Length, a var int
+      return Array.from(bytes.subarray(
+          2 + 1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length));
+    }
+
+    /**
+     * Sends a FETCH and answers it with a REQUEST_OK.
+     *
+     * @param {!Array<number>=} properties
+     * @return {!Promise<!Array<!shaka.extern.MsfObject>>}
+     */
+    async function acceptedFetch(properties = []) {
+      /** @type {!Array<!shaka.extern.MsfObject>} */
+      const received = [];
+      const fetched = session.fetch(
+          NAMESPACE, TRACK, (obj) => received.push(obj));
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(message(0x07, [0x00].concat(properties)));
+      await fetched;
+      return received;
+    }
+
+    /**
+     * @param {!Array<!shaka.extern.MsfObject>} objects
+     * @return {!Array<string>}
+     */
+    function locationsOf(objects) {
+      return objects.map((obj) => `${obj.location.group}/` +
+          `${obj.location.subgroup}/${obj.location.object}`);
+    }
+
+    it('subscribes without FORWARD, which PAUSED replaced', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk23());
+      expect(await subscribed).toBe(BigInt(7));
+
+      expect(subscribeParams()).toEqual([
+        0x01, // Parameter count
+        0x20, 0x00, // SUBSCRIBER_PRIORITY = 0
+      ]);
+    });
+
+    it('reads the var int Length of the messages that follow', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk23());
+      const alias = await subscribed;
+
+      responses.enqueue(message(0x0b, [0x00, 0x00, 0x00])); // PUBLISH_DONE
+      await shaka.test.Util.shortDelay();
+
+      expect(registryOf().getTrackInfoFromAlias(alias).closed).toBe(true);
+    });
+
+    it('joins with FILL_PARAMETERS that has no length', async () => {
+      const subscribed = session.subscribe(
+          NAMESPACE, TRACK, () => {},
+          /* startLocation= */ null, /* joinCurrentGroup= */ true);
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk23());
+      await subscribed;
+
+      expect(subscribeParams()).toEqual([
+        0x03, // Parameter count
+        0x20, 0x00, // SUBSCRIBER_PRIORITY = 0
+        0x01, 0x05, // delta 0x01 -> LOCATION_FILTER, Next Object
+        0x02, // delta 0x02 -> FILL_PARAMETERS, with no length:
+        0x01, // Number of Parameters
+        0x21, 0x01, 0x01, // LOCATION_FILTER, Relative Start, StartGroup 1
+      ]);
+    });
+
+    it('refuses a control message longer than 65535 bytes', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(new Uint8Array(bytesOf(0x04, 65536)));
+
+      await expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(/MAX_CONTROL_MESSAGE_SIZE/),
+          }));
+    });
+
+    it('reports the reason of a REQUEST_ERROR with Error Details',
+        async () => {
+          const reason = 'moved';
+          const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+          await shaka.test.Util.shortDelay();
+          responses.enqueue(message(0x05, [
+            0x34, // Error Code = REDIRECT
+            0x00, // Retry Interval
+            reason.length,
+            ...Array.from(reason, (c) => c.charCodeAt(0)),
+            // REDIRECT Error Detail: empty Connect URI, namespace ['b'],
+            // Track Name 'c'.
+            0x01, 0x06, 0x00, 0x01, 0x01, 0x62, 0x01, 0x63,
+          ]));
+
+          await expectAsync(subscribed).toBeRejectedWith(
+              jasmine.objectContaining({
+                message: jasmine.stringMatching(
+                    /code 52, reason "moved", redirect to b:c$/),
+              }));
+        });
+
+    it('names the Connect URI of a REDIRECT', async () => {
+      const uri = 'https://x';
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      const detail = [
+        uri.length, ...Array.from(uri, (c) => c.charCodeAt(0)),
+        0x01, 0x01, 0x62, // namespace ['b']
+        0x01, 0x63, // Track Name 'c'
+      ];
+      responses.enqueue(message(0x05, [
+        0x34, 0x00, 0x00, // REDIRECT, no Retry Interval, empty Reason
+        0x01, detail.length, ...detail,
+      ]));
+
+      await expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(/redirect to b:c at https:\/\/x/),
+          }));
+    });
+
+    it('lists every UNSUPPORTED_PROPERTY Error Detail', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(message(0x05, bytesOf(
+          0x33, 0x00, 0x00, // UNSUPPORTED_EXTENSION, no retry, empty Reason
+          0x02, 0x4001, // UNSUPPORTED_PROPERTY 0x4001
+          0x00, 0x4002, // delta 0: UNSUPPORTED_PROPERTY again, 0x4002
+          0x11a, 0x05))); // delta to 0x11C, an even grease type, skipped
+
+      await expectAsync(subscribed).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(
+                /code 51, reason "", unsupported properties 0x4001, 0x4002$/),
+          }));
+    });
+
+    it('still reports the error when the Error Details are malformed',
+        async () => {
+          const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+          await shaka.test.Util.shortDelay();
+          responses.enqueue(message(0x05, [
+            0x34, 0x00, 0x00,
+            0x01, 0x10, 0x00, // a REDIRECT claiming more bytes than it has
+          ]));
+
+          await expectAsync(subscribed).toBeRejectedWith(
+              jasmine.objectContaining({
+                message: jasmine.stringMatching(/code 52, reason ""$/),
+              }));
+        });
+
+    it('retries a request a relay had no stream credit for', async () => {
+      const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      // UNAVAILABLE (0xA), retry after 0 ms, empty Reason.
+      responses.enqueue(message(0x05, [0x0a, 0x01, 0x00]));
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(subscribeOk23());
+
+      expect(await subscribed).toBe(BigInt(7));
+      expect(written.length).toBe(2);
+    });
+
+    it('reads the peer SETUP with a var int Length', async () => {
+      const stream = new ReadableStream({
+        start: (controller) => {
+          controller.enqueue(new Uint8Array(bytesOf(
+              2, // Length, after the SETUP type the caller has read
+              0x02, 0x05, // an even Setup Option
+              0x10, 1, 0))); // GOAWAY with an empty New Session URI
+          controller.close();
+        },
+      });
+      const reader = new shaka.msf.Reader(
+          new Uint8Array([]), stream, new shaka.msf.draft18.Codec());
+
+      // Read as 16 bits, the Length would be 514 and swallow the stream.
+      await expectAsync(readPeerControlStream(reader)).toBeResolved();
+    });
+
+    /**
+     * @param {!shaka.msf.Reader} reader
+     * @return {!Promise}
+     * @suppress {visibility}
+     */
+    function readPeerControlStream(reader) {
+      return session.handlePeerControlStream_(reader);
+    }
+
+    it('accepts a FETCH answered by a REQUEST_OK', async () => {
+      const received = await acceptedFetch(COMPRESSION);
+      await readFetchStream(fetchStreamOf(bytesOf(
+          0, 0x1c, 3, 0, [0x80], 1, [0xa0])));
+
+      expect(written[0][0]).toBe(0x16); // FETCH
+      expect(received.length).toBe(1);
+      expect(received[0].trackProperties).toEqual(new Uint8Array(COMPRESSION));
+    });
+
+    it('no longer takes a FETCH_OK for an answer', async () => {
+      const fetched = session.fetch(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(message(0x18, [0x00, 0x00, 0x00, 0x00]));
+
+      await expectAsync(fetched).toBeRejectedWith(
+          jasmine.objectContaining({
+            message: jasmine.stringMatching(/unexpected response type 0x18/),
+          }));
+    });
+
+    it('reads draft-23 fetch streams', async () => {
+      const received = await acceptedFetch();
+      await readFetchStream(fetchStreamOf(bytesOf(
+          0, // Request ID
+          // Group 3, Object 0, with a Priority.
+          0x1c, 3, 0, [0x80], 1, [0xa0],
+          // An Object ID Delta within a Group is 2 short of the gap.
+          0x04, 1, 1, [0xa1],
+          // End of Group: the next Object has to name its Group.
+          0x80,
+          // Group 3 + 1 + 1, Object 0 afresh.
+          0x0c, 1, 0, 1, [0xa2],
+          // End of Non-Existent Range in the same Group: Object 0 + 3 + 1.
+          0x8c, 0, 3,
+          0x00, 1, [0xa3],
+          // End of Gone Range two Groups on, at an absolute Object 1.
+          0x40c, 2, 1,
+          0x00, 1, [0xa4],
+          // End of Track.
+          0x81)));
+
+      expect(locationsOf(received)).toEqual(
+          ['3/0/0', '3/0/3', '5/0/0', '5/0/5', '7/0/2']);
+      expect(received.map((obj) => obj.data[0])).toEqual(
+          [0xa0, 0xa1, 0xa2, 0xa3, 0xa4]);
+    });
+
+    it('reads an End of Range that opens the stream as absolute', async () => {
+      const received = await acceptedFetch();
+      await readFetchStream(fetchStreamOf(bytesOf(
+          0, 0x10c, 4, 2, 0x00, 1, [0xa0])));
+
+      expect(locationsOf(received)).toEqual(['4/0/3']);
+    });
+
+    it('refuses an Object that does not name its Group after End of Group',
+        async () => {
+          const received = await acceptedFetch();
+          await expectAsync(readFetchStream(fetchStreamOf(bytesOf(
+              0, 0x1c, 3, 0, [0x80], 1, [0xa0], 0x80, 0x00, 1, [0xa1]))))
+              .toBeRejected();
+
+          expect(locationsOf(received)).toEqual(['3/0/0']);
+        });
+  });
+
+  describe('before draft-23', () => {
+    it('refuses End of Group, which draft-23 introduced', async () => {
+      const fetched = session.fetch(NAMESPACE, TRACK, () => {});
+      await shaka.test.Util.shortDelay();
+      responses.enqueue(fetchOk());
+      await fetched;
+
+      await expectAsync(readFetchStream(fetchStreamOf(bytesOf(
+          0, 0x1c, 3, 0, [0x80], 1, [0xa0], 0x80)))).toBeRejected();
     });
   });
 });
