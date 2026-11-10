@@ -196,6 +196,62 @@ describe('AdaptationSet', () => {
         .toBeFalsy();
   });
 
+  describe('containers', () => {
+    const tsMime = 'video/mp2t';
+    const mp4Mime = 'video/mp4';
+    const avc = ['avc1.4d401e', 'mp4a.40.2'];
+    const hevc = ['hvc1.1.6.L93.90', 'mp4a.40.2'];
+
+    /**
+     * @param {number} id
+     * @param {string} mimeType
+     * @param {!Array<string>} codecs
+     * @return {shaka.extern.Variant}
+     */
+    function makeMuxedVariant(id, mimeType, codecs) {
+      const video = makeStream(id, mimeType, codecs, [], null);
+      video.type = 'video';
+      return makeVariant(id, null, video);
+    }
+
+    it('accepts transmuxed TS and MP4 with the same codecs', () => {
+      // Only meaningful where TS is transmuxed to MP4.
+      if (!shaka.util.MimeUtils.getFullOrConvertedType(
+          tsMime, avc.join(','), 'video').startsWith(mp4Mime)) {
+        pending('TS is not transmuxed to MP4 on this platform');
+      }
+      const set = new shaka.media.AdaptationSet(
+          makeMuxedVariant(1, mp4Mime, avc), [], /* compareCodecs= */ true);
+      expect(set.canInclude(makeMuxedVariant(2, tsMime, avc),
+          /* compareCodecs= */ true)).toBeTruthy();
+    });
+
+    it('rejects transmuxed TS and MP4 with other codecs', () => {
+      const set = new shaka.media.AdaptationSet(
+          makeMuxedVariant(1, mp4Mime, hevc), [], /* compareCodecs= */ true);
+      expect(set.canInclude(makeMuxedVariant(2, tsMime, avc),
+          /* compareCodecs= */ true)).toBeFalsy();
+    });
+
+    it('rejects TS and MP4 when TS is not transmuxed', () => {
+      spyOn(shaka.transmuxer.TransmuxerEngine, 'isSupported')
+          .and.returnValue(false);
+      const set = new shaka.media.AdaptationSet(
+          makeMuxedVariant(1, mp4Mime, avc), [], /* compareCodecs= */ true);
+      expect(set.canInclude(makeMuxedVariant(2, tsMime, avc),
+          /* compareCodecs= */ true)).toBeFalsy();
+    });
+
+    it('accepts TS and MP4 when codecs can be switched smoothly', () => {
+      spyOn(shaka.transmuxer.TransmuxerEngine, 'isSupported')
+          .and.returnValue(false);
+      const set = new shaka.media.AdaptationSet(
+          makeMuxedVariant(1, mp4Mime, avc), [], /* compareCodecs= */ false);
+      expect(set.canInclude(makeMuxedVariant(2, tsMime, avc),
+          /* compareCodecs= */ false)).toBeTruthy();
+    });
+  });
+
   describe('haveSameAudio', () => {
     it('ignores the codec profile within a codec family', () => {
       const a = makeVariant(
