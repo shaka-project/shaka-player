@@ -259,6 +259,58 @@ describe('AdaptationSetCriteria', () => {
       expect(set).toBe(builder.getLastAdaptationSet());
     });
 
+    // https://github.com/shaka-project/shaka-player/issues/10938
+    it('keeps loaded TS variants next to MP4 guesses with the same codecs',
+        () => {
+          const codecs = 'avc1.4d401e,mp4a.40.2';
+          if (!shaka.util.MimeUtils.getFullOrConvertedType(
+              'video/mp2t', codecs, 'video').startsWith('video/mp4')) {
+            pending('TS is not transmuxed to MP4 on this platform');
+          }
+          // An HLS stream only has a guessed video/mp4 mimeType until its
+          // media playlist is loaded, so loaded and unloaded TS streams
+          // disagree.
+          const manifest =
+              shaka.test.ManifestGenerator.generate((manifest) => {
+                for (let i = 0; i < 5; i++) {
+                  manifest.addVariant(i, (variant) => {
+                    variant.bandwidth = (i + 1) * 1000;
+                    variant.addVideo(i + 10, (stream) => {
+                      stream.mimeType = i >= 3 ? 'video/mp2t' : 'video/mp4';
+                      stream.codecs = codecs;
+                    });
+                  });
+                }
+              });
+
+          const builder = new shaka.media.PreferenceBasedCriteria();
+          builder.configure({
+            preferredAudio: [],
+            preferredVideo: [],
+            language: '',
+            role: '',
+            videoRole: '',
+            channelCount: 0,
+            hdrLevel: '',
+            spatialAudio: false,
+            videoLayout: '',
+            audioLabel: '',
+            videoLabel: '',
+            preferredAudioCodecs: [],
+            preferredAudioChannelCount: 0,
+            codecSwitchingStrategy:
+                shaka.config.CodecSwitchingStrategy.RELOAD,
+            audioCodec: '',
+            activeAudioCodec: '',
+            activeAudioChannelCount: 0,
+            keySystem: '',
+          });
+
+          const set = builder.create(manifest.variants);
+
+          expect(Array.from(set.values()).length).toBe(5);
+        });
+
     it('chooses variants in preferred language and role', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
