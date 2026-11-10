@@ -567,6 +567,10 @@ shaka.test.FakeSegmentIndex = class {
         jasmine.createSpy('getNumReferences').and.returnValue(0);
 
     /** @type {!jasmine.Spy} */
+    this.getNumEvicted =
+        jasmine.createSpy('getNumEvicted').and.returnValue(0);
+
+    /** @type {!jasmine.Spy} */
     this.find = jasmine.createSpy('find').and.returnValue(null);
 
     /** @type {!jasmine.Spy} */

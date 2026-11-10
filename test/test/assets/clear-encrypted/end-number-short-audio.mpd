@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Audio ends after 4s, but video continues to the 8s Period end. -->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT8S">
+  <Period id="1">
+    <AdaptationSet id="10" contentType="video" maxWidth="256" maxHeight="110" frameRate="12288/512" subsegmentAlignment="true" par="40:17">
+      <SegmentTemplate timescale="1000" media="clear-v-s$Number$.mp4" startNumber="1" duration="4000" initialization="clear-v-init.mp4"/>
+      <Representation id="10" bandwidth="100803" codecs="avc1.42c01e" mimeType="video/mp4" sar="110:109" width="256" height="110"/>
+    </AdaptationSet>
+
+    <AdaptationSet id="11" contentType="audio" lang="en" subsegmentAlignment="true">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="1000" media="clear-a-s$Number$.mp4" startNumber="1" endNumber="1" duration="4000" initialization="clear-a-init.mp4"/>
+      <Representation id="11" bandwidth="132445" codecs="mp4a.40.2" mimeType="audio/mp4" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
