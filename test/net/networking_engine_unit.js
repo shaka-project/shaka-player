@@ -122,17 +122,17 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
             }
             return shaka.util.AbortableOperation.completed(createResponse());
           });
-      shaka.net.NetworkingEngine.registerScheme('streamresume', plugin);
+      shaka.net.NetworkingEngine.registerScheme('resume', Util.spyFunc(plugin));
       try {
         const request = shaka.net.NetworkingUtils.createSegmentRequest(
-            ['streamresume://seg.m4s'],
+            ['resume://seg.m4s'],
             /* start= */ 0,
             /* end= */ 99,
             retryParameters,
             () => Promise.resolve());
         await networkingEngine.request(requestType, request).promise;
       } finally {
-        shaka.net.NetworkingEngine.unregisterScheme('streamresume');
+        shaka.net.NetworkingEngine.unregisterScheme('resume');
       }
       expect(ranges).toEqual(['bytes=0-99', 'bytes=4-99']);
     });
@@ -164,21 +164,22 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
             }
             return shaka.util.AbortableOperation.completed(createResponse());
           });
-      shaka.net.NetworkingEngine.registerScheme('mdatresume', plugin);
+      shaka.net.NetworkingEngine.registerScheme(
+          'boundary', Util.spyFunc(plugin));
       try {
         const callback = () => Promise.resolve(6);
         callback['streamDataReset'] = () => {
           resets++;
         };
         const request = shaka.net.NetworkingUtils.createSegmentRequest(
-            ['mdatresume://seg.m4s'],
+            ['boundary://seg.m4s'],
             /* start= */ 0,
             /* end= */ 99,
             retryParameters,
             callback);
         await networkingEngine.request(requestType, request).promise;
       } finally {
-        shaka.net.NetworkingEngine.unregisterScheme('mdatresume');
+        shaka.net.NetworkingEngine.unregisterScheme('boundary');
       }
       expect(resets).toBe(1);
       expect(ranges).toEqual(['bytes=0-99', 'bytes=6-99']);
@@ -210,17 +211,18 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
             }
             return shaka.util.AbortableOperation.completed(createResponse());
           });
-      shaka.net.NetworkingEngine.registerScheme('streamresumefail', plugin);
+      shaka.net.NetworkingEngine.registerScheme(
+          'failure', Util.spyFunc(plugin));
       try {
         const request = shaka.net.NetworkingUtils.createSegmentRequest(
-            ['streamresumefail://seg.m4s'],
+            ['failure://seg.m4s'],
             /* start= */ 0,
             /* end= */ 99,
             retryParameters,
             () => Promise.reject(error));
         await networkingEngine.request(requestType, request).promise;
       } finally {
-        shaka.net.NetworkingEngine.unregisterScheme('streamresumefail');
+        shaka.net.NetworkingEngine.unregisterScheme('failure');
       }
       expect(ranges).toEqual(['bytes=0-99', 'bytes=0-99']);
     });
