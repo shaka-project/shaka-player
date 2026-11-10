@@ -200,12 +200,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
             ranges.push(request.headers['Range']);
             if (ranges.length == 1) {
               const pending = (async () => {
-                try {
-                  const data = new Uint8Array([1, 2, 3, 4]);
-                  await request.streamDataCallback(data);
-                } catch (e) {
-                  // The callback rejected, so those bytes must not count.
-                }
+                const data = new Uint8Array([1, 2, 3, 4]);
+                // The callback rejected, so those bytes must not count.
+                await expectAsync(request.streamDataCallback(data))
+                    .toBeRejected();
                 throw error;
               })();
               return new shaka.util.AbortableOperation(pending, () => {});
