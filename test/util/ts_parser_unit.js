@@ -257,4 +257,29 @@ describe('TsParser', () => {
       expect(tsParser.startsWithVideoKeyframe()).toBeNull();
     });
   });
+
+  it('skips the network information table in the PAT', async () => {
+    // DVB streams commonly list program 0 first, which points at the NIT on
+    // PID 0x10 rather than at a PMT.
+    const response = await Util.fetch('/base/test/test/assets/video.ts');
+    const segment = BufferUtils.toUint8(response).slice();
+
+    const section = [
+      0x00, 0xb0, 0x11, 0x00, 0x01, 0xc1, 0x00, 0x00,
+      // Program 0, the NIT on PID 0x10.
+      0x00, 0x00, 0xe0, 0x10,
+      // Program 1, its PMT on PID 32, as in the original PAT.
+      0x00, 0x01, 0xe0, 0x20,
+    ];
+    const crc = shaka.util.TsParser.crc32(new Uint8Array(section));
+    section.push(crc >>> 24, (crc >>> 16) & 0xff, (crc >>> 8) & 0xff,
+        crc & 0xff);
+    const pat = new Uint8Array(188).fill(0xff);
+    pat.set([0x47, 0x40, 0x00, 0x10, 0x00, ...section]);
+    segment.set(pat, 0);
+
+    const tsParser = new shaka.util.TsParser().parse(segment);
+    expect(tsParser.getCodecs().video).toBe('avc');
+    expect(tsParser.getVideoData().length).toBeGreaterThan(0);
+  });
 });

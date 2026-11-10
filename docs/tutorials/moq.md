@@ -16,7 +16,7 @@ underlying specifications are finalized and no longer in draft status.
 - [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/)
 - [draft-ietf-moq-loc](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/)
 - [draft-einarsson-moq-locmaf](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/)
-- [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/)
+- [draft-gregoire-moq-msfts-02](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/02/)
 - [draft-wilaw-moq-scte35-event-timeline](https://datatracker.ietf.org/doc/draft-wilaw-moq-scte35-event-timeline/)
 
 
@@ -125,7 +125,7 @@ and the rest of the catalog still plays.
 | `chunk-per-object` | One CMAF chunk | [draft-ietf-moq-cmsf](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/) |
 | `loc` | One frame of a raw bitstream | [draft-ietf-moq-loc](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/) |
 | `locmaf` | One CMAF chunk with its `moof` compacted | [draft-einarsson-moq-locmaf](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/) |
-| `m2ts` | A run of whole transport packets | [draft-gregoire-moq-msfts](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/) |
+| `mpeg2ts` | A run of whole transport packets | [draft-gregoire-moq-msfts-02](https://datatracker.ietf.org/doc/draft-gregoire-moq-msfts/02/) |
 
 Two more `packaging` values carry no media, but metadata about it:
 
@@ -167,32 +167,51 @@ player.configure('manifest.msf.catalogPreprocessor', (catalog) => {
 });
 ```
 
-### MPEG-2 Transport Stream (`m2ts`)
+### MPEG-2 Transport Stream (`mpeg2ts`)
 
-Both source packet sizes are supported: 188-octet transport packets and
-192-octet M2TS source packets, whose 4-octet arrival timestamp is discarded
-because it says nothing about presentation.
+Shaka implements draft-gregoire-moq-msfts-02. Both source packet sizes are
+supported: 188-octet transport packets and 192-octet M2TS source packets,
+whose 4-octet prefix is discarded because it says nothing about presentation.
+The `m2ts` packaging of draft-00 is no longer recognized.
 
-Two things are worth knowing about this packaging:
+Every track must declare `mpeg2tsMode`. Shaka supports the modes that carry a
+whole program:
 
-- **The track must declare `codec`.** The codec decides which source buffers
-  MediaSource opens, and that happens before the first group has arrived to be
-  inspected, so it cannot be discovered from the media. A track carrying a
-  muxed program lists both codecs, comma separated, exactly like the HLS
-  `CODECS` attribute:
+| `mpeg2tsMode` | What Shaka does |
+| --- | --- |
+| `unmodified-program` | Plays the stream as it is. |
+| `per-program` | Plays the stream as it is. |
+| `unmodified-multiplex` | Keeps only the program named in `mpeg2tsProgramNumber`, dropping the packets of every other program and rewriting the PAT. A multiplex that names no reference program is skipped, since nothing says which program to play. |
+| `es-packets` | Not supported yet; the track is skipped. |
 
-  ```json
-  {
-    "name": "program-1-ts",
-    "packaging": "m2ts",
-    "codec": "avc1.64001f,mp4a.40.2",
-    "m2tsPacketSize": 188,
-    "m2tsPcrPid": 257
-  }
-  ```
+```json
+{
+  "name": "program-1-ts",
+  "packaging": "mpeg2ts",
+  "mpeg2tsMode": "unmodified-program",
+  "mpeg2tsPacketSize": 188,
+  "mpeg2tsRandomAccess": true,
+  "initRef": "program-1-psi",
+  "codec": "avc1.64001f,mp4a.40.2"
+}
+```
 
-  Shaka opens an audio and a video source buffer from that one track and feeds
-  both from its segments.
+A few things are worth knowing about this packaging:
+
+- **Declare `codec` if you can.** The codec decides which source buffers
+  MediaSource opens, and that happens before the first group has arrived. The
+  draft does not require it, so when it is missing Shaka reads the codecs from
+  the PMT in the track's initialization data. A PMT only says which kind of
+  codec a stream uses, not its profile, so the codec strings are generic ones.
+  A track with neither is skipped. A muxed program lists both codecs, comma
+  separated, exactly like the HLS `CODECS` attribute, and Shaka opens an audio
+  and a video source buffer from that one track.
+
+- **Declare `initRef`.** The initialization data is base64 PAT/PMT packets.
+  Shaka puts the program information in front of any group that does not open
+  with its own: the latest seen in the track, or the catalog's until the track
+  has carried one. That keeps a stream playable when its program information
+  does not repeat at the start of each group.
 
 - **Latency is one Group.** A transport packet carries no timing of its own, a
   PES packet spans many of them, and an object boundary falls wherever the
@@ -201,15 +220,31 @@ Two things are worth knowing about this packaging:
   one starts. Expect higher latency than `chunk-per-object`, where each object
   can be appended the moment it arrives.
 
-Declaring `initData` (base64 PAT/PMT packets) is recommended: Shaka prepends it
-to every group, which is what keeps a stream playable when its program
-information does not repeat at the start of each group.
+- **Random access.** Unless the track declares `mpeg2tsRandomAccess: true`, a
+  Group may not begin where decoding can, so Shaka starts playback from the
+  first H.264 or H.265 IDR (or packet flagged `random_access_indicator`) it
+  finds, dropping whole groups until one has it.
 
-If the publisher signals a PCR discontinuity between two groups, Shaka
-re-anchors the media so that presentation time keeps running forward, and
-tells the transmuxer to start a fresh initialization segment.
+- **Discontinuities.** If the publisher signals a PCR discontinuity, Shaka
+  re-anchors the media so that presentation time keeps running forward, and
+  tells the transmuxer to start a fresh initialization segment. In the
+  unmodified modes a discontinuity of the source can fall in the middle of a
+  Group; Shaka then splits the Group in two there.
 
-> **Note:** `m2ts` needs the transmuxer, which is a separate build target.
+- **Alternate renditions.** The renditions of an `altGroup` do not have to
+  share a clock. When Shaka switches to one whose timestamps are on another
+  clock, it lines its first Group up with where the previous rendition placed
+  the same Group, or ended the one before it.
+
+- **SCTE-35.** Splice information carried in the stream is reported like
+  that of any other transport stream, with `source` set to `'ts'`; see
+  {@tutorial scte35}. The catalog's `mpeg2tsScte35Pid` is not needed: the PMT
+  says which PID carries it.
+
+- **Scrambling.** A stream scrambled at the transport stream level cannot be
+  descrambled by a browser, and fails with `CONTENT_UNSUPPORTED_BY_BROWSER`.
+
+> **Note:** `mpeg2ts` needs the transmuxer, which is a separate build target.
 > A custom build must include `+@transmuxer` alongside `+@msf`. The same is
 > true of HLS with transport stream segments.
 

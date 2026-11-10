@@ -254,9 +254,20 @@ ChromeAndroid:
     - *basic_chrome_config
     - *android_chrome_config
 
-ChromecastUltra:
+Chromecast1stGen:
+  # This is a very low-performing device, and many of our tests don't work here.
+  # Do not run tests here by default.
+  # This device can still be requested explicitly in the Selenium workflow.
+  disabled: true
   browser: chromecast
-  version: Ultra
+  version: 1st-gen
+
+Chromecast3rdGen:
+  browser: chromecast
+  version: 3rd-gen
+  # A full run takes about 32 minutes here even when everything passes, which
+  # leaves too little margin under the default.
+  timeout_minutes: 50
 
 ChromecastGTV:
   browser: chromecast
@@ -265,7 +276,8 @@ ChromecastGTV:
 ChromecastHub:
   browser: chromecast
   version: hub
-  # Disabled by default until we resolve issues with autoplay on Fuchsia.
+  # Disabled by default because the device stops responding partway through a
+  # full test run, apparently from resources that accumulate during playback.
   disabled: true
 
 ChromecastSpeaker:
@@ -275,14 +287,6 @@ ChromecastSpeaker:
   disabled: true
   browser: chromecast
   version: speaker
-
-ChromecastV1:
-  # This is a very low-performing device, and many of our tests don't work here.
-  # Do not run tests here by default.
-  # This device can still be requested explicitly in the Selenium workflow.
-  disabled: true
-  browser: chromecast
-  version: v1
 
 ChromecastStreamer:
   # This is publicly the "Google TV Streamer", but it's still a Chromecast, too.

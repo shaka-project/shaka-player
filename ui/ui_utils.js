@@ -78,6 +78,58 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Gives the buttons placed directly in a menu the role of a menu item, so
+   * that the menu only contains menu items.  Toggle buttons become menu item
+   * checkboxes, which report their state with aria-checked instead of
+   * aria-pressed.  Buttons that already have a role keep it.
+   *
+   * @param {!HTMLElement} menu
+   */
+  static setMenuItemRoles(menu) {
+    for (const node of Array.from(menu.childNodes)) {
+      if (node.nodeName != 'BUTTON') {
+        continue;
+      }
+      const child = /** @type {!HTMLElement} */ (node);
+      if (child.hasAttribute('role')) {
+        continue;
+      }
+      if (child.hasAttribute('aria-pressed') &&
+          !child.hasAttribute('aria-haspopup')) {
+        child.setAttribute('role', 'menuitemcheckbox');
+        child.setAttribute('aria-checked', child.getAttribute('aria-pressed'));
+      } else {
+        child.setAttribute('role', 'menuitem');
+      }
+      // aria-pressed is only allowed on buttons.  A menu item that opens a
+      // submenu shows its state in its label instead.
+      child.removeAttribute('aria-pressed');
+    }
+  }
+
+
+  /**
+   * Sets the state of a toggle button, which may be a menu item checkbox.
+   * See setMenuItemRoles().
+   *
+   * @param {!HTMLElement} button
+   * @param {boolean} pressed
+   */
+  static setPressed(button, pressed) {
+    switch (button.getAttribute('role')) {
+      case 'menuitemcheckbox':
+        button.setAttribute('aria-checked', pressed.toString());
+        break;
+      case 'menuitem':
+        break;
+      default:
+        button.setAttribute('aria-pressed', pressed.toString());
+        break;
+    }
+  }
+
+
+  /**
    * Clears out a submenu, preserving its "back to overflow menu" button so
    * the submenu can be rebuilt from scratch.
    *
@@ -106,6 +158,42 @@ shaka.ui.Utils = class {
     iconElement.classList.add('shaka-chosen-item');
 
     return iconElement;
+  }
+
+
+  /**
+   * Whether the browser is in forced colors mode (e.g. Windows high contrast).
+   *
+   * In that mode the browser drops the background gradients that range
+   * elements use to paint their progress, so their containers opt out of
+   * forced colors in CSS and must be painted with system colors instead of
+   * the configured ones.
+   *
+   * @return {boolean}
+   */
+  static isForcedColorsActive() {
+    return !!window.matchMedia &&
+        window.matchMedia('(forced-colors: active)').matches;
+  }
+
+
+  /**
+   * Calls the callback when the browser enters or leaves forced colors mode.
+   *
+   * @param {!shaka.util.EventManager} eventManager
+   * @param {function()} callback
+   */
+  static onForcedColorsChange(eventManager, callback) {
+    if (!window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(forced-colors: active)');
+    // Old browsers (e.g. Safari < 14) only support the deprecated
+    // addListener(), and they don't have a forced colors mode anyway.
+    if (!mediaQuery.addEventListener) {
+      return;
+    }
+    eventManager.listen(mediaQuery, 'change', callback);
   }
 
 

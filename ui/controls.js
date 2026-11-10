@@ -273,9 +273,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.anySettingsMenusAreOpen()) {
         return;
       }
+      const wasShown = this.controlsContainer_.getAttribute('shown') != null;
       this.controlsContainer_.removeAttribute('shown');
       this.dispatchVisibilityEvent_();
       this.computeShakaTextContainerSize_();
+
+      // The hidden controls can still have the focus, and the next key press
+      // would then act on a control nobody can see.  Give the focus back to
+      // the player instead; the keyboard shortcuts keep working there, and
+      // Tab brings the controls back.  Only do it as the controls hide: this
+      // timer also fires while they are hidden, and on some platforms (e.g.
+      // Chromecast) focus() does not move the focus, so it would be retried
+      // every time.
+      const activeElement = this.videoContainer_.ownerDocument.activeElement;
+      if (wasShown && activeElement &&
+          activeElement != this.controlsContainer_ &&
+          this.controlsContainer_.contains(activeElement)) {
+        this.restoreFocus();
+      }
 
       if (this.contextMenu_) {
         this.contextMenu_.closeMenu();
@@ -330,6 +345,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {?Element}
      */
     this.lostFocusElement_ = null;
+
+    /**
+     * Whether the last user input was a key press, as opposed to the mouse or
+     * a touch.
+     * @private {boolean}
+     */
+    this.lastInputWasKeyboard_ = false;
 
     /**
      * Checks whether the focus was lost because |lostFocusElement_| can no
@@ -1633,6 +1655,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onContainerClick();
     });
 
+    // Tooltips dismissed with Escape show again once the pointer or the focus
+    // moves to another element.
+    const showTooltips = () => {
+      this.controlsContainer_.classList.remove('shaka-tooltips-dismissed');
+    };
+    this.eventManager_.listen(
+        this.controlsContainer_, 'mouseover', showTooltips);
+    this.eventManager_.listen(
+        this.controlsContainer_, 'focusin', showTooltips);
+
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
       if (this.config_.doubleClickForFullscreen &&
           this.isFullScreenSupported()) {
@@ -1970,6 +2002,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
     });
 
+    // Tab is not the only way to move the focus with the keyboard: TV remotes
+    // and spatial navigation use the arrow keys, and the UI itself moves the
+    // focus in response to keys, e.g. when a menu opens or closes.  Whenever
+    // a control gets the focus because of a key, show the focus ring and keep
+    // the controls visible.  :focus-visible is not used for this: it is not
+    // supported everywhere (e.g. Tizen 3), and a focus() call matches it when
+    // the user has not clicked yet.
+    this.eventManager_.listen(this.controlsContainer_, 'focusin', () => {
+      if (this.lastInputWasKeyboard_ &&
+          !this.controlsContainer_.classList.contains(
+              'shaka-keyboard-navigation')) {
+        this.controlsContainer_.classList.add('shaka-keyboard-navigation');
+        this.computeOpacity();
+      }
+    });
+
+    // Capture these, so that a control that stops the propagation of an event
+    // cannot hide it.
+    this.eventManager_.listen(window, 'keydown', () => {
+      this.lastInputWasKeyboard_ = true;
+    }, {capture: true, passive: true});
+    const onPointerInput = () => {
+      this.lastInputWasKeyboard_ = false;
+    };
+    this.eventManager_.listen(window, 'mousedown', onPointerInput,
+        {capture: true, passive: true});
+    this.eventManager_.listen(window, 'touchstart', onPointerInput,
+        {capture: true, passive: true});
+
     // Hiding, disabling or removing the focused element moves the focus to
     // the body, and the keyboard controls go with it.  See restoreFocus().
     this.eventManager_.listen(this.videoContainer_, 'focusout', (e) => {
@@ -1978,6 +2039,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.lostFocusElement_ = /** @type {Element} */ (event.target);
         this.lostFocusTimer_.tickAfter(/* seconds= */ 0);
       }
+    });
+
+    // Registered before the keyboard playback controls, which skip the keys
+    // that the menus use.
+    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
+      this.onMenuKeyDown_(/** @type {!KeyboardEvent} */(e));
     });
 
     this.listenForControlsKeyEvents_(this.videoContainer_,
@@ -2366,7 +2433,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onControlsKeyDown_(event) {
-    if (event.ctrlKey || event.metaKey) {
+    // A menu with the focus already used the key.  See onMenuKeyDown_().
+    if (event.ctrlKey || event.metaKey || event.defaultPrevented) {
       return;
     }
 
@@ -2834,8 +2902,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * Add behaviors for keyboard navigation.
    * 1. Add blue outline for focused elements.
    * 2. Allow exiting overflow settings menus by pressing Esc key.
-   * 3. When navigating on overflow settings menu by pressing Tab
-   *    key or Shift+Tab keys keep the focus inside overflow menu.
+   * 3. Tab and Shift+Tab leave an open settings menu, which closes it, as
+   *    described by the ARIA Authoring Practices for menu buttons.  The arrow
+   *    keys move the focus inside the menu.  See onMenuKeyDown_().
    *
    * @param {!KeyboardEvent} event
    * @private
@@ -2851,18 +2920,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
       this.computeOpacity();
-      this.eventManager_.listen(window, 'mousedown', () => this.onMouseDown_());
     }
 
     // If escape key was pressed, close any open settings menus.
     if (event.key == 'Escape') {
       this.closeSettingsMenusAndRestoreFocus_();
+      // Tooltips are CSS-only, so hide them until the pointer or the focus
+      // moves (WCAG 1.4.13). This must come after the focus is restored,
+      // since moving the focus shows them again.
+      this.controlsContainer_.classList.add('shaka-tooltips-dismissed');
     }
 
     if (event.key == 'Tab') {
-      // An active menu has its own tab cycle, even in fullscreen.
-      if (anySettingsMenusAreOpen && this.keepFocusInMenu_(event)) {
-        return;
+      // Close the menu and move the focus to its opening button.  The browser
+      // then moves the focus to the next or previous control from there.
+      if (anySettingsMenusAreOpen) {
+        this.closeSettingsMenusAndRestoreFocus_();
       }
       const fullscreenElement =
           this.videoContainer_.ownerDocument.fullscreenElement;
@@ -2891,26 +2964,94 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Keeps keyboard focus within the open menu containing the active element.
-   * @param {!Event} event
-   * @return {boolean} Whether the focus is inside an open settings menu.
+   * Returns the nearest menu that contains an element.  The overflow menu
+   * contains its submenus, so each submenu needs to be told apart from it.
+   * @param {!Element} element
+   * @return {?Element}
    * @private
    */
-  keepFocusInMenu_(event) {
-    const activeElement = this.videoContainer_.ownerDocument.activeElement;
-    // The overflow menu stays open while a nested submenu is displayed.
-    // Use the nearest registered menu containing the focus, rather than the
-    // first open menu, so each submenu has its own tab cycle.
-    let settingsMenu = activeElement;
-    while (settingsMenu &&
-           !this.menus_.some((menu) => menu == settingsMenu)) {
-      settingsMenu = settingsMenu.parentElement;
+  getMenuOf_(element) {
+    const isMenu = (e) => this.menus_.includes(e) ||
+        this.contextMenus_.includes(e);
+    let menu = element.parentElement;
+    while (menu && !isMenu(menu)) {
+      menu = menu.parentElement;
     }
-    if (!settingsMenu || settingsMenu.classList.contains('shaka-hidden')) {
-      return false;
+    return menu;
+  }
+
+  /**
+   * Supports the keyboard interaction of the ARIA Authoring Practices for
+   * menus while the focus is in a menu item: the up and down arrows move the
+   * focus to the previous and next item, Home and End to the first and last
+   * one, the right arrow opens a submenu and the left arrow returns from it.
+   * The keys are not used for playback while a menu has the focus.
+   *
+   * @param {!KeyboardEvent} event
+   * @private
+   */
+  onMenuKeyDown_(event) {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey ||
+        event.metaKey || event.shiftKey) {
+      return;
     }
-    this.keepFocusInContainer_(event, settingsMenu);
-    return true;
+    const activeElement = /** @type {HTMLElement} */ (
+      this.videoContainer_.ownerDocument.activeElement);
+    const menu = activeElement && this.getMenuOf_(activeElement);
+    if (!menu || menu.classList.contains('shaka-hidden')) {
+      return;
+    }
+    // A slider, such as the one in the playback rate menu, uses the other
+    // keys itself.  It only takes part in the up and down navigation.
+    const isSlider = activeElement.tagName == 'INPUT';
+    if (isSlider && event.key != 'ArrowUp' && event.key != 'ArrowDown') {
+      return;
+    }
+    const items = Array.from(menu.querySelectorAll('button, input')).filter(
+        (item) => this.getMenuOf_(item) == menu &&
+            shaka.ui.Controls.canTakeFocus_(item));
+    const index = items.indexOf(activeElement);
+    const last = items.length - 1;
+    let target = null;
+    switch (event.key) {
+      case 'ArrowDown':
+        target = items[index < last ? index + 1 : 0];
+        break;
+      case 'ArrowUp':
+        target = items[index > 0 ? index - 1 : last];
+        break;
+      case 'Home':
+        target = items[0];
+        break;
+      case 'End':
+        target = items[last];
+        break;
+      case 'ArrowRight':
+        if (activeElement.getAttribute('aria-haspopup') == 'true') {
+          // Opening the submenu focuses its chosen item.
+          activeElement.click();
+        }
+        break;
+      case 'ArrowLeft': {
+        // A menu has its own back button before any nested submenu.
+        const backButton = shaka.ui.Utils.getDescendantIfExists(
+            /** @type {!HTMLElement} */ (menu),
+            'shaka-back-to-overflow-button');
+        // Only submenus return to a parent menu.  The back button of a
+        // standalone menu closes it.
+        if (menu.classList.contains('shaka-sub-menu') && backButton &&
+            shaka.ui.Controls.canTakeFocus_(backButton)) {
+          /** @type {!HTMLElement} */ (backButton).click();
+        }
+        break;
+      }
+      default:
+        return;
+    }
+    event.preventDefault();
+    if (target) {
+      target.focus();
+    }
   }
 
   /**
@@ -2957,16 +3098,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       event.preventDefault();
       firstShownChild.focus();
     }
-  }
-
-  /**
-   * For keyboard navigation, we use blue borders to highlight the active
-   * element. If we detect that a mouse is being used, remove the blue border
-   * from the active element.
-   * @private
-   */
-  onMouseDown_() {
-    this.eventManager_.unlisten(window, 'mousedown');
   }
 
   /**

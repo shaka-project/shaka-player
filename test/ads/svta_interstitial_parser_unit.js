@@ -68,6 +68,15 @@ describe('SvtaInterstitialParser', () => {
     expect(ads[1].podOffset).toBe(10);
   });
 
+  it('returns pods without slots for separately carried slots', () => {
+    const pod = {start: 5, duration: 20,
+      tracking: [{type: 'podStart', urls: ['pod-start']}]};
+    const result = Parser.parseInterstitials(envelope([pod], 'pod'), 100, 'id');
+    expect(result.interstitials).toEqual([]);
+    expect(result.pods).toEqual([{id: 'id_pod_0', pod: jasmine.objectContaining(
+        {duration: 20, slots: []}), startTime: 105, endTime: 125}]);
+  });
+
   it('preserves progress offsets, verification data and skip controls', () => {
     const data = slot();
     data.tracking = [{type: 'progress', offset: 1.234, urls: ['progress']}];
@@ -152,7 +161,7 @@ describe('SvtaInterstitialParser', () => {
     for (const data of ['!', btoa('null')]) {
       expect(Parser.parseMetadata({type: 'svta', startTime: 0, endTime: 10,
         values: [{key: 'X-AD-CREATIVE-SIGNALING', data}]})).toEqual(
-          {interstitials: [], deferred: []});
+          {interstitials: [], deferred: [], pods: []});
     }
   });
 });

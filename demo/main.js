@@ -327,7 +327,12 @@ shakaDemo.Main = class {
           }
         }
       }
-      if (this.selectedAsset.certificateUri) {
+      if (this.selectedAsset.certificates &&
+          this.selectedAsset.certificates.size) {
+        for (const [key, cert] of this.selectedAsset.certificates) {
+          addLine('certificate (' + key + ')', cert);
+        }
+      } else if (this.selectedAsset.certificateUri) {
         addLine('certificate', this.selectedAsset.certificateUri);
       }
       fillInTemplate('RE:uris', uriLines.join('\n'));
@@ -623,6 +628,10 @@ shakaDemo.Main = class {
       const asset = getAssetWithIdentifier(identifier);
       if (asset) {
         asset.storedProgress = progress;
+        if (asset.storedProgress < 1) {
+          // Needed to pause the download.
+          asset.downloadingOfflineUri = content.offlineUri;
+        }
         this.dispatchEventWithName_('shaka-main-offline-progress');
       }
     };
@@ -656,33 +665,82 @@ shakaDemo.Main = class {
       }
     }
 
-    asset.storeCallback = async () => {
+    /**
+     * @param {function(!shaka.offline.Storage):
+     *     !shaka.extern.IAbortableOperation<shaka.extern.StoredContent>
+     * } download
+     * @return {!Promise}
+     */
+    const runDownload = async (download) => {
       const storage = this.makeStorageInstance_();
       if (!storage) {
         return;
       }
       try {
         this.drmConfiguration_(asset, storage);
-        const metadata = {
-          'identifier': this.getIdentifierFromAsset_(asset),
-          'downloaded': new Date(),
-        };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
         const start = Date.now();
-        const stored = await storage.store(asset.manifestUri, metadata,
-            asset.mimeType || null, asset.extraThumbnail,
-            asset.extraText).promise;
+        // If the download is paused, this is the incomplete content.
+        const stored = await download(storage).promise;
         const end = Date.now();
         console.log('Download time:', end - start);
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
-        asset.storedContent = null;
+        // A failed download is removed, but a failed resume is kept.
+        if (!asset.isPartiallyStored()) {
+          asset.storedContent = null;
+        }
       }
       storage.destroy();
+      asset.downloadingOfflineUri = null;
       asset.storedProgress = 1;
       this.dispatchEventWithName_('shaka-main-offline-progress');
+    };
+
+    asset.storeCallback = () => {
+      const metadata = {
+        'identifier': this.getIdentifierFromAsset_(asset),
+        'downloaded': new Date(),
+      };
+      return runDownload((storage) => {
+        return storage.store(asset.manifestUri, metadata,
+            asset.mimeType || null, asset.extraThumbnail, asset.extraText);
+      });
+    };
+
+    asset.resumeCallback = () => {
+      goog.asserts.assert(asset.storedContent, 'Content should be stored!');
+      const offlineUri =
+        /** @type {string} */ (asset.storedContent.offlineUri);
+      return runDownload((storage) => {
+        const operation = storage.resume(offlineUri, asset.mimeType || null);
+        // If the content is being played, and streaming stopped at a segment
+        // that was not stored yet, continue it now that the download resumes.
+        if (this.player_.getAssetUri() == offlineUri) {
+          this.player_.retryStreaming();
+        }
+        return operation;
+      });
+    };
+
+    asset.pauseCallback = async () => {
+      const offlineUri = asset.downloadingOfflineUri;
+      if (!offlineUri) {
+        // The content has not been created in storage yet.
+        return;
+      }
+      const storage = this.makeStorageInstance_();
+      if (!storage) {
+        return;
+      }
+      try {
+        await storage.pause(offlineUri);
+      } catch (error) {
+        this.onError_(/** @type {!shaka.util.Error} */ (error));
+      }
+      storage.destroy();
     };
 
     asset.unstoreCallback = async () => {
@@ -719,6 +777,14 @@ shakaDemo.Main = class {
     const storage = this.makeStorageInstance_();
     if (!storage) {
       return;
+    }
+    try {
+      // Clean up after downloads that were interrupted, e.g. by closing the
+      // page, so that their leftover segments don't take up space.  This fails
+      // if another page is downloading content; the next launch will do it.
+      await storage.removeOrphans();
+    } catch (error) {
+      console.warn('Unable to remove orphaned offline data:', error);
     }
     try {
       this.initialStoredList_ = await storage.list();
@@ -1543,15 +1609,29 @@ shakaDemo.Main = class {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
+   * @return {?string}  The offline URI of the asset, if it is stored or being
+   *   downloaded.  Content that is being downloaded can be played while its
+   *   download continues.
+   * @private
+   */
+  getOfflineUri_(asset) {
+    if (asset.isStored() && asset.storedContent.offlineUri) {
+      return asset.storedContent.offlineUri;
+    }
+    return asset.downloadingOfflineUri;
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
    * @return {!Promise<string>}
    * @private
    */
   async getManifestUri_(asset) {
     let manifestUri = asset.manifestUri;
-    // If we have an offline copy, use that.  If the offlineUri field is null,
-    // we are still downloading it.
-    if (asset.storedContent && asset.storedContent.offlineUri) {
-      manifestUri = asset.storedContent.offlineUri;
+    // If we have an offline copy, use that.
+    const offlineUri = this.getOfflineUri_(asset);
+    if (offlineUri) {
+      manifestUri = offlineUri;
     }
     // If it's a server side dai asset, request ad-containing manifest
     // from the ad manager.
@@ -1699,7 +1779,7 @@ shakaDemo.Main = class {
         itemConfig, this.desiredConfig_, itemConfig);
     shaka.util.PlayerConfiguration.mergeConfigObjects(
         itemConfig, assetConfig, itemConfig);
-    const isOffline = asset.storedContent && asset.storedContent.offlineUri;
+    const isOffline = !!this.getOfflineUri_(asset);
     /** @type {shaka.extern.QueueItem} */
     const queueItem = {
       manifestUri: manifestUri,

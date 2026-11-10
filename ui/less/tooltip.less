@@ -34,10 +34,14 @@
     position: relative;
 
     /* The :after pseudo-element contains the tooltip */
-    &:hover::after,
-    &:focus-visible::after,
-    &:active::after {
+    &::after {
       content: attr(aria-label);
+      visibility: hidden;
+
+      /* Keep the tooltip for a moment after the pointer leaves the button, so
+       * the pointer can cross the gap and move over it (WCAG 1.4.13). A
+       * bridge over the gap would cover the seek bar. */
+      transition: visibility 0s linear 0.3s;
       line-height: 1.2;
       white-space: nowrap;
       font-size: var(--shaka-font-size);
@@ -62,14 +66,19 @@
         background-color: var(--shaka-bg-90);
       }
     }
+
+    &:hover::after,
+    &:focus-visible::after,
+    &:active::after {
+      visibility: visible;
+      transition-delay: 0s;
+    }
   }
 
   // If the seekbar is missing, this is positioned lower.
   &.shaka-tooltips-bottom {
     & > .shaka-tooltip {
-      &:hover::after,
-      &:focus-visible::after,
-      &:active::after {
+      &::after {
         bottom: calc(var(--shaka-icon-size) / 2 * -1);
       }
     }
@@ -78,9 +87,7 @@
   // If the seekbar is missing, this is positioned lower.
   &.shaka-tooltips-low-position {
     & > .shaka-tooltip {
-      &:hover::after,
-      &:focus-visible::after,
-      &:active::after {
+      &::after {
         bottom: var(--shaka-icon-size);
       }
     }
@@ -88,9 +95,7 @@
 
   /* Adds an additional attribute for the status in .shaka-tooltip-status */
   & > .shaka-tooltip-status {
-    &:hover::after,
-    &:focus-visible::after,
-    &:active::after {
+    &::after {
       content: attr(aria-label) " (" attr(shaka-status) ")";
     }
   }
@@ -98,35 +103,61 @@
   &.shaka-big-buttons-container {
     & > .shaka-tooltip,
     & > .shaka-tooltip-status {
-      &:hover::after,
-      &:focus-visible::after,
-      &:active::after {
+      &::after {
         bottom: calc(100% + 8px);
         left: 50%;
         transform: translateX(-50%);
-        pointer-events: none;
       }
     }
   }
 
   &.shaka-controls-button-panel,
   &.shaka-controls-top-button-panel {
+    /* Moving to another button of the panel hides the tooltip right away. */
+    &:hover > .shaka-tooltip:not(:hover),
+    &:hover > .shaka-tooltip-status:not(:hover) {
+      &::after {
+        transition-delay: 0s;
+      }
+    }
+
     /* Keep the first and last tooltips inside the control panel. */
-    button:first-child {
-      &:hover::after,
-      &:focus-visible::after,
-      &:active::after {
+    & > button:first-child {
+      &::after {
         left: 0;
         transform: translateX(0);
       }
     }
 
-    button:last-child {
-      &:hover::after,
-      &:focus-visible::after,
-      &:active::after {
+    & > button:last-child {
+      &::after {
         left: var(--shaka-icon-size);
         transform: translateX(-100%);
+      }
+    }
+  }
+}
+
+/* Escape hides the tooltips until the pointer or the focus moves (WCAG 1.4.13).
+ * The class is set on .shaka-controls-container by Controls. */
+.shaka-tooltips-dismissed .shaka-tooltips-on {
+  & > .shaka-tooltip,
+  & > .shaka-tooltip-status {
+    &::after {
+      display: none;
+    }
+  }
+}
+
+/* In forced colors mode (e.g. Windows high contrast), forced colors keep the
+ * alpha of the background, which would let the video show through. */
+@media (forced-colors: active) {
+  .shaka-tooltips-on {
+    & > .shaka-tooltip,
+    & > .shaka-tooltip-status {
+      &::after {
+        background: Canvas;
+        border: 1px solid CanvasText;
       }
     }
   }

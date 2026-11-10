@@ -320,6 +320,62 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     it('rejects an alias it never knew', () => {
       expect(() => session.unsubscribe(BigInt(99))).toThrow();
     });
+
+    it('subscribes again to a withdrawn track without a warning', () => {
+      // Every seek and ABR switch withdraws a track and subscribes to it
+      // again under a new alias.
+      const registry = registryOf();
+      registry.registerTrackWithAlias(
+          NAMESPACE, TRACK, BigInt(0), BigInt(7));
+      registry.getTrackInfoFromAlias(BigInt(7)).closed = true;
+      const warning = spyOn(shaka.log, 'warning');
+
+      registry.registerTrackWithAlias(
+          NAMESPACE, TRACK, BigInt(1), BigInt(8));
+
+      expect(warning).not.toHaveBeenCalled();
+      // The withdrawn alias is still known, so its stragglers are dropped.
+      expect(registry.getTrackInfoFromAlias(BigInt(7)).closed).toBe(true);
+    });
+
+    it('warns about a track subscribed twice at once', () => {
+      const registry = registryOf();
+      registry.registerTrackWithAlias(
+          NAMESPACE, TRACK, BigInt(0), BigInt(7));
+      const warning = spyOn(shaka.log, 'warning');
+
+      registry.registerTrackWithAlias(
+          NAMESPACE, TRACK, BigInt(1), BigInt(8));
+
+      expect(warning).toHaveBeenCalled();
+    });
+  });
+
+  describe('a stream that ends early', () => {
+    /**
+     * @param {*} error
+     * @suppress {visibility}
+     */
+    function logFailure(error) {
+      session.logStreamFailure_('Incoming stream ended', error);
+    }
+
+    it('is not a warning when the peer reset it', () => {
+      // What the publisher does with the streams of a withdrawn subscription.
+      const warning = spyOn(shaka.log, 'warning');
+
+      logFailure({source: 'stream', streamErrorCode: 0});
+
+      expect(warning).not.toHaveBeenCalled();
+    });
+
+    it('is a warning for anything else', () => {
+      const warning = spyOn(shaka.log, 'warning');
+
+      logFailure(new Error('malformed'));
+
+      expect(warning).toHaveBeenCalled();
+    });
   });
 
   describe('Track Properties', () => {
@@ -738,6 +794,31 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
       ]);
     });
 
+    it('sends an Absolute Joining FETCH from a start in the past',
+        async () => {
+          // A subscription only forwards what is published after it, so the
+          // Groups from its start up to the live edge have to be fetched.
+          const subscribed = session.subscribe(
+              NAMESPACE, TRACK, (obj) => received.push(obj),
+              {group: BigInt(9), object: BigInt(0)},
+              /* joinCurrentGroup= */ true);
+          await shaka.test.Util.shortDelay();
+          responses.enqueue(subscribeOk());
+          await subscribed;
+          await shaka.test.Util.shortDelay();
+
+          expect(written.length).toBe(2);
+          expect(Array.from(written[1])).toEqual([
+            0x16, // FETCH
+            0x00, 0x05, // Length
+            0x02, // Request ID
+            0x03, // Fetch Type = Absolute Joining
+            0x00, // Joining Request ID, the SUBSCRIBE's
+            0x09, // Joining Start: Group 9
+            0x00, // Parameter count
+          ]);
+        });
+
     it('delivers the fetched Objects to the subscription', async () => {
       await subscribeJoining();
       responses.enqueue(fetchOk());
@@ -852,6 +933,28 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         ]);
       });
 
+      it('fills from a start in the past', async () => {
+        const subscribed = session.subscribe(
+            NAMESPACE, TRACK, () => {},
+            {group: BigInt(7), object: BigInt(3)},
+            /* joinCurrentGroup= */ true);
+        await shaka.test.Util.shortDelay();
+        responses.enqueue(subscribeOk());
+        await subscribed;
+
+        const params = subscribePayload().subarray(
+            1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+        expect(Array.from(params)).toEqual([
+          0x04, // Parameter count
+          0x10, 0x01, // FORWARD = 1
+          0x10, 0x00, // delta 0x10 -> SUBSCRIBER_PRIORITY = 0
+          0x01, 0x02, 0x07, 0x03, // LOCATION_FILTER, Absolute Start {7, 3}
+          0x02, 0x05, // delta 0x02 -> FILL_PARAMETERS, 5 bytes:
+          0x01, // Parameter count
+          0x21, 0x02, 0x07, 0x03, // LOCATION_FILTER, Absolute Start {7, 3}
+        ]);
+      });
+
       it('delivers the fill fetch stream to the subscription', async () => {
         // Its FETCH_HEADER carries the SUBSCRIBE's own Request ID.
         await subscribeJoining();
@@ -889,7 +992,7 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
             () => new shaka.msf.draft22.MessageWriter(codec));
       });
 
-      it('writes the nested LOCATION_FILTER as Relative Start', async () => {
+      it('pairs Next Object with a Relative Start fill', async () => {
         // Draft-22 replaced the filter's length with a Location Filter Type.
         // Relative Start is 0x01 and carries one field, so the bytes happen to
         // match what draft-20 writes for a one-byte value; the nested writer
@@ -900,14 +1003,116 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
         const params = payload.subarray(
             1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
         expect(Array.from(params)).toEqual([
-          0x03, // Parameter count
+          0x04, // Parameter count
           0x10, 0x01, // FORWARD = 1
           0x10, 0x00, // delta 0x10 -> SUBSCRIBER_PRIORITY = 0
-          0x03, 0x04, // delta 0x03 -> FILL_PARAMETERS, 4 bytes:
+          0x01, 0x05, // delta 0x01 -> LOCATION_FILTER, Next Object
+          0x02, 0x04, // delta 0x02 -> FILL_PARAMETERS, 4 bytes:
           0x01, // Parameter count
           0x21, // LOCATION_FILTER, no length:
           0x01, 0x01, // Relative Start, StartGroup = 1
         ]);
+      });
+
+      it('does not add Next Object without a fill', async () => {
+        const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
+        await shaka.test.Util.shortDelay();
+        responses.enqueue(subscribeOk());
+        await subscribed;
+
+        const params = subscribePayload().subarray(
+            1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+        expect(Array.from(params)).toEqual([
+          0x02, // Parameter count
+          0x10, 0x01, // FORWARD = 1
+          0x10, 0x00, // SUBSCRIBER_PRIORITY = 0
+        ]);
+      });
+
+      for (const [group, object] of [[0, 0], [7, 3]]) {
+        it(`fills from an explicit start at {${group}, ${object}}`,
+            async () => {
+              const subscribed = session.subscribe(
+                  NAMESPACE, TRACK, () => {},
+                  {group: BigInt(group), object: BigInt(object)},
+                  /* joinCurrentGroup= */ true);
+              await shaka.test.Util.shortDelay();
+              responses.enqueue(subscribeOk());
+              await subscribed;
+
+              const params = subscribePayload().subarray(
+                  1 + 1 + 1 + NAMESPACE[0].length + 1 + TRACK.length);
+              const filter = group || object ?
+                  [0x01, 0x02, group, object] : [];
+              expect(Array.from(params)).toEqual([
+                group || object ? 0x04 : 0x03, // Parameter count
+                0x10, 0x01, // FORWARD = 1
+                0x10, 0x00, // SUBSCRIBER_PRIORITY = 0
+                ...filter, // Absolute Start, or unfiltered at the origin
+                group || object ? 0x02 : 0x03, // FILL_PARAMETERS delta
+                0x05, // Length
+                // The same start as an Absolute Start fill; draft-22 can
+                // spell the origin, which draft-20 cannot.
+                0x01, 0x21, 0x02, group, object,
+              ]);
+            });
+      }
+
+      it('delivers the fill before the subscription', async () => {
+        const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+        await deliverToSubscription(alias, 5, 2);
+        expect(received.length).toBe(0);
+
+        await readFetchStream(groupStartFor(0, 5, 2));
+        expect(receivedLocations()).toEqual(['5:0', '5:1', '5:2']);
+      });
+
+      it('does not wait for a fill on a track with nothing published',
+          async () => {
+            const alias = await subscribeJoining(subscribeOkAt(null));
+            await deliverToSubscription(alias, 0, 0);
+
+            expect(receivedLocations()).toEqual(['0:0']);
+          });
+
+      it('stops waiting soon for a fill stream that never shows up',
+          async () => {
+            // A relay that cannot fill should open the stream and reset it,
+            // but a reset can lose the FETCH_HEADER, and some relays open
+            // nothing at all.
+            const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+            await deliverToSubscription(alias, 5, 2);
+            expect(received.length).toBe(0);
+
+            // Well short of the two seconds a fill that has started gets.
+            await shaka.test.Util.delay(1);
+
+            expect(receivedLocations()).toEqual(['5:2']);
+          });
+
+      it('keeps waiting for a fill stream that has shown up', async () => {
+        /** @type {ReadableStreamDefaultController} */
+        let controller;
+        const stream = new ReadableStream({
+          start: (c) => {
+            controller = c;
+            // The FETCH_HEADER, with the SUBSCRIBE's Request ID, and nothing
+            // after it yet.
+            c.enqueue(new Uint8Array(bytesOf(0)));
+          },
+        });
+
+        const alias = await subscribeJoining(subscribeOkAt([5, 1]));
+        const read = readFetchStream(new shaka.msf.Reader(
+            new Uint8Array([]), stream, new shaka.msf.draft18.Codec()));
+        await deliverToSubscription(alias, 5, 2);
+
+        await shaka.test.Util.delay(1);
+        expect(received.length).toBe(0);
+
+        controller.close();
+        await read;
+        expect(receivedLocations()).toEqual(['5:2']);
       });
     });
   });

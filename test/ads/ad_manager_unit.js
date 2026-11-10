@@ -37,8 +37,10 @@ describe('Ad manager', () => {
     adManager.setContainers(adContainer, adContainer);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     window['google'] = originalGoogle;
+    // This also releases the ad manager.
+    await player.destroy();
   });
 
   describe('client side', () => {
@@ -82,6 +84,10 @@ describe('Ad manager', () => {
           contentComplete() {
             // Nothing
           }
+
+          destroy() {
+            // Nothing
+          }
         };
         window['google'].ima.AdsLoader = mockAdsLoader;
 
@@ -97,6 +103,10 @@ describe('Ad manager', () => {
             }
 
             destroy() {
+              // Nothing
+            }
+
+            stop() {
               // Nothing
             }
 
@@ -168,16 +178,12 @@ describe('Ad manager', () => {
   it('routes native HLS creative metadata to the SVTA parser', async () => {
     Object.assign(mockVideo, {style: document.createElement('video').style});
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'com.apple.quicktime.HLS', startTime: 0,
       endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
-    try {
-      await adManager.onHLSMetadata(metadata);
-      expect(parse).toHaveBeenCalledTimes(1);
-      expect(parse.calls.argsFor(0)[0]).toBe(metadata);
-    } finally {
-      adManager.release();
-    }
+    await adManager.onHLSMetadata(metadata);
+    expect(parse).toHaveBeenCalledTimes(1);
+    expect(parse.calls.argsFor(0)[0]).toBe(metadata);
   });
 
   it('measures SVTA metadata when HLS insertion is disabled', async () => {
@@ -186,16 +192,12 @@ describe('Ad manager', () => {
     config.disableHLSInterstitial = true;
     adManager.configure(config);
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'com.apple.hls.interstitial', startTime: 0,
       endTime: 10, values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
-    try {
-      await adManager.onHLSMetadata(metadata);
-      expect(parse).toHaveBeenCalledTimes(1);
-      expect(parse.calls.argsFor(0)[0]).toBe(metadata);
-    } finally {
-      adManager.release();
-    }
+    await adManager.onHLSMetadata(metadata);
+    expect(parse).toHaveBeenCalledTimes(1);
+    expect(parse.calls.argsFor(0)[0]).toBe(metadata);
   });
 
   it('ignores SVTA metadata when SVTA is disabled', async () => {
@@ -203,16 +205,12 @@ describe('Ad manager', () => {
     config.disableSVTA = true;
     adManager.configure(config);
     const parse = spyOn(shaka.ads.SvtaInterstitialParser, 'parseMetadata')
-        .and.returnValue({interstitials: [], deferred: []});
+        .and.returnValue({interstitials: [], deferred: [], pods: []});
     const metadata = {type: 'urn:svta:advertising-wg:ad-creative-signaling',
       startTime: 0, endTime: 10,
       values: [{key: 'X-AD-CREATIVE-SIGNALING', data: 'test'}]};
-    try {
-      await adManager.onHLSMetadata(metadata);
-      expect(parse).not.toHaveBeenCalled();
-    } finally {
-      adManager.release();
-    }
+    await adManager.onHLSMetadata(metadata);
+    expect(parse).not.toHaveBeenCalled();
   });
 
   /**
@@ -277,6 +275,10 @@ describe('Ad manager', () => {
       AD_BREAK_READY: 'AD_BREAK_READY',
       INTERACTION: 'INTERACTION',
     };
-    window['google'].ima.AdDisplayContainer = class { initialize() {} };
+    window['google'].ima.AdDisplayContainer = class {
+      initialize() {}
+
+      destroy() {}
+    };
   }
 });

@@ -52,7 +52,7 @@ shaka.ui.TextStyleMenu = class extends shaka.ui.SettingsMenu {
     const available = !this.isSubMenuOpened &&
         shaka.ui.TextStyleMenu.isStyleAvailable(this.player, this.controls);
     shaka.ui.Utils.setDisplay(this.button, available);
-    this.button.ariaPressed = available ? 'true' : 'false';
+    shaka.ui.Utils.setPressed(this.button, available);
   }
 
   /**

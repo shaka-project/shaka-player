@@ -225,21 +225,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
       await p;
 
-      // Collect messages over 50 update cycles, and average their length.
-      // Not all properties are passed along on every update message, so
-      // the average length is expected to be lower than the length of the first
-      // update message.
-      let totalLength = 0;
-      let totalMessages = 0;
-      for (let i = 0; i < 50; i++) {
-        // eslint-disable-next-line no-await-in-loop
-        const messages = await waitForUpdateMessages();
-        for (const message of messages) {
-          totalLength += message.length;
-          totalMessages += 1;
-        }
-      }
-      expect(totalLength / totalMessages).toBeLessThan(2000);
+      expect(await averageUpdateMessageLength()).toBeLessThan(2000);
     });
   });
 
@@ -295,21 +281,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
       await p;
 
-      // Collect messages over 50 update cycles, and average their length.
-      // Not all properties are passed along on every update message, so
-      // the average length is expected to be lower than the length of the first
-      // update message.
-      let totalLength = 0;
-      let totalMessages = 0;
-      for (let i = 0; i < 50; i++) {
-        // eslint-disable-next-line no-await-in-loop
-        const messages = await waitForUpdateMessages();
-        for (const message of messages) {
-          totalLength += message.length;
-          totalMessages += 1;
-        }
-      }
-      expect(totalLength / totalMessages).toBeLessThan(2000);
+      expect(await averageUpdateMessageLength()).toBeLessThan(2000);
     });
   });
 
@@ -380,6 +352,33 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     toRestore.push(() => {
       prototype[methodName] = original;
     });
+  }
+
+  /**
+   * Collects update messages and averages their length.  Not all properties
+   * are passed along on every update message, so the average length is
+   * expected to be lower than the length of the first update message.
+   *
+   * @return {!Promise<number>}
+   */
+  async function averageUpdateMessageLength() {
+    // Properties are sent every 1, 2, 4, 5, or 10 updates (see
+    // shaka.cast.CastUtils), so any 20 updates in a row cover a whole cycle of
+    // them.  Updates come every half second at most, so more updates would
+    // only make this test slower.
+    const updatesPerCycle = 20;
+
+    let totalLength = 0;
+    let totalMessages = 0;
+    for (let i = 0; i < updatesPerCycle; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      const messages = await waitForUpdateMessages();
+      for (const message of messages) {
+        totalLength += message.length;
+        totalMessages += 1;
+      }
+    }
+    return totalLength / totalMessages;
   }
 
   function waitForLoadedData() {

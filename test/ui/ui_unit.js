@@ -534,21 +534,26 @@ describe('UI', () => {
         expect(document.activeElement).toBe(rateButton);
       });
 
-      it('loops Tab and Shift+Tab inside the PiP menu', async () => {
-        await controls.togglePiP();
-        rateButton.focus();
-        const forward = createKeydownEvent('Tab');
-        rateButton.dispatchEvent(forward);
-        expect(forward.defaultPrevented).toBe(true);
-        expect(frame.contentDocument.activeElement).toBe(pipButton);
-        frame.contentWindow.dispatchEvent(
-            new KeyboardEvent('keyup', {key: 'Tab'}));
-        pipButton.dispatchEvent(createKeydownEvent('Shift'));
-        const backward = createKeydownEvent('Tab');
-        pipButton.dispatchEvent(backward);
-        expect(backward.defaultPrevented).toBe(true);
-        expect(frame.contentDocument.activeElement).toBe(rateButton);
-      });
+      it('moves with the arrow keys and closes on Tab in the PiP menu',
+          async () => {
+            await controls.togglePiP();
+            pipButton.focus();
+            const down = createKeydownEvent('ArrowDown');
+            pipButton.dispatchEvent(down);
+            expect(down.defaultPrevented).toBe(true);
+            expect(frame.contentDocument.activeElement).toBe(rateButton);
+
+            const opener = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-overflow-menu-button'));
+            const tab = createKeydownEvent('Tab');
+            rateButton.dispatchEvent(tab);
+            frame.contentWindow.dispatchEvent(
+                new KeyboardEvent('keyup', {key: 'Tab'}));
+            expect(tab.defaultPrevented).toBe(false);
+            const menu = videoContainer.querySelector('.shaka-overflow-menu');
+            expect(menu.classList.contains('shaka-hidden')).toBe(true);
+            expect(frame.contentDocument.activeElement).toBe(opener);
+          });
 
       it('does not trap keys from the original window while in PiP',
           async () => {
@@ -676,26 +681,155 @@ describe('UI', () => {
           });
 
           for (const backwards of [false, true]) {
-            it(backwards ? 'loops Shift+Tab to the last control' :
-              'loops Tab to the back button', () => {
-              const first = /** @type {!HTMLElement} */ (
-                menu.querySelector('.shaka-back-to-overflow-button'));
-              const last = /** @type {!HTMLElement} */ (
-                menu.querySelector('.shaka-playback-rate-presets')
-                    .lastElementChild);
-              const target = backwards ? last : first;
-              const source = backwards ? first : last;
-              const focus = spyOn(target, 'focus').and.callThrough();
-              focusForKeyboardTest(source);
+            it(backwards ? 'closes on Shift+Tab' : 'closes on Tab', () => {
+              const opener = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector(inOverflow ?
+                  '.shaka-overflow-menu-button' :
+                  '.shaka-playbackrate-button'));
+              const focus = spyOn(opener, 'focus').and.callThrough();
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              focusForKeyboardTest(chosen);
               if (backwards) {
-                source.dispatchEvent(createKeydownEvent('Shift'));
+                chosen.dispatchEvent(createKeydownEvent('Shift'));
               }
               const event = createKeydownEvent('Tab');
-              source.dispatchEvent(event);
-              expect(event.defaultPrevented).toBe(true);
-              expect(focus).toHaveBeenCalled();
+              chosen.dispatchEvent(event);
               window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
               window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Shift'}));
+              // The browser moves the focus on from the opening button.
+              expect(event.defaultPrevented).toBe(false);
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              expect(opener.getAttribute('aria-expanded')).toBe('false');
+              expect(focus).toHaveBeenCalled();
+            });
+          }
+
+          /**
+           * @param {!HTMLElement} source
+           * @param {string} key
+           * @return {!KeyboardEvent}
+           */
+          function pressMenuKey(source, key) {
+            focusForKeyboardTest(source);
+            const event = createKeydownEvent(key);
+            source.dispatchEvent(event);
+            return event;
+          }
+
+          it('moves the focus with the arrow keys, Home and End', () => {
+            const back = /** @type {!HTMLElement} */ (
+              menu.querySelector('.shaka-back-to-overflow-button'));
+            const presets = Array.from(menu.querySelectorAll(
+                '.shaka-playback-rate-presets > button'));
+            const first = /** @type {!HTMLElement} */ (presets[0]);
+            const second = /** @type {!HTMLElement} */ (presets[1]);
+            const beforeLast = /** @type {!HTMLElement} */ (
+              presets[presets.length - 2]);
+            const last = /** @type {!HTMLElement} */ (
+              presets[presets.length - 1]);
+            // Each target is different, so that each one is spied once.
+            const expectFocus = (source, key, target) => {
+              const focus = spyOn(target, 'focus').and.callThrough();
+              const event = pressMenuKey(source, key);
+              expect(event.defaultPrevented).toBe(true);
+              expect(focus).toHaveBeenCalledTimes(1);
+            };
+            expectFocus(first, 'ArrowDown', second);
+            expectFocus(last, 'ArrowUp', beforeLast);
+            expectFocus(first, 'End', last);
+            expectFocus(second, 'Home', back);
+          });
+
+          it('leaves the other keys to the playback rate slider', () => {
+            const slider = /** @type {!HTMLElement} */ (
+              menu.querySelector('.shaka-playback-rate-slider'));
+            const [decrease, increase] = Array.from(menu.querySelectorAll(
+                '.shaka-playback-rate-step-btn'));
+            const toSlider = spyOn(slider, 'focus').and.callThrough();
+            expect(pressMenuKey(/** @type {!HTMLElement} */ (decrease),
+                'ArrowDown').defaultPrevented).toBe(true);
+            expect(toSlider).toHaveBeenCalledTimes(1);
+
+            for (const key of ['ArrowLeft', 'ArrowRight', 'Home', 'End']) {
+              expect(pressMenuKey(slider, key).defaultPrevented).toBe(false);
+            }
+            expect(menu.classList.contains('shaka-hidden')).toBe(false);
+
+            const toIncrease = spyOn(increase, 'focus').and.callThrough();
+            expect(pressMenuKey(slider, 'ArrowDown').defaultPrevented)
+                .toBe(true);
+            expect(toIncrease).toHaveBeenCalledTimes(1);
+          });
+
+          it('wraps the arrow keys, skipping hidden and disabled items',
+              () => {
+                const presets =
+                    menu.querySelector('.shaka-playback-rate-presets');
+                const hidden = /** @type {!HTMLElement} */ (
+                  presets.lastElementChild);
+                hidden.classList.add('shaka-hidden');
+                const disabled = /** @type {!HTMLButtonElement} */ (
+                  hidden.previousElementSibling);
+                disabled.disabled = true;
+                const last = /** @type {!HTMLElement} */ (
+                  disabled.previousElementSibling);
+                const back = /** @type {!HTMLElement} */ (
+                  menu.querySelector('.shaka-back-to-overflow-button'));
+
+                const toBack = spyOn(back, 'focus').and.callThrough();
+                expect(pressMenuKey(last, 'ArrowDown').defaultPrevented)
+                    .toBe(true);
+                expect(toBack).toHaveBeenCalledTimes(1);
+
+                const toLast = spyOn(last, 'focus').and.callThrough();
+                expect(pressMenuKey(back, 'ArrowUp').defaultPrevented)
+                    .toBe(true);
+                expect(toLast).toHaveBeenCalledTimes(1);
+              });
+
+          it('does not intercept the arrow keys outside the menu', () => {
+            const event = pressMenuKey(video, 'ArrowDown');
+            expect(event.defaultPrevented).toBe(false);
+          });
+
+          if (inOverflow) {
+            it('returns to the parent menu on ArrowLeft', () => {
+              const button = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector('.shaka-playbackrate-button'));
+              const focus = spyOn(button, 'focus').and.callThrough();
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const event = pressMenuKey(chosen, 'ArrowLeft');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              expect(button.closest('.shaka-hidden')).toBe(null);
+              expect(focus).toHaveBeenCalledTimes(1);
+            });
+
+            it('opens a submenu on ArrowRight', () => {
+              const back = /** @type {!HTMLElement} */ (
+                menu.querySelector('.shaka-back-to-overflow-button'));
+              back.click();
+              expect(menu.classList.contains('shaka-hidden')).toBe(true);
+              const button = /** @type {!HTMLElement} */ (
+                videoContainer.querySelector('.shaka-playbackrate-button'));
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const focus = spyOn(chosen, 'focus').and.callThrough();
+              const event = pressMenuKey(button, 'ArrowRight');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(false);
+              expect(button.getAttribute('aria-expanded')).toBe('true');
+              expect(focus).toHaveBeenCalledTimes(1);
+            });
+          } else {
+            it('does not close a standalone menu on ArrowLeft', () => {
+              const chosen = /** @type {!HTMLElement} */ (
+                menu.querySelector('button[aria-checked="true"]'));
+              const event = pressMenuKey(chosen, 'ArrowLeft');
+              expect(event.defaultPrevented).toBe(true);
+              expect(menu.classList.contains('shaka-hidden')).toBe(false);
             });
           }
 
@@ -719,27 +853,6 @@ describe('UI', () => {
                   expect(document.activeElement).toBe(button);
                 }
               });
-
-          it('skips hidden and disabled controls at the end', () => {
-            const presets = menu.querySelector('.shaka-playback-rate-presets');
-            const hidden = /** @type {!HTMLElement} */ (
-              presets.lastElementChild);
-            hidden.classList.add('shaka-hidden');
-            const disabled = /** @type {!HTMLButtonElement} */ (
-              hidden.previousElementSibling);
-            disabled.disabled = true;
-            const last = /** @type {!HTMLElement} */ (
-              disabled.previousElementSibling);
-            const first = /** @type {!HTMLElement} */ (
-              menu.querySelector('.shaka-back-to-overflow-button'));
-            const focus = spyOn(first, 'focus').and.callThrough();
-            focusForKeyboardTest(last);
-            const event = createKeydownEvent('Tab');
-            last.dispatchEvent(event);
-            expect(event.defaultPrevented).toBe(true);
-            expect(focus).toHaveBeenCalled();
-            window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
-          });
 
           it('does not intercept Tab outside the menu', () => {
             focusForKeyboardTest(video);
@@ -871,19 +984,20 @@ describe('UI', () => {
         });
       }
 
-      it('keeps the submenu tab cycle in fullscreen', () => {
+      it('closes a submenu on Tab and moves on from its opener', () => {
         last.click();
         const rate = /** @type {!HTMLElement} */ (
           videoContainer.querySelector('.shaka-playbackrate-button'));
         rate.click();
-        const back = /** @type {!HTMLElement} */ (
-          menu.querySelector('.shaka-back-to-overflow-button'));
         const end = /** @type {!HTMLElement} */ (
           menu.querySelector('.shaka-playback-rate-presets').lastElementChild);
         focusForKeyboardTest(end);
-        const focus = spyOn(back, 'focus').and.callThrough();
+        // The overflow menu button is the last control, so Tab wraps from it
+        // to the first one.
+        const focus = spyOn(first, 'focus').and.callThrough();
         const event = createKeydownEvent('Tab');
         end.dispatchEvent(event);
+        expect(menu.classList.contains('shaka-hidden')).toBe(true);
         expect(event.defaultPrevented).toBe(true);
         expect(focus).toHaveBeenCalled();
       });
@@ -1164,6 +1278,49 @@ describe('UI', () => {
             'shaka-fullscreen-button')[0];
         expect(muteButton.hasAttribute('aria-pressed')).toBe(true);
         expect(fullscreenButton.hasAttribute('aria-pressed')).toBe(true);
+      });
+
+      it('has menu item roles in the overflow menu', async () => {
+        const config = {
+          controlPanelElements: ['overflow_menu'],
+          overflowMenuButtons: ['mute', 'playback_rate', 'captions'],
+          customContextMenu: false,
+        };
+
+        await UiUtils.createUIThroughAPI(videoContainer, video, config);
+        const overflowMenu = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-overflow-menu');
+        const buttons = Array.from(overflowMenu.childNodes)
+            .filter((child) => child.nodeName == 'BUTTON')
+            .map((child) => /** @type {!HTMLElement} */ (child));
+        expect(buttons.length).toBe(3);
+        for (const button of buttons) {
+          expect(button.getAttribute('role')).toMatch(/^menuitem/);
+          // Only buttons outside menus can be pressed.
+          expect(button.hasAttribute('aria-pressed')).toBe(false);
+        }
+
+        // Toggle buttons report their state as menu item checkboxes.
+        const muteButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-mute-button');
+        expect(muteButton.getAttribute('role')).toBe('menuitemcheckbox');
+        video.muted = false;
+        video.dispatchEvent(new Event('volumechange'));
+        expect(muteButton.getAttribute('aria-checked')).toBe('false');
+        video.muted = true;
+        video.dispatchEvent(new Event('volumechange'));
+        expect(muteButton.getAttribute('aria-checked')).toBe('true');
+        expect(muteButton.hasAttribute('aria-pressed')).toBe(false);
+
+        // Buttons that open a submenu are plain menu items.
+        const captionsButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-caption-button');
+        expect(captionsButton.getAttribute('role')).toBe('menuitem');
+
+        for (const back of Array.from(videoContainer.querySelectorAll(
+            '.shaka-back-to-overflow-button'))) {
+          expect(back.getAttribute('role')).toBe('menuitem');
+        }
       });
 
       it('has aria-hidden on SVG icons', async () => {
@@ -2630,6 +2787,94 @@ describe('UI', () => {
       });
     });
 
+    describe('focus indicator', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let button;
+
+      beforeEach(async () => {
+        jasmine.clock().install();
+
+        // Keep the controls from staying up just because the video is paused.
+        // Cast defaults fadeDelay to 3 seconds, so pin it.
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['play_pause'],
+          showUIOnPaused: false,
+          fadeDelay: 0,
+        });
+        controlsContainer = ui.getControls().getControlsContainer();
+        button = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-play-button'));
+      });
+
+      afterEach(() => {
+        jasmine.clock().uninstall();
+      });
+
+      /**
+       * Focuses |button| after the given user input.
+       *
+       * @param {string} input 'keydown' or 'mousedown'.
+       */
+      function focusButtonAfter(input) {
+        if (input == 'keydown') {
+          // An arrow key, as TV remotes and spatial navigation use to move
+          // the focus, and not Tab, which enables the focus ring by itself.
+          window.dispatchEvent(createKeydownEvent('ArrowDown'));
+        } else {
+          UiUtils.simulateEvent(button, input);
+        }
+        focusForKeyboardTest(button);
+        // Not every platform fires focusin when focusForKeyboardTest() had to
+        // fake the focus.
+        button.dispatchEvent(new FocusEvent('focusin', {bubbles: true}));
+      }
+
+      function isKeyboardNavigation() {
+        return controlsContainer.classList.contains(
+            'shaka-keyboard-navigation');
+      }
+
+      it('keeps the controls shown when a key moves the focus', () => {
+        focusButtonAfter('keydown');
+
+        expect(isKeyboardNavigation()).toBe(true);
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe('true');
+      });
+
+      it('ignores a focus that follows a click', () => {
+        window.dispatchEvent(createKeydownEvent('ArrowDown'));
+        focusButtonAfter('mousedown');
+
+        expect(isKeyboardNavigation()).toBe(false);
+      });
+
+      it('gives the focus back to the player when the controls hide', () => {
+        focusButtonAfter('mousedown');
+        const focus = spyOn(videoContainer, 'focus').and.callThrough();
+
+        UiUtils.simulateEvent(videoContainer, 'mousemove');
+        expect(controlsContainer.getAttribute('shown')).toBe('true');
+        expect(focus).not.toHaveBeenCalled();
+
+        jasmine.clock().tick(5000);
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+        expect(focus).toHaveBeenCalledTimes(1);
+      });
+
+      it('leaves the focus alone when it is outside the controls', () => {
+        const focus = spyOn(videoContainer, 'focus');
+
+        UiUtils.simulateEvent(videoContainer, 'mousemove');
+        jasmine.clock().tick(5000);
+
+        expect(controlsContainer.getAttribute('shown')).toBe(null);
+        expect(focus).not.toHaveBeenCalled();
+      });
+    });
+
     describe('statistics context menu', () => {
       /** @type {!HTMLElement} */
       let statisticsButton;
@@ -3140,6 +3385,174 @@ describe('UI', () => {
       });
     });
 
+    describe('tooltips', () => {
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!HTMLElement} */
+      let playButton;
+      /** @type {!HTMLElement} */
+      let muteButton;
+
+      beforeEach(async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['play_pause', 'mute', 'overflow_menu'],
+          overflowMenuButtons: ['loop'],
+          customContextMenu: false,
+          enableTooltips: true,
+        });
+        controlsContainer = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-controls-container'));
+        playButton = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-play-button'));
+        muteButton = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('.shaka-mute-button'));
+      });
+
+      /** @return {boolean} */
+      function tooltipsDismissed() {
+        return controlsContainer.classList.contains(
+            'shaka-tooltips-dismissed');
+      }
+
+      it('are dismissed on Escape until the pointer moves', () => {
+        playButton.dispatchEvent(createKeydownEvent('Escape'));
+        expect(tooltipsDismissed()).toBe(true);
+
+        UiUtils.simulateEvent(muteButton, 'mouseover');
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('show again when the focus moves', () => {
+        playButton.dispatchEvent(createKeydownEvent('Escape'));
+        expect(tooltipsDismissed()).toBe(true);
+
+        muteButton.dispatchEvent(new Event('focusin', {bubbles: true}));
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('are not dismissed by other keys', () => {
+        playButton.dispatchEvent(createKeydownEvent('Shift'));
+        expect(tooltipsDismissed()).toBe(false);
+      });
+
+      it('stay dismissed when Escape returns the focus to a menu button',
+          () => {
+            const overflowButton = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-overflow-menu-button'));
+            overflowButton.click();
+            const loop = /** @type {!HTMLElement} */ (
+              videoContainer.querySelector('.shaka-loop-button'));
+            focusForKeyboardTest(loop);
+            const focus = spyOn(overflowButton, 'focus').and.callFake(() => {
+              // Moving the focus shows the tooltips again, so Escape has to
+              // dismiss them after the focus is back on the opening button.
+              overflowButton.dispatchEvent(
+                  new Event('focusin', {bubbles: true}));
+            });
+            loop.dispatchEvent(createKeydownEvent('Escape'));
+            expect(focus).toHaveBeenCalledTimes(1);
+            expect(tooltipsDismissed()).toBe(true);
+          });
+    });
+
+    describe('in forced colors mode', () => {
+      /** @type {boolean} */
+      let forcedColorsActive;
+      /** @type {!shaka.util.FakeEventTarget} */
+      let forcedColorsQuery;
+
+      /** @param {boolean} active */
+      function setForcedColors(active) {
+        forcedColorsActive = active;
+        forcedColorsQuery.dispatchEvent(new shaka.util.FakeEvent('change'));
+      }
+
+      /**
+       * @param {string} className
+       * @return {string}
+       */
+      function getBackground(className) {
+        const element = /** @type {!HTMLElement} */ (
+          videoContainer.getElementsByClassName(className)[0]);
+        return element.style.background.toLowerCase();
+      }
+
+      beforeEach(() => {
+        // Forced colors mode is faked here, but browsers that really have it
+        // also support the CSS Color 4 system colors.  Older ones (e.g.
+        // Tizen) reject the whole gradient because of the unknown color.
+        if (!window.CSS || !CSS.supports('color', 'CanvasText')) {
+          pending('This platform does not support CSS system colors.');
+        }
+        forcedColorsActive = false;
+        forcedColorsQuery = new shaka.util.FakeEventTarget();
+        Object.defineProperty(forcedColorsQuery, 'matches', {
+          get: () => forcedColorsActive,
+        });
+        spyOn(window, 'matchMedia').and.callThrough()
+            .withArgs('(forced-colors: active)')
+            .and.returnValue(forcedColorsQuery);
+      });
+
+      it('paints the volume bar with system colors', async () => {
+        forcedColorsActive = true;
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['volume'],
+        });
+        video.dispatchEvent(new Event('volumechange'));
+
+        const background = getBackground('shaka-volume-bar-container');
+        expect(background).toContain('highlight');
+        expect(background).toContain('canvastext');
+      });
+
+      it('repaints the volume bar when the mode changes', async () => {
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['volume'],
+        });
+        video.dispatchEvent(new Event('volumechange'));
+        expect(getBackground('shaka-volume-bar-container'))
+            .not.toContain('highlight');
+
+        setForcedColors(true);
+        expect(getBackground('shaka-volume-bar-container'))
+            .toContain('highlight');
+
+        setForcedColors(false);
+        expect(getBackground('shaka-volume-bar-container'))
+            .not.toContain('highlight');
+      });
+
+      it('paints the playback rate slider with system colors', async () => {
+        forcedColorsActive = true;
+        await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['overflow_menu'],
+          overflowMenuButtons: ['playback_rate'],
+        });
+
+        const background =
+            getBackground('shaka-playback-rate-slider-container');
+        expect(background).toContain('highlight');
+        expect(background).toContain('canvastext');
+      });
+    });
+
+    // A missing space between a color and its stop made any named color an
+    // invalid gradient, which the browser ignored.
+    it('accepts named colors for the volume bar', async () => {
+      await UiUtils.createUIThroughAPI(videoContainer, video, {
+        controlPanelElements: ['volume'],
+        volumeBarColors: {base: 'gray', level: 'red'},
+      });
+      video.dispatchEvent(new Event('volumechange'));
+
+      const container = /** @type {!HTMLElement} */ (
+        videoContainer.getElementsByClassName(
+            'shaka-volume-bar-container')[0]);
+      expect(container.style.background).toContain('red');
+      expect(container.style.background).toContain('gray');
+    });
+
     describe('seek bar thumbnail preview', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
@@ -3149,6 +3562,8 @@ describe('UI', () => {
       let seekBar;
       /** @type {!HTMLElement} */
       let thumbnailContainer;
+      /** @type {!jasmine.Spy} */
+      let seekRangeSpy;
 
       beforeEach(async () => {
         Object.defineProperty(video, 'duration', {
@@ -3170,7 +3585,8 @@ describe('UI', () => {
         controls = ui.getControls();
         player = controls.getLocalPlayer();
         spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
-        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 100});
+        seekRangeSpy = spyOn(player, 'seekRange')
+            .and.returnValue({start: 0, end: 100});
 
         seekBar = UiUtils.getElementByClassName(
             videoContainer, 'shaka-seek-bar');
@@ -3187,6 +3603,31 @@ describe('UI', () => {
       /** @param {string} key */
       function pressKey(key) {
         seekBar.dispatchEvent(createKeydownEvent(key));
+      }
+
+      /**
+       * Pins the bar to a known box and returns the clientX of its middle,
+       * where the thumb would be centered.  Older browsers (e.g. Tizen 3)
+       * truncate MouseEvent.clientX to an integer, which on a narrow bar is
+       * off by more than a second, so the middle has to be a whole pixel.
+       *
+       * @return {number}
+       */
+      function middleOfBar() {
+        const rect = seekBar.getBoundingClientRect();
+        const left = Math.round(rect.left);
+        // The thumb travels (width - 12) pixels: make that 200.
+        const width = 212;
+        spyOn(seekBar, 'getBoundingClientRect').and.returnValue(
+            /** @type {!DOMRect} */ ({
+              left,
+              right: left + width,
+              width,
+              top: rect.top,
+              bottom: rect.bottom,
+              height: rect.height,
+            }));
+        return left + width / 2;
       }
 
       it('stays up while a seek key is held down', async () => {
@@ -3207,6 +3648,82 @@ describe('UI', () => {
         // away on its own.
         await Util.delay(1.2);
         expect(thumbnailContainer.style.visibility).toBe('hidden');
+      });
+
+      it('follows a live seek range under a still pointer', () => {
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        const thumbnailTime = UiUtils.getElementByClassName(
+            thumbnailContainer, 'shaka-player-ui-thumbnail-time');
+
+        seekBar.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: middleOfBar(),
+          bubbles: true,
+        }));
+        expect(thumbnailContainer.style.visibility).toBe('visible');
+        expect(thumbnailTime.textContent).toBe('-0:50');
+
+        // The live edge moves on while the pointer stays where it was, so
+        // the pointer is now over a different time.
+        seekRangeSpy.and.returnValue({start: 0, end: 200});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-1:40');
+      });
+
+      it('reuses the thumbnail while it covers a live pointer', async () => {
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        spyOn(player, 'getImageTracks').and.returnValue([
+          /** @type {shaka.extern.Track} */ ({}),
+        ]);
+        /** @type {shaka.extern.Thumbnail} */
+        const thumbnail = {
+          segment: null,
+          imageHeight: 0,
+          imageWidth: 0,
+          height: 90,
+          positionX: 0,
+          positionY: 0,
+          startTime: 40,
+          duration: 20,
+          uris: ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'],
+          startByte: 0,
+          endByte: null,
+          width: 160,
+          sprite: false,
+          mimeType: null,
+          codecs: null,
+        };
+        const getThumbnails = spyOn(player, 'getThumbnails')
+            .and.returnValue(Promise.resolve(thumbnail));
+        const thumbnailTime = UiUtils.getElementByClassName(
+            thumbnailContainer, 'shaka-player-ui-thumbnail-time');
+
+        seekBar.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: middleOfBar(),
+          bubbles: true,
+        }));
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+        // Let the thumbnail be shown.
+        await shaka.test.Util.shortDelay();
+
+        // The window slides by a second: the pointer is over a later time,
+        // but at the same distance from the live edge and in the same
+        // thumbnail, so there is nothing to do.
+        seekRangeSpy.and.returnValue({start: 1, end: 101});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-0:50');
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+
+        // The window grows: the time changes, the thumbnail does not.
+        seekRangeSpy.and.returnValue({start: 0, end: 104});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-0:52');
+        expect(getThumbnails).toHaveBeenCalledTimes(1);
+
+        // Now the pointer is past the end of that thumbnail.
+        seekRangeSpy.and.returnValue({start: 0, end: 140});
+        controls.seekTo(50, false);
+        expect(thumbnailTime.textContent).toBe('-1:10');
+        expect(getThumbnails).toHaveBeenCalledTimes(2);
       });
 
       it('is not shown for keys that do not seek', async () => {
@@ -3383,7 +3900,7 @@ describe('UI', () => {
       });
     });
 
-    describe('keyboard during a seek bar drag', () => {
+    describe('seek bar interactions', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
       /** @type {shaka.Player} */
@@ -3464,6 +3981,97 @@ describe('UI', () => {
       function pressKey(key) {
         seekBar.dispatchEvent(createKeydownEvent(key));
       }
+
+      /**
+       * @param {number} deltaY
+       * @param {!WheelEventInit=} options
+       * @return {!WheelEvent}
+       */
+      function scroll(deltaY, options = {}) {
+        const event = new WheelEvent('wheel', Object.assign({
+          deltaY,
+          bubbles: true,
+          cancelable: true,
+        }, options));
+        seekBar.dispatchEvent(event);
+        return event;
+      }
+
+      for (const deltaY of [-100, 100]) {
+        for (const playing of [false, true]) {
+          it(`seeks with wheel delta ${deltaY} while playing=${playing}`,
+              async () => {
+                if (playing) {
+                  video.play();
+                }
+                const time = video.currentTime;
+                const expected = time + (deltaY > 0 ? -1 : 1);
+                const event = scroll(deltaY);
+
+                expect(video.currentTime).toBe(expected);
+                expect(parseFloat(seekBar.value)).toBe(expected);
+                expect(video.paused).toBe(!playing);
+                expect(controls.isSeeking()).toBe(false);
+                expect(event.defaultPrevented).toBe(true);
+
+                // No delayed seek may overwrite a subsequent playback update.
+                video.currentTime = 70;
+                await Util.delay(0.6);
+
+                expect(video.currentTime).toBe(70);
+                expect(video.paused).toBe(!playing);
+              });
+        }
+      }
+
+      it('accumulates wheel events from the current playback time', () => {
+        video.currentTime = 60;
+        scroll(-100);
+        scroll(-100);
+        scroll(-100);
+        expect(video.currentTime).toBe(63);
+        scroll(100);
+        expect(video.currentTime).toBe(62);
+      });
+
+      it('clamps wheel seeks to the live seek range', () => {
+        Util.funcSpy(player.seekRange).and.returnValue({start: 20, end: 80});
+        video.currentTime = 20.5;
+        scroll(100);
+        expect(video.currentTime).toBe(20);
+        video.currentTime = 79.5;
+        scroll(-100);
+        expect(video.currentTime).toBe(80);
+      });
+
+      it('ignores zoom gestures and horizontal scrolling', () => {
+        expect(scroll(-100, {ctrlKey: true}).defaultPrevented).toBe(false);
+        expect(scroll(-100, {metaKey: true}).defaultPrevented).toBe(false);
+        expect(scroll(0, {deltaX: 100}).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(50);
+      });
+
+      it('ignores the wheel while disabled or hidden', () => {
+        seekBar.disabled = true;
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        seekBar.disabled = false;
+        spyOn(controls, 'isOpaque').and.returnValue(false);
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(50);
+      });
+
+      it('lets the wheel take over a drag', async () => {
+        mouseEvent('mousedown', positionOfBar(0.25));
+        const dragTime = parseFloat(seekBar.value);
+        scroll(-100);
+        expect(video.currentTime).toBe(dragTime + 1);
+        expect(controls.isSeeking()).toBe(false);
+
+        mouseEvent('mousemove', positionOfBar(0.75), document);
+        mouseEvent('mouseup', positionOfBar(0.75), document);
+        await Util.delay(0.3);
+        expect(video.currentTime).toBe(dragTime + 1);
+      });
 
       it('seeks from where the drag left the bar', () => {
         mouseEvent('mousedown', positionOfBar(0.25));

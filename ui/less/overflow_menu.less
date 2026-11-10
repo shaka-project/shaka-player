@@ -349,3 +349,22 @@
     background: transparent !important;
   }
 }
+
+/* In forced colors mode (e.g. Windows high contrast), the arrow is drawn with
+ * a mask over its background color, which would be replaced with Canvas, and
+ * the color swatches would all get the same forced color.  The swatches show
+ * the actual caption colors, so opt them out. */
+@media (forced-colors: active) {
+  .shaka-overflow-button-label-inline::after {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+
+  .shaka-settings-menu,
+  .shaka-sub-menu {
+    .shaka-color-swatch {
+      forced-color-adjust: none;
+      box-shadow: 0 0 0 1px CanvasText;
+    }
+  }
+}

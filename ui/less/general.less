@@ -57,6 +57,12 @@
   --shaka-rate-preset-hover: rgba(255, 255, 255, 18%);
   --shaka-rate-preset-active: rgba(255, 255, 255, 20%);
   --shaka-rate-preset-border: rgba(255, 255, 255, 70%);
+
+  /* Keyboard focus indicator.  The default blue keeps a contrast of at
+   * least 3:1 against both white and black, so the ring stays visible over
+   * any video behind the controls. */
+  --shaka-focus-ring-color: #1a73e8;
+  --shaka-focus-ring-width: 2px;
 }
 
 /* Make a thing unselectable.  There are currently no cases where we make it
@@ -167,9 +173,21 @@
 }
 
 @media (forced-colors: active) {
+  /* Forced colors keep the alpha of the backgrounds, which would let the
+   * video show through, so make them opaque. */
   .shaka-overflow-menu,
   .shaka-settings-menu,
-  .shaka-context-menu {
+  .shaka-context-menu,
+  .shaka-statistics-container,
+  .shaka-ad-statistics-container {
+    background: Canvas;
     border: 1px solid ButtonText;
+  }
+
+  /* Icons from a URL are drawn with a mask over their background color
+   * (currentColor), which forced colors would replace with Canvas.  This keeps
+   * their colors, but takes the forced text color of their parent. */
+  .shaka-ui-icon {
+    forced-color-adjust: preserve-parent-color;
   }
 }

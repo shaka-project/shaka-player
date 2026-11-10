@@ -31,9 +31,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    // Enable the mouse wheel so that every timestamp stays reachable:
-    // a wheel tick always seeks by exactly one second, even when the bar
-    // has fewer pixels than the content has seconds.
     super(parent, controls,
         [
           'shaka-seek-bar-container',
@@ -42,8 +39,27 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-seek-bar',
           'shaka-no-propagation',
           'shaka-show-controls-on-mouse-over',
-        ],
-        /* enableWheel= */ true);
+        ]);
+
+    // Seek through the same path as the keyboard controls.  The generic
+    // range wheel handler only changes the bar and schedules a seek, allowing
+    // playback updates to overwrite the value before that seek runs.
+    this.eventManager.listen(this.container, 'wheel', (e) => {
+      const event = /** @type {!WheelEvent} */ (e);
+      if (event.ctrlKey || event.metaKey || !event.deltaY ||
+          this.bar.disabled || !this.controls.isOpaque() ||
+          !this.video.duration || !this.isShowing()) {
+        return;
+      }
+
+      event.preventDefault();
+      const range = this.player.seekRange();
+      const currentTime = this.controls.isSeeking() ?
+          this.getValue() : this.video.currentTime;
+      const newTime = currentTime + (event.deltaY > 0 ? -1 : 1);
+      this.controls.seekTo(
+          Math.max(range.start, Math.min(range.end, newTime)), false);
+    });
 
     /** @private {!HTMLElement} */
     this.adMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -94,6 +110,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     /** @private {shaka.util.Timer} */
     this.chaptersTimer_ = new shaka.util.Timer(() => {
+      this.markChapters_();
+    });
+
+    shaka.ui.Utils.onForcedColorsChange(this.eventManager, () => {
+      this.update();
+      this.markAdBreaks_();
       this.markChapters_();
     });
 
@@ -198,6 +220,24 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.valueBeforeKeyPress_ = null;
 
     /**
+     * The horizontal position of the pointer while it hovers over the bar, or
+     * null when the preview is not following the pointer.  Live seek ranges
+     * keep changing under a still pointer, so the preview has to be computed
+     * again from it.
+     *
+     * @private {?number}
+     */
+    this.hoverClientX_ = null;
+
+    /**
+     * What the preview was last laid out for, so that refreshing it for a new
+     * seek range can tell when nothing visible has changed.
+     *
+     * @private {string}
+     */
+    this.lastPreviewLayout_ = '';
+
+    /**
      * The timer is activated to preview the position a key press has moved
      * the bar to.
      *
@@ -215,6 +255,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         // The key did not seek.
         return;
       }
+      this.hoverClientX_ = null;
       this.showThumbnailAtValue_(value);
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickAfter(
@@ -257,10 +298,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             this.lastThumbnailPendingRequest_ = null;
           }
           this.lastThumbnail_ = null;
+          this.hoverClientX_ = null;
           this.hideThumbnailTimeContainer_();
         });
 
     this.eventManager.listen(this.bar, 'mousemove', (event) => {
+      this.hoverClientX_ = event.clientX;
       if (this.controls.anySettingsMenusAreOpen()) {
         this.hideThumbnailTimeContainer_();
         return;
@@ -270,6 +313,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
+      this.hoverClientX_ = null;
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickNow();
     });
@@ -450,7 +494,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   update() {
-    const colors = this.config_.seekBarColors;
+    const colors = this.getColors_();
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
     let bufferedStart = 0;
@@ -479,7 +523,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
 
+    const rangeChanged = seekRange.start != this.getMin() ||
+        seekRange.end != this.getMax();
     this.setRange(seekRange.start, seekRange.end);
+    if (rangeChanged) {
+      this.refreshThumbnail_();
+    }
 
     if (!this.shouldBeDisplayed_()) {
       shaka.ui.Utils.setDisplay(this.container, false);
@@ -513,7 +562,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         this.makeColor_(colors.base, bufferEndFraction),
       ];
       this.container.style.background =
-          'linear-gradient(' + gradient.join(',') + ')';
+          `linear-gradient(${gradient.join(',')})`;
     }
   }
 
@@ -530,7 +579,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const rects = [];
-    const adBreakColor = this.config_.seekBarColors.adBreaks;
+    const adBreakColor = this.getColors_().adBreaks;
     let postRollAd = false;
     for (const point of this.adCuePoints_) {
       // Post-roll ads are marked as starting at -1 in CS IMA ads.
@@ -571,7 +620,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   markChapters_() {
-    const color = this.config_.seekBarColors.chapters;
+    const color = this.getColors_().chapters;
 
     const chapters = this.controls.getChapters();
 
@@ -642,13 +691,38 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
 
   /**
+   * In forced colors mode, the configured colors are replaced with system
+   * colors, so that the seek bar follows the user's palette.  Markers stay
+   * disabled if they are disabled in the configuration.
+   *
+   * @return {shaka.extern.UISeekBarColors}
+   * @private
+   */
+  getColors_() {
+    const colors = this.config_.seekBarColors;
+    if (!shaka.ui.Utils.isForcedColorsActive()) {
+      return colors;
+    }
+    // Markers are drawn as gaps in the track.
+    const markerColor = (color) =>
+      (!color || color === 'transparent') ? color : 'Canvas';
+    return {
+      base: 'GrayText',
+      buffered: 'CanvasText',
+      played: 'Highlight',
+      adBreaks: markerColor(colors.adBreaks),
+      chapters: markerColor(colors.chapters),
+    };
+  }
+
+  /**
    * @param {string} color
    * @param {number} fraction
    * @return {string}
    * @private
    */
   makeColor_(color, fraction) {
-    return color + ' ' + (fraction * 100) + '%';
+    return `${color} ${fraction * 100}%`;
   }
 
   /**
@@ -800,20 +874,27 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /**
    * @param {number} value
+   * @param {boolean=} isRefresh
    * @private
    */
-  showThumbnailAtValue_(value) {
+  showThumbnailAtValue_(value, isRefresh = false) {
     const position = this.getThumbCenterPixel_(value);
     if (position == null) {
       return;
     }
-    this.showThumbnailAndTime_(position, value);
+    this.showThumbnailAndTime_(position, value, isRefresh);
   }
 
   /**
+   * @param {number} pixelPosition
+   * @param {number} value
+   * @param {boolean} isRefresh True when the preview is only being refreshed
+   *   because the seek range changed.  The thumbnail is then reused while
+   *   it still covers the value, and nothing is done at all when the preview
+   *   would look the same.
    * @private
    */
-  async showThumbnailAndTime_(pixelPosition, value) {
+  async showThumbnailAndTime_(pixelPosition, value, isRefresh) {
     if (value < 0) {
       value = 0;
     }
@@ -846,14 +927,23 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
     const chapter = this.getChapter_(value);
     if (chapter) {
-      this.thumbnailTime_.textContent = time + ' · ' + chapter.title;
-    } else {
-      this.thumbnailTime_.textContent = time;
+      time += ' · ' + chapter.title;
     }
 
     const hasImageTracks = this.player.getImageTracks().length > 0;
     const hasChapterThumbnails = chapter && chapter.images.length > 0;
     const showImage = !isAdValue && (hasImageTracks || hasChapterThumbnails);
+
+    const layout = [pixelPosition, barWidth, showImage, time].join();
+    const lastThumbnail = this.lastThumbnail_;
+    const keepThumbnail = isRefresh && (!showImage || (!!lastThumbnail &&
+        playerValue >= lastThumbnail.startTime &&
+        playerValue < lastThumbnail.startTime + lastThumbnail.duration));
+    if (keepThumbnail && layout == this.lastPreviewLayout_) {
+      return;
+    }
+    this.lastPreviewLayout_ = layout;
+    this.thumbnailTime_.textContent = time;
 
     // The container reserves the width of a thumbnail, but when there is no
     // image to show, only the time is visible, centered inside that much wider
@@ -887,7 +977,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
     this.thumbnailContainer_.style.visibility = 'visible';
 
-    if (!showImage) {
+    if (!showImage || keepThumbnail) {
       return;
     }
 
@@ -1001,6 +1091,27 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
   }
 
+
+  /**
+   * Shows the preview again for the current seek range, if it is visible.
+   * In live content the range keeps moving, which changes both the time under
+   * a still pointer and the position of a fixed value.
+   *
+   * @private
+   */
+  refreshThumbnail_() {
+    if (this.thumbnailContainer_.style.visibility != 'visible' ||
+        this.controls.anySettingsMenusAreOpen()) {
+      return;
+    }
+    if (this.hoverClientX_ != null && !this.controls.isSeeking()) {
+      this.showThumbnailAtValue_(
+          this.getValueFromPosition(this.hoverClientX_), /* isRefresh= */ true);
+    } else {
+      // Dragging or a keyboard seek: the preview follows the bar value.
+      this.showThumbnailAtValue_(this.getValue(), /* isRefresh= */ true);
+    }
+  }
 
   /**
    * @private

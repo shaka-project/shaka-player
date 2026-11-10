@@ -224,6 +224,240 @@ describe('UITextDisplayer', () => {
         .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
+  it('places only the top-level cue of vertical text', async () => {
+    const Cue = shaka.text.Cue;
+    const cue = new Cue(0, 100, '');
+    cue.writingMode = Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    for (const text of ['First line', 'Second line']) {
+      const nestedCue = new Cue(0, 100, text);
+      nestedCue.writingMode = Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+      cue.nestedCues.push(nestedCue);
+    }
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const cueElement = /** @type {!HTMLElement} */(
+      textContainer.querySelector('div'));
+    expect(cueElement.style.position).toBe('absolute');
+    expect(cueElement.style.left).toBe('0px');
+
+    // The nested cues flow inside the top-level one, instead of all being
+    // placed at the same edge, on top of each other.
+    const nestedElements =
+        cueElement.querySelectorAll('.shaka-text-wrapper > span');
+    expect(nestedElements.length).toBe(2);
+    for (const element of nestedElements) {
+      expect(/** @type {!HTMLElement} */(element).style.position).toBe('');
+    }
+  });
+
+  describe('TTML paragraphs', () => {
+    /**
+     * Shows a paragraph in a body and a div, the way the TTML parser nests
+     * them.
+     *
+     * @param {!shaka.text.Cue} paragraph
+     * @param {shaka.text.Cue.textAlign=} containerAlign The alignment of the
+     *   containers.
+     * @return {!Promise<!HTMLElement>} The element of the paragraph.
+     */
+    async function showParagraph(paragraph,
+        containerAlign = shaka.text.Cue.textAlign.CENTER) {
+      const body = new shaka.text.Cue(0, 100, '');
+      body.isContainer = true;
+      body.textAlign = containerAlign;
+      const div = new shaka.text.Cue(0, 100, '');
+      div.isContainer = true;
+      div.textAlign = containerAlign;
+      body.nestedCues = [div];
+      div.nestedCues = [paragraph];
+
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([body]);
+      await updateCaptions();
+
+      const textContainer =
+          videoContainer.querySelector('.shaka-text-container');
+      const wrapper = textContainer.querySelector('.shaka-text-wrapper');
+      return /** @type {!HTMLElement} */ (
+        wrapper.firstElementChild.firstElementChild);
+    }
+
+    /**
+     * @param {string} payload
+     * @return {!shaka.text.Cue}
+     */
+    function span(payload) {
+      return new shaka.text.Cue(0, 100, payload);
+    }
+
+    /** @return {!shaka.text.Cue} */
+    function lineBreak() {
+      const cue = new shaka.text.Cue(0, 100, '');
+      cue.lineBreak = true;
+      return cue;
+    }
+
+    /**
+     * @param {string} base
+     * @param {string} text
+     * @param {?shaka.text.Cue.rubyPosition} rubyPosition
+     * @return {!shaka.text.Cue}
+     */
+    function ruby(base, text, rubyPosition) {
+      const cue = new shaka.text.Cue(0, 100, '');
+      cue.rubyTag = 'ruby';
+      const annotation = span(text);
+      annotation.rubyTag = 'rt';
+      annotation.rubyPosition = rubyPosition;
+      cue.nestedCues = [span(base), annotation];
+      return cue;
+    }
+
+    /**
+     * @param {!Element} element
+     * @return {string}
+     */
+    function getRubyPosition(element) {
+      const style = /** @type {!HTMLElement} */ (element).style;
+      return style.getPropertyValue('ruby-position') ||
+          style.getPropertyValue('-webkit-ruby-position');
+    }
+
+    it('aligns paragraphs in their containers', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      paragraph.textAlign = Cue.textAlign.END;
+      paragraph.nestedCues = [span('First'), span('Second')];
+      const element = await showParagraph(paragraph);
+
+      // The containers fill their region, and the paragraph is aligned in
+      // them.
+      const wrapper = element.parentElement.parentElement;
+      expect(wrapper.classList).toContain('shaka-text-wrapper');
+      expect(wrapper.style.display).toBe('flex');
+      expect(wrapper.style.width).toBe('100%');
+      expect(wrapper.parentElement.style.width).toBe('100%');
+      expect(element.parentElement.style.width).toBe('100%');
+      // Older browsers don't support self-end in flex layout, and get the
+      // flex-end fallback instead.
+      const alignSelf = CSS.supports('align-self', 'self-end') ?
+          'self-end' : 'flex-end';
+      expect(element.style.alignSelf).toBe(alignSelf);
+
+      // The words of the paragraph are not floated, which would reverse them.
+      for (const child of Array.from(element.childNodes)) {
+        expect(/** @type {!HTMLElement} */ (child).style.cssFloat).toBe('');
+      }
+    });
+
+    it('centers paragraphs in containers aligned to the start', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      paragraph.textAlign = Cue.textAlign.CENTER;
+      paragraph.nestedCues = [span('Centered')];
+      const element = await showParagraph(paragraph, Cue.textAlign.START);
+
+      expect(element.parentElement.style.alignItems).toBe('flex-start');
+      expect(element.style.alignSelf).toBe('center');
+    });
+
+    it('aligns the box of paragraphs by their position alignment', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      // A block at the end, whose lines are aligned to its start.
+      paragraph.positionAlign = Cue.positionAlign.RIGHT;
+      paragraph.textAlign = Cue.textAlign.START;
+      paragraph.nestedCues = [span('First'), lineBreak(), span('Second')];
+      const element = await showParagraph(paragraph);
+
+      // Older browsers don't support self-end in flex layout, and get the
+      // flex-end fallback instead.
+      const alignSelf = CSS.supports('align-self', 'self-end') ?
+          'self-end' : 'flex-end';
+      expect(element.style.alignSelf).toBe(alignSelf);
+      expect(element.style.textAlign).toBe('start');
+    });
+
+    it('keeps the display of ruby', async () => {
+      const Cue = shaka.text.Cue;
+      const paragraph = new Cue(0, 100, '');
+      const rubyCue = ruby('Base', 'Text', Cue.rubyPosition.BEFORE);
+      rubyCue.rubyAlign = 'space-around';
+      paragraph.nestedCues = [rubyCue];
+      const element = await showParagraph(paragraph);
+
+      const rubyElement = /** @type {!HTMLElement} */ (
+        element.querySelector('ruby'));
+      const annotation = /** @type {!HTMLElement} */ (
+        rubyElement.querySelector('rt'));
+      expect(rubyElement.style.display).toBe('');
+      expect(annotation.style.display).toBe('');
+      // A text alignment would override the alignment of the ruby.
+      expect(annotation.style.textAlign).toBe('');
+      expect(getRubyPosition(rubyElement)).toMatch(/^(over|before)$/);
+    });
+
+    it('places outside annotations after the lines but the first',
+        async () => {
+          const Cue = shaka.text.Cue;
+          const paragraph = new Cue(0, 100, '');
+          paragraph.nestedCues = [
+            ruby('First', 'Text', Cue.rubyPosition.OUTSIDE),
+            lineBreak(),
+            ruby('Second', 'Text', Cue.rubyPosition.OUTSIDE),
+          ];
+          const element = await showParagraph(paragraph);
+
+          const rubyElements = element.querySelectorAll('ruby');
+          expect(rubyElements.length).toBe(2);
+          expect(getRubyPosition(rubyElements[0])).toMatch(/^(over|before)$/);
+          expect(getRubyPosition(rubyElements[1])).toMatch(/^(under|after)$/);
+        });
+
+    it('reserves space for ruby on each line', async () => {
+      const paragraph = new shaka.text.Cue(0, 100, '');
+      paragraph.rubyReserve = 'both 0.5em';
+      paragraph.nestedCues = [span('First'), lineBreak(), span('Second')];
+      const element = await showParagraph(paragraph);
+
+      // Each line starts with a ruby annotated before it, which holds a ruby
+      // annotated after it.
+      const reserves = Array.from(element.querySelectorAll('ruby'))
+          .filter((rubyElement) => rubyElement.parentElement.localName !=
+              'ruby');
+      expect(reserves.length).toBe(2);
+      for (const reserve of reserves) {
+        expect(getRubyPosition(reserve)).toMatch(/^(over|before)$/);
+        const inner = reserve.querySelector('ruby');
+        expect(getRubyPosition(inner)).toMatch(/^(under|after)$/);
+        for (const annotation of Array.from(reserve.querySelectorAll('rt'))) {
+          expect(/** @type {!HTMLElement} */ (annotation).style.fontSize)
+              .toBe('0.5em');
+        }
+      }
+      // The text is unchanged, except for the empty bases and annotations.
+      expect(element.textContent.replace(/\u200B/g, '')).toBe('FirstSecond');
+    });
+  });
+
+  it('converts font sizes relative to the video container', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Text');
+    cue.fontSize = '10rh';
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const cueElement = /** @type {!HTMLElement} */ (
+      textContainer.querySelector('div'));
+    expect(cueElement.style.fontSize).toBe(videoContainerHeight / 10 + 'px');
+  });
+
   it('correctly displays styles for cellResolution units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
@@ -472,6 +706,37 @@ describe('UITextDisplayer', () => {
     expect(textContainer.textContent).toBe('OneTwo');
   });
 
+  it('stacks the cues of a region in their block flow direction', async () => {
+    const Cue = shaka.text.Cue;
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'vertical';
+    cueRegion.height = 80;
+    cueRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.width = 80;
+    cueRegion.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    const container = new Cue(0, 100, '');
+    container.isContainer = true;
+    container.region = cueRegion;
+    container.writingMode = Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    container.nestedCues = [new Cue(0, 100, 'First')];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([container]);
+    await updateCaptions();
+
+    const regionElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-region'));
+    // Older browsers, like Tizen 3, only have the prefixed property.
+    expect(regionElement.style.getPropertyValue('writing-mode') ||
+        regionElement.style.getPropertyValue('-webkit-writing-mode'))
+        .toBe('vertical-rl');
+    // A vertical container fills its region along its lines.
+    const containerElement = /** @type {!HTMLElement} */ (
+      regionElement.firstElementChild);
+    expect(containerElement.style.height).toBe('100%');
+    expect(containerElement.style.width).toBe('');
+  });
+
   it('creates separate elements for cue regions', async () => {
     const cueRegion = new shaka.text.CueRegion();
     cueRegion.id = 'regionId';
@@ -695,6 +960,76 @@ describe('UITextDisplayer', () => {
     expect(cueElement.textContent).toBe('Hidden');
   });
 
+  it('applies the bidirectional embedding level of the cues', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Override');
+    cue.direction = shaka.text.Cue.direction.HORIZONTAL_RIGHT_TO_LEFT;
+    cue.unicodeBidi = 'bidi-override';
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    await updateCaptions();
+
+    const cueElement = /** @type {!HTMLElement} */ (
+      videoContainer.querySelector('.shaka-text-container > div'));
+    expect(cueElement.style.direction).toBe('rtl');
+    expect(cueElement.style.unicodeBidi).toBe('bidi-override');
+  });
+
+  it('falls back to the prefixed bidirectional embedding level', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Isolated');
+    cue.unicodeBidi = 'isolate';
+    // An older browser which only supports the prefixed value.  The
+    // prototype which defines the property depends on the browser.
+    const prototypes = [];
+    for (let p = Object.getPrototypeOf(document.createElement('div').style);
+      p; p = Object.getPrototypeOf(p)) {
+      prototypes.push(p);
+    }
+    const style = /** @type {!Object} */ (prototypes.find((p) =>
+      Object.getOwnPropertyDescriptor(p, 'unicodeBidi')) || prototypes[0]);
+    const descriptor =
+        Object.getOwnPropertyDescriptor(style, 'unicodeBidi');
+    const values = new WeakMap();
+    Object.defineProperty(style, 'unicodeBidi', {
+      configurable: true,
+      // The accessors need the style they are called on, as "this".
+      /**
+       * @this {!CSSStyleDeclaration}
+       * @return {string}
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      get() {
+        return values.get(this) || '';
+      },
+      /**
+       * @this {!CSSStyleDeclaration}
+       * @param {string} value
+       */
+      // eslint-disable-next-line no-restricted-syntax
+      set(value) {
+        if (value != 'isolate') {
+          values.set(this, value);
+        }
+      },
+    });
+
+    try {
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([cue]);
+      await updateCaptions();
+
+      const cueElement = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container > div'));
+      expect(cueElement.style.unicodeBidi).toBe('-webkit-isolate');
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(style, 'unicodeBidi', descriptor);
+      } else {
+        delete style['unicodeBidi'];
+      }
+    }
+  });
+
   it('does not wrap the lines of cues which should not wrap', async () => {
     const cue = new shaka.text.Cue(0, 100, 'Test');
     cue.wrapLine = false;
@@ -706,6 +1041,52 @@ describe('UITextDisplayer', () => {
     const cueElement = /** @type {!HTMLElement} */ (
       videoContainer.querySelector('.shaka-text-container > div'));
     expect(cueElement.style.whiteSpace).toBe('pre');
+  });
+
+  describe('white space', () => {
+    /**
+     * @param {string} payload
+     * @return {!Promise<string>} The white-space style of the cue's element.
+     */
+    async function whiteSpaceFor(payload) {
+      const cue = new shaka.text.Cue(0, 100, payload);
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([cue]);
+      await updateCaptions();
+
+      const cueElement = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container > div'));
+      return cueElement.style.whiteSpace;
+    }
+
+    // Older browsers count the space at a soft wrap when aligning a line with
+    // pre-wrap, but not with pre-line, which lays out the same text when it
+    // would not collapse any of it.
+    it('uses pre-line when it would collapse nothing', async () => {
+      expect(await whiteSpaceFor('Two words\nand a new line'))
+          .toBe('pre-line');
+    });
+
+    it('uses pre-line with trailing spaces, kept as nbsp', async () => {
+      expect(await whiteSpaceFor('Trailing spaces  ')).toBe('pre-line');
+    });
+
+    it('uses pre-wrap to keep a run of spaces', async () => {
+      expect(await whiteSpaceFor('Two  spaces')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the start of a line', async () => {
+      expect(await whiteSpaceFor(' Leading space')).toBe('pre-wrap');
+      expect(await whiteSpaceFor('Line\n indented')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep spaces at the end of a line', async () => {
+      expect(await whiteSpaceFor('Trailing \nspace')).toBe('pre-wrap');
+    });
+
+    it('uses pre-wrap to keep tabs', async () => {
+      expect(await whiteSpaceFor('A\ttab')).toBe('pre-wrap');
+    });
   });
 
   describe('regions sized in lines', () => {
@@ -1114,6 +1495,125 @@ describe('UITextDisplayer', () => {
     cueElement = textContainer.querySelector('div');
     expect(cueElement.textContent).toBe('Previewed cue');
     expect(cueElement.style.fontSize).toBe('');
+  });
+
+  describe('fontScaleFactor', () => {
+    beforeEach(() => {
+      const config =
+          shaka.util.PlayerConfiguration.createDefault().textDisplayer;
+      config.suspendRenderingWhenHidden = false;
+      config.fontScaleFactor = 2;
+      textDisplayer.configure(config);
+      textDisplayer.setTextVisibility(true);
+    });
+
+    /**
+     * @param {string} text
+     * @return {!Array<!shaka.text.Cue>}
+     */
+    function parseVtt(text) {
+      return new shaka.text.VttTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text)),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 100,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          null, []);
+    }
+
+    /**
+     * @param {string} body
+     * @return {!Array<!shaka.text.Cue>}
+     */
+    function parseTtml(body) {
+      return new shaka.text.TtmlTextParser().parseMedia(
+          shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(
+              '<tt xmlns="http://www.w3.org/ns/ttml" ' +
+              'xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+              body + '</tt>')),
+          {
+            periodStart: 0,
+            segmentStart: 0,
+            segmentEnd: 100,
+            vttOffset: 0,
+            isMpegTs: false,
+          },
+          null, []);
+    }
+
+    /**
+     * @param {!Array<!shaka.text.Cue>} cues
+     * @param {string} text
+     * @return {!Promise<number>} The computed font size of the innermost
+     *   element containing the text, in pixels.
+     */
+    async function getFontSize(cues, text) {
+      textDisplayer.append(cues);
+      await updateCaptions();
+      const textContainer =
+          videoContainer.querySelector('.shaka-text-container');
+      const elements = Array.from(textContainer.querySelectorAll('*'))
+          .filter((e) => e.textContent.trim() == text);
+      const element = elements[elements.length - 1];
+      expect(element).toBeTruthy();
+      return parseFloat(getComputedStyle(element).fontSize);
+    }
+
+    /** @return {number} */
+    function getBaseFontSize() {
+      return parseFloat(getComputedStyle(
+          videoContainer.querySelector('.shaka-text-container')).fontSize);
+    }
+
+    it('scales CEA-608/708 cues only once', async () => {
+      const cue = new shaka.text.Cue(0, 100, '');
+      const nestedCue = shaka.cea.CeaUtils.createStyledCue(
+          0, 100, /* underline= */ false, /* italics= */ true,
+          'white', 'black');
+      nestedCue.payload = 'Captain\'s log.';
+      cue.nestedCues = [nestedCue];
+
+      const fontSize = await getFontSize([cue], 'Captain\'s log.');
+      expect(fontSize).toBeCloseTo(2 * getBaseFontSize(), 1);
+    });
+
+    it('scales deeply nested WebVTT cues only once', async () => {
+      const cues = parseVtt(
+          'WEBVTT\n\n' +
+          '00:00:00.000 --> 00:01:40.000\n' +
+          '<c>one <c>two <c>three <c>four</c></c></c></c>\n');
+
+      const fontSize = await getFontSize(cues, 'four');
+      expect(fontSize).toBeCloseTo(2 * getBaseFontSize(), 1);
+    });
+
+    it('does not scale nested WebVTT font sizes in em again', async () => {
+      const cues = parseVtt(
+          'WEBVTT\n\n' +
+          'STYLE\n::cue(.big) { font-size: 150%; }\n\n' +
+          '00:00:00.000 --> 00:01:40.000\n' +
+          '<c>one <c>two <c.big>three</c></c></c>\n');
+
+      const fontSize = await getFontSize(cues, 'three');
+      expect(fontSize).toBeCloseTo(2 * 1.5 * getBaseFontSize(), 1);
+    });
+
+    it('scales nested TTML cues only once', async () => {
+      const cues = parseTtml(
+          '<body><div><p begin="0s" end="100s">' +
+          '<span>one <span>two</span></span>' +
+          '<span tts:fontSize="10px">three</span>' +
+          '</p></div></body>');
+
+      // The default cell resolution is 32 by 15 cells, and the default font
+      // size is 1c.
+      const cellHeight = videoContainerHeight / 15;
+      expect(await getFontSize(cues, 'two')).toBeCloseTo(2 * cellHeight, 1);
+      expect(await getFontSize([], 'three')).toBeCloseTo(2 * 10, 1);
+    });
   });
 
   // eslint-disable-next-line @stylistic/max-len

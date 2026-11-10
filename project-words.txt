@@ -2,6 +2,7 @@
 abrstatuschanged
 abrtest
 haspopup
+menuitemcheckbox
 menuitemradio
 adblocker
 audiofocuspaused
@@ -15,6 +16,7 @@ autoplaying
 boundarycrossed
 bufferappending
 canupdatestarttime
+canvastext
 captionselectionupdated
 caststatuschanged
 channelcount
@@ -424,6 +426,7 @@ schi
 schm
 scte
 sdtp
+segmenters
 segs
 senc
 sepiff

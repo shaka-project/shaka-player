@@ -58,6 +58,15 @@ describe('tXml', () => {
       expect(body.children[0]).toBe('\n  ');
       expect(body.children[2]).toBe('\n  ');
     });
+
+    it('keeps the white space between nodes when asked to', () => {
+      const xml = '<p><span>A</span>\n  <span>B</span></p>';
+      const kept = TXml.parse(xml, /* includeParent= */ true,
+          /* keepSpace= */ true)[0];
+      expect(kept.children[1]).toBe('\n  ');
+      const dropped = TXml.parse(xml, /* includeParent= */ true)[0];
+      expect(dropped.children.length).toBe(2);
+    });
   });
 
   describe('namespace queries', () => {

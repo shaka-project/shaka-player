@@ -109,4 +109,68 @@ describe('MediaSource polyfill', () => {
         expect(abortIsStubbed()).toBe(true);
         expect(removalRangeIsPatched()).toBe(true);
       });
+
+  describe('rejecting codecs', () => {
+    /**
+     * Installs the polyfill for a device that rejects |codecs|, over a
+     * MediaSource that claims to support everything.
+     *
+     * @param {!Array<string>} codecs
+     */
+    function installRejecting(codecs) {
+      MediaSource.isTypeSupported = () => true;
+      if (window.ManagedMediaSource) {
+        ManagedMediaSource.isTypeSupported = () => true;
+      }
+
+      const device = new shaka.device.DefaultBrowser();
+      spyOn(device, 'rejectCodecs').and.returnValue(codecs);
+      spyOn(shaka.device.DeviceFactory, 'getDevice').and.returnValue(device);
+      shaka.polyfill.MediaSource.install();
+    }
+
+    it('rejects the codec', () => {
+      installRejecting(['opus']);
+      expect(MediaSource.isTypeSupported('audio/webm; codecs="opus"'))
+          .toBe(false);
+    });
+
+    it('ignores case', () => {
+      installRejecting(['opus']);
+      expect(MediaSource.isTypeSupported('audio/mp4; codecs="Opus"'))
+          .toBe(false);
+    });
+
+    it('rejects the codec alongside others', () => {
+      installRejecting(['opus']);
+      expect(MediaSource.isTypeSupported(
+          'video/webm; codecs="vp09.00.10.08, opus"')).toBe(false);
+    });
+
+    it('accepts other codecs', () => {
+      installRejecting(['opus']);
+      expect(MediaSource.isTypeSupported('audio/mp4; codecs="mp4a.40.2"'))
+          .toBe(true);
+      expect(MediaSource.isTypeSupported(
+          'video/mp4; codecs="avc1.42E01E,mp4a.40.2"')).toBe(true);
+      expect(MediaSource.isTypeSupported('audio/webm')).toBe(true);
+    });
+
+    it('accepts the codec on other devices', () => {
+      installRejecting([]);
+      expect(MediaSource.isTypeSupported('audio/webm; codecs="opus"'))
+          .toBe(true);
+    });
+
+    it('rejects the codec in ManagedMediaSource', () => {
+      if (!window.ManagedMediaSource) {
+        pending('ManagedMediaSource is not available');
+      }
+      installRejecting(['opus']);
+      expect(ManagedMediaSource.isTypeSupported('audio/webm; codecs="opus"'))
+          .toBe(false);
+      expect(ManagedMediaSource.isTypeSupported(
+          'audio/mp4; codecs="mp4a.40.2"')).toBe(true);
+    });
+  });
 });

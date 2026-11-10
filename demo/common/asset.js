@@ -57,6 +57,17 @@ const ShakaDemoAssetInfo = class {
     this.extraChapter = [];
     /** @type {?string} */
     this.certificateUri = null;
+    /** @type {!Map<string, string>} */
+    this.certificates = new Map();
+    /**
+     * Preserves DRM blocks configuration for custom assets.
+     * @type {?Array<{
+     *   licenseServerUri: string,
+     *   certificateUri: string,
+     *   drmSystem: string
+     * }>}
+     */
+    this.drmInfos = null;
     /** @type {?string} */
     this.description = null;
     /** @type {boolean} */
@@ -121,6 +132,16 @@ const ShakaDemoAssetInfo = class {
     this.storeCallback;
     /** @type {?function()} */
     this.unstoreCallback;
+    /** @type {?function()} */
+    this.pauseCallback;
+    /** @type {?function()} */
+    this.resumeCallback;
+    /**
+     * The offline URI of the content while it is being downloaded, once it is
+     * known.
+     * @type {?string}
+     */
+    this.downloadingOfflineUri = null;
     /** @type {?shaka.extern.StoredContent} */
     this.storedContent;
     /** @type {number} */
@@ -315,6 +336,23 @@ const ShakaDemoAssetInfo = class {
    */
   getLicenseServers() {
     return this.licenseServers;
+  }
+
+  /**
+   * @param {string} keySystem
+   * @param {string} certificate
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addCertificate(keySystem, certificate) {
+    this.certificates.set(keySystem, certificate);
+    return this;
+  }
+
+  /**
+   * @return {!Map<string, string>}
+   */
+  getCertificates() {
+    return this.certificates;
   }
 
   /**
@@ -586,14 +624,15 @@ const ShakaDemoAssetInfo = class {
       config.drm.servers = config.drm.servers || {};
       licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
-        if (this.certificateUri || this.licenseRequestHeaders.size) {
+        const cert = (this.certificates && this.certificates.get(key)) ||
+            this.certificateUri;
+        if (cert || this.licenseRequestHeaders.size) {
           if (!config.drm.advanced[key]) {
             config.drm.advanced[key] =
                 ShakaDemoAssetInfo.defaultAdvancedDrmConfig();
           }
-          if (this.certificateUri) {
-            config.drm.advanced[key].serverCertificateUri =
-                this.certificateUri;
+          if (cert) {
+            config.drm.advanced[key].serverCertificateUri = cert;
           }
           if (this.licenseRequestHeaders.size) {
             this.licenseRequestHeaders.forEach((headerValue, headerName) => {
@@ -627,7 +666,15 @@ const ShakaDemoAssetInfo = class {
 
   /** @return {boolean} */
   isStored() {
-    return this.storedContent != null;
+    return this.storedContent != null && !this.storedContent.isIncomplete;
+  }
+
+  /**
+   * @return {boolean} Whether the asset was partially stored, and its download
+   *   can be resumed.
+   */
+  isPartiallyStored() {
+    return this.storedContent != null && this.storedContent.isIncomplete;
   }
 
   /** @return {!ShakaDemoAssetInfo} */

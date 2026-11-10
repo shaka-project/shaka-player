@@ -39,7 +39,7 @@ goog.require('shaka.msf.draft22.Dialect');
 goog.require('shaka.msf.packaging.Cmaf');
 goog.require('shaka.msf.packaging.Loc');
 goog.require('shaka.msf.packaging.Locmaf');
-goog.require('shaka.msf.packaging.M2ts');
+goog.require('shaka.msf.packaging.Mpeg2ts');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpFetchPlugin');
 goog.require('shaka.net.HttpXHRPlugin');

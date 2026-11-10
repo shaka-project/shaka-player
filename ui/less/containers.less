@@ -685,3 +685,23 @@
     cursor: none !important;
   }
 }
+
+/* In forced colors mode (e.g. Windows high contrast), the colors of the
+ * controls are forced to the user's palette, but the video behind them is
+ * not.  Text gets an opaque backplate from the browser, but icons don't, so
+ * give the controls an opaque background to keep them legible.  The top
+ * panel is often empty, so only its buttons get a background. */
+@media (forced-colors: active) {
+  /* The bottom controls don't fade out with the controls (only their
+   * children do), so only paint them while the controls are shown. */
+  .shaka-controls-container[shown="true"] .shaka-bottom-controls,
+  .shaka-controls-container[casting="true"] .shaka-bottom-controls,
+  .shaka-controls-top-button-panel > button {
+    background-color: Canvas;
+  }
+
+  .shaka-big-buttons-container button {
+    background-color: Canvas;
+    outline: 1px solid CanvasText;
+  }
+}

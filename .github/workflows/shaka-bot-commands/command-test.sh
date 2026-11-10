@@ -25,10 +25,10 @@ WORKFLOW_ARGS=( "pr=$PR_NUMBER" )
 
 case "${SHAKA_BOT_ARGUMENTS[0]}" in
   # CE devices only.
-  ce) WORKFLOW_ARGS+=( "browser_filter=Tizen ChromecastUltra ChromecastGTV ChromecastStreamer ChromeAndroid" ) ;;
+  ce) WORKFLOW_ARGS+=( "browser_filter=Tizen Chromecast3rdGen ChromecastGTV ChromecastStreamer ChromeAndroid" ) ;;
 
   # Cast devices only.
-  cast) WORKFLOW_ARGS+=( "browser_filter=ChromecastUltra ChromecastGTV ChromecastStreamer" ) ;;
+  cast) WORKFLOW_ARGS+=( "browser_filter=Chromecast3rdGen ChromecastGTV ChromecastStreamer" ) ;;
 
   # Tizen device only.
   tizen) WORKFLOW_ARGS+=( "browser_filter=Tizen" ) ;;

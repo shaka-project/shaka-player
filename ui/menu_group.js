@@ -161,6 +161,7 @@ shaka.ui.MenuGroup = class extends shaka.ui.SettingsMenu {
         }
       }
     }
+    shaka.ui.Utils.setMenuItemRoles(this.menu);
   }
 
   /**

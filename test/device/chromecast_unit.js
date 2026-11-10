@@ -9,6 +9,8 @@ describe('Chromecast', () => {
   // cspell: disable-next-line
   const vizio = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 CrKey/1.0.999999 VIZIO SmartCast(Conjure/MTKF-5.1.516.1 FW/0.6.11.1-2 Model/V50C6-J09)';
   // cspell: disable-next-line
+  const chromecastFirstGen = 'Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.47 Safari/537.36 CrKey/1.36.159268';
+  // cspell: disable-next-line
   const chromecastBuiltinOrOlder = 'Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.225 Safari/537.36 CrKey/1.56.500000 DeviceType/Chromecast';
   // cspell: disable-next-line
   const chromecastFuchsia = 'Mozilla/5.0 (Fuchsia) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 CrKey/1.56.500000';
@@ -36,5 +38,17 @@ describe('Chromecast', () => {
     expect(new Chromecast().getDeviceName()).toContain('Fuchsia');
     Util.setUserAgent(chromecastAndroid);
     expect(new Chromecast().getDeviceName()).toContain('Android');
+  });
+
+  it('rejects Opus only on the 1st-gen Chromecast', () => {
+    Util.setUserAgentData(null);
+    Util.setUserAgent(chromecastFirstGen);
+    expect(new Chromecast().rejectCodecs()).toEqual(['opus']);
+    Util.setUserAgent(chromecastBuiltinOrOlder);
+    expect(new Chromecast().rejectCodecs()).toEqual([]);
+    Util.setUserAgent(chromecastFuchsia);
+    expect(new Chromecast().rejectCodecs()).toEqual([]);
+    Util.setUserAgent(chromecastAndroid);
+    expect(new Chromecast().rejectCodecs()).toEqual([]);
   });
 });
