@@ -370,6 +370,24 @@ describe('DashParser SegmentTemplate', () => {
         expect(stream.segmentIndex.find(25)).toBe(null);
       });
 
+      it('does not stretch a SegmentTimeline that ends at @endNumber',
+          async () => {
+            // The timeline only lists the segments that exist.
+            const source = Dash.makeSimpleManifestText([
+              '<SegmentTemplate startNumber="1" endNumber="2"',
+              '  media="s$Number$.mp4">',
+              '  <SegmentTimeline>',
+              '    <S t="0" d="10" r="1" />',
+              '  </SegmentTimeline>',
+              '</SegmentTemplate>',
+            ], /* duration= */ 40);
+            const references = [
+              ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+              ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+            ];
+            await Dash.testSegmentIndex(source, references);
+          });
+
       it('still stretches a SegmentTimeline it does not cap', async () => {
         const source = Dash.makeSimpleManifestText([
           '<SegmentTemplate startNumber="1" endNumber="3"',
@@ -1059,6 +1077,36 @@ describe('DashParser SegmentTemplate', () => {
 
         const pos = index.find(0);
         expect(pos).toBe(0);
+      });
+
+      it('follows an @endNumber change in an update', async () => {
+        /**
+         * @param {number} endNumber
+         * @return {shaka.dash.SegmentTemplate.SegmentTemplateInfo}
+         */
+        const makeInfo = (endNumber) => {
+          const ranges = [0, 1, 2, 3].map((i) => ({
+            start: i * 10,
+            end: (i + 1) * 10,
+            unscaledStart: i * 10 * 90000,
+            segmentPosition: i + 1,
+          }));
+          const info = makeTemplateInfo(ranges);
+          info.endNumber = endNumber;
+          return info;
+        };
+        // The period ends at 41.
+        const index = await makeTimelineSegmentIndex(makeInfo(2));
+        expect(index.getNumReferences()).toBe(2);
+        // Segment 2 is the last one, far from the period end.
+        expect(index.get(1).endTime).toBe(20);
+        expect(index.find(25)).toBe(null);
+
+        index.appendTemplateInfo(makeInfo(4), 0, 41);
+        expect(index.getNumReferences()).toBe(4);
+        expect(index.find(25)).toBe(2);
+        // Segment 4 is the last one now, a rounding error from the period end.
+        expect(index.get(3).endTime).toBe(41);
       });
 
       it('finds correct position if time === first end time', async () => {
