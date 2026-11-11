@@ -106,6 +106,7 @@ uiupdated
 unlisten
 unloop
 unmutes
+valuetext
 variantchanged
 vrstatuschanged
 webkitcurrentplaybacktargetiswirelesschanged

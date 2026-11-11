@@ -529,6 +529,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (rangeChanged) {
       this.refreshThumbnail_();
     }
+    this.updateValueText_(seekRange);
 
     if (!this.shouldBeDisplayed_()) {
       shaka.ui.Utils.setDisplay(this.container, false);
@@ -808,6 +809,57 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   /** @override */
   updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
+    this.updateValueText_(this.player.seekRange());
+  }
+
+  /**
+   * Gives screen readers a spoken form of the position, e.g. "20 minutes,
+   * 34 seconds of 45 minutes", instead of the raw number of seconds.  It is
+   * left out where the browser can not put a duration into words.
+   *
+   * @param {{start: number, end: number}} seekRange
+   * @private
+   */
+  updateValueText_(seekRange) {
+    const LocIds = shaka.ui.Locales.Ids;
+    const Utils = shaka.ui.Utils;
+    const locales = Array.from(this.localization.getCurrentLocales());
+    const seekRangeSize = seekRange.end - seekRange.start;
+    const value = Math.min(
+        Math.max(this.getValue(), seekRange.start), seekRange.end);
+
+    let text = null;
+    if (isFinite(seekRangeSize) && seekRangeSize > 0) {
+      if (this.player.isDynamic()) {
+        // Like the presentation time, count down from the live edge, and
+        // consider it live when less than 1 second behind it.
+        const behindLive = Math.floor(seekRange.end - value);
+        const time = Utils.buildAccessibleTimeString(behindLive, locales);
+        if (time != null) {
+          text = behindLive >= 1 ?
+              this.localization.resolve(LocIds.BEHIND_LIVE)
+                  .replace('[TIME]', time) :
+              this.localization.resolve(LocIds.LIVE);
+        }
+      } else {
+        const currentTime = Utils.buildAccessibleTimeString(
+            value - seekRange.start, locales);
+        const duration = Utils.buildAccessibleTimeString(
+            seekRangeSize, locales);
+        if (currentTime != null && duration != null) {
+          text = this.localization.resolve(LocIds.SEEK_BAR_VALUE_TEXT)
+              .replace('[CURRENT_TIME]', currentTime)
+              .replace('[DURATION]', duration);
+        }
+      }
+    }
+
+    // This runs on every time update; only touch the DOM on a change.
+    if (text == null) {
+      this.bar.removeAttribute('aria-valuetext');
+    } else if (this.bar.getAttribute('aria-valuetext') != text) {
+      this.bar.setAttribute('aria-valuetext', text);
+    }
   }
 
   /**

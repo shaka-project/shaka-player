@@ -266,6 +266,80 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Builds a spoken form of a duration, e.g. "20 minutes, 34 seconds", for
+   * assistive technologies.  The browser does all the localization, so this
+   * returns null when Intl.DurationFormat is not available.
+   *
+   * @param {number} seconds
+   * @param {!Array<string>} locales
+   * @return {?string}
+   */
+  static buildAccessibleTimeString(seconds, locales) {
+    if (!window.Intl || !('DurationFormat' in Intl)) {
+      return null;
+    }
+    // Intl.DurationFormat only takes whole numbers and does not carry
+    // seconds over into larger units, so break the duration down here.
+    const total = Math.max(0, Math.floor(seconds));
+    try {
+      const key = locales.join(',');
+      const formatters =
+          shaka.ui.Utils.durationFormatters_.getOrInsertComputed(key, () => {
+            return {
+              // Units that are zero are left out of the long style, which
+              // would leave nothing at all for a zero duration.  Use a
+              // second formatter that always shows the seconds for that
+              // case only, since it would also print "0 seconds" on whole
+              // minutes and hours.
+              any: new Intl.DurationFormat(locales, {style: 'long'}),
+              zero: new Intl.DurationFormat(locales,
+                  {style: 'long', secondsDisplay: 'always'}),
+            };
+          });
+      if (!total) {
+        return formatters.zero.format({seconds: 0});
+      }
+      return formatters.any.format({
+        days: Math.floor(total / 86400),
+        hours: Math.floor((total % 86400) / 3600),
+        minutes: Math.floor((total % 3600) / 60),
+        seconds: total % 60,
+      });
+    } catch (e) {
+      // e.g. a malformed locale tag.
+      return null;
+    }
+  }
+
+
+  /**
+   * Builds a localized percentage, e.g. "33%", from a fraction between 0
+   * and 1, or null if the browser can not format it.
+   *
+   * @param {number} fraction
+   * @param {!Array<string>} locales
+   * @return {?string}
+   */
+  static buildPercentString(fraction, locales) {
+    if (!window.Intl || !Intl.NumberFormat) {
+      return null;
+    }
+    try {
+      const key = locales.join(',');
+      const formatter =
+          shaka.ui.Utils.percentFormatters_.getOrInsertComputed(key, () => {
+            return new Intl.NumberFormat(locales,
+                {style: 'percent', maximumFractionDigits: 0});
+          });
+      return formatter.format(fraction);
+    } catch (e) {
+      // e.g. a malformed locale tag.
+      return null;
+    }
+  }
+
+
+  /**
    * Marks a menu item as selected or unselected by toggling the ARIA state
    * and the visual indicator class atomically.
    * @param {!HTMLElement} button
@@ -301,3 +375,22 @@ shaka.ui.Utils = class {
     return uri;
   }
 };
+
+
+/**
+ * The Intl.DurationFormat instances used by buildAccessibleTimeString, by
+ * locale list.  Building one is expensive, and the seek bar asks for a new
+ * string on every time update.
+ *
+ * @private {!Map<string, {any: !Intl.DurationFormat,
+ *                         zero: !Intl.DurationFormat}>}
+ */
+shaka.ui.Utils.durationFormatters_ = new Map();
+
+
+/**
+ * The Intl.NumberFormat instances used by buildPercentString, by locale list.
+ *
+ * @private {!Map<string, !Intl.NumberFormat>}
+ */
+shaka.ui.Utils.percentFormatters_ = new Map();

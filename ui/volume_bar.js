@@ -118,6 +118,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     }
 
     this.updateColors_();
+    this.updateValueText_();
   }
 
   /** @private */
@@ -128,6 +129,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     const volume = this.ad.getVolume();
     this.setValue(volume * 100);
     this.updateColors_();
+    this.updateValueText_();
   }
 
   /** @private */
@@ -145,6 +147,23 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
   /** @override */
   updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
+    this.updateValueText_();
+  }
+
+  /**
+   * Gives screen readers the volume as a percentage instead of the raw
+   * value of the bar, which may have many decimals.
+   *
+   * @private
+   */
+  updateValueText_() {
+    const text = shaka.ui.Utils.buildPercentString(this.getValue() / 100,
+        Array.from(this.localization.getCurrentLocales()));
+    if (text == null) {
+      this.bar.removeAttribute('aria-valuetext');
+    } else {
+      this.bar.setAttribute('aria-valuetext', text);
+    }
   }
 
   /** @override */
