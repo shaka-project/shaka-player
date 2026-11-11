@@ -32,11 +32,17 @@ goog.requireType('cml.cmcd.CmcdReportRecorderWaitOptions');
 cml.cmcd.CmcdReportRecorderInternalWaiter_;
 
 
-/** @const {!RegExp} @private */
+/**
+ * @const {!RegExp}
+ * @private
+ */
 cml.cmcd.CmcdReportRecorder_MANIFEST_EXTENSIONS_ =
     /\.(m3u8|mpd)(\?|$|\/)/i;
 
-/** @const {!RegExp} @private */
+/**
+ * @const {!RegExp}
+ * @private
+ */
 cml.cmcd.CmcdReportRecorder_SEGMENT_EXTENSIONS_ =
     /\.(m4s|m4v|m4a|mp4|ts|aac)(\?|$|\/)/i;
 
