@@ -2091,6 +2091,120 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('avoiding a reset by transmuxing', () => {
+    const avc = 'avc1.42E01E';
+    const mp4Type = 'video/mp4; codecs="avc1.42E01E"';
+
+    /** @type {!jasmine.Spy} */
+    let onBeforeResetSpy;
+
+    beforeEach(async () => {
+      // TS plays natively here.  The support of each type is cached, so the
+      // fake MediaSource.isTypeSupported can't be relied on.
+      spyOn(shaka.media.Capabilities, 'isTypeSupported').and.returnValue(true);
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.codecSwitchingStrategy =
+          shaka.config.CodecSwitchingStrategy.RELOAD;
+      mediaSourceEngine.configure(config);
+      const videoStream = makeFakeStream('video/mp4');
+      videoStream.codecs = avc;
+      await mediaSourceEngine.init(
+          new Map([[ContentType.VIDEO, videoStream]]), false);
+      onBeforeResetSpy = jasmine.createSpy('onBeforeReset')
+          .and.returnValue(Promise.resolve());
+      createMediaSourceSpy.calls.reset();
+    });
+
+    /**
+     * @param {string} mimeType
+     * @param {string} codecs
+     * @param {boolean=} encrypted
+     * @return {!Promise}
+     */
+    function switchTo(mimeType, codecs, encrypted = false) {
+      const stream = makeFakeStream(mimeType);
+      stream.codecs = codecs;
+      stream.encrypted = encrypted;
+      return mediaSourceEngine.setStreamProperties(
+          ContentType.VIDEO, /* timestampOffset= */ 0,
+          /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity,
+          /* ignoreTimestampOffset= */ false, mimeType, codecs,
+          new Map([[ContentType.VIDEO, stream]]),
+          Util.spyFunc(onBeforeResetSpy));
+    }
+
+    /**
+     * @return {boolean}
+     * @suppress {visibility}
+     */
+    function hasVideoTransmuxer() {
+      return mediaSourceEngine.transmuxers_.has(ContentType.VIDEO);
+    }
+
+    it('fits native TS into the MP4 SourceBuffer by transmuxing', async () => {
+      await switchTo('video/mp2t', avc);
+      expect(createMediaSourceSpy).not.toHaveBeenCalled();
+      expect(onBeforeResetSpy).not.toHaveBeenCalled();
+      expect(hasVideoTransmuxer()).toBe(true);
+      expect(mockTransmuxer.destroy).not.toHaveBeenCalled();
+    });
+
+    it('drops the transmuxer again when switching back to MP4', async () => {
+      await switchTo('video/mp2t', avc);
+      await switchTo('video/mp4', avc);
+      expect(createMediaSourceSpy).not.toHaveBeenCalled();
+      expect(hasVideoTransmuxer()).toBe(false);
+      expect(mockTransmuxer.destroy).toHaveBeenCalled();
+    });
+
+    it('resets when the transmuxed codec does not match', async () => {
+      mockTransmuxer.convertCodecs.and.returnValue(
+          'video/mp4; codecs="hvc1.1.6.L93.90"');
+      await switchTo('video/mp2t', 'hvc1.1.6.L93.90');
+      expect(onBeforeResetSpy).toHaveBeenCalled();
+      expect(createMediaSourceSpy).toHaveBeenCalled();
+      expect(mockTransmuxer.destroy).toHaveBeenCalled();
+    });
+
+    it('resets when no transmuxer takes the content', async () => {
+      shaka.transmuxer.TransmuxerEngine.findTransmuxer = () => null;
+      await switchTo('video/mp2t', avc);
+      expect(createMediaSourceSpy).toHaveBeenCalled();
+      expect(hasVideoTransmuxer()).toBe(false);
+    });
+
+    it('resets for encrypted content', async () => {
+      await switchTo('video/mp2t', avc, /* encrypted= */ true);
+      expect(createMediaSourceSpy).toHaveBeenCalled();
+      expect(mockTransmuxer.convertCodecs).not.toHaveBeenCalled();
+    });
+
+    it('resets for muxed content in a single SourceBuffer', async () => {
+      mockTransmuxer.convertCodecs.and.callFake((type) =>
+        type == ContentType.AUDIO ?
+            'audio/mp4; codecs="mp4a.40.2"' : mp4Type);
+      await switchTo('video/mp2t', avc + ',mp4a.40.2');
+      expect(createMediaSourceSpy).toHaveBeenCalled();
+      expect(mockTransmuxer.destroy).toHaveBeenCalled();
+    });
+
+    it('uses changeType instead of transmuxing when it is allowed',
+        /** @suppress {visibility} */ () => {
+          spyOn(deviceDetected, 'supportsSmoothCodecSwitching')
+              .and.returnValue(true);
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.codecSwitchingStrategy =
+              shaka.config.CodecSwitchingStrategy.SMOOTH;
+          mediaSourceEngine.configure(config);
+          const info = mediaSourceEngine.getInfoAboutResetOrChangeType_(
+              ContentType.VIDEO, 'video/mp2t', avc, new Map());
+          expect(info.type)
+              .toBe(shaka.media.MediaSourceEngine.ResetMode_.CHANGE_TYPE);
+          expect(info.transmuxer).toBeFalsy();
+        });
+  });
+
   describe('destroy', () => {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
