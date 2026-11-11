@@ -141,8 +141,11 @@ describe('UI Utils', () => {
     });
 
     it('uses the given locales', () => {
+      // Match the explicit precision used by buildPercentString, since the
+      // default fraction digits can differ between browsers.
       expect(shaka.ui.Utils.buildPercentString(0.5, ['es']))
-          .toBe(new Intl.NumberFormat('es', {style: 'percent'}).format(0.5));
+          .toBe(new Intl.NumberFormat('es',
+              {style: 'percent', maximumFractionDigits: 0}).format(0.5));
     });
   });
 });
