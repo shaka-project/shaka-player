@@ -234,6 +234,7 @@ shaka.ui.HiddenSeekButton = class extends shaka.ui.Element {
  * The amount of time, in seconds, to double-tap detection.
  *
  * @const {number}
+ * @private
  */
 shaka.ui.HiddenSeekButton.DOUBLE_TAP_WINDOW_ = 0.5;
 
@@ -242,5 +243,6 @@ shaka.ui.HiddenSeekButton.DOUBLE_TAP_WINDOW_ = 0.5;
  * scroll rather than a tap.
  *
  * @const {number}
+ * @private
  */
 shaka.ui.HiddenSeekButton.SCROLL_THRESHOLD_ = 10;
