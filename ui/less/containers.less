@@ -266,7 +266,8 @@
   // Poster: contain, sharp, fills the placeholder at the bottom of the stack.
   .pip-poster {
     position: absolute;
-    inset: 0;
+    .inset();
+
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -276,7 +277,8 @@
   // darkens slightly so the icon and label remain legible.
   .pip-blur-overlay {
     position: absolute;
-    inset: 0;
+    .inset();
+
     backdrop-filter: blur(18px) brightness(0.55);
     z-index: 1;
   }
@@ -297,7 +299,8 @@
   // Expanding pulse ring behind the button.
   .pip-pulse-ring {
     position: absolute;
-    inset: 0;
+    .inset();
+
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 35%);
     animation: pip-pulse 2s ease-out infinite;

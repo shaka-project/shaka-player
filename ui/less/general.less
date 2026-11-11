@@ -118,7 +118,8 @@
   position: absolute;
 
   /* Fill the container by default. */
-  inset: 0;
+  .inset();
+
   margin: 0;
   padding: 0;
 
@@ -130,7 +131,20 @@
    * properties to determine the positioning.  We should set all these
    * properties to ensure it is positioned properly on all platforms. */
   position: absolute;
-  inset: 0;
+  .inset();
+}
+
+/* Sets the distance from all four sides of the containing block, like the
+ * "inset" shorthand.  Use this instead of "inset", which browsers only
+ * support since Chrome 87, Firefox 66, and Safari 14.1.  Older browsers, like
+ * the ones on Tizen 3 and the first-generation Chromecast, drop the whole
+ * declaration, which leaves the element positioned by its other edges, or not
+ * at all. */
+.inset(@value: 0) {
+  top: @value;
+  right: @value;
+  bottom: @value;
+  left: @value;
 }
 
 /* For things that should not shrink inside a flex container.
