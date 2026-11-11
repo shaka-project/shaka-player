@@ -15,10 +15,16 @@ goog.requireType('cml.cmcd.CmcdValidationOptions');
 goog.requireType('cml.cmcd.CmcdValidationResult');
 
 
-/** @private @const {!Set<string>} */
+/**
+ * @private
+ * @const {!Set<string>}
+ */
 cml.cmcd.validateCmcdKeys_V1_KEY_SET_ = new Set(cml.cmcd.CMCD_V1_KEYS);
 
-/** @private @const {!Set<string>} */
+/**
+ * @private
+ * @const {!Set<string>}
+ */
 cml.cmcd.validateCmcdKeys_KEY_SET_ = new Set(cml.cmcd.CMCD_KEYS);
 
 

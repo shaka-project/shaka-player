@@ -7,6 +7,7 @@
 import argCommentSpacing from './arg-comment-spacing.js';
 import arrayNoInstanceof from './array-no-instanceof.js';
 import buffersourceNoInstanceof from './buffersource-no-instanceof.js';
+import jsdocTagPerLine from './jsdoc-tag-per-line.js';
 import noIteratorType from './no-iterator-type.js';
 import privateRule from './private.js';
 
@@ -15,6 +16,7 @@ const index = {
     'arg-comment-spacing': argCommentSpacing,
     'array-no-instanceof': arrayNoInstanceof,
     'buffersource-no-instanceof': buffersourceNoInstanceof,
+    'jsdoc-tag-per-line': jsdocTagPerLine,
     'no-iterator-type': noIteratorType,
     'private': privateRule,
   },
