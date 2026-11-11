@@ -29,5 +29,7 @@
 +../../lib/msf/drafts/draft20/messages.js
 +../../lib/msf/drafts/draft22/dialect.js
 +../../lib/msf/drafts/draft22/messages.js
++../../lib/msf/drafts/draft23/dialect.js
++../../lib/msf/drafts/draft23/messages.js
 
 +../../lib/transmuxer/loc_transmuxer.js

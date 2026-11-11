@@ -40,19 +40,21 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_20);
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_21);
     expect(registered).toContain(shaka.config.MsfVersion.DRAFT_22);
+    expect(registered).toContain(shaka.config.MsfVersion.DRAFT_23);
   });
 
   it('should offer every shipped draft newest first for AUTO', () => {
     const offered = shaka.msf.DialectRegistry.getForVersion(
         shaka.config.MsfVersion.AUTO);
     expect(offered.map((d) => d.getName())).toEqual([
+      shaka.config.MsfVersion.DRAFT_23,
       shaka.config.MsfVersion.DRAFT_22,
       shaka.config.MsfVersion.DRAFT_21,
       shaka.config.MsfVersion.DRAFT_20,
       shaka.config.MsfVersion.DRAFT_18,
     ]);
     expect(offered.map((d) => d.getSubprotocol())).toEqual(
-        ['moqt-22', 'moqt-21', 'moqt-20', 'moqt-18']);
+        ['moqt-23', 'moqt-22', 'moqt-21', 'moqt-20', 'moqt-18']);
   });
 
   it('should serve draft-20 and draft-21 from one implementation', () => {
@@ -84,6 +86,28 @@ filterDescribe('shaka.msf.DialectRegistry', isMSFSupported, () => {
     expect(draft22 instanceof shaka.msf.draft20.Dialect).toBe(true);
     expect(draft22.getDraftNumber()).toBe(22);
     expect(draft22.getSubprotocol()).toBe('moqt-22');
+  });
+
+  it('should serve draft-23 from its own message writer', () => {
+    // Draft-23 changed the framing and the fetch stream serialization, and
+    // its message writer describes both, so it too is a draft-20 dialect
+    // with a different writer.
+    const offered = shaka.msf.DialectRegistry.getForVersion(
+        shaka.config.MsfVersion.AUTO);
+    const draft23 = offered.find(
+        (d) => d.getName() == shaka.config.MsfVersion.DRAFT_23);
+
+    expect(draft23 instanceof shaka.msf.draft23.Dialect).toBe(true);
+    expect(draft23 instanceof shaka.msf.draft20.Dialect).toBe(true);
+    expect(draft23.getDraftNumber()).toBe(23);
+    expect(draft23.getSubprotocol()).toBe('moqt-23');
+  });
+
+  it('should select draft-23 when the server echoes moqt-23', () => {
+    const offered = shaka.msf.DialectRegistry.getForVersion(
+        shaka.config.MsfVersion.AUTO);
+    expect(shaka.msf.DialectRegistry.select(offered, 'moqt-23').getName())
+        .toBe(shaka.config.MsfVersion.DRAFT_23);
   });
 
   it('should select draft-22 when the server echoes moqt-22', () => {
