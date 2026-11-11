@@ -973,23 +973,167 @@ WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];
  * This is useful when running tests locally on many browsers, since you can
  * see more clearly which browsers are still working and which are done.
  *
+ * It also labels each browser with the name it was requested by (such as
+ * "ChromeWindows"), keeps the live status block in the order of the requested
+ * browsers, and shows browsers which have not connected or have failed to
+ * launch.  Without this, a browser which fails to launch is only mentioned in
+ * an error log far above the status block, and only by a generic name such as
+ * "chrome via Remote WebDriver".
+ *
  * This could have been done through a fork of Karma itself, but this plugin
  * was clearer in some ways than using a fork of a now-extinct project.
  *
  * @param {!Array<karma.Reporter>} reporters
  * @param {string} settingsJson
+ * @param {karma.Launcher} launcher
+ * @param {!EventEmitter} emitter
+ * @param {?Array<string>} browserNames
+ * @param {boolean} useColors
  * @return {karma.Middleware}
  */
-function AugmentReportersFactory(reporters, settingsJson) {
+function AugmentReportersFactory(
+    reporters, settingsJson, launcher, emitter, browserNames, useColors) {
   const settings = JSON.parse(settingsJson);
+  browserNames = browserNames || [];
+
+  const red = (colors, text) => colors ? `\x1B[31m${text}\x1B[39m` : text;
+
+  // Karma's launcher only knows browsers by generic names like "chrome via
+  // Remote WebDriver".  But it creates one launcher instance per requested
+  // browser, in the order of config.browsers, so we can recover the requested
+  // name from an instance's position.  (If any browser failed to load, Karma
+  // exits before running anything, so the positions can't drift in practice.)
+  const getRequestedName = (id) => {
+    const index = launcher._browsers.findIndex((b) => b.id == id);
+    return index >= 0 ? browserNames[index] || null : null;
+  };
+
+  // The position of a requested browser name, for sorting things into the
+  // requested order.  Anything else goes at the end.
+  const rank = (name) => {
+    const index = browserNames.indexOf(name);
+    return index < 0 ? browserNames.length : index;
+  };
+
+  // Only the progress reporter has a live status block which it redraws.
+  const hasLiveStatus = (reporter) => typeof reporter._refresh == 'function';
+
+  /** @type {!Array<{name: string, error: string}>} */
+  const launchFailures = [];
+
+  // Label each connected browser with its requested name.  Every reporter
+  // prints browsers through toString(), which returns the name, so this shows
+  // up everywhere, while keeping the browser version for debugging.
+  emitter.on('browser_register', (browser) => {
+    if (browser.requestedName) {
+      // Already labeled; this is a reconnection.
+      return;
+    }
+    const name = getRequestedName(browser.id);
+    if (name) {
+      browser.requestedName = name;
+      browser.name = `${name} - ${browser.name}`;
+    }
+  });
+
+  // Karma emits this once per browser, after its last retry has failed.
+  emitter.on('browser_process_failure', (browserLauncher) => {
+    const name = getRequestedName(browserLauncher.id) || browserLauncher.name;
+    const error = browserLauncher.error || 'unknown error';
+    launchFailures.push({name, error});
+
+    for (const reporter of reporters) {
+      if (!hasLiveStatus(reporter)) {
+        continue;
+      }
+      const placeholder = reporter._browsers.find(
+          (b) => b.isPlaceholder && b.requestedName == name);
+      if (placeholder) {
+        placeholder.error = error;
+        reporter.write(reporter._refresh());
+      }
+    }
+  });
+
+  // Repeat any launch failures at the very end of the output, after the
+  // reporters are done.  Karma doesn't print a total at all in this case.
+  emitter.on('run_complete', () => {
+    if (!launchFailures.length) {
+      return;
+    }
+    const lines = launchFailures
+        .sort((a, b) => rank(a.name) - rank(b.name))
+        .map((f) => `  ${f.name} (${f.error})`);
+    lines.unshift('FAILED TO LAUNCH:');
+    process.stdout.write(
+        lines.map((line) => red(useColors, line) + '\n').join(''));
+  });
 
   // Augment each reporter in the list.
   for (const reporter of reporters) {
+    // Fill the live status block with placeholders for each requested browser
+    // up front, so that browsers appear in the requested order instead of the
+    // order they happen to connect in.
+    // The source we are patching: https://github.com/karma-runner/karma/blob/d8cf806e/lib/reporters/progress.js
+    const origRunStart = reporter.onRunStart;
+    reporter.onRunStart = (...args) => {
+      origRunStart.apply(reporter, args);
+      if (hasLiveStatus(reporter)) {
+        for (const name of browserNames) {
+          reporter._browsers.push({
+            isPlaceholder: true,
+            requestedName: name,
+            error: null,
+          });
+        }
+      }
+    };
+
+    // When a browser starts, replace its placeholder (or its previous entry,
+    // if it was restarted) in place.
+    const origBrowserStart = reporter.onBrowserStart;
+    reporter.onBrowserStart = (browser, ...args) => {
+      const index = hasLiveStatus(reporter) && browser.requestedName ?
+          reporter._browsers.findIndex(
+              (b) => b.requestedName == browser.requestedName) : -1;
+      if (index < 0) {
+        // Not one we know about, such as a manually-connected browser.
+        origBrowserStart.apply(reporter, [browser, ...args]);
+        return;
+      }
+      // The number of lines in the status block doesn't change, so we can
+      // just redraw it.
+      reporter._browsers[index] = browser;
+      reporter.write(reporter._refresh());
+    };
+
+    // Put the final summary (used by the spec reporter) in the requested order,
+    // too.  Reporters only use map() and length on this collection, so an
+    // array of the same browsers works in its place.
+    const origRunComplete = reporter.onRunComplete;
+    reporter.onRunComplete = (browsers, ...args) => {
+      // This is a BrowserCollection, which has no sort() and is neither
+      // iterable nor array-like (so Array.from() yields only undefined).
+      // map() gives us a plain array copy to sort, leaving Karma's alone.
+      const sorted = browsers.map((b) => b)
+          .sort((a, b) => rank(a.requestedName) - rank(b.requestedName));
+      origRunComplete.apply(reporter, [sorted, ...args]);
+    };
+
     // Shim the renderBrowser function to add the number of test cases not yet
-    // processed (passed, failed, or skipped).
+    // processed (passed, failed, or skipped), and to render placeholders.
     // The source we are patching: https://github.com/karma-runner/karma/blob/d8cf806e/lib/reporters/base.js#L37
     const orig = reporter.renderBrowser;
     reporter.renderBrowser = (browser) => {
+      if (browser.isPlaceholder) {
+        const name = browser.requestedName;
+        if (browser.error) {
+          return red(reporter.USE_COLORS,
+              `${name} - failed to launch (${browser.error})`);
+        }
+        return `${name} - not connected`;
+      }
+
       const results = browser.lastResult;
       const processed = results.success + results.failed + results.skipped;
       const left = results.total - processed;
@@ -1008,4 +1152,11 @@ function AugmentReportersFactory(reporters, settingsJson) {
   // middleware.
   return (request, response, next) => next();
 }
-AugmentReportersFactory.$inject = ['reporter._reporters', 'config.settings'];
+AugmentReportersFactory.$inject = [
+  'reporter._reporters',
+  'config.settings',
+  'launcher',
+  'emitter',
+  'config.browsers',
+  'config.colors',
+];
