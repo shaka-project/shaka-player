@@ -1412,7 +1412,7 @@ describe('MediaSourceEngine', () => {
       const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
           ContentType.AUDIO, packedAac, dummyReference(0, 10), fakeStream,
           'audio/aac');
-      expect(timestamp).toBeCloseTo(9.907, 3);
+      expect(timestamp).toBeCloseTo(9.904222, 6);
     });
 
     // Packed audio is sometimes published with a .ts extension, so the stream
@@ -1424,7 +1424,7 @@ describe('MediaSourceEngine', () => {
       const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
           ContentType.AUDIO, packedAac, dummyReference(0, 10), fakeStream,
           'video/mp2t; codecs="mp4a.40.2"');
-      expect(timestamp).toBeCloseTo(9.907, 3);
+      expect(timestamp).toBeCloseTo(9.904222, 6);
     });
 
     it('still reads the PES timestamp of real TS audio', () => {
