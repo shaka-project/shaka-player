@@ -16,6 +16,22 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
   let responses;
   /** @type {{aborted: boolean, cancelled: boolean}} */
   let requestStream;
+  /** @type {!Array<function()>} */
+  let writeListeners;
+
+  /**
+   * Resolves once the session has written at least `count` messages. A slow
+   * device can take longer than any fixed delay to open a request stream.
+   *
+   * @param {number} count
+   * @return {!Promise}
+   */
+  async function untilWritten(count) {
+    while (written.length < count) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => writeListeners.push(resolve));
+    }
+  }
 
   /**
    * A bidirectional stream whose write side records bytes and whose read side
@@ -27,6 +43,11 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     const writable = new WritableStream({
       write: (chunk) => {
         written.push(chunk);
+        const listeners = writeListeners;
+        writeListeners = [];
+        for (const listener of listeners) {
+          listener();
+        }
       },
       abort: () => {
         requestStream.aborted = true;
@@ -52,6 +73,7 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
   beforeEach(() => {
     written = [];
+    writeListeners = [];
     requestStream = {aborted: false, cancelled: false};
 
     // The session listens on this for its lifetime, so it must never resolve
@@ -297,22 +319,23 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     }
 
     /**
-     * Answers the request in flight, then waits for the session to act on
-     * the answer, which for a retry means opening the next request stream.
+     * Rejects the request in flight with a Retry Interval of 1 (retry at
+     * once), then waits for the session to send it again on a new request
+     * stream, so the next answer reaches that stream and not the old one.
      *
-     * @param {!Uint8Array} response
      * @return {!Promise}
      */
-    async function answer(response) {
-      responses.enqueue(response);
-      await shaka.test.Util.shortDelay();
+    async function rejectAndAwaitRetry() {
+      const count = written.length;
+      responses.enqueue(requestError(1));
+      await untilWritten(count + 1);
     }
 
     it('is sent again with a new Request ID', async () => {
       const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
-      await shaka.test.Util.shortDelay();
-      await answer(requestError(1)); // Retry at once
-      await answer(subscribeOk());
+      await untilWritten(1);
+      await rejectAndAwaitRetry();
+      responses.enqueue(subscribeOk());
 
       expect(await subscribed).toBe(BigInt(7));
       expect(written.length).toBe(2);
@@ -323,9 +346,9 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
     it('is sent again when it was a FETCH', async () => {
       const fetched = session.fetch(NAMESPACE, TRACK, () => {});
-      await shaka.test.Util.shortDelay();
-      await answer(requestError(1));
-      await answer(fetchOk());
+      await untilWritten(1);
+      await rejectAndAwaitRetry();
+      responses.enqueue(fetchOk());
 
       await expectAsync(fetched).toBeResolved();
       expect(written.length).toBe(2);
@@ -338,11 +361,13 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
           jasmine.objectContaining({
             message: jasmine.stringMatching(/code 9, reason "", retry after/),
           }));
-      await shaka.test.Util.shortDelay();
-      for (let i = 0; i < 4; i++) {
+      await untilWritten(1);
+      for (let i = 0; i < 3; i++) {
         // eslint-disable-next-line no-await-in-loop
-        await answer(requestError(1));
+        await rejectAndAwaitRetry();
       }
+      // The fourth refusal is not retried.
+      responses.enqueue(requestError(1));
 
       await outcome;
       expect(written.length).toBe(4);
@@ -354,8 +379,8 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
           jasmine.objectContaining({
             message: jasmine.stringMatching(/retry after 3001 ms/),
           }));
-      await shaka.test.Util.shortDelay();
-      await answer(requestError(3002));
+      await untilWritten(1);
+      responses.enqueue(requestError(3002));
 
       await outcome;
       expect(written.length).toBe(1);
@@ -364,9 +389,9 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
     it('is not sent again once the session is closing', async () => {
       const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
       const outcome = expectAsync(subscribed).toBeRejected();
-      await shaka.test.Util.shortDelay();
+      await untilWritten(1);
       session.release();
-      await answer(requestError(1));
+      responses.enqueue(requestError(1));
 
       await outcome;
       expect(written.length).toBe(1);
@@ -1411,10 +1436,12 @@ filterDescribe('shaka.msf.draft18.Session', isMSFSupported, () => {
 
     it('retries a request a relay had no stream credit for', async () => {
       const subscribed = session.subscribe(NAMESPACE, TRACK, () => {});
-      await shaka.test.Util.shortDelay();
+      await untilWritten(1);
       // UNAVAILABLE (0xA), retry after 0 ms, empty Reason.
       responses.enqueue(message(0x05, [0x0a, 0x01, 0x00]));
-      await shaka.test.Util.shortDelay();
+      // The retry goes out on a new request stream, which a slow device can
+      // take longer than any fixed delay to open.
+      await untilWritten(2);
       responses.enqueue(subscribeOk23());
 
       expect(await subscribed).toBe(BigInt(7));
