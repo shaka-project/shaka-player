@@ -1357,6 +1357,33 @@ describe('DrmEngine', () => {
           message, nativeError, undefined));
     });
 
+    it('closes a session whose generateRequest fails', async () => {
+      // Set up an init data override in the manifest to get an immediate call
+      // to generateRequest:
+      const initData1 = new Uint8Array(5);
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: initData1, initDataType: 'cenc', keyId: null},
+        ];
+      });
+
+      // Fail generateRequest.
+      const session1 = createMockSession();
+      session1.generateRequest.and.returnValue(
+          Promise.reject(new Error('whoops!')));
+      mockMediaKeys.createSession.and.returnValue(session1);
+
+      onErrorSpy.and.stub();
+      await initAndAttach();
+      await Util.shortDelay();
+
+      // The failed session is dropped.  Dropping it must close it, since
+      // destroy() only closes the sessions it still tracks.
+      expect(onErrorSpy).toHaveBeenCalled();
+      expect(session1.close).toHaveBeenCalled();
+    });
+
     it('should throw a OFFLINE_SESSION_REMOVED error', async () => {
       // Given persistent session is not available
       session1.load.and.returnValue(false);
