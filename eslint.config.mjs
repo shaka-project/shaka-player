@@ -403,6 +403,8 @@ export default [
     rules: {
       // Externs naturally redeclare things eslint knows about.
       'no-redeclare': 'off',
+      // Externs mirror names defined elsewhere, such as "__karma__".
+      'shaka-rules/private': 'off',
     },
   },
   {

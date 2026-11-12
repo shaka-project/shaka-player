@@ -2108,4 +2108,61 @@ describe('UITextDisplayer', () => {
           .toBe(normalizeColor('green'));
     });
   });
+
+  // The steps for the snap-to-lines flag in
+  // https://www.w3.org/TR/webvtt1/#apply-webvtt-cue-settings
+  // These cover where a cue goes, given its measurements.  Measuring and
+  // moving it depend on real layout.
+  describe('places cues positioned by a line number', () => {
+    /**
+     * @param {number} line
+     * @param {number} step
+     * @param {number} extent
+     * @param {number} full
+     * @return {?number}
+     * @suppress {visibility}
+     */
+    function computeLineOffset(line, step, extent, full) {
+      return shaka.text.UITextDisplayer.computeLineOffset_(
+          line, step, extent, full);
+    }
+
+    it('counts lines from the start', () => {
+      expect(computeLineOffset(0, 20, 20, 100)).toBe(0);
+      expect(computeLineOffset(2, 20, 20, 100)).toBe(40);
+    });
+
+    it('counts negative lines back from the end', () => {
+      // Line -1 puts the first line box in the last line.
+      expect(computeLineOffset(-1, 20, 20, 100)).toBe(80);
+      expect(computeLineOffset(-3, 20, 20, 100)).toBe(40);
+    });
+
+    it('moves a cue that does not fit back a line at a time', () => {
+      // Three lines starting on the last line overflow by two, so the cue moves
+      // up two lines, and its last line is the last line.
+      expect(computeLineOffset(-1, 20, 60, 100)).toBe(40);
+
+      // Two lines starting on line 4 of 5 overflow by one.  Moving down puts
+      // the first line outside, so the cue moves up from line 4 instead.
+      expect(computeLineOffset(4, 20, 40, 100)).toBe(60);
+    });
+
+    it('moves a cue past the start back in', () => {
+      // Line -6 of 5 starts a line before the start.  Moving further up only
+      // makes that worse, so the cue moves down from there instead.
+      expect(computeLineOffset(-6, 20, 20, 100)).toBe(0);
+    });
+
+    it('does not place a cue larger than the area', () => {
+      expect(computeLineOffset(0, 20, 120, 100)).toBe(null);
+      expect(computeLineOffset(-1, 20, 120, 100)).toBe(null);
+    });
+
+    it('allows for sizes rounded to fractions of a pixel', () => {
+      // Three lines of 28px, measured a little larger, still fit three lines
+      // up from the end, rather than moving up a whole line.
+      expect(computeLineOffset(-3, 28, 84.3, 720)).toBe(636);
+    });
+  });
 });

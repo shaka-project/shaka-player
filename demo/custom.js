@@ -1500,6 +1500,7 @@ shakaDemo.Custom.ButtonStyle_ = {
  * The name of the field in window.localStorage that is used to store a user's
  * custom assets.
  * @const {string}
+ * @private
  */
 shakaDemo.Custom.saveId_ = 'shakaPlayerDemoSavedAssets';
 

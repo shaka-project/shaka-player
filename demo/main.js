@@ -35,7 +35,10 @@ shakaDemo.Main = class {
     /** @type {?ShakaDemoAssetInfo} */
     this.selectedAsset = null;
 
-    /** @type {shaka.ui.Localization} */
+    /**
+     * @type {shaka.ui.Localization}
+     * @private
+     */
     this.localization_ = null;
 
     /**

@@ -270,8 +270,9 @@ shaka.ui.Matrix4x4 = class {
    * @param {number} near Near bound of the frustum
    * @param {number} far Far bound of the frustum
    * @return {!Float32Array}
+   * @private
    */
-  static frustum(out, left, right, bottom, top, near, far) {
+  static frustum_(out, left, right, bottom, top, near, far) {
     const rl = 1 / (right - left);
     const tb = 1 / (top - bottom);
     const nf = 1 / (near - far);
