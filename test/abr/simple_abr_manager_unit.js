@@ -401,6 +401,79 @@ describe('SimpleAbrManager', () => {
     expect(chosen.id).toBe(10);
   });
 
+  describe('restrictToElementSize', () => {
+    /** @type {!HTMLVideoElement} */
+    let mockVideo;
+
+    /**
+     * @param {number} width
+     * @param {number} height
+     */
+    function setElementSize(width, height) {
+      Object.defineProperty(mockVideo, 'clientWidth', {
+        get: () => width,
+        configurable: true,
+      });
+      Object.defineProperty(mockVideo, 'clientHeight', {
+        get: () => height,
+        configurable: true,
+      });
+    }
+
+    /**
+     * @param {!Array<!Array<number>>} sizes [width, height] per variant, in
+     *   ascending order; the variant id is the index.
+     */
+    function setLadder(sizes) {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        sizes.forEach(([width, height], index) => {
+          manifest.addVariant(index, (variant) => {
+            variant.bandwidth = 1e5 * (index + 1);
+            variant.addVideo(index, (stream) => {
+              stream.size(width, height);
+            });
+          });
+        });
+      });
+      abrManager.setVariants(manifest.variants, false);
+    }
+
+    beforeEach(() => {
+      mockVideo = /** @type {!HTMLVideoElement} */ (
+        document.createElement('video'));
+      // Plenty of bandwidth, so only the element size limits the choice.
+      config.defaultBandwidthEstimate = 100e6;
+      config.restrictToElementSize = true;
+      config.ignoreDevicePixelRatio = true;
+      abrManager.configure(config);
+      abrManager.setMediaElement(mockVideo);
+    });
+
+    it('caps a landscape ladder at the smallest variant covering a ' +
+       'landscape element', () => {
+      setElementSize(500, 281);
+      setLadder([[256, 144], [640, 360], [1280, 720], [1920, 1080]]);
+
+      expect(abrManager.chooseVariant().id).toBe(1);
+    });
+
+    it('caps a portrait ladder at the smallest variant covering a ' +
+       'portrait element', () => {
+      setElementSize(281, 500);
+      setLadder([[144, 256], [360, 640], [720, 1280], [1080, 1920]]);
+
+      expect(abrManager.chooseVariant().id).toBe(1);
+    });
+
+    it('caps a landscape ladder at the smallest variant covering a ' +
+       'portrait element', () => {
+      setElementSize(281, 500);
+      setLadder([[256, 144], [640, 360], [1280, 720], [1920, 1080]]);
+
+      expect(abrManager.chooseVariant().id).toBe(2);
+    });
+  });
+
   describe('dropped frame protection', /** @suppress {accessControls} */ () => {
     /** @type {!HTMLVideoElement} */
     let mockVideo;
