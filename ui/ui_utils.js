@@ -20,8 +20,9 @@ shaka.ui.Utils = class {
    * @param {!HTMLElement} element
    * @param {string} className
    * @return {!HTMLElement}
+   * @private
    */
-  static getFirstDescendantWithClassName(element, className) {
+  static getFirstDescendantWithClassName_(element, className) {
     // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 
     const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
@@ -137,7 +138,7 @@ shaka.ui.Utils = class {
    */
   static clearMenuKeepingBackButton(menu) {
     // 1. Save the back to menu button.
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName_(
         menu, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything.

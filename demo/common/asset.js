@@ -15,6 +15,7 @@ goog.provide('ShakaDemoAssetInfo');
 /**
  * @param {string} key
  * @return {boolean}
+ * @private
  */
 function shakaDemoIsBlockedKey_(key) {
   return key == '__proto__' || key == 'constructor' || key == 'prototype';
