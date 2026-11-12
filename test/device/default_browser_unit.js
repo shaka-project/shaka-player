@@ -45,11 +45,11 @@ describe('DefaultBrowser', () => {
           .toBe(false);
     });
 
-    it('is true for Safari', () => {
+    it('is false for Safari', () => {
       Util.setUserAgent(safari);
       Util.setVendor('Apple Computer, Inc.');
       expect(new shaka.device.DefaultBrowser().supportsSourceBufferRemoval())
-          .toBe(true);
+          .toBe(false);
     });
   });
 
