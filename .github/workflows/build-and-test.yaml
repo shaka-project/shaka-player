@@ -149,10 +149,29 @@ jobs:
           sudo chown root:root /opt/microsoft/msedge/msedge-sandbox
           sudo chmod 4755 /opt/microsoft/msedge/msedge-sandbox
 
+      # Opera's snap is used instead of its .deb because only the snap gets
+      # the proprietary codecs (H.264, AAC) the tests need, through the
+      # chromium-ffmpeg snap.  The Snap Store is unreachable from the runners
+      # often enough to fail the job, so retry the install.  snapd is already
+      # in the runner image; don't upgrade it, which alone takes over a minute.
       - name: 'Install Opera on Ubuntu'
-        timeout-minutes: 5
+        timeout-minutes: 15
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Opera'
-        run: sudo apt -y update && sudo apt -y install snapd && sudo snap install opera
+        run: |
+          sudo snap wait system seed.loaded
+
+          for attempt in 1 2 3 4 5; do
+            if sudo snap install opera; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              exit 1
+            fi
+            echo "Opera install failed (attempt $attempt), retrying..."
+            sleep 30
+          done
+
+          snap list opera
 
       - name: 'Install Opera on Windows'
         timeout-minutes: 5
