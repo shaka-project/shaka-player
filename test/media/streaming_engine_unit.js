@@ -672,6 +672,40 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     });
 
+    it('does not append a segment fetched before a reset', async () => {
+      // The video requests cannot be aborted, so one can finish after the
+      // reset that restores the audio.
+      await setupShortAudio(2);
+      netEngineDelays.video = 2;
+      await start();
+
+      const isVideoRequest = (args) => args[1].uris[0].includes('_video_');
+      const isVideoAppend = (args) => args[0] == ContentType.VIDEO;
+      /** @type {?number} */
+      let appendsBeforeReset = null;
+      await runTest(() => {
+        const requests =
+            netEngine.request.calls.allArgs().filter(isVideoRequest).length;
+        const appends = mediaSourceEngine.appendBuffer.calls.allArgs()
+            .filter(isVideoAppend).length;
+        if (appendsBeforeReset == null &&
+            mediaSourceEngine.removeSourceBuffer.calls.count() > 0 &&
+            requests > appends) {
+          appendsBeforeReset = appends;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        }
+      });
+
+      goog.asserts.assert(appendsBeforeReset != null, 'Must have seeked back');
+      const appendsAfterReset = mediaSourceEngine.appendBuffer.calls.allArgs()
+          .filter(isVideoAppend).slice(appendsBeforeReset);
+      expect(appendsAfterReset.length).toBeGreaterThan(0);
+      // The new SourceBuffer gets the init segment first.
+      expect(appendsAfterReset[0][2]).toBe(null);
+    });
+
     it('restores the audio on a seek back during the detach', async () => {
       await setupShortAudio(2);
       await start();
