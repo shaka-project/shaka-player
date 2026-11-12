@@ -2373,6 +2373,45 @@ describe('HlsParser', () => {
     expect(actual.variants[0].video).toBeTruthy();
   });
 
+  it('sets the duration without loading audio-only variants', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540\n',
+      'test:/main\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=64,CODECS="mp4a"\n',
+      'test:/audio\n',
+    ].join('');
+
+    const main = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/main', main)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual.variants.length).toBe(2);
+    const muxed = actual.variants.find((v) => v.video);
+    // The muxed audio-video variant has no audio stream of its own.
+    expect(muxed.audio).toBe(null);
+    await muxed.video.createSegmentIndex();
+
+    const timeline = actual.presentationTimeline;
+    expect(timeline.getDuration()).toBe(10);
+    expect(timeline.isLive()).toBe(false);
+  });
+
+
   it('parse image streams', async () => {
     const master = [
       '#EXTM3U\n',
