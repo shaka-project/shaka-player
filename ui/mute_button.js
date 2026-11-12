@@ -90,6 +90,8 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           'loaded',
           'unloading',
           'trackschanged',
+          'variantchanged',
+          'adaptation',
         ], () => {
           this.checkAvailability();
         });
@@ -167,7 +169,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
-    } else if (this.player.isVideoOnly()) {
+    } else if (this.player.isPlayingVideoOnly()) {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.button_, available && !this.isSubMenuOpened);

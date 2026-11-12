@@ -85,6 +85,8 @@ shaka.ui.SaveVideoFrameButton = class extends shaka.ui.Element {
         [
           'unloading',
           'loaded',
+          'variantchanged',
+          'adaptation',
         ], () => {
           this.checkAvailability();
         });

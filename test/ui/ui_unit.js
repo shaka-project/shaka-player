@@ -2400,6 +2400,173 @@ describe('UI', () => {
           });
     });
 
+    describe('playing only the audio or the video', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!jasmine.Spy} */
+      let isPlayingAudioOnly;
+      /** @type {!jasmine.Spy} */
+      let isPlayingVideoOnly;
+
+      beforeEach(async () => {
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'volume',
+            'picture_in_picture',
+          ],
+          // Document Picture-in-Picture shows the controls, so it is also
+          // useful without video.
+          documentPictureInPicture: {
+            enabled: false,
+          },
+        };
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(640, 480);
+            });
+            variant.addAudio(2);
+          });
+        });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        isPlayingAudioOnly =
+            spyOn(player, 'isPlayingAudioOnly').and.returnValue(false);
+        isPlayingVideoOnly =
+            spyOn(player, 'isPlayingVideoOnly').and.returnValue(false);
+      });
+
+      /**
+       * Pretends that only the audio, only the video, or both are played,
+       * e.g. after switching to an audio-only or a video-only variant mixed
+       * with audio-video ones.
+       *
+       * @param {string} what 'audio', 'video' or 'both'.
+       * @return {!Promise}
+       */
+      async function play(what) {
+        isPlayingAudioOnly.and.returnValue(what == 'audio');
+        isPlayingVideoOnly.and.returnValue(what == 'video');
+        player.dispatchEvent(new shaka.util.FakeEvent('variantchanged'));
+        // The UI gets the events of the player through the cast proxy.
+        await Util.shortDelay();
+      }
+
+      /** @return {!HTMLElement} */
+      function getPoster() {
+        const poster = videoContainer.querySelector('.shaka-audio-only-poster');
+        goog.asserts.assert(poster, 'Missing audio-only poster');
+        return /** @type {!HTMLElement} */ (poster);
+      }
+
+      /**
+       * @param {string} className
+       * @return {boolean}
+       */
+      function isHidden(className) {
+        const element = videoContainer.getElementsByClassName(className)[0];
+        goog.asserts.assert(element, 'Missing ' + className);
+        return element.classList.contains('shaka-hidden');
+      }
+
+      it('shows when only the audio is played', async () => {
+        await play('both');
+        expect(getPoster().classList).toContain('shaka-hidden');
+
+        await play('audio');
+        expect(getPoster().classList).not.toContain('shaka-hidden');
+        expect(isHidden('shaka-mute-button')).toBe(false);
+
+        await play('both');
+        expect(getPoster().classList).toContain('shaka-hidden');
+      });
+
+      it('covers the video with its poster when only the audio is played',
+          async () => {
+            await play('audio');
+            const poster = getPoster();
+            expect(poster.style.backgroundImage).toBe('');
+
+            // It follows changes of the poster.
+            video.poster = 'data:,poster';
+            await Util.shortDelay();
+            expect(poster.style.backgroundImage).toContain(video.poster);
+
+            video.removeAttribute('poster');
+            await Util.shortDelay();
+            expect(poster.style.backgroundImage).toBe('');
+          });
+
+      it('hides the volume controls when only the video is played',
+          async () => {
+            await play('both');
+            expect(isHidden('shaka-mute-button')).toBe(false);
+            expect(isHidden('shaka-volume-bar-container')).toBe(false);
+
+            await play('video');
+            expect(isHidden('shaka-mute-button')).toBe(true);
+            expect(isHidden('shaka-volume-bar-container')).toBe(true);
+            expect(getPoster().classList).toContain('shaka-hidden');
+
+            await play('both');
+            expect(isHidden('shaka-mute-button')).toBe(false);
+            expect(isHidden('shaka-volume-bar-container')).toBe(false);
+          });
+
+      it('hides Picture-in-Picture when only the audio is played',
+          async () => {
+            if (!controls.isPiPAllowed()) {
+              pending('Picture-in-Picture is not available.');
+            }
+            await play('both');
+            expect(isHidden('shaka-pip-button')).toBe(false);
+
+            await play('audio');
+            expect(isHidden('shaka-pip-button')).toBe(true);
+
+            await play('both');
+            expect(isHidden('shaka-pip-button')).toBe(false);
+          });
+
+      it('takes no screenshot when only the audio is played', async () => {
+        // Clear content is needed to take a screenshot.
+        spyOn(player, 'drmInfo').and.returnValue(null);
+        await play('both');
+        expect(controls.canTakeScreenshot()).toBe(true);
+
+        await play('audio');
+        expect(controls.canTakeScreenshot()).toBe(false);
+      });
+
+      /** @suppress {accessControls} */
+      it('does not step frames when only the audio is played', async () => {
+        const seek = spyOn(controls, 'seek_');
+        spyOn(player, 'getVideoTracks').and.returnValue([
+          /** @type {shaka.extern.VideoTrack} */ ({
+            active: true,
+            frameRate: 25,
+          }),
+        ]);
+        spyOn(player, 'seekRange').and.returnValue({start: 0, end: 60});
+
+        await play('audio');
+        controls.frameByFrame_(1);
+        expect(seek).not.toHaveBeenCalled();
+
+        await play('both');
+        controls.frameByFrame_(1);
+        expect(seek).toHaveBeenCalled();
+      });
+    });
     describe('video type menu', () => {
       /** @type {!HTMLElement} */
       let videoTypeMenu;

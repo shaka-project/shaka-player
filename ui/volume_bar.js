@@ -55,6 +55,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           'loaded',
           'unloading',
           'trackschanged',
+          'variantchanged',
+          'adaptation',
         ], () => {
           this.checkAvailability();
         });
@@ -153,7 +155,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
-    } else if (this.player.isVideoOnly()) {
+    } else if (this.player.isPlayingVideoOnly()) {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.container, available);

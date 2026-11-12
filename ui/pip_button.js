@@ -92,9 +92,15 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       this.checkAvailability();
     });
 
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.checkAvailability();
-    });
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'trackschanged',
+          'variantchanged',
+          'adaptation',
+        ], () => {
+          this.checkAvailability();
+        });
 
     if ('documentPictureInPicture' in window) {
       this.eventManager.listen(window.documentPictureInPicture, 'enter',
@@ -173,6 +179,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
+    } else if (this.player && this.player.isPlayingAudioOnly() &&
+        !this.controls.shouldUseDocumentPictureInPicture()) {
+      // There are no frames to show, but the video comes back, e.g. when
+      // adaptation stops falling back to audio-only, so stay in
+      // Picture-in-Picture.
+      shaka.ui.Utils.setDisplay(this.pipButton_, false);
     } else {
       shaka.ui.Utils.setDisplay(this.pipButton_, !this.isSubMenuOpened);
     }
