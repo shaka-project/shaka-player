@@ -706,6 +706,24 @@ describe('MediaSourceEngine', () => {
       await mediaSourceEngine.destroy();
     });
 
+    it('waits for a reset in progress when destroyed', async () => {
+      const streams = new Map([
+        [ContentType.AUDIO, fakeAudioStream],
+        [ContentType.VIDEO, fakeVideoStream],
+      ]);
+      await mediaSourceEngine.init(streams, false);
+      // The new MediaSource never opens.
+      createMediaSourceSpy.and.callFake((p) => mockMediaSource);
+      const reset = mediaSourceEngine.reset(streams);
+      await Util.shortDelay();
+      expect(createMediaSourceSpy).toHaveBeenCalled();
+      expect(mediaSourceEngine.isReloadingMediaSource()).toBe(true);
+      // Fails the queue assertions in debug builds if the queues are still
+      // blocked by the reset.
+      await mediaSourceEngine.destroy();
+      await expectAsync(reset).toBeResolved();
+    });
+
     for (const rejects of [false, true]) {
       it('discards pending transmuxing when it ' +
           (rejects ? 'rejects' : 'resolves') + ' after removal', async () => {
