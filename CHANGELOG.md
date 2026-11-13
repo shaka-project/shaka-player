@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.3.5](https://github.com/shaka-project/shaka-player/compare/v5.3.4...v5.3.5) (2026-11-13)
+
+
+### Bug Fixes
+
+* **ABR:** Apply element/screen size restrictions to vertical video ([#10956](https://github.com/shaka-project/shaka-player/issues/10956)) ([1d52a4d](https://github.com/shaka-project/shaka-player/commit/1d52a4d2f1e69a6552ea7a7753ab5e816416786f))
+* **ABR:** Compare the transmuxed container when building adaptation sets ([#10941](https://github.com/shaka-project/shaka-player/issues/10941)) ([c16d56c](https://github.com/shaka-project/shaka-player/commit/c16d56c4828fce3b072f522ecc98e63bba38f2bd)), closes [#10938](https://github.com/shaka-project/shaka-player/issues/10938)
+* **DRM:** Close sessions dropped after a failed generateRequest ([#10954](https://github.com/shaka-project/shaka-player/issues/10954)) ([5bd9181](https://github.com/shaka-project/shaka-player/commit/5bd9181265da8d529b587336046c087ac1c0b758))
+* **HLS:** Fix AES-128 decryption for media sequence numbers &gt;= 2^31 ([#10937](https://github.com/shaka-project/shaka-player/issues/10937)) ([278cc6c](https://github.com/shaka-project/shaka-player/commit/278cc6c271f5315441aacf6c784af53b4be47550))
+* **HLS:** Set the duration without loading audio-only variants ([#10959](https://github.com/shaka-project/shaka-player/issues/10959)) ([99a5e65](https://github.com/shaka-project/shaka-player/commit/99a5e65d6f2e56b2d15e84dbed5db585c83d65f0))
+* **ID3:** Read the full transportStreamTimestamp and fix tag parsing ([#10946](https://github.com/shaka-project/shaka-player/issues/10946)) ([4e64a07](https://github.com/shaka-project/shaka-player/commit/4e64a076a32466918d8a5da93b8c61d5b18b79cd)), closes [#10935](https://github.com/shaka-project/shaka-player/issues/10935)
+* **MSE:** Transmux instead of resetting the MediaSource when that avoids the reset ([#10942](https://github.com/shaka-project/shaka-player/issues/10942)) ([344cedb](https://github.com/shaka-project/shaka-player/commit/344cedb119ca4229fd43554db867047c553b6f95))
+* **Transmux:** Keep the transmuxer worker alive across MediaSource resets ([#10957](https://github.com/shaka-project/shaka-player/issues/10957)) ([abfc384](https://github.com/shaka-project/shaka-player/commit/abfc384f5b6cb6d4f36a50212f39c6cf9b4f1c75))
+* **UI:** Fix inset positioning on old browsers ([#10944](https://github.com/shaka-project/shaka-player/issues/10944)) ([00e7f7d](https://github.com/shaka-project/shaka-player/commit/00e7f7db3bc86109c9081f2dc08bba6780bb51e3))
+
 ## [5.3.4](https://github.com/shaka-project/shaka-player/compare/v5.3.3...v5.3.4) (2026-11-06)
 
 
