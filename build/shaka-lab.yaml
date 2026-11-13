@@ -121,6 +121,12 @@ vars:
       # adb on the tethered device.
       androidPackage: com.android.chrome
 
+      # Accept Android 17's local network access permission automatically
+      # when setting up a fresh browser.  Without this, Android will not permit
+      # Chrome to access local network addresses, including our Karma server.
+      androidGrantPermissions:
+        - "ACCESS_LOCAL_NETWORK"
+
   mac_chrome_config: &mac_chrome_config
     goog:chromeOptions:
       args:
