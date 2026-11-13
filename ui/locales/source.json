@@ -49,6 +49,10 @@
     "description": "Label for a button used to select the background opacity of the subtitles, inside the subtitle style menu.",
     "message": "Background opacity"
   },
+  "BEHIND_LIVE": {
+    "description": "Spoken description of the position of the seek bar in a live stream, read by screen readers. [TIME] is replaced by how far behind the live broadcast it is, in words, such as \"2 minutes, 5 seconds\".",
+    "message": "[TIME] behind live"
+  },
   "BLACK": {
     "description": "Name of the color black, in a menu used to select the color of the subtitles.",
     "message": "Black"
@@ -334,6 +338,10 @@
   "SEEK_BACKWARD": {
     "description": "Label for a button used to seek backward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",
     "message": "Seek backward [SECONDS] seconds"
+  },
+  "SEEK_BAR_VALUE_TEXT": {
+    "description": "Spoken description of the position of the seek bar, read by screen readers. [CURRENT_TIME] and [DURATION] are replaced by durations in words, such as \"20 minutes, 34 seconds\" and \"45 minutes\".",
+    "message": "[CURRENT_TIME] of [DURATION]"
   },
   "SEEK_FORWARD": {
     "description": "Label for a button used to seek forward in the video by a fixed number of seconds. [SECONDS] is replaced by that number.",

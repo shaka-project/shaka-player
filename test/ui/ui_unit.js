@@ -4013,6 +4013,151 @@ describe('UI', () => {
       });
     });
 
+    describe('aria-valuetext', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.Player} */
+      let player;
+      /** @type {!jasmine.Spy} */
+      let seekRangeSpy;
+      /** @type {!Array<string>} */
+      let locales;
+      /** @type {*} */
+      let originalDurationFormat;
+
+      const supportsDurationFormat = () =>
+        !!window.Intl && 'DurationFormat' in Intl;
+
+      /**
+       * @param {!Object<string, number>} duration
+       * @return {string}
+       */
+      function spoken(duration) {
+        return new Intl.DurationFormat(locales, {style: 'long'})
+            .format(duration);
+      }
+
+      /**
+       * @param {string} id
+       * @return {string}
+       */
+      function resolve(id) {
+        return controls.getLocalization().resolve(id);
+      }
+
+      async function createUI() {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+          writable: true,
+        });
+
+        let currentTime = 0;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => currentTime,
+          set: (val) => {
+            currentTime = val;
+          },
+          configurable: true,
+        });
+
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+          controlPanelElements: ['volume'],
+        });
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
+        spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
+        seekRangeSpy = spyOn(player, 'seekRange')
+            .and.returnValue({start: 0, end: 100});
+        locales = Array.from(controls.getLocalization().getCurrentLocales());
+
+        // The bar picks up the seek range on its first update, so seek once to
+        // get it out of the range it is built with.
+        controls.seekTo(0, false);
+      }
+
+      /** @return {!HTMLElement} */
+      function getSeekBar() {
+        return UiUtils.getElementByClassName(videoContainer, 'shaka-seek-bar');
+      }
+
+      afterEach(() => {
+        if (originalDurationFormat) {
+          Intl['DurationFormat'] = originalDurationFormat;
+          originalDurationFormat = undefined;
+        }
+      });
+
+      it('describes the seek bar position in words', async () => {
+        if (!supportsDurationFormat()) {
+          pending('Intl.DurationFormat is not supported.');
+        }
+        await createUI();
+        controls.seekTo(50, false);
+
+        expect(getSeekBar().getAttribute('aria-valuetext')).toBe(
+            resolve(shaka.ui.Locales.Ids.SEEK_BAR_VALUE_TEXT)
+                .replace('[CURRENT_TIME]', spoken({seconds: 50}))
+                .replace('[DURATION]', spoken({minutes: 1, seconds: 40})));
+      });
+
+      it('counts from the start of the seek range', async () => {
+        if (!supportsDurationFormat()) {
+          pending('Intl.DurationFormat is not supported.');
+        }
+        await createUI();
+        seekRangeSpy.and.returnValue({start: 20, end: 80});
+        controls.seekTo(50, false);
+
+        expect(getSeekBar().getAttribute('aria-valuetext')).toBe(
+            resolve(shaka.ui.Locales.Ids.SEEK_BAR_VALUE_TEXT)
+                .replace('[CURRENT_TIME]', spoken({seconds: 30}))
+                .replace('[DURATION]', spoken({minutes: 1})));
+      });
+
+      it('counts down from the live edge', async () => {
+        if (!supportsDurationFormat()) {
+          pending('Intl.DurationFormat is not supported.');
+        }
+        await createUI();
+        spyOn(player, 'isDynamic').and.returnValue(true);
+        const seekBar = getSeekBar();
+
+        controls.seekTo(70, false);
+        expect(seekBar.getAttribute('aria-valuetext')).toBe(
+            resolve(shaka.ui.Locales.Ids.BEHIND_LIVE)
+                .replace('[TIME]', spoken({seconds: 30})));
+
+        controls.seekTo(99.5, false);
+        expect(seekBar.getAttribute('aria-valuetext'))
+            .toBe(resolve(shaka.ui.Locales.Ids.LIVE));
+      });
+
+      it('is left out without Intl.DurationFormat', async () => {
+        if (supportsDurationFormat()) {
+          originalDurationFormat = Intl.DurationFormat;
+          delete Intl['DurationFormat'];
+        }
+        await createUI();
+        controls.seekTo(50, false);
+
+        expect(getSeekBar().hasAttribute('aria-valuetext')).toBe(false);
+      });
+
+      it('gives the volume as a percentage', async () => {
+        await createUI();
+        video.muted = false;
+        video.volume = 0.333333;
+        video.dispatchEvent(new Event('volumechange'));
+
+        const volumeBar = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-volume-bar');
+        expect(volumeBar.getAttribute('aria-valuetext')).toBe(
+            new Intl.NumberFormat(locales,
+                {style: 'percent', maximumFractionDigits: 0}).format(0.333333));
+      });
+    });
+
     describe('seek bar interactions', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
