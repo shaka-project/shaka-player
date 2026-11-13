@@ -2576,6 +2576,75 @@ describe('Player', () => {
         });
   });
 
+  describe('isPlayingAudioOnly and isPlayingVideoOnly', () => {
+    it('are false before loading', () => {
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+    });
+
+    it('are true for content without video or audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isAudioOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isVideoOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+    });
+
+    it('follow the variant being played', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10);
+          variant.addVideo(11);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+
+      // E.g. an audio-only or a video-only variant mixed with audio-video
+      // ones.
+      const variant = manifest.variants[0];
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {video: null}));
+      expect(player.isPlayingAudioOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+      expect(player.isAudioOnly()).toBe(false);
+
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {audio: null}));
+      expect(player.isPlayingVideoOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('consider audio muxed into the video', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d401f,mp4a.40.2';
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+    });
+  });
+
   describe('tracks', () => {
     /** @type {!Array<shaka.extern.Track>} */
     let variantTracks;

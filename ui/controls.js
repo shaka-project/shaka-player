@@ -469,6 +469,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateChapters_();
+          this.updateAudioOnlyPoster_();
         });
 
     this.eventManager_.listen(this.localization_,
@@ -477,7 +478,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.adManager_.setLocale(locale);
           this.videoContainer_.setAttribute('lang', locale);
           this.updateChapters_();
+          this.updateAudioOnlyPoster_();
         });
+
+    this.eventManager_.listenMulti(
+        this.player_,
+        [
+          'loaded',
+          'unloading',
+          'variantchanged',
+          'adaptation',
+          'trackschanged',
+        ], () => {
+          this.updateAudioOnlyPoster_();
+        });
+    this.updateAudioOnlyPoster_();
 
     this.adManager_.setContainers(
         this.getClientSideAdContainer(), this.getServerSideAdContainer());
@@ -588,6 +603,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.spinnerContainer_) {
       this.videoContainer_.removeChild(this.spinnerContainer_);
       this.spinnerContainer_ = null;
+    }
+
+    if (this.audioOnlyPoster_) {
+      this.audioOnlyPosterObserver_.disconnect();
+      this.audioOnlyPosterObserver_ = null;
+      this.audioOnlyPoster_.remove();
+      this.audioOnlyPoster_ = null;
     }
 
     if (this.clientSideAdContainer_) {
@@ -1580,6 +1602,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
     this.localVideo_.classList.add('shaka-video');
 
+    if (!this.audioOnlyPoster_) {
+      this.addAudioOnlyPoster_();
+    }
+
     this.addScrimContainer_();
 
     if (this.config_.bigButtons.length) {
@@ -1704,6 +1730,55 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.contextMenu_ =
         new shaka.ui.ContextMenu(this.controlsButtonPanel_, this);
     this.elements_.push(this.contextMenu_);
+  }
+
+  /**
+   * Adds the poster shown while only the audio is played, e.g. after falling
+   * back to an audio-only variant at very low bandwidths.  Media elements show
+   * their poster only until the first frame, so it covers the last one.  It
+   * goes right after the video, under the text and the controls.
+   *
+   * @private
+   */
+  addAudioOnlyPoster_() {
+    /** @private {HTMLElement} */
+    this.audioOnlyPoster_ = shaka.util.Dom.createHTMLElement('div');
+    this.audioOnlyPoster_.classList.add('shaka-audio-only-poster');
+    shaka.ui.Utils.setDisplay(this.audioOnlyPoster_, false);
+
+    if (this.localVideo_.parentElement == this.videoContainer_) {
+      this.videoContainer_.insertBefore(
+          this.audioOnlyPoster_, this.localVideo_.nextSibling);
+    } else {
+      this.videoContainer_.prepend(this.audioOnlyPoster_);
+    }
+
+    // Follow the poster of the video, which can change at any time.
+    /** @private {MutationObserver} */
+    this.audioOnlyPosterObserver_ =
+        new MutationObserver(() => this.updateAudioOnlyPoster_());
+    this.audioOnlyPosterObserver_.observe(this.localVideo_, {
+      attributes: true,
+      attributeFilter: ['poster'],
+    });
+  }
+
+  /** @private */
+  updateAudioOnlyPoster_() {
+    if (!this.audioOnlyPoster_) {
+      return;
+    }
+    // Without any video, the media element shows its poster by itself.
+    const show = !this.ad_ && !this.castProxy_.isCasting() &&
+        !!this.player_ && this.player_.isPlayingAudioOnly() &&
+        !this.player_.isAudioOnly();
+    if (show) {
+      const video = /** @type {HTMLVideoElement} */ (this.localVideo_);
+      const poster = video.poster || '';
+      this.audioOnlyPoster_.style.backgroundImage =
+          poster ? `url(${JSON.stringify(poster)})` : '';
+    }
+    shaka.ui.Utils.setDisplay(this.audioOnlyPoster_, show);
   }
 
   /** @private */
@@ -2060,6 +2135,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.ad_ = this.adManager_.getCurrentAd();
           this.showAdUI();
           this.onBufferingStateChange_();
+          this.updateAudioOnlyPoster_();
         });
 
     this.eventManager_.listen(
@@ -2067,6 +2143,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.ad_ = null;
           this.hideAdUI();
           this.onBufferingStateChange_();
+          this.updateAudioOnlyPoster_();
         });
 
     this.eventManager_.listen(
@@ -2402,6 +2479,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.dispatchVisibilityEvent_();
       }
     }
+    this.updateAudioOnlyPoster_();
   }
 
   /** @private */
@@ -2691,7 +2769,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (available && this.castProxy_.isCasting()) {
       available = false;
     }
-    if (available && (this.player_.drmInfo() || this.player_.isAudioOnly())) {
+    if (available &&
+        (this.player_.drmInfo() || this.player_.isPlayingAudioOnly())) {
       available = false;
     }
     if (available && this.ad_) {
@@ -2805,7 +2884,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   frameByFrame_(step) {
     if ((this.ad_ && this.ad_.isLinear()) ||
-        this.player_.isAudioOnly()) {
+        this.player_.isPlayingAudioOnly()) {
       return;
     }
     const videoTrack = this.player_.getVideoTracks().find((t) => t.active);

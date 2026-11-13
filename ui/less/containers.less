@@ -648,6 +648,20 @@
   transition-delay: 0ms;
 }
 
+/* The poster shown while only the audio of a video is played, e.g. after
+ * falling back to an audio-only variant at very low bandwidths. */
+.shaka-audio-only-poster {
+  .absolute-position();
+  .fill-container();
+  .hide-when-shaka-controls-disabled();
+
+  background-color: #000;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
 /* The buffering spinner. */
 .shaka-spinner-container {
   .absolute-position();

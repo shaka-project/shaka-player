@@ -29,6 +29,13 @@ shakaDemo.Main = class {
     /** @private {HTMLElement} */
     this.container_ = null;
 
+    /**
+     * The poster replaced by the audio-only one while only the audio is
+     * played.
+     * @private {?string}
+     */
+    this.posterBeforeAudioOnly_ = null;
+
     /** @private {shaka.Player} */
     this.player_ = null;
 
@@ -467,22 +474,15 @@ shakaDemo.Main = class {
     const onErrorEvent = (event) => this.onErrorEvent_(event);
     this.player_.addEventListener('error', onErrorEvent);
 
-    this.player_.addEventListener('loaded', () => {
-      if (this.player_.isAudioOnly()) {
-        const queueItemMetadata =
-            this.controls_.getQueueManager().getCurrentItem()?.metadata;
-        if (queueItemMetadata) {
-          // This prevents the browser from normalizing it.
-          const poster = this.video_.getAttribute('poster');
-          if (poster == queueItemMetadata.poster ||
-              poster == shakaDemo.Main.mainPoster_) {
-            this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
-          }
-        }
-      }
-    });
+    // Also while adaptation falls back to an audio-only variant mixed with
+    // audio-video ones, or one is selected.
+    for (const eventName of ['loaded', 'variantchanged', 'adaptation']) {
+      this.player_.addEventListener(
+          eventName, () => this.updateAudioOnlyPoster_());
+    }
 
     this.player_.addEventListener('unloading', () => {
+      this.posterBeforeAudioOnly_ = null;
       this.video_.poster = shakaDemo.Main.mainPoster_;
     });
 
@@ -1580,6 +1580,31 @@ shakaDemo.Main = class {
       this.player_.configure(assetConfig);
     }
     this.remakeHash();
+  }
+
+  /**
+   * Shows the audio-only poster while only the audio is played, and the
+   * previous one again when the video is.
+   *
+   * @private
+   */
+  updateAudioOnlyPoster_() {
+    // This prevents the browser from normalizing it.
+    const poster = this.video_.getAttribute('poster');
+    if (this.player_.isPlayingAudioOnly()) {
+      const queueItemMetadata =
+          this.controls_.getQueueManager().getCurrentItem()?.metadata;
+      if (queueItemMetadata && (poster == queueItemMetadata.poster ||
+          poster == shakaDemo.Main.mainPoster_)) {
+        this.posterBeforeAudioOnly_ = poster;
+        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+      }
+    } else if (this.posterBeforeAudioOnly_ != null) {
+      if (poster == shakaDemo.Main.audioOnlyPoster_) {
+        this.video_.poster = this.posterBeforeAudioOnly_;
+      }
+      this.posterBeforeAudioOnly_ = null;
+    }
   }
 
   /**

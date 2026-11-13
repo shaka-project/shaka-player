@@ -83,6 +83,22 @@ describe('Player Src Equals', () => {
     expect(player.isAudioOnly()).toBeFalsy();
   });
 
+  // With src=, the content and what is played can't be told apart.  The
+  // variant tracks come from the media element, and their audio and video ids
+  // are null (e.g. on Safari), so they must not be read as audio-only ones.
+  it('reports playing only the audio of audio-only content', async () => {
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(player.isPlayingAudioOnly()).toBe(false);
+    expect(player.isPlayingVideoOnly()).toBe(false);
+
+    await loadWithSrcEquals(
+        '/base/test/test/assets/dash-multi-codec/audio_en_2c_128k_aac.mp4',
+        /* startTime= */ null);
+    expect(player.isAudioOnly()).toBe(true);
+    expect(player.isPlayingAudioOnly()).toBe(true);
+    expect(player.isPlayingVideoOnly()).toBe(false);
+  });
+
   it('allow load with startTime', async () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
