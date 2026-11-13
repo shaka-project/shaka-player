@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.2.18](https://github.com/shaka-project/shaka-player/compare/v5.2.17...v5.2.18) (2026-11-13)
+
+
+### Bug Fixes
+
+* **ABR:** Apply element/screen size restrictions to vertical video ([#10956](https://github.com/shaka-project/shaka-player/issues/10956)) ([5b29333](https://github.com/shaka-project/shaka-player/commit/5b2933363efda7ea288d5dad2c98544bcc6726cd))
+* **ABR:** Compare the transmuxed container when building adaptation sets ([#10941](https://github.com/shaka-project/shaka-player/issues/10941)) ([4159ceb](https://github.com/shaka-project/shaka-player/commit/4159ceb2d37c4df9daf2892130d2f28f5ccca277)), closes [#10938](https://github.com/shaka-project/shaka-player/issues/10938)
+* **DRM:** Close sessions dropped after a failed generateRequest ([#10954](https://github.com/shaka-project/shaka-player/issues/10954)) ([3029fe8](https://github.com/shaka-project/shaka-player/commit/3029fe8b2a52123c9d9608ad00cd0aedabbf3b51))
+* **HLS:** Fix AES-128 decryption for media sequence numbers &gt;= 2^31 ([#10937](https://github.com/shaka-project/shaka-player/issues/10937)) ([e5dceb9](https://github.com/shaka-project/shaka-player/commit/e5dceb9ee616f680f24c08f90d23414d5a7f2a7d))
+* **HLS:** Set the duration without loading audio-only variants ([#10959](https://github.com/shaka-project/shaka-player/issues/10959)) ([f97bf2a](https://github.com/shaka-project/shaka-player/commit/f97bf2afc3318e24c2e824224532b119d22717df))
+* **MSE:** Transmux instead of resetting the MediaSource when that avoids the reset ([#10942](https://github.com/shaka-project/shaka-player/issues/10942)) ([3b54692](https://github.com/shaka-project/shaka-player/commit/3b546925959a38e2b344d37a02b437bb2b082fe4))
+* **Transmux:** Keep the transmuxer worker alive across MediaSource resets ([#10957](https://github.com/shaka-project/shaka-player/issues/10957)) ([1e2d72f](https://github.com/shaka-project/shaka-player/commit/1e2d72fe15a54258f3a6f8b4b6dc58edc299513b))
+* **UI:** Fix inset positioning on old browsers ([#10944](https://github.com/shaka-project/shaka-player/issues/10944)) ([0ab6a7c](https://github.com/shaka-project/shaka-player/commit/0ab6a7c9f914cff62d2501f6304314505a9736b7))
+
 ## [5.2.17](https://github.com/shaka-project/shaka-player/compare/v5.2.16...v5.2.17) (2026-11-06)
 
 
