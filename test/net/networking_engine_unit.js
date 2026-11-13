@@ -97,6 +97,108 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(request.attempt).toBe(1);
     });
 
+    describe('with a stream data callback', () => {
+      const retryParameters = {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      };
+
+      /** @type {!Array<!Array<number>>} */
+      let received;
+      /** @type {!Array<?function(BufferSource):!Promise>} */
+      let callbacks;
+
+      beforeEach(() => {
+        received = [];
+        callbacks = [];
+      });
+
+      afterEach(() => {
+        shaka.net.NetworkingEngine.unregisterScheme('stream');
+      });
+
+      /**
+       * Registers a scheme whose attempts stream the given chunks, and fail
+       * all but the last one.
+       *
+       * @param {!Array<!Array<!Array<number>>>} attempts
+       */
+      function registerStreamScheme(attempts) {
+        const plugin = jasmine.createSpy('stream scheme').and.callFake(
+            (uri, request) => {
+              const attempt = callbacks.length;
+              callbacks.push(request.streamDataCallback);
+              const promise = (async () => {
+                for (const chunk of attempts[attempt]) {
+                  // eslint-disable-next-line no-await-in-loop
+                  await request.streamDataCallback(new Uint8Array(chunk));
+                }
+                if (attempt < attempts.length - 1) {
+                  throw error;
+                }
+                return createResponse();
+              })();
+              return new shaka.util.AbortableOperation(
+                  promise, () => Promise.resolve());
+            });
+        shaka.net.NetworkingEngine.registerScheme(
+            'stream', Util.spyFunc(plugin));
+      }
+
+      /** @return {!Promise} */
+      async function streamRequest() {
+        const request = createRequest('stream://foo', retryParameters);
+        request.streamDataCallback = (data) => {
+          received.push(Array.from(shaka.util.BufferUtils.toUint8(data)));
+          return Promise.resolve();
+        };
+        await networkingEngine.request(requestType, request).promise;
+      }
+
+      it('does not deliver the same bytes again on retry', async () => {
+        registerStreamScheme([
+          [[0, 1, 2, 3]],
+          [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1, 2, 3], [4, 5, 6, 7, 8, 9]]);
+      });
+
+      it('skips delivered bytes across chunk boundaries', async () => {
+        registerStreamScheme([
+          [[0, 1], [2, 3, 4]],
+          [[0, 1, 2], [3, 4, 5], [6]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1], [2, 3, 4], [5], [6]]);
+      });
+
+      it('keeps the delivered bytes across several retries', async () => {
+        registerStreamScheme([
+          [[0, 1, 2]],
+          [[0], [1]],
+          [[0, 1, 2, 3, 4]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1, 2], [3, 4]]);
+      });
+
+      it('ignores late data from a failed attempt', async () => {
+        registerStreamScheme([
+          [[0, 1]],
+          [[0, 1, 2, 3]],
+        ]);
+        await streamRequest();
+        await callbacks[0](new Uint8Array([2, 3]));
+        expect(received).toEqual([[0, 1], [2, 3]]);
+      });
+    });
+
     it('will retry twice', async () => {
       const request = createRequest('reject://foo', {
         maxAttempts: 3,
