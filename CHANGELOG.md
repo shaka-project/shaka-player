@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.15.68](https://github.com/shaka-project/shaka-player/compare/v4.15.67...v4.15.68) (2026-11-13)
+
+
+### Bug Fixes
+
+* **DRM:** Close sessions dropped after a failed generateRequest ([#10954](https://github.com/shaka-project/shaka-player/issues/10954)) ([0c75174](https://github.com/shaka-project/shaka-player/commit/0c75174bf9112cd523ffc787c4c2c76f4738368a))
+* **HLS:** Set the duration without loading audio-only variants ([#10959](https://github.com/shaka-project/shaka-player/issues/10959)) ([44ff23c](https://github.com/shaka-project/shaka-player/commit/44ff23c25abf541b7bb0c1c81fe46e399521e350))
+
 ## [4.15.67](https://github.com/shaka-project/shaka-player/compare/v4.15.66...v4.15.67) (2026-11-06)
 
 
