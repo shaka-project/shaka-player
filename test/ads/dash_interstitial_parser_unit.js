@@ -83,7 +83,6 @@ describe('DashInterstitialParser', () => {
           /* id= */ 'PREROLL');
 
       const interstitial = DashInterstitialParser.parseRegion(region);
-      // The parser leaves mimeType null; the manager resolves it later.
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'PREROLL',
@@ -91,7 +90,7 @@ describe('DashInterstitialParser', () => {
         startTime: 0,
         endTime: 1,
         uri: 'test.mpd',
-        mimeType: null,
+        mimeType: 'application/dash+xml',
         isSkippable: false,
         skipOffset: null,
         skipFor: null,
@@ -128,7 +127,7 @@ describe('DashInterstitialParser', () => {
         startTime: 1,
         endTime: 2,
         uri: 'test.mpd',
-        mimeType: null,
+        mimeType: 'application/dash+xml',
         isSkippable: true,
         skipOffset: 0,
         skipFor: null,
@@ -177,6 +176,24 @@ describe('DashInterstitialParser', () => {
       goog.asserts.assert(interstitial, 'Should parse an interstitial!');
       // 20 (in timescale units) / timescale(2) = 10 seconds.
       expect(interstitial.resolutionTimeOffset).toBe(10);
+    });
+
+    it('assumes an MPD for an alternative MPD URI without extension', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="https://ads.test/sgai/ads?b=1"/>' +
+              '</Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.mimeType).toBe('application/dash+xml');
+    });
+
+    it('takes the MIME type of a known alternative MPD URI extension', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="https://ads.test/ad.m3u8"/>' +
+              '</Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.mimeType).toBe('application/x-mpegurl');
     });
 
     it('returns null for an alternative MPD without a URI', () => {
