@@ -2383,12 +2383,16 @@ shaka.extern.SpeechToTextConfiguration;
  *   With <code>MANUAL_SELECTION</code>, adaptation only chooses audio-video
  *   variants, and audio-only and video-only ones are only played when
  *   selected manually.
+ *   If playback stalls after removing a <code>SourceBuffer</code>, the
+ *   <code>MediaSource</code> is reset instead, and from then on for the rest
+ *   of the page's lifetime.
  *   Changes take effect on the next load.
  *   <br>
  *   Defaults to <code>ALL</code> on platforms that can remove a
  *   <code>SourceBuffer</code> while playing, and to
- *   <code>MANUAL_SELECTION</code> otherwise (e.g. Firefox and Safari), where
- *   every switch to or from an audio-only variant requires a
+ *   <code>MANUAL_SELECTION</code> otherwise (Firefox and other Gecko
+ *   browsers, Safari and other WebKit browsers, Tizen and WebOS), where every
+ *   switch to or from an audio-only variant requires a
  *   <code>MediaSource</code> reset.
  * @exportDoc
  */

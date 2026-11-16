@@ -2621,8 +2621,12 @@ describe('UI', () => {
             const poster = getPoster();
             expect(poster.style.backgroundImage).toBe('');
 
-            // It follows changes of the poster.
-            video.poster = 'data:,poster';
+            // It follows changes of the poster.  It has to be a real image:
+            // older Chromium and WebKit (Chromecast, Tizen) fire an error on
+            // the video element when the poster cannot be loaded.
+            video.poster = 'data:image/gif;base64,' +
+                // cspell: disable-next-line
+                'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
             await Util.shortDelay();
             expect(poster.style.backgroundImage).toContain(video.poster);
 

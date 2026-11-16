@@ -635,6 +635,88 @@ describe('StreamingEngine', () => {
           expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
         });
 
+    describe('on a stalled removal', /** @suppress {accessControls} */ () => {
+      beforeEach(() => {
+        // The watch only counts the time while playing.
+        Object.defineProperty(video, 'paused', {
+          get: () => false,
+          configurable: true,
+        });
+        spyOn(video, 'play').and.returnValue(Promise.resolve());
+      });
+
+      afterEach(() => {
+        shaka.media.StreamingEngine.removalStalls_ = false;
+      });
+
+      it('recreates the MediaSource without the video', async () => {
+        await start(variant);
+
+        mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+          // The playhead stops, although the audio has content ahead.
+          playing = false;
+          return Promise.resolve();
+        });
+        mediaSourceEngine.reset.and.callFake(() => {
+          playing = true;
+          return Promise.resolve();
+        });
+        let switched = false;
+        await runTest(() => {
+          if (presentationTimeInSeconds == 6 && !switched) {
+            switched = true;
+            streamingEngine.switchVariant(audioOnlyVariant);
+          }
+        });
+
+        expect(mediaSourceEngine.removeSourceBuffer)
+            .toHaveBeenCalledOnceWith(ContentType.VIDEO);
+        expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+        expect(streamsByType.has(ContentType.AUDIO)).toBe(true);
+        expect(streamsByType.has(ContentType.VIDEO)).toBe(false);
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
+      });
+
+      it('resets instead of removing it from then on', async () => {
+        shaka.media.StreamingEngine.removalStalls_ = true;
+        await start(variant);
+
+        let switched = false;
+        await runTest(() => {
+          if (presentationTimeInSeconds == 6 && !switched) {
+            switched = true;
+            streamingEngine.switchVariant(audioOnlyVariant);
+          }
+        });
+
+        expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('keeps removing the video if playback goes on without it',
+        /** @suppress {accessControls} */ async () => {
+          Object.defineProperty(video, 'paused', {
+            get: () => false,
+            configurable: true,
+          });
+          await start(variant);
+
+          let switched = false;
+          await runTest(() => {
+            if (presentationTimeInSeconds == 6 && !switched) {
+              switched = true;
+              streamingEngine.switchVariant(audioOnlyVariant);
+            }
+          });
+
+          expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+          expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+          expect(shaka.media.StreamingEngine.removalStalls_).toBe(false);
+        });
+
     it('keeps the video if it comes back before being detached',
         async () => {
           await start(variant);

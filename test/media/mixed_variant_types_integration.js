@@ -327,7 +327,11 @@ describe('Mixed variant types', () => {
         () => video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA &&
             !video.seeking, 10,
         'the element to be ready to play after the reset');
-    expect(video.currentTime).toBeGreaterThan(time - 0.5);
+    // Tizen goes back to the keyframe before, at the start of the segment,
+    // and the segments of these assets are 4 seconds at most.
+    const isTizen =
+        shaka.device.DeviceFactory.getDevice().getDeviceName() == 'Tizen';
+    expect(video.currentTime).toBeGreaterThan(time - (isTizen ? 4 : 0.5));
     expect(video.duration).toBe(player.seekRange().end);
   }
 
