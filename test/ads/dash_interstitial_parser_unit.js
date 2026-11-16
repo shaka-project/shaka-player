@@ -166,6 +166,54 @@ describe('DashInterstitialParser', () => {
       expect(interstitial.endTime).toBe(1);
     });
 
+    it('parses clip and startWithOffset of a replace event', () => {
+      const defaults = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(defaults, 'Should parse an interstitial!');
+      expect(defaults.clip).toBe(true);
+      expect(defaults.startWithOffset).toBe(false);
+
+      const explicit = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd" clip="false" ' +
+              'startWithOffset="true"/></Event>'));
+      goog.asserts.assert(explicit, 'Should parse an interstitial!');
+      expect(explicit.clip).toBe(false);
+      expect(explicit.startWithOffset).toBe(true);
+    });
+
+    it('parses executeOnce of alternative MPD events', () => {
+      const byDefault = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(byDefault, 'Should parse an interstitial!');
+      expect(byDefault.once).toBe(false);
+
+      const replace = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd" executeOnce="true"/>' +
+              '</Event>'));
+      goog.asserts.assert(replace, 'Should parse an interstitial!');
+      expect(replace.once).toBe(true);
+
+      const insert = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="test.mpd" executeOnce="true"/>' +
+              '</Event>'));
+      goog.asserts.assert(insert, 'Should parse an interstitial!');
+      expect(insert.once).toBe(true);
+    });
+
+    it('leaves clip and startWithOffset unset for an insert event', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.clip).toBeUndefined();
+      expect(interstitial.startWithOffset).toBeUndefined();
+    });
+
     it('parses earliestResolutionTimeOffset scaled by the timescale', () => {
       const region = makeRegion(
           'urn:mpeg:dash:event:alternativeMPD:insert:2025',
