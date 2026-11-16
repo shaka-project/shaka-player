@@ -36,7 +36,6 @@ function httpPluginTests(usingFetch) {
       jasmine.Fetch.install();
       const MockFetch = window.fetch;
       const MockAbortController = window.AbortController;
-      const MockReadableStream = window.ReadableStream;
       const MockHeaders = window.Headers;
       jasmine.Fetch.uninstall();
       // Now plug this mock into HttpRequest directly, so it does not interfere
@@ -44,7 +43,6 @@ function httpPluginTests(usingFetch) {
       // source-map-support.
       shaka.net.HttpFetchPlugin['fetch_'] = MockFetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = MockAbortController;
-      shaka.net.HttpFetchPlugin['ReadableStream_'] = MockReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = MockHeaders;
     } else {
       // Install the mock only briefly in the global namespace, to get a handle
@@ -156,7 +154,6 @@ function httpPluginTests(usingFetch) {
     if (usingFetch) {
       shaka.net.HttpFetchPlugin['fetch_'] = window.fetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
-      shaka.net.HttpFetchPlugin['ReadableStream_'] = window.ReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = window.Headers;
     } else {
       shaka.net.HttpXHRPlugin['Xhr_'] = window.XMLHttpRequest;
@@ -238,6 +235,123 @@ function httpPluginTests(usingFetch) {
           .promise).toBeRejectedWith(expected);
 
       expect(streamDataCallback).not.toHaveBeenCalled();
+    });
+
+    describe('with a body in chunks', () => {
+      /** @type {function(string, !RequestInit)} */
+      let mockFetch;
+
+      const chunks = [
+        new Uint8Array([1, 2, 3]),
+        new Uint8Array([4, 5]),
+        new Uint8Array([6, 7, 8, 9]),
+      ];
+      const fullBody = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+      beforeEach(() => {
+        mockFetch = shaka.net.HttpFetchPlugin['fetch_'];
+      });
+
+      afterEach(() => {
+        shaka.net.HttpFetchPlugin['fetch_'] = mockFetch;
+      });
+
+      /**
+       * Makes fetch respond with |chunks|, one per read.
+       *
+       * @param {?string} contentLength
+       */
+      function respondWithChunks(contentLength) {
+        shaka.net.HttpFetchPlugin['fetch_'] = () => {
+          let index = 0;
+          const body = new ReadableStream({
+            pull: (controller) => {
+              if (index < chunks.length) {
+                controller.enqueue(chunks[index++]);
+              } else {
+                controller.close();
+              }
+            },
+          });
+          const headers = new Headers();
+          if (contentLength != null) {
+            headers.set('Content-Length', contentLength);
+          }
+          return Promise.resolve(new Response(body, {status: 200, headers}));
+        };
+      }
+
+      /**
+       * @param {?function(BufferSource):!Promise} streamDataCallback
+       * @return {!Promise<shaka.extern.Response>}
+       */
+      function download(streamDataCallback) {
+        const uri = 'https://foo.bar/chunks';
+        const request = shaka.net.NetworkingEngine.makeRequest(
+            [uri], retryParameters, streamDataCallback);
+        return plugin(uri, request, requestType, progressUpdated,
+            headersReceived, {}).promise;
+      }
+
+      it('joins the chunks when the length is known', async () => {
+        respondWithChunks(String(fullBody.byteLength));
+        const response = await download(null);
+        expect(shaka.util.BufferUtils.toUint8(response.data))
+            .toEqual(fullBody);
+      });
+
+      it('joins the chunks when the length is unknown', async () => {
+        respondWithChunks(null);
+        const response = await download(null);
+        expect(shaka.util.BufferUtils.toUint8(response.data))
+            .toEqual(fullBody);
+      });
+
+      it('handles a body larger than the Content-Length', async () => {
+        // As for a compressed response, where Content-Length is the size
+        // before decoding.
+        respondWithChunks('4');
+        const response = await download(null);
+        expect(shaka.util.BufferUtils.toUint8(response.data))
+            .toEqual(fullBody);
+      });
+
+      it('handles a body smaller than the Content-Length', async () => {
+        respondWithChunks('100');
+        const response = await download(null);
+        expect(shaka.util.BufferUtils.toUint8(response.data))
+            .toEqual(fullBody);
+        expect(response.data.byteLength).toBe(fullBody.byteLength);
+      });
+
+      it('streams each chunk before resolving', async () => {
+        respondWithChunks(String(fullBody.byteLength));
+        /** @type {!Array<!Uint8Array>} */
+        const streamed = [];
+        const streamDataCallback = async (data) => {
+          await Util.shortDelay();
+          streamed.push(shaka.util.BufferUtils.toUint8(data).slice());
+        };
+        await download(streamDataCallback);
+        expect(streamed).toEqual(chunks);
+      });
+
+      it('reports all the bytes as progress', async () => {
+        respondWithChunks(String(fullBody.byteLength));
+        let bytes = 0;
+        let lastRemaining = -1;
+        const progress = (time, chunkBytes, remaining) => {
+          bytes += chunkBytes;
+          lastRemaining = remaining;
+        };
+        const uri = 'https://foo.bar/chunks';
+        const request = shaka.net.NetworkingEngine.makeRequest(
+            [uri], retryParameters);
+        await plugin(uri, request, requestType, progress, headersReceived,
+            {}).promise;
+        expect(bytes).toBe(fullBody.byteLength);
+        expect(lastRemaining).toBe(0);
+      });
     });
   }
 
