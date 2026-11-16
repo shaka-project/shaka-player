@@ -2248,6 +2248,128 @@ describe('Interstitial Ad manager', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
+    describe('joining in the middle of a ReplacePresentation', () => {
+      /** @type {number} */
+      let fakeCurrentTime;
+      /** @type {!jasmine.Spy} */
+      let loadSpy;
+
+      beforeEach(() => {
+        fakeCurrentTime = 1;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => fakeCurrentTime,
+          set: (val) => {
+            fakeCurrentTime = val;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(video, 'paused', {
+          get: () => false,
+          configurable: true,
+        });
+        const adPlayer = interstitialAdManager.getPlayer();
+        spyOn(adPlayer, 'preload').and.returnValue(Promise.resolve(null));
+        loadSpy = spyOn(adPlayer, 'load').and.returnValue(Promise.resolve());
+      });
+
+      /**
+       * Adds a 20 s Replace event at 10 s and joins it at 15 s.
+       *
+       * @param {string} attributes Extra ReplacePresentation attributes.
+       * @param {number=} maxDuration
+       * @return {!Promise}
+       */
+      async function joinAt15(attributes, maxDuration = 20) {
+        const eventNode = TXml.parseXmlString([
+          '<Event duration="20" id="BREAK" presentationTime="10">',
+          `<ReplacePresentation uri="test.mpd" maxDuration="${maxDuration}"`,
+          ` ${attributes}/>`,
+          '</Event>',
+        ].join(''));
+        goog.asserts.assert(eventNode, 'Should have a event node!');
+        await addRegion({
+          startTime: 10,
+          endTime: 30,
+          id: 'BREAK',
+          schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          eventNode,
+          value: '',
+          timescale: 1,
+        });
+        video.dispatchEvent(new Event('timeupdate'));
+        fakeCurrentTime = 15;
+        video.dispatchEvent(new Event('timeupdate'));
+        await shaka.test.Util.shortDelay();
+      }
+
+      /** @return {number} */
+      function getPlayRangeEnd() {
+        return interstitialAdManager.getPlayer().getConfiguration()
+            .playRangeEnd;
+      }
+
+      it('starts from the beginning and clips by default', async () => {
+        await joinAt15('');
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        // No start time: the alternative presentation starts at 0.
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        // The 5 s elapsed since the event start are deducted.
+        expect(getPlayRangeEnd()).toBe(15);
+      });
+
+      it('starts at the join offset with startWithOffset', async () => {
+        await joinAt15('startWithOffset="true"');
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(5);
+        expect(getPlayRangeEnd()).toBe(20);
+      });
+
+      it('plays the whole maxDuration without clip', async () => {
+        await joinAt15('clip="false"');
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        expect(getPlayRangeEnd()).toBe(20);
+      });
+
+      it('is not executed when clipping leaves nothing', async () => {
+        await joinAt15('', /* maxDuration= */ 5);
+
+        expect(loadSpy).not.toHaveBeenCalled();
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-impression'}));
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-started'}));
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-complete'}));
+      });
+
+      it('is executed only once with executeOnce', async () => {
+        await joinAt15('executeOnce="true"');
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(interstitialAdManager.getInterstitials().length).toBe(0);
+      });
+
+      it('is not used up by a failed execution with executeOnce', async () => {
+        await joinAt15('executeOnce="true"', /* maxDuration= */ 5);
+
+        expect(loadSpy).not.toHaveBeenCalled();
+        // It may still be executed later, e.g. after a seek back before it.
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+      });
+
+      it('is executed without clip when joined late', async () => {
+        await joinAt15('clip="false"', /* maxDuration= */ 5);
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        expect(getPlayRangeEnd()).toBe(5);
+      });
+    });
+
     it('ignore duplicate alternative MPD', async () => {
       const eventString = [
         '<Event duration="1" id="PREROLL" presentationTime="0">',
