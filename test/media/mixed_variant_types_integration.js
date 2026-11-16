@@ -271,7 +271,7 @@ describe('Mixed variant types', () => {
           20, 'the ' + keptType + ' to be buffered further');
     }
 
-    const src = video.currentSrc;
+    const src = getSrc();
     const timeAtRemoval = video.currentTime;
     if (removes) {
       held.set(keptType, segmentCounts.get(keptType) || 0);
@@ -286,11 +286,11 @@ describe('Mixed variant types', () => {
         .toBe(without.id);
     if (removes) {
       // Removed from the same MediaSource, not by resetting it.
-      expect(video.currentSrc).toBe(src);
+      expect(getSrc()).toBe(src);
       await waitFor(() => isBuffered(video.currentTime), 2,
           'the playhead to be buffered after the removal');
     } else {
-      expect(video.currentSrc).not.toBe(src);
+      expect(getSrc()).not.toBe(src);
       await expectResumedAfterReset(timeAtRemoval);
     }
     const appendedBefore = countSegments();
@@ -303,12 +303,12 @@ describe('Mixed variant types', () => {
     releaseAll();
 
     // MediaSource is reset to add the stream back.
-    const srcWithout = video.currentSrc;
+    const srcWithout = getSrc();
     const timeAtReset = video.currentTime;
     player.selectVariantTrack(audioVideo);
     await waitFor(() => getBuffered(removedType).length > 0, 20,
         'the ' + removedType + ' to be buffered again');
-    expect(video.currentSrc).not.toBe(srcWithout);
+    expect(getSrc()).not.toBe(srcWithout);
     await expectResumedAfterReset(timeAtReset);
     await waiter.waitUntilPlayheadReachesOrFailOnTimeout(
         video, video.currentTime + 1, 10);
@@ -333,6 +333,19 @@ describe('Mixed variant types', () => {
         shaka.device.DeviceFactory.getDevice().getDeviceName() == 'Tizen';
     expect(video.currentTime).toBeGreaterThan(time - (isTizen ? 4 : 0.5));
     expect(video.duration).toBe(player.seekRange().end);
+  }
+
+  /**
+   * The URL of the current MediaSource.  Unlike currentSrc, which the element
+   * updates asynchronously (late on slow devices such as Chromecast), it
+   * changes as soon as the MediaSource is recreated.
+   *
+   * @return {string}
+   */
+  function getSrc() {
+    const source = /** @type {HTMLSourceElement} */ (
+      video.querySelector('source'));
+    return source ? source.src : video.src;
   }
 
   /** @param {string} type */
