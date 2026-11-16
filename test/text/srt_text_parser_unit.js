@@ -218,6 +218,36 @@ describe('SrtTextParser', () => {
         });
   });
 
+  it('keeps colors when nested font tags have no known color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Red unknown face still red',
+                color: 'red',
+              },
+            ],
+          },
+        ],
+        '1\n' +
+        '00:00:10,000 --> 00:00:20,000\n' +
+        '<font color="red">Red <font color="unknown">unknown</font>' +
+        '<font face="Arial"> face</font> still red</font>',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
