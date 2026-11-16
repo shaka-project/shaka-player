@@ -3763,11 +3763,11 @@ describe('StreamingEngine', () => {
             expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
           });
 
-      it('lowers the goal again for a heavier segment', async () => {
+      it('waits for room for a heavier segment that was rejected', async () => {
         // The video quota is in bytes, and the third video segment weighs
-        // three times as much as the others (VBR).  The goal derived from
-        // the light segments is then too high for it, so it is rejected again
-        // once the buffer is down to that goal, and the goal is lowered again.
+        // three times as much as the others (VBR).  It is rejected, and the
+        // light segments that fit tell nothing about its size.  Its own size
+        // does, though, so it is not tried again before there is room for it.
         const quotaBytes = 32000;
         setUpQuota((type, reference) => {
           if (type != ContentType.VIDEO) {
@@ -3791,7 +3791,7 @@ describe('StreamingEngine', () => {
 
         await play();
 
-        expect(quotaErrors.video).toBeGreaterThan(1);
+        expect(quotaErrors.video).toBe(1);
         expect(onError).not.toHaveBeenCalled();
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
       });
