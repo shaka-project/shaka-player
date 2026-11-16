@@ -57,6 +57,16 @@ describe('PlayheadObserverManager', () => {
     expect(pollSpy).toHaveBeenCalledWith(19.9, false);
   });
 
+  it('polls with the current time on demand', () => {
+    video.currentTime = 20;
+    video.duration = 20;
+
+    manager.poll();
+
+    expect(pollSpy).toHaveBeenCalledTimes(1);
+    expect(pollSpy).toHaveBeenCalledWith(20, false);
+  });
+
   it('polls with the current time on seek', () => {
     video.currentTime = 10;
     video.duration = 20;
