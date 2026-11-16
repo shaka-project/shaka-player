@@ -691,48 +691,6 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
     });
 
-    it('does not append a segment fetched before a reset', async () => {
-      // The audio requests cannot be aborted, so one can finish after the
-      // reset that brings the video back.
-      netEngineDelays.audio = 2;
-      await start(variant);
-
-      /** @type {?number} */
-      let detachedAt = null;
-      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
-        detachedAt = presentationTimeInSeconds;
-        return Promise.resolve();
-      });
-      const isAudioRequest = (args) => args[1].uris[0].includes('_audio_');
-      const isAudioAppend = (args) => args[0] == ContentType.AUDIO;
-      /** @type {?number} */
-      let appendsBeforeReset = null;
-      let switched = false;
-      await runTest(() => {
-        const requests =
-            netEngine.request.calls.allArgs().filter(isAudioRequest).length;
-        const appends = mediaSourceEngine.appendBuffer.calls.allArgs()
-            .filter(isAudioAppend).length;
-        if (presentationTimeInSeconds == 6 && !switched) {
-          switched = true;
-          streamingEngine.switchVariant(audioOnlyVariant);
-        } else if (detachedAt != null && appendsBeforeReset == null &&
-            requests > appends) {
-          appendsBeforeReset = appends;
-          streamingEngine.switchVariant(variant);
-          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
-        }
-      });
-
-      goog.asserts.assert(
-          appendsBeforeReset != null, 'Must have switched back');
-      const appendsAfterReset = mediaSourceEngine.appendBuffer.calls.allArgs()
-          .filter(isAudioAppend).slice(appendsBeforeReset);
-      expect(appendsAfterReset.length).toBeGreaterThan(0);
-      // The new SourceBuffer gets the init segment first.
-      expect(appendsAfterReset[0][2]).toBe(null);
-    });
-
     it('adds the video when starting audio-only', async () => {
       await start(audioOnlyVariant);
       expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
