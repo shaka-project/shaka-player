@@ -2645,6 +2645,82 @@ describe('Player', () => {
     });
   });
 
+  // ISO/IEC 23009-1 Annex I.4.
+  describe('getUrlParamState', () => {
+    it('is not known before loading', () => {
+      expect(player.getUrlParamState('audio', '')).toBe(null);
+      expect(player.getUrlParamState('video', '')).toBe(null);
+      expect(player.getUrlParamState('lang', 'audio')).toBe(null);
+      expect(player.getUrlParamState('encryption', '')).toBe(null);
+    });
+
+    it('describes the variant being played', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+            stream.bandwidth = 128000;
+            stream.originalLanguage = 'tlh';
+          });
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d002a';
+            stream.bandwidth = 420000;
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      expect(player.getUrlParamState('audio', '')).toBe('mp4a.40.2,128000');
+      expect(player.getUrlParamState('video', '')).toBe('avc1.4d002a,420000');
+      expect(player.getUrlParamState('lang', 'audio')).toBe('tlh');
+      // No text is shown.
+      expect(player.getUrlParamState('lang', 'text')).toBe(null);
+      expect(player.getUrlParamState('encryption', '')).toBe('nenc');
+      // Not a state the player describes.
+      expect(player.getUrlParamState('execution-delta', '42')).toBe(null);
+    });
+
+    it('follows the base layer with the dependent one', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d002a';
+            stream.bandwidth = 420000;
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const variant = manifest.variants[0];
+      const dependency = Object.assign({}, variant.video, {
+        codecs: 'lvc1',
+        bandwidth: 100000,
+      });
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {
+            video: Object.assign({}, variant.video, {
+              dependencyStream: dependency,
+            }),
+          }));
+
+      expect(player.getUrlParamState('video', ''))
+          .toBe('avc1.4d002a,420000,lvc1,100000');
+    });
+
+    it('does not know the scheme of encrypted content without DRM',
+        async () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(1, (variant) => {
+              variant.addVideo(11, (stream) => {
+                stream.encrypted = true;
+              });
+            });
+          });
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          expect(player.getUrlParamState('encryption', '')).toBe(null);
+        });
+  });
+
   describe('tracks', () => {
     /** @type {!Array<shaka.extern.Track>} */
     let variantTracks;

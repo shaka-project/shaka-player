@@ -4995,6 +4995,49 @@ describe('DashParser Manifest', () => {
           expect(steeringCall.args[1].uris[0])
               .toBe('https://steering.example.com/manifest?tok=abc');
         });
+
+    it('gives the player state to steering RequestParam', async () => {
+      const source = [
+        '<MPD type="static">',
+        '  <RequestParam includeInRequests="steering"',
+        '      queryTemplate="v=$urn:mpeg:dash:state:video$"/>',
+        '  <ContentSteering queryBeforeStart="true">',
+        '    https://steering.example.com/manifest',
+        '  </ContentSteering>',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate media="s$Number$.mp4"',
+        '            startNumber="1" duration="5"/>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const contentSteering = JSON.stringify({
+        'VERSION': 1,
+        'TTL': 300,
+        'PATHWAY-PRIORITY': [],
+      });
+
+      fakeNetEngine.setResponseText('https://foo.example.com/mpd', source);
+      fakeNetEngine.setResponseText(
+          'https://steering.example.com/manifest?v=avc1.4d002a,420000',
+          contentSteering);
+      playerInterface.urlParamsStateResolver =
+          (name, key) => name == 'video' ? 'avc1.4d002a,420000' : null;
+
+      await parser.start('https://foo.example.com/mpd', playerInterface);
+
+      const steeringType =
+          shaka.net.NetworkingEngine.RequestType.CONTENT_STEERING;
+      const steeringCall = fakeNetEngine.request.calls.all().find(
+          (call) => call.args[0] === steeringType);
+      expect(steeringCall).toBeDefined();
+      expect(steeringCall.args[1].uris[0])
+          .toBe('https://steering.example.com/manifest?v=avc1.4d002a,420000');
+    });
   });
 
   it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line @stylistic/max-len

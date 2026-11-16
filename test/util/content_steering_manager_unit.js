@@ -14,8 +14,12 @@ describe('ContentSteeringManager', () => {
   /** @type {number} */
   let bandwidthEstimate;
 
+  /** @type {?string} */
+  let videoState;
+
   beforeEach(() => {
     bandwidthEstimate = 1e6;
+    videoState = null;
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     const config = shaka.util.PlayerConfiguration.createDefault();
     const playerInterface = {
@@ -38,6 +42,8 @@ describe('ContentSteeringManager', () => {
       addFont: (name, url) => {},
       getStreamingRetryParameters: () => config.streaming.retryParameters,
       onSegmentReceived: (deltaTimeMs, numBytes) => {},
+      urlParamsStateResolver:
+          (name, key) => name == 'video' ? videoState : null,
     };
     manager = new shaka.util.ContentSteeringManager(playerInterface);
     manager.configure(config.manifest);
@@ -294,6 +300,33 @@ describe('ContentSteeringManager', () => {
       const newLocations = manager.getLocations('foo');
       expect(newLocations.length).toBe(1);
       expect(newLocations[0]).toBe('http://cdn-b/');
+    });
+
+    // ISO/IEC 23009-1 Annex I: the RequestParam parameters, with the player
+    // state of each request.
+    it('builds the RequestParam parameters for each request', async () => {
+      manager.setRequestParams((resolver) => {
+        const video = resolver ? resolver('video', '') : null;
+        return `v=${video || ''}`;
+      });
+      const manifest = JSON.stringify({
+        'VERSION': 1,
+        'TTL': 1,
+        'RELOAD-URI': 'http://foo.bar/update',
+      });
+      fakeNetEngine.setResponseText('http://foo.bar/manifest?v=', manifest);
+      fakeNetEngine.setResponseText(
+          'http://foo.bar/update?v=avc1.4d002a,420000', manifest);
+
+      await manager.requestInfo('http://foo.bar/manifest');
+      videoState = 'avc1.4d002a,420000';
+      await shaka.test.Util.delay(1.1);
+
+      const uris = fakeNetEngine.request.calls.all()
+          .map((call) => call.args[1].uris[0]);
+      expect(uris[0]).toBe('http://foo.bar/manifest?v=');
+      // The reload keeps the parameters, with the new state.
+      expect(uris[1]).toBe('http://foo.bar/update?v=avc1.4d002a,420000');
     });
 
     it('fallback for no RELOAD-URI', async () => {
