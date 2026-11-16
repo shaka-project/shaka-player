@@ -909,6 +909,91 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('bufferedBytes', () => {
+    beforeEach(async () => {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
+      await mediaSourceEngine.init(initObject, false);
+      spyOn(mediaSourceEngine, 'getTimestampAndDispatchMetadata')
+          .and.returnValue({
+            timestamp: null,
+            metadata: [],
+            scte35: [],
+          });
+      audioSourceBuffer.buffered = createFakeBuffered([{start: 0, end: 20}]);
+    });
+
+    /**
+     * @param {!shaka.media.SegmentReference} reference
+     * @param {number} bytes
+     * @param {boolean=} isChunkedData
+     */
+    async function append(reference, bytes, isChunkedData = false) {
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, new ArrayBuffer(bytes), reference, fakeStream,
+          /* hasClosedCaptions= */ false, /* seeked= */ false,
+          /* adaptation= */ false, isChunkedData);
+      audioSourceBuffer.updateend();
+      await p;
+    }
+
+    it('returns the bytes of the segments in the given range', async () => {
+      await append(dummyReference(0, 10), 1000);
+      await append(dummyReference(10, 20), 3000);
+
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, Infinity))
+          .toBeCloseTo(4000);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 5, Infinity))
+          .toBeCloseTo(3500);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, 15))
+          .toBeCloseTo(2500);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 20, Infinity))
+          .toBe(0);
+    });
+
+    it('does not count what is not buffered anymore', async () => {
+      await append(dummyReference(0, 10), 1000);
+      await append(dummyReference(10, 20), 3000);
+
+      // As if the browser evicted the first half of the first segment.
+      audioSourceBuffer.buffered = createFakeBuffered([{start: 5, end: 20}]);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, Infinity))
+          .toBeCloseTo(3500);
+
+      audioSourceBuffer.buffered = createFakeBuffered([]);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, Infinity))
+          .toBe(0);
+    });
+
+    it('replaces the bytes of a segment that is appended over', async () => {
+      await append(dummyReference(0, 10), 1000);
+      await append(dummyReference(10, 20), 3000);
+      await append(dummyReference(5, 15), 500);
+
+      // Half of each of the first two segments is left.
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, Infinity))
+          .toBeCloseTo(500 + 500 + 1500);
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, 5))
+          .toBeCloseTo(500);
+    });
+
+    it('adds up the parts of a segment appended in chunks', async () => {
+      const reference = dummyReference(0, 10);
+      await append(reference, 1000, /* isChunkedData= */ true);
+      await append(reference, 500, /* isChunkedData= */ true);
+
+      expect(mediaSourceEngine.bufferedBytes(ContentType.AUDIO, 0, Infinity))
+          .toBeCloseTo(1500);
+    });
+
+    it('returns zero for text', () => {
+      expect(mediaSourceEngine.bufferedBytes(ContentType.TEXT, 0, Infinity))
+          .toBe(0);
+    });
+  });
+
   describe('appendBuffer', () => {
     beforeEach(async () => {
       requiresEC3InitSegments.and.returnValue(false);
