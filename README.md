@@ -11,6 +11,11 @@ adaptive media formats (such as [DASH][] and [HLS][]) in a browser,
 without using plugins or Flash.  Instead, Shaka Player uses the open web
 standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
+Shaka Player also supports experimental playback of MSF streams and Matroska
+(MKV) files. See [MOQT Streaming Format (MSF)](#moqt-streaming-format-msf-experimental)
+and [Matroska (MKV) features](#matroska-mkv-features-experimental) for supported
+features, codecs and requirements.
+
 Shaka Player also supports [offline storage and playback][] of media using
 [IndexedDB][].  Content can be stored on any browser.  Storage of licenses
 depends on browser support.
@@ -83,10 +88,14 @@ NOTES for iOS and iPadOS:
 
 ## Manifest format support matrix
 
-|Format|Video On-Demand|Live |Event|In-Progress Recording|
-|:----:|:-------------:|:---:|:---:|:-------------------:|
-|DASH  |**Y**          |**Y**| -   |**Y**                |
-|HLS   |**Y**          |**Y**|**Y**| -                   |
+|Format                  |Video On-Demand|Live |Event|In-Progress Recording|
+|:----------------------:|:-------------:|:---:|:---:|:-------------------:|
+|DASH                    |**Y**          |**Y**| -   |**Y**                |
+|HLS                     |**Y**          |**Y**|**Y**| -                   |
+|MSF (Experimental)      | -             |**Y**| -   | -                   |
+|MKV (Experimental)      |**Y**          | -   | -   | -                   |
+
+MSF and Matroska support are only included in the experimental build.
 
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
@@ -218,6 +227,27 @@ Features supported:
 Features **not** supported:
  - VOD
  - MOQT Streaming Format catalog updates
+
+Note: This module is experimental and is only included in the experimental build.
+
+
+## Matroska (MKV) features (Experimental)
+
+Features supported:
+ - VOD playback of Matroska video (`.mkv`) and audio-only (`.mka`) files
+ - Seeking using the file's Cues (seek index)
+ - Multiple video, audio and subtitle tracks
+ - Chapters
+
+Supported codecs:
+ - Video: H.264 (AVC), H.265 (HEVC), AV1, VP9 and VP8
+ - Audio: AAC, AC-3, E-AC-3, Opus, MP3, FLAC and Vorbis
+ - Subtitles: SubRip (SRT), ASCII, SSA and ASS
+
+Requirements:
+ - A Matroska file with a Cues seek index
+ - A server that supports HTTP byte-range requests
+ - A browser with MediaSource Extensions support for the selected codecs
 
 Note: This module is experimental and is only included in the experimental build.
 
