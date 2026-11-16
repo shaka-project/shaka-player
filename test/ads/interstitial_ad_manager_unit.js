@@ -2215,8 +2215,7 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
 
-      // The parser leaves mimeType null; addInterstitials resolves it from the
-      // URI. The detailed field-by-field parsing is covered by
+      // The detailed field-by-field parsing is covered by
       // DashInterstitialParser's own unit tests.
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
