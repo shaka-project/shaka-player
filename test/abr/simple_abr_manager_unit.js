@@ -439,6 +439,10 @@ describe('SimpleAbrManager', () => {
     }
 
     beforeEach(() => {
+      // The element size is only followed with a ResizeObserver.
+      if (!('ResizeObserver' in window)) {
+        pending('ResizeObserver is not available.');
+      }
       mockVideo = /** @type {!HTMLVideoElement} */ (
         document.createElement('video'));
       // Plenty of bandwidth, so only the element size limits the choice.
