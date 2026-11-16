@@ -4667,6 +4667,52 @@ describe('Player', () => {
     }
   });
 
+  describe('complete event', () => {
+    beforeEach(async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    // An app may unload the content on 'complete', before the next poll and
+    // before 'ended', so the regions at the very end must be polled first.
+    it('polls the playhead observers before it is dispatched', () => {
+      /** @type {!Array<string>} */
+      const order = [];
+      spyOn(getPlayheadObservers(), 'poll').and.callFake(() => {
+        order.push('poll');
+      });
+      player.addEventListener('complete', () => order.push('complete'));
+      spyOn(player, 'seekRange').and.returnValue({start: 0, end: 20});
+
+      video.currentTime = 20;
+      // Each progress update reports one milestone: started, the three
+      // quartiles, then complete.
+      for (let i = 0; i < 5; i++) {
+        onVideoProgress();
+      }
+
+      expect(order).toEqual(['poll', 'complete']);
+    });
+
+    /**
+     * @return {!shaka.media.PlayheadObserverManager}
+     * @suppress {accessControls}
+     */
+    function getPlayheadObservers() {
+      goog.asserts.assert(player.playheadObservers_, 'Must have observers');
+      return player.playheadObservers_;
+    }
+
+    /** @suppress {accessControls} */
+    function onVideoProgress() {
+      player.onVideoProgress_();
+    }
+  });
+
   describe('unplayable content', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
