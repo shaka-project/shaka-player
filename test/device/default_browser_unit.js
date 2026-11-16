@@ -53,6 +53,44 @@ describe('DefaultBrowser', () => {
     });
   });
 
+  describe('adjustConfig', () => {
+    /** @return {shaka.extern.PlayerConfiguration} */
+    function createDefaultConfig() {
+      // The default has already been adjusted for the browser running the
+      // tests.
+      const config = shaka.util.PlayerConfiguration.createDefault();
+      config.streaming.mixedVariantTypes = shaka.config.MixedVariantTypes.ALL;
+      return config;
+    }
+
+    it('falls back to audio-only variants if it can remove the video', () => {
+      Util.setUserAgent(chrome);
+      Util.setVendor('Google Inc.');
+      const config = new shaka.device.DefaultBrowser().adjustConfig(
+          createDefaultConfig());
+      expect(config.streaming.mixedVariantTypes)
+          .toBe(shaka.config.MixedVariantTypes.ALL);
+    });
+
+    it('only offers manual selection on Safari', () => {
+      Util.setUserAgent(safari);
+      Util.setVendor('Apple Computer, Inc.');
+      const config = new shaka.device.DefaultBrowser().adjustConfig(
+          createDefaultConfig());
+      expect(config.streaming.mixedVariantTypes)
+          .toBe(shaka.config.MixedVariantTypes.MANUAL_SELECTION);
+    });
+
+    it('only offers manual selection on Firefox', () => {
+      Util.setUserAgent(firefox);
+      Util.setVendor('');
+      const config = new shaka.device.DefaultBrowser().adjustConfig(
+          createDefaultConfig());
+      expect(config.streaming.mixedVariantTypes)
+          .toBe(shaka.config.MixedVariantTypes.MANUAL_SELECTION);
+    });
+  });
+
   describe('requiresTimestampOffsetFudge', () => {
     it('is true for legacy Edge', () => {
       Util.setUserAgent(legacyEdge);

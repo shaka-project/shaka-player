@@ -2084,6 +2084,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
  *   processSrcEqualMetadata: boolean,
+ *   mixedVariantTypes: shaka.config.MixedVariantTypes,
  * }}
  *
  * @description
@@ -2362,6 +2363,33 @@ shaka.extern.SpeechToTextConfiguration;
  *   This allows metadata frames to be parsed and exposed by the player.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {shaka.config.MixedVariantTypes} mixedVariantTypes
+ *   Which variants to keep when the manifest mixes audio-video variants with
+ *   audio-only or video-only ones (e.g. an HLS master playlist with an
+ *   audio-only variant for very low bandwidths).
+ *   With <code>ALL</code>, adaptation switches to an audio-only variant with
+ *   the same audio as a last resort: only when the bandwidth estimate can't
+ *   sustain the lowest audio-video variant (according to
+ *   <code>abr.bandwidthDowngradeTarget</code>) and less than half of
+ *   <code>bufferingGoal</code> is buffered.  The video plays out what is
+ *   buffered first.  Adaptation goes back to the lowest audio-video variant
+ *   once the estimate has sustained it (according to
+ *   <code>abr.bandwidthUpgradeTarget</code>) for twice
+ *   <code>abr.switchInterval</code> and the buffer is not draining, since
+ *   adding the video back requires a <code>MediaSource</code> reset.  An
+ *   audio-only variant that was selected manually is left as soon as
+ *   adaptation is enabled again.  Video-only variants are only played when
+ *   selected manually.
+ *   With <code>MANUAL_SELECTION</code>, adaptation only chooses audio-video
+ *   variants, and audio-only and video-only ones are only played when
+ *   selected manually.
+ *   Changes take effect on the next load.
+ *   <br>
+ *   Defaults to <code>ALL</code> on platforms that can remove a
+ *   <code>SourceBuffer</code> while playing, and to
+ *   <code>MANUAL_SELECTION</code> otherwise (e.g. Firefox and Safari), where
+ *   every switch to or from an audio-only variant requires a
+ *   <code>MediaSource</code> reset.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

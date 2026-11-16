@@ -396,6 +396,72 @@ describe('AdaptationSet', () => {
     });
   });
 
+  describe('getAudioOnlyFallbacks', () => {
+    const AdaptationSet = shaka.media.AdaptationSet;
+
+    /**
+     * @param {number} id
+     * @param {number} bandwidth
+     * @param {boolean} hasVideo
+     * @param {string=} codec
+     * @param {string=} language
+     * @return {shaka.extern.Variant}
+     */
+    function make(id, bandwidth, hasVideo, codec = 'mp4a.40.2',
+        language = 'en') {
+      const audio = makeStream(id * 10, 'audio/mp4', [codec], [], 2);
+      const variant = makeVariant(id, audio,
+          makeStream(id * 10 + 1, 'video/mp4', ['avc1.4d401e'], [], null));
+      if (!hasVideo) {
+        variant.video = null;
+      }
+      variant.bandwidth = bandwidth;
+      variant.language = language;
+      return variant;
+    }
+
+    it('falls back to cheaper audio-only variants with the same audio', () => {
+      const audioVideo = [make(1, 1000, true), make(2, 2000, true)];
+      const cheap = make(3, 100, false);
+      const all = [
+        ...audioVideo,
+        cheap,
+        make(4, 1500, false),  // Not cheaper than the audio-video ones.
+        make(5, 100, false, 'mp4a.40.2', 'es'),  // Another language.
+      ];
+      expect(AdaptationSet.getAudioOnlyFallbacks(
+          audioVideo, all, /* compareCodecs= */ true)).toEqual([cheap]);
+    });
+
+    it('requires a codec it can transition to when comparing codecs', () => {
+      const audioVideo = [make(1, 1000, true)];
+      const ec3 = make(2, 100, false, 'ec-3');
+      expect(AdaptationSet.getAudioOnlyFallbacks(
+          audioVideo, [...audioVideo, ec3], /* compareCodecs= */ true))
+          .toEqual([]);
+      expect(AdaptationSet.getAudioOnlyFallbacks(
+          audioVideo, [...audioVideo, ec3], /* compareCodecs= */ false))
+          .toEqual([ec3]);
+    });
+
+    it('only matches the language when the audio is muxed', () => {
+      const muxed = makeVariant(1,
+          null, makeStream(11, 'video/mp2t', ['avc1.4d401e', 'mp4a.40.2'],
+              [], null));
+      muxed.language = 'en';
+      const ec3 = make(2, 100, false, 'ec-3');
+      expect(AdaptationSet.getAudioOnlyFallbacks(
+          [muxed], [muxed, ec3], /* compareCodecs= */ true)).toEqual([ec3]);
+    });
+
+    it('needs audio-video variants to fall back from', () => {
+      const audioOnly = [make(1, 1000, false)];
+      expect(AdaptationSet.getAudioOnlyFallbacks(
+          audioOnly, [...audioOnly, make(2, 100, false)],
+          /* compareCodecs= */ false)).toEqual([]);
+    });
+  });
+
   it('rejects misaligned spatial audio', () => {
     const variants = [
       makeVariant(

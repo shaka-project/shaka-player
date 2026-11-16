@@ -793,6 +793,13 @@ shakaDemo.Config = class {
       'RESET_ON_ENCRYPTION_CHANGE': 'Reset on encryption change',
     };
 
+    const mixedVariantTypesOptions = shaka.config.MixedVariantTypes;
+    const mixedVariantTypesOptionsNames = {
+      'AV_ONLY': 'Audio-video only',
+      'MANUAL_SELECTION': 'Manual selection',
+      'ALL': 'All',
+    };
+
     this.addBoolInput_('Start At Segment Boundary',
         'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
@@ -816,6 +823,9 @@ shakaDemo.Config = class {
         .addSelectInput_('Cross Boundary Strategy',
             'streaming.crossBoundaryStrategy',
             strategyOptions, strategyOptionsNames)
+        .addSelectInput_('Mixed variant types',
+            'streaming.mixedVariantTypes',
+            mixedVariantTypesOptions, mixedVariantTypesOptionsNames)
         .addBoolInput_(
             'Return to end of live window when outside of live window',
             'streaming.returnToEndOfLiveWindowWhenOutside')

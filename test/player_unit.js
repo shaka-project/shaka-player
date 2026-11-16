@@ -145,6 +145,8 @@ describe('Player', () => {
         getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),
         addSecondarySource: jasmine.createSpy('addSecondarySource'),
+        bufferedAheadOf:
+            jasmine.createSpy('bufferedAheadOf').and.returnValue(0),
       };
 
       player.createDrmEngine = () => {
@@ -2491,6 +2493,8 @@ describe('Player', () => {
 
   describe('filterTracks', () => {
     it('retains only video+audio variants if they exist', async () => {
+      player.configure('streaming.mixedVariantTypes',
+          shaka.config.MixedVariantTypes.AV_ONLY);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(10, (variant) => {
           variant.addAudio(1);
@@ -2515,6 +2519,59 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const actualVariantTracks = player.getVariantTracks();
       expect(actualVariantTracks).toEqual(variantTracks);
+    });
+
+    it('retains every variant for manual selection', async () => {
+      player.configure('streaming.mixedVariantTypes',
+          shaka.config.MixedVariantTypes.MANUAL_SELECTION);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(10, (variant) => {
+          variant.bandwidth = 1e5;
+          variant.addAudio(1);
+        });
+        manifest.addVariant(11, (variant) => {
+          variant.bandwidth = 1e6;
+          variant.addAudio(2);
+          variant.addVideo(3);
+        });
+        manifest.addVariant(12, (variant) => {
+          variant.addVideo(4);
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const tracks = player.getVariantTracks();
+      expect(tracks.map((t) => t.id).sort()).toEqual([10, 11, 12]);
+      // Audio-video variants are preferred.
+      expect(tracks.find((t) => t.active).id).toBe(11);
+      // Adaptation doesn't fall back to the audio-only variant either.
+      expect(abrManager.variants.map((v) => v.id)).toEqual([11]);
+    });
+
+    it('retains every variant if allowed', async () => {
+      player.configure('streaming.mixedVariantTypes',
+          shaka.config.MixedVariantTypes.ALL);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(10, (variant) => {
+          variant.bandwidth = 1e5;
+          variant.addAudio(1);
+        });
+        manifest.addVariant(11, (variant) => {
+          variant.bandwidth = 1e6;
+          variant.addAudio(2);
+          variant.addVideo(3);
+        });
+        manifest.addVariant(12, (variant) => {
+          variant.addVideo(4);
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const tracks = player.getVariantTracks();
+      expect(tracks.map((t) => t.id).sort()).toEqual([10, 11, 12]);
+      expect(tracks.find((t) => t.active).id).toBe(11);
+      // Adaptation never chooses the video-only variant.
+      expect(abrManager.variants.map((v) => v.id).sort()).toEqual([10, 11]);
     });
 
     it('reports null audio/videoLanguage when the stream is absent',
@@ -2576,6 +2633,302 @@ describe('Player', () => {
         });
   });
 
+  describe('audio-only fallback', () => {
+    /** @type {!jasmine.Spy} */
+    let bufferedAheadOf;
+
+    beforeEach(async () => {
+      player.configure('streaming.mixedVariantTypes',
+          shaka.config.MixedVariantTypes.ALL);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.bandwidth = 1e6;
+          variant.addAudio(10);
+          variant.addVideo(11, (stream) => {
+            stream.size(640, 360);
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.bandwidth = 2e6;
+          variant.addAudio(10);
+          variant.addVideo(21, (stream) => {
+            stream.size(1280, 720);
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.bandwidth = 1e5;
+          variant.addAudio(30);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      bufferedAheadOf = mediaSourceEngine.bufferedAheadOf;
+      jasmine.clock().install();
+      jasmine.clock().mockDate();
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    it('is the last resort of adaptation', () => {
+      expect(abrManager.variants.map((v) => v.id)).toEqual([1, 2, 3]);
+      expect(getCurrentId()).toBe(1);
+    });
+
+    it('needs low bandwidth and a draining buffer', () => {
+      const audioOnly = getVariant(3);
+
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      bufferedAheadOf.and.returnValue(0);
+      abrManager.switchCallback(audioOnly);
+      expect(getCurrentId()).toBe(1);
+
+      abrManager.getBandwidthEstimate.and.returnValue(1e5);
+      bufferedAheadOf.and.returnValue(10);
+      abrManager.switchCallback(audioOnly);
+      expect(getCurrentId()).toBe(1);
+
+      bufferedAheadOf.and.returnValue(0);
+      abrManager.switchCallback(audioOnly);
+      expect(getCurrentId()).toBe(3);
+    });
+
+    it('goes back to the lowest audio-video variant after a while', () => {
+      fallBackToAudioOnly();
+      const highest = getVariant(2);
+
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      bufferedAheadOf.and.returnValue(10);
+      abrManager.switchCallback(highest);
+      expect(getCurrentId()).toBe(3);
+
+      jasmine.clock().tick(8000);
+      abrManager.switchCallback(highest);
+      expect(getCurrentId()).toBe(3);
+
+      jasmine.clock().tick(8000);
+      abrManager.switchCallback(highest);
+      expect(getCurrentId()).toBe(1);
+    });
+
+    it('waits again if the bandwidth drops', () => {
+      fallBackToAudioOnly();
+      const highest = getVariant(2);
+      bufferedAheadOf.and.returnValue(10);
+
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      abrManager.switchCallback(highest);
+      jasmine.clock().tick(8000);
+      // 1 Mbps can't sustain the lowest audio-video variant with the upgrade
+      // target.
+      abrManager.getBandwidthEstimate.and.returnValue(1e6);
+      abrManager.switchCallback(highest);
+      jasmine.clock().tick(8000);
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      abrManager.switchCallback(highest);
+      expect(getCurrentId()).toBe(3);
+
+      jasmine.clock().tick(16000);
+      abrManager.switchCallback(highest);
+      expect(getCurrentId()).toBe(1);
+    });
+
+    it('needs some audio buffered to go back', () => {
+      fallBackToAudioOnly();
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      bufferedAheadOf.and.returnValue(0);
+      abrManager.switchCallback(getVariant(2));
+      jasmine.clock().tick(16000);
+      abrManager.switchCallback(getVariant(2));
+      expect(getCurrentId()).toBe(3);
+    });
+
+    it('needs no more buffer than the buffering goal keeps', () => {
+      // Longer than anything StreamingEngine buffers ahead.
+      manifest.presentationTimeline.notifyMaxSegmentDuration(30);
+      player.configure('streaming.bufferingGoal', 10);
+      fallBackToAudioOnly();
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      bufferedAheadOf.and.returnValue(6);
+      abrManager.switchCallback(getVariant(2));
+      jasmine.clock().tick(16000);
+      abrManager.switchCallback(getVariant(2));
+      expect(getCurrentId()).toBe(1);
+    });
+
+    it('does not wait again while the buffer goes up and down', () => {
+      fallBackToAudioOnly();
+      abrManager.getBandwidthEstimate.and.returnValue(5e6);
+      bufferedAheadOf.and.returnValue(10);
+      abrManager.switchCallback(getVariant(2));
+      jasmine.clock().tick(8000);
+      bufferedAheadOf.and.returnValue(0);
+      abrManager.switchCallback(getVariant(2));
+      jasmine.clock().tick(8000);
+      abrManager.switchCallback(getVariant(2));
+      expect(getCurrentId()).toBe(3);
+
+      bufferedAheadOf.and.returnValue(10);
+      abrManager.switchCallback(getVariant(2));
+      expect(getCurrentId()).toBe(1);
+    });
+
+    it('leaves a selected audio-only variant when adaptation is enabled',
+        () => {
+          player.configure('abr.enabled', false);
+          const audioOnly = player.getVariantTracks().find((t) => t.id == 3);
+          goog.asserts.assert(audioOnly, 'Must have an audio-only track');
+          player.selectVariantTrack(audioOnly);
+          expect(getCurrentId()).toBe(3);
+
+          player.configure('abr.enabled', true);
+          abrManager.getBandwidthEstimate.and.returnValue(5e6);
+          bufferedAheadOf.and.returnValue(0);
+          abrManager.switchCallback(getVariant(2));
+          expect(getCurrentId()).toBe(2);
+        });
+
+    it('reports that only the audio is played', () => {
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      fallBackToAudioOnly();
+      expect(player.isPlayingAudioOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+      expect(player.isAudioOnly()).toBe(false);
+    });
+
+    it('offers the video qualities it goes back to', () => {
+      fallBackToAudioOnly();
+      const videoTracks = player.getVideoTracks();
+      expect(videoTracks.map((t) => t.height).sort()).toEqual([360, 720]);
+      expect(videoTracks.some((t) => t.active)).toBe(false);
+      expect(player.getAudioTracks().length).toBe(1);
+      expect(player.getAudioTracks()[0].active).toBe(true);
+
+      player.configure('abr.enabled', false);
+      const track720 = videoTracks.find((t) => t.height == 720);
+      goog.asserts.assert(track720, 'Must have a 720p track');
+      player.selectVideoTrack(track720);
+      expect(getCurrentId()).toBe(2);
+    });
+
+    function fallBackToAudioOnly() {
+      abrManager.getBandwidthEstimate.and.returnValue(1e5);
+      bufferedAheadOf.and.returnValue(0);
+      abrManager.switchCallback(getVariant(3));
+      expect(getCurrentId()).toBe(3);
+    }
+
+    /** @return {number} */
+    function getCurrentId() {
+      const getCurrentVariant =
+          shaka.test.Util.spyFunc(streamingEngine.getCurrentVariant);
+      return getCurrentVariant().id;
+    }
+
+    /**
+     * @param {number} id
+     * @return {shaka.extern.Variant}
+     */
+    function getVariant(id) {
+      const variant = manifest.variants.find((v) => v.id == id);
+      goog.asserts.assert(variant, 'Must have the variant');
+      return variant;
+    }
+  });
+
+  describe('variants without audio or video', () => {
+    beforeEach(async () => {
+      player.configure('streaming.mixedVariantTypes',
+          shaka.config.MixedVariantTypes.ALL);
+      player.configure('abr.enabled', false);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        for (const [id, language, label] of [
+          [1, 'en', 'main'], [2, 'es', 'main'],
+          [3, 'en', 'alt'], [4, 'es', 'alt'],
+        ]) {
+          manifest.addVariant(id, (variant) => {
+            variant.language = language;
+            variant.bandwidth = 1e6;
+            variant.addAudio(language == 'en' ? 10 : 20, (stream) => {
+              stream.language = language;
+            });
+            variant.addVideo(label == 'main' ? 30 : 40, (stream) => {
+              stream.label = label;
+              stream.size(640, 360);
+            });
+          });
+        }
+        manifest.addVariant(5, (variant) => {
+          variant.bandwidth = 9e5;
+          variant.addVideo(40, (stream) => {
+            stream.label = 'alt';
+            stream.size(640, 360);
+          });
+        });
+        manifest.addVariant(6, (variant) => {
+          variant.language = 'es';
+          variant.bandwidth = 1e5;
+          variant.addAudio(20, (stream) => {
+            stream.language = 'es';
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    it('keep the audio played before a video-only variant', () => {
+      selectVariant(4);
+      selectVariant(5);
+      expect(getCurrentId()).toBe(5);
+      // Adaptation goes back to the Spanish audio, not to any audio (or
+      // falls back to the Spanish audio-only variant).
+      expect(abrManager.variants.map((v) => v.id)).toEqual([4, 6]);
+    });
+
+    it('keep the video played before an audio-only variant', () => {
+      selectVariant(4);
+      selectVariant(6);
+      expect(getCurrentId()).toBe(6);
+      // Adaptation goes back to the alternative video.
+      expect(abrManager.variants.map((v) => v.id)).toEqual([4, 6]);
+    });
+
+    it('go back to the audio played before from a video-only variant',
+        () => {
+          selectVariant(4);
+          selectVariant(5);
+          const videoTracks = player.getVideoTracks();
+          const alt = videoTracks.find((t) => t.label == 'alt');
+          goog.asserts.assert(alt, 'Must have the alternative video');
+          player.selectVideoTrack(alt);
+          expect(getCurrentId()).toBe(4);
+        });
+
+    it('go back to audio-video with the same video for an audio track',
+        () => {
+          selectVariant(4);
+          selectVariant(5);
+          const english = player.getAudioTracks().find(
+              (t) => t.language == 'en');
+          goog.asserts.assert(english, 'Must have English audio');
+          player.selectAudioTrack(english);
+          // English with the alternative video of the video-only variant.
+          expect(getCurrentId()).toBe(3);
+        });
+
+    /** @param {number} id */
+    function selectVariant(id) {
+      const track = player.getVariantTracks().find((t) => t.id == id);
+      goog.asserts.assert(track, 'Must have variant ' + id);
+      player.selectVariantTrack(track);
+    }
+
+    /** @return {number} */
+    function getCurrentId() {
+      return shaka.test.Util.spyFunc(streamingEngine.getCurrentVariant)().id;
+    }
+  });
+
   describe('isPlayingAudioOnly and isPlayingVideoOnly', () => {
     it('are false before loading', () => {
       expect(player.isPlayingAudioOnly()).toBe(false);
@@ -2631,12 +2984,47 @@ describe('Player', () => {
       expect(player.isVideoOnly()).toBe(false);
     });
 
+    it('report a video-only variant mixed with audio-video ones',
+        async () => {
+          player.configure('streaming.mixedVariantTypes',
+              shaka.config.MixedVariantTypes.ALL);
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(1, (variant) => {
+              variant.bandwidth = 1e6;
+              variant.addAudio(10);
+              variant.addVideo(11);
+            });
+            manifest.addVariant(2, (variant) => {
+              variant.bandwidth = 9e5;
+              variant.addVideo(21);
+            });
+          });
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+          player.configure('abr.enabled', false);
+          expect(player.isPlayingVideoOnly()).toBe(false);
+
+          const tracks = player.getVariantTracks();
+          const track2 = tracks.find((t) => t.id == 2);
+          goog.asserts.assert(track2, 'Must have variant 2');
+          player.selectVariantTrack(track2);
+          expect(player.isPlayingVideoOnly()).toBe(true);
+          expect(player.isPlayingAudioOnly()).toBe(false);
+
+          const track1 = tracks.find((t) => t.id == 1);
+          goog.asserts.assert(track1, 'Must have variant 1');
+          player.selectVariantTrack(track1);
+          expect(player.isPlayingVideoOnly()).toBe(false);
+        });
+
     it('consider audio muxed into the video', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
           variant.addVideo(11, (stream) => {
             stream.codecs = 'avc1.4d401f,mp4a.40.2';
           });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(20);
         });
       });
       await player.load(fakeManifestUri, 0, fakeMimeType);
