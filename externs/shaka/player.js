@@ -1670,6 +1670,11 @@ shaka.extern.DashManifestConfiguration;
  *   byte range segments. More info in
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
  *   <br>
+ *   It is only used when the networking plugin of the segments passes the data
+ *   on while it is downloaded (see the <code>streamingSupport</code> parameter
+ *   of <code>shaka.net.NetworkingEngine.registerScheme</code>), as the default
+ *   plugin based on the Fetch API does.
+ *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} allowRangeRequestsToGuessMimeType
  *   If set to true, the HLS parser will use range request (only first byte) to

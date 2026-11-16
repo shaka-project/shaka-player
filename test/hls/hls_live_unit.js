@@ -824,8 +824,7 @@ describe('HlsParser live', () => {
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
     });
 
-    it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line @stylistic/max-len
-      playerInterface.isLowLatencyMode = () => true;
+    describe('with partial and preload hinted segments and BYTERANGE', () => {
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -850,8 +849,30 @@ describe('HlsParser live', () => {
         'BYTERANGE-LENGTH=210\n',
       ].join('');
 
-      // If ReadableStream is defined we can apply some optimizations
-      if (window.ReadableStream) {
+      beforeEach(() => {
+        playerInterface.isLowLatencyMode = () => true;
+      });
+
+      afterEach(() => {
+        shaka.net.NetworkingEngine.unregisterScheme('test');
+      });
+
+      /** @param {boolean} streamingSupport */
+      function registerTestScheme(streamingSupport) {
+        // The fake networking engine handles the requests; this only tells
+        // the parser what the plugin of the segments supports.
+        shaka.net.NetworkingEngine.registerScheme('test',
+            () => shaka.util.AbortableOperation.aborted(),
+            shaka.net.NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, streamingSupport);
+      }
+
+      it('joins the parts with a streaming plugin', async () => {
+        if (!window.ReadableStream) {
+          pending('ReadableStream is not supported by the browser.');
+        }
+        registerTestScheme(/* streamingSupport= */ true);
+
         const ref = makeReference(
             'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
@@ -868,14 +889,40 @@ describe('HlsParser live', () => {
 
         await testInitialManifest(master, mediaWithPartialSegments,
             [ref, ref2]);
-      } else {
+      });
+
+      it('keeps the parts with a plugin that does not stream', async () => {
+        // Joining the parts would append nothing of a segment until all of it
+        // is downloaded, which is later than with the parts.
+        registerTestScheme(/* streamingSupport= */ false);
+        await testInitialManifest(master, mediaWithPartialSegments,
+            makePartialRefs());
+      });
+
+      it('keeps the parts without ReadableStream', async () => {
+        registerTestScheme(/* streamingSupport= */ true);
+        const originalReadableStream = window.ReadableStream;
+        try {
+          delete window['ReadableStream'];
+          await testInitialManifest(master, mediaWithPartialSegments,
+              makePartialRefs());
+        } finally {
+          window['ReadableStream'] = originalReadableStream;
+        }
+      });
+
+      /** @return {!Array<!shaka.media.SegmentReference>} */
+      function makePartialRefs() {
         const partialRef = makeReference(
             'test:/ref1.mp4', 0, 2, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 199);
+        partialRef.partial = true;
 
         const partialRef2 = makeReference(
             'test:/ref1.mp4', 2, 4, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 200, /* endByte= */ 429);
+        partialRef2.partial = true;
+        partialRef2.lastPartial = true;
 
         const ref = makeReference(
             'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
@@ -886,10 +933,12 @@ describe('HlsParser live', () => {
         const partialRef3 = makeReference(
             'test:/ref2.mp4', 4, 6, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+        partialRef3.partial = true;
 
         const preloadRef = makeReference(
             'test:/ref2.mp4', 6, 7.5, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
+        preloadRef.partial = true;
         preloadRef.markAsPreload();
         preloadRef.markAsNonIndependent();
 
@@ -898,9 +947,7 @@ describe('HlsParser live', () => {
             '', 4, 7.5, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 419,
             /* timestampOffset= */ 0, [partialRef3, preloadRef]);
-
-        await testInitialManifest(master, mediaWithPartialSegments,
-            [ref, ref2]);
+        return [ref, ref2];
       }
     });
 
