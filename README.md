@@ -218,7 +218,7 @@ Features supported:
  - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
- - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
+ - DRM support for Widevine, PlayReady, FairPlay, WisePlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
  - LoC [draft-2](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/02/) support
  - LOCMAF [draft-1](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/01/) support (`locmafVersion` 0.3)
@@ -331,11 +331,15 @@ NOTES:
 |:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
 |DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
 |HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
+|MSF       |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
 
 NOTES:
- - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
-   Safari. We do support FairPlay through MSE/EME, however. See the
-   `streaming.useNativeHlsForFairPlay` configuration value.
+ - ¹: On Safari, FairPlay HLS uses MSE/EME by default when available.
+   Set `streaming.useNativeHlsForFairPlay` to `true` to prefer native HLS
+   playback (the default is `false`). Native fallback for certain unsupported
+   encrypted HLS loads is controlled by
+   `streaming.fallbackToNativeHlsOnMseError`, enabled by default on Apple
+   browsers. See [FairPlay support](docs/tutorials/fairplay.md) for details.
 
 
 ## Media container and subtitle support
