@@ -6699,6 +6699,21 @@ describe('Player', () => {
           expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
         });
 
+    it('starts with audio when it joined after the video keyframe',
+        async () => {
+          // The audio subscription joined one Group later than the video.
+          for (const variant of manifest.variants) {
+            const audioIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              variant.audio.segmentIndex);
+            const refs = Array.from(audioIndex)
+                .filter((ref) => ref && ref.startTime > 101.05);
+            variant.audio.segmentIndex = new shaka.media.SegmentIndex(refs);
+          }
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)())
+              .toBeCloseTo(101.08, 6);
+        });
+
     it('preserves an explicit start time', async () => {
       await player.load(fakeManifestUri, 100.3, fakeMimeType);
       expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(100.3);
