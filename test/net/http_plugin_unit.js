@@ -237,7 +237,24 @@ function httpPluginTests(usingFetch) {
       expect(streamDataCallback).not.toHaveBeenCalled();
     });
 
-    describe('with a body in chunks', () => {
+    /**
+     * Byte streams can be constructed since Chrome 89, but the plugin is
+     * supported from Chrome 66.
+     *
+     * @return {boolean}
+     */
+    function byteStreams() {
+      try {
+        // eslint-disable-next-line no-new
+        new ReadableStream({type: 'bytes'});
+        return true;
+      } catch (e) {  // eslint-disable-line no-restricted-syntax
+        return false;
+      }
+    }
+    const streams = () => shaka.net.HttpFetchPlugin.isSupported();
+
+    filterDescribe('with a body in chunks', streams, () => {
       /** @type {function(string, !RequestInit)} */
       let mockFetch;
       /** @type {?} */
@@ -337,7 +354,7 @@ function httpPluginTests(usingFetch) {
         const usesByob = byteStream && byobSupported;
 
         const name = byteStream ? 'as a byte stream' : 'as a default stream';
-        describe(name, () => {
+        filterDescribe(name, byteStream ? byteStreams : streams, () => {
           it('joins the chunks when the length is known', async () => {
             respondWithChunks(String(fullBody.byteLength), byteStream);
             const response = await download(null);
@@ -405,22 +422,25 @@ function httpPluginTests(usingFetch) {
         });
       }
 
-      it('does not use a BYOB reader for a compressed response', async () => {
-        respondWithChunks('4', /* byteStream= */ true,
-            {'Content-Encoding': 'gzip'});
-        const response = await download(null);
-        expect(shaka.util.BufferUtils.toUint8(response.data))
-            .toEqual(fullBody);
-        expectByob(false);
-      });
+      filterDescribe('with a byte stream', byteStreams, () => {
+        it('does not use a BYOB reader for a compressed response', async () => {
+          respondWithChunks('4', /* byteStream= */ true,
+              {'Content-Encoding': 'gzip'});
+          const response = await download(null);
+          expect(shaka.util.BufferUtils.toUint8(response.data))
+              .toEqual(fullBody);
+          expectByob(false);
+        });
 
-      it('reads a byte stream without BYOB support', async () => {
-        shaka.net.HttpFetchPlugin['ReadableStreamBYOBReader_'] = undefined;
-        respondWithChunks(String(fullBody.byteLength), /* byteStream= */ true);
-        const response = await download(null);
-        expect(shaka.util.BufferUtils.toUint8(response.data))
-            .toEqual(fullBody);
-        expectByob(false);
+        it('reads a byte stream without BYOB support', async () => {
+          shaka.net.HttpFetchPlugin['ReadableStreamBYOBReader_'] = undefined;
+          const length = String(fullBody.byteLength);
+          respondWithChunks(length, /* byteStream= */ true);
+          const response = await download(null);
+          expect(shaka.util.BufferUtils.toUint8(response.data))
+              .toEqual(fullBody);
+          expectByob(false);
+        });
       });
     });
   }
