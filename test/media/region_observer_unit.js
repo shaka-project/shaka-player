@@ -327,6 +327,71 @@ describe('RegionObserver', () => {
     expect(onSkipRegion).not.toHaveBeenCalled();
   });
 
+  // A region added after the first poll (e.g. handed off by a preload) may
+  // already be behind the playhead at the next one.
+  it('fires enter and exit for a region crossed before it was seen', () => {
+    poll(observer, /* timeInSeconds= */ 0, /* seeking= */ false);
+
+    const region = createRegion('start-region', 0, 0);
+    timeline.addRegion(region);
+
+    poll(observer, /* timeInSeconds= */ 0.25, /* seeking= */ false);
+    expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+    expect(onExitRegion).toHaveBeenCalledOnceMoreWith([region, false]);
+    expect(onSkipRegion).not.toHaveBeenCalled();
+
+    // Only once.
+    poll(observer, /* timeInSeconds= */ 0.5, /* seeking= */ false);
+    expect(onEnterRegion).not.toHaveBeenCalled();
+    expect(onExitRegion).not.toHaveBeenCalled();
+  });
+
+  it('enters a region at the start position the first poll is past', () => {
+    observer.release();
+    observer = new shaka.media.RegionObserver(
+        timeline, /* startsPastZero= */ false, /* startPosition= */ 0);
+    observer.addEventListener('enter', (event) => {
+      shaka.test.Util.spyFunc(onEnterRegion)(event['region'], event['seeking']);
+    });
+    observer.addEventListener('exit', (event) => {
+      shaka.test.Util.spyFunc(onExitRegion)(event['region'], event['seeking']);
+    });
+
+    const startRegion = createRegion('start-region', 0, 0);
+    const laterRegion = createRegion('later-region', 1, 2);
+    timeline.addRegion(startRegion);
+    timeline.addRegion(laterRegion);
+
+    // The first frame is a little after the start position.
+    poll(observer, /* timeInSeconds= */ 0.0002, /* seeking= */ false);
+    expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([startRegion, false]);
+    expect(onExitRegion).toHaveBeenCalledOnceMoreWith([startRegion, false]);
+  });
+
+  it('skips a region crossed before it was seen when seeking', () => {
+    poll(observer, /* timeInSeconds= */ 0, /* seeking= */ false);
+
+    const region = createRegion('start-region', 0, 0);
+    timeline.addRegion(region);
+
+    poll(observer, /* timeInSeconds= */ 10, /* seeking= */ true);
+    expect(onEnterRegion).not.toHaveBeenCalled();
+    expect(onExitRegion).not.toHaveBeenCalled();
+    expect(onSkipRegion).toHaveBeenCalledOnceMoreWith([region, true]);
+  });
+
+  it('ignores a late region that ended before the previous poll', () => {
+    poll(observer, /* timeInSeconds= */ 5, /* seeking= */ false);
+
+    const region = createRegion('early-region', 0, 1);
+    timeline.addRegion(region);
+
+    poll(observer, /* timeInSeconds= */ 5.25, /* seeking= */ false);
+    expect(onEnterRegion).not.toHaveBeenCalled();
+    expect(onExitRegion).not.toHaveBeenCalled();
+    expect(onSkipRegion).not.toHaveBeenCalled();
+  });
+
   // See https://github.com/shaka-project/shaka-player/issues/3949
   it('cleans up references to regions', async () => {
     const region = createRegion('my-region', 0, 10);
