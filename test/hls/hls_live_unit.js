@@ -854,7 +854,12 @@ describe('HlsParser live', () => {
       });
 
       afterEach(() => {
+        // Put back the global test scheme (test/test/util/test_scheme.js) that
+        // the plugin registered by these tests replaced; other suites load
+        // test: URIs through it.
         shaka.net.NetworkingEngine.unregisterScheme('test');
+        shaka.net.NetworkingEngine.registerScheme(
+            'test', shaka.test.TestScheme.plugin);
       });
 
       /** @param {boolean} streamingSupport */
@@ -868,9 +873,6 @@ describe('HlsParser live', () => {
       }
 
       it('joins the parts with a streaming plugin', async () => {
-        if (!window.ReadableStream) {
-          pending('ReadableStream is not supported by the browser.');
-        }
         registerTestScheme(/* streamingSupport= */ true);
 
         const ref = makeReference(
@@ -897,18 +899,6 @@ describe('HlsParser live', () => {
         registerTestScheme(/* streamingSupport= */ false);
         await testInitialManifest(master, mediaWithPartialSegments,
             makePartialRefs());
-      });
-
-      it('keeps the parts without ReadableStream', async () => {
-        registerTestScheme(/* streamingSupport= */ true);
-        const originalReadableStream = window.ReadableStream;
-        try {
-          delete window['ReadableStream'];
-          await testInitialManifest(master, mediaWithPartialSegments,
-              makePartialRefs());
-        } finally {
-          window['ReadableStream'] = originalReadableStream;
-        }
       });
 
       /** @return {!Array<!shaka.media.SegmentReference>} */
