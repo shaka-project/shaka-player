@@ -172,6 +172,8 @@ shakaAssets.Feature = {
 
   // Set if the asset requires AV1 support.
   AV1: 'AV1',
+  // Set if the asset requires HEVC support.
+  HEVC: 'HEVC',
   // Set if the asset requires MV-HEVC support.
   MV_HEVC: 'MV-HEVC',
 
@@ -1918,6 +1920,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnCTVqNpUs9400xP/master.mpd',
       /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HEVC)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
@@ -2205,6 +2208,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
       /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/simulcast/manifests/hevc-ctv.mpd',
       /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HEVC)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
@@ -2230,6 +2234,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bbc.png',
       /* manifestUri= */ 'https://rdmedia.bbc.co.uk/testcard/lowlatency/manifests/ll-hevc-ctv.mpd',
       /* source= */ shakaAssets.Source.BBC)
+      .addFeature(shakaAssets.Feature.HEVC)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
