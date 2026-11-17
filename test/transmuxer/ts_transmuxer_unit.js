@@ -344,4 +344,124 @@ describe('TsTransmuxer', () => {
           .toBeRejectedWith(expected);
     });
   });
+
+  describe('GOPs that span segments', () => {
+    // Generated with FFmpeg from 4 seconds of a test pattern at 25 fps
+    // (128x72 for H.264, 320x180 for H.265), with a fixed 2-second GOP cut
+    // into 1-second segments (-hls_flags split_by_time).  GOPs are closed, and
+    // parameter sets only ride with key frames (open-gop=0 and
+    // repeat-headers=0 for x265), so segments 0 and 2 start with them and an
+    // IDR frame, while 1 and 3 start in the middle of a GOP and carry neither.
+    const cases = [
+      {
+        name: 'H.264',
+        assets: 'hls-ts-h264-gop-spans-segments',
+        codecs: 'avc1.4d400b',
+      },
+      {
+        name: 'H.265',
+        assets: 'hls-ts-h265-gop-spans-segments',
+        codecs: 'hvc1.1.6.L60.90',
+      },
+    ];
+
+    for (const testCase of cases) {
+      describe(testCase.name, () => {
+        /**
+         * @param {number} index
+         * @return {!Promise<!Uint8Array>}
+         */
+        async function fetchSegment(index) {
+          const data = await shaka.test.Util.fetch(
+              `/base/test/test/assets/${testCase.assets}/${index}.ts`);
+          return shaka.util.BufferUtils.toUint8(data);
+        }
+
+        /**
+         * @param {!Uint8Array} ts
+         * @param {shaka.extern.Stream=} tsStream
+         * @return {!Promise<(!Uint8Array|!shaka.extern.TransmuxerOutput)>}
+         */
+        function transmux(ts, tsStream = stream) {
+          return transmuxer.transmux(
+              ts, tsStream, reference, /* duration= */ 4, ContentType.VIDEO);
+        }
+
+        beforeEach(() => {
+          stream.codecs = testCase.codecs;
+        });
+
+        it('reuses the parameter sets of an earlier segment', async () => {
+          const first = await transmux(await fetchSegment(0));
+          expect(ArrayBuffer.isView(first)).toBe(false);
+          const firstOutput =
+          /** @type {!shaka.extern.TransmuxerOutput} */ (first);
+          expect(firstOutput.init).not.toBeNull();
+
+          const result = await transmux(await fetchSegment(1));
+
+          expect(ArrayBuffer.isView(result)).toBe(false);
+          const output = /** @type {!shaka.extern.TransmuxerOutput} */ (result);
+          // The init segment from the first one still applies.
+          expect(output.init).toBeNull();
+          expect(mdatOf(output.data).byteLength).toBeGreaterThan(0);
+        });
+
+        it('does not reuse the parameter sets of another stream', async () => {
+          await transmux(await fetchSegment(0));
+          const otherStream = /** @type {shaka.extern.Stream} */ (
+            Object.assign({}, stream, {id: 2}));
+          const result = await transmux(await fetchSegment(1), otherStream);
+
+          // Nothing describes the other stream yet, so there is no video to
+          // emit from this segment.
+          expect(result).toEqual(new Uint8Array([]));
+        });
+
+        it('does not reuse parameter sets across discontinuities', async () => {
+          await transmux(await fetchSegment(0));
+          reference = /** @type {!shaka.media.SegmentReference} */ (
+            Object.assign({}, reference, {discontinuitySequence: 1}));
+          const result = await transmux(await fetchSegment(1));
+
+          expect(result).toEqual(new Uint8Array([]));
+        });
+
+        it('skips a segment that starts mid-GOP before any parameter sets',
+            async () => {
+              // This is where playback lands when it starts or seeks into such
+              // a segment: its frames cannot be decoded, but that must not be
+              // fatal, since the next segment starts a new GOP.
+              const result = await transmux(await fetchSegment(1));
+
+              expect(result).toEqual(new Uint8Array([]));
+            });
+      });
+    }
+  });
+
+  describe('packed audio', () => {
+    it('is not mistaken for MPEG audio by bytes inside a frame', async () => {
+      // An ADTS frame (AAC-LC, 48 kHz, stereo) whose payload is a run of 0xff
+      // bytes, which reads as a chain of MPEG audio frame headers.
+      const frame = new Uint8Array([
+        0xff, 0xf1, 0x4c, 0x80, 0x01, 0xff, 0xfc,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      ]);
+      // An empty ID3 tag, as packed audio starts with one.
+      const id3 = new Uint8Array([0x49, 0x44, 0x33, 0x04, 0, 0, 0, 0, 0, 0]);
+      const data = Uint8ArrayUtils.concat(id3, frame, frame);
+      stream.type = ContentType.AUDIO;
+      stream.mimeType = 'audio/mp2t';
+      stream.codecs = 'mp4a.40.2';
+
+      const result = await transmuxer.transmux(
+          data, stream, reference, /* duration= */ 0.08, ContentType.AUDIO);
+
+      expect(stream.audioSamplingRate).toBe(48000);
+      expect(result).toEqual(jasmine.objectContaining({
+        data: jasmine.any(Uint8Array),
+      }));
+    });
+  });
 });

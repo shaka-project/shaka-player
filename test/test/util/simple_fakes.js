@@ -73,6 +73,9 @@ shaka.test.FakeAbrManager = class {
     this.setCmsdManager = jasmine.createSpy('setCmsdManager');
 
     /** @type {!jasmine.Spy} */
+    this.setPlayerInterface = jasmine.createSpy('setPlayerInterface');
+
+    /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
   }
 };
@@ -106,6 +109,9 @@ shaka.test.FakeStreamingEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.seeked = jasmine.createSpy('seeked');
+
+    /** @type {!jasmine.Spy} */
+    this.retry = jasmine.createSpy('retry').and.returnValue(true);
 
     /** @type {!jasmine.Spy} */
     this.getCurrentVariant =
@@ -559,6 +565,10 @@ shaka.test.FakeSegmentIndex = class {
     /** @type {!jasmine.Spy} */
     this.getNumReferences =
         jasmine.createSpy('getNumReferences').and.returnValue(0);
+
+    /** @type {!jasmine.Spy} */
+    this.getNumEvicted =
+        jasmine.createSpy('getNumEvicted').and.returnValue(0);
 
     /** @type {!jasmine.Spy} */
     this.find = jasmine.createSpy('find').and.returnValue(null);

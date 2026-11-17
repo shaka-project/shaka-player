@@ -36,7 +36,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('shaka-tooltip');
     this.button_.classList.add('shaka-no-propagation');
-    this.button_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.button_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.icon_ = new shaka.ui.Icon(this.button_,
@@ -90,6 +90,8 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           'loaded',
           'unloading',
           'trackschanged',
+          'variantchanged',
+          'adaptation',
         ], () => {
           this.checkAvailability();
         });
@@ -142,7 +144,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     const label = this.localization.resolve(locId);
 
     this.button_.ariaLabel = label;
-    this.button_.ariaPressed = locId == LocIds.UNMUTE ? 'true' : 'false';
+    shaka.ui.Utils.setPressed(this.button_, locId == LocIds.UNMUTE);
     this.nameSpan_.textContent = label;
   }
 
@@ -167,7 +169,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
-    } else if (this.player.isVideoOnly()) {
+    } else if (this.player.isPlayingVideoOnly()) {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.button_, available && !this.isSubMenuOpened);

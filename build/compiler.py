@@ -278,10 +278,8 @@ class ExternGenerator(object):
 
     extern_generator = _get_source_path('build/generateExterns.js')
 
-    cmd_line = ['node', extern_generator, '--output', self.output]
-    cmd_line += self.source_files
-
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+    if not _run_extern_generator(
+        extern_generator, '--output', self.output, self.source_files):
       logging.error('Externs generation failed')
       return False
 
@@ -313,14 +311,27 @@ class NamespaceExternGenerator(object):
 
     extern_generator = _get_source_path('build/generateExterns.js')
 
-    cmd_line = ['node', extern_generator, '--namespace-typedef', self.output]
-    cmd_line += self.source_files
-
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+    if not _run_extern_generator(
+        extern_generator, '--namespace-typedef', self.output,
+        self.source_files):
       logging.error('Namespace typedef generation failed')
       return False
 
     return True
+
+
+def _run_extern_generator(extern_generator, output_option, output_path,
+    source_files):
+  """Runs the extern generator with source files in a temporary list file."""
+  with shakaBuildHelpers.NamedTemporaryFile() as fp:
+    fp.write(('\n'.join(source_files) + '\n').encode('utf8'))
+    fp.close()
+
+    cmd_line = [
+        'node', extern_generator, output_option, output_path,
+        '--input-list', fp.name,
+    ]
+    return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
 class TsDefGenerator(object):

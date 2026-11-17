@@ -111,6 +111,16 @@ The `earliestResolutionTimeOffset` attribute of `InsertPresentation` /
 interstitial's presentation time) the alternative MPD may be resolved. When it
 is absent, the `ads.interstitialPreloadAheadTime` configuration value is used.
 
+When playback joins in the middle of a `ReplacePresentation` (with
+`ads.allowStartInMiddleOfInterstitial` enabled), its `startWithOffset` and
+`clip` attributes are honored. By default (`startWithOffset="false"`) the
+alternative presentation starts from its beginning; with
+`startWithOffset="true"` it starts at the offset of the join point. With
+`clip="true"` (the default) the time elapsed since the event started is deducted
+from `maxDuration`, and the event is not executed if nothing is left; with
+`clip="false"` the whole `maxDuration` is played and the main content resumes
+that long after the join point, as needed for a live preroll.
+
 
 ##### Custom Interstitials
 

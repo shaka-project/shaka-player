@@ -34,11 +34,11 @@ filterDescribe('shaka.msf.PackagingRegistry', isMSFSupported, () => {
     expect(registered).toContain('cmaf');
     expect(registered).toContain('chunk-per-object');
     expect(registered).toContain('loc');
-    expect(registered).toContain('m2ts');
+    expect(registered).toContain('mpeg2ts');
   });
 
   it('creates a packaging for a registered name', () => {
-    expect(shaka.msf.PackagingRegistry.create('m2ts')).not.toBeNull();
+    expect(shaka.msf.PackagingRegistry.create('mpeg2ts')).not.toBeNull();
   });
 
   it('returns null for a packaging nobody registered', () => {
@@ -53,8 +53,8 @@ filterDescribe('shaka.msf.PackagingRegistry', isMSFSupported, () => {
   it('creates a new instance per call', () => {
     // A packaging keeps the state it derived from one track, so two tracks
     // must never share one.
-    const first = shaka.msf.PackagingRegistry.create('m2ts');
-    const second = shaka.msf.PackagingRegistry.create('m2ts');
+    const first = shaka.msf.PackagingRegistry.create('mpeg2ts');
+    const second = shaka.msf.PackagingRegistry.create('mpeg2ts');
     expect(first).not.toBe(second);
   });
 

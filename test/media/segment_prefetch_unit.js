@@ -167,6 +167,35 @@ describe('SegmentPrefetch', () => {
       expect(op).toBeNull();
       await expectSegmentsPrefetched(1, 1);
     });
+
+    it('does not reuse failed prefetches', async () => {
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      fetchDispatcher.and.callFake(() => {
+        return new shaka.net.NetworkingEngine.PendingRequest(
+            Promise.reject(error), () => Promise.resolve(),
+            new shaka.net.NetworkingEngine.NumBytesRemainingClass());
+      });
+
+      const reference = makeReference(uri('0.10'), 0, 10);
+      const initReference =
+          new shaka.media.InitSegmentReference(() => ['init.mp4'], 0, 500);
+      reference.initSegmentReference = initReference;
+      stream = createStream();
+      stream.segmentIndex = new shaka.media.SegmentIndex([reference]);
+      segmentPrefetch.switchStream(stream);
+
+      await expectAsync(
+          segmentPrefetch.prefetchSegmentsByTime(reference.startTime))
+          .toBeRejectedWith(error);
+
+      // They are fetched again when they are needed, instead of reusing the
+      // failures.
+      expect(segmentPrefetch.getPrefetchedSegment(reference)).toBeNull();
+      expect(segmentPrefetch.getPrefetchedSegment(initReference)).toBeNull();
+    });
   });
 
   describe('clearAll', () => {
@@ -334,6 +363,62 @@ describe('SegmentPrefetch', () => {
       await expectSegmentsPrefetched(0, 1);
       // only dispatched fetch one more time.
       expect(fetchDispatcher).toHaveBeenCalledTimes(3 + 1);
+    });
+  });
+
+  describe('stream data', () => {
+    /** @type {?function(BufferSource):!Promise} */
+    let dispatchedCallback;
+    /** @type {function(shaka.extern.Response)} */
+    let resolveResponse;
+    /** @type {!jasmine.Spy} */
+    let streamDataCallback;
+
+    beforeEach(() => {
+      dispatchedCallback = null;
+      streamDataCallback =
+          jasmine.createSpy('streamDataCallback').and.resolveTo();
+      fetchDispatcher.and.callFake((ref, stream, callback) => {
+        dispatchedCallback = callback || null;
+        const response = new Promise((resolve) => {
+          resolveResponse = resolve;
+        });
+        return new shaka.net.NetworkingEngine.PendingRequest(
+            response, () => Promise.resolve(),
+            new shaka.net.NetworkingEngine.NumBytesRemainingClass());
+      });
+      segmentPrefetch = new shaka.media.SegmentPrefetch(
+          1, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false);
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      expect(dispatchedCallback).not.toBeNull();
+    });
+
+    it('passes chunks buffered before the callback was set', async () => {
+      await dispatchedCallback(new Uint8Array([1, 2]));
+      segmentPrefetch.getPrefetchedSegment(
+          references[0], Util.spyFunc(streamDataCallback));
+      await dispatchedCallback(new Uint8Array([3]));
+
+      expect(streamDataCallback).toHaveBeenCalledOnceWith(
+          new Uint8Array([1, 2, 3]));
+    });
+
+    it('drops buffered chunks once the request is done', async () => {
+      await dispatchedCallback(new Uint8Array([1, 2]));
+      resolveResponse(/** @type {shaka.extern.Response} */ ({
+        uri: references[0].getUris()[0],
+        data: new Uint8Array([1, 2]),
+        headers: {},
+      }));
+      await shaka.test.Util.shortDelay();
+
+      // The full response is used instead of the stream data, so the chunks
+      // are never passed on.
+      const op = segmentPrefetch.getPrefetchedSegment(
+          references[0], Util.spyFunc(streamDataCallback));
+      const result = await op.promise;
+      expect(result.data).toEqual(new Uint8Array([1, 2]));
+      expect(streamDataCallback).not.toHaveBeenCalled();
     });
   });
   /**

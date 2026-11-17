@@ -508,6 +508,7 @@ shaka.ui.Overlay = class {
         'captions-position',
         'captions-style-reset',
       ],
+      captionsStyleDefaults: {},
       documentPictureInPicture: {
         enabled: true,
         preferInitialWindowPlacement: false,

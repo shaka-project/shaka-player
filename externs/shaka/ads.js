@@ -81,6 +81,9 @@ shaka.extern.AdCuePoint;
  *   canJump: boolean,
  *   resumeOffset: ?number,
  *   playoutLimit: ?number,
+ *   clip: (boolean|undefined),
+ *   startWithOffset: (boolean|undefined),
+ *   urlParams: (?shaka.extern.UrlParamsFunction|undefined),
  *   once: boolean,
  *   pre: boolean,
  *   post: boolean,
@@ -143,6 +146,27 @@ shaka.extern.AdCuePoint;
  *   must be null.
  * @property {?number} playoutLimit
  *   Indicate a limit for the playout time of the entire interstitial.
+ * @property {(boolean|undefined)} clip
+ *   When playback joins in the middle of the interstitial, whether the time
+ *   elapsed since <code>startTime</code> is deducted from
+ *   <code>playoutLimit</code> (<code>true</code>), or the whole
+ *   <code>playoutLimit</code> is played and the primary content resumes that
+ *   long after the join point (<code>false</code>). An interstitial with
+ *   nothing left to play is not played. <code>undefined</code> means
+ *   <code>true</code>. This maps to the DASH
+ *   <code>ReplacePresentation@clip</code> attribute.
+ * @property {(boolean|undefined)} startWithOffset
+ *   When playback joins in the middle of the interstitial, whether it starts at
+ *   the matching offset within the interstitial (<code>true</code>) or at its
+ *   beginning (<code>false</code>). <code>undefined</code> means
+ *   <code>true</code>. This maps to the DASH
+ *   <code>ReplacePresentation@startWithOffset</code> attribute, whose default
+ *   is <code>false</code>.
+ * @property {(?shaka.extern.UrlParamsFunction|undefined)} urlParams
+ *   For DASH alternative MPD events, the URL parameters of the request
+ *   (ISO/IEC 23009-1 Annex I). <code>uri</code> carries them with the values
+ *   of an unknown player state; the player builds them again with the actual
+ *   state when it requests the interstitial.
  * @property {boolean} once
  *   Indicates that the interstitial should only be played once.
  * @property {boolean} pre

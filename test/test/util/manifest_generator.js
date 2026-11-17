@@ -266,7 +266,10 @@ shaka.test.ManifestGenerator.Variant = class {
    * @param {number=} id
    */
   constructor(manifest, isPartial, id) {
-    /** @const {!shaka.test.ManifestGenerator.Manifest} */
+    /**
+     * @const {!shaka.test.ManifestGenerator.Manifest}
+     * @private
+     */
     this.manifest_ = manifest;
 
     /** @type {?shaka.extern.Stream} */
@@ -396,7 +399,10 @@ shaka.test.ManifestGenerator.DrmInfo = class {
    * @param {string} keySystem
    */
   constructor(manifest, keySystem) {
-    /** @const {!shaka.test.ManifestGenerator.Manifest} */
+    /**
+     * @const {!shaka.test.ManifestGenerator.Manifest}
+     * @private
+     */
     this.manifest_ = manifest;
 
     /** @type {string} */
@@ -517,10 +523,16 @@ shaka.test.ManifestGenerator.Stream = class {
     //     'Streams should have unique ids!');
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
-    /** @const {shaka.test.ManifestGenerator.Manifest} */
+    /**
+     * @const {shaka.test.ManifestGenerator.Manifest}
+     * @private
+     */
     this.manifest_ = manifest;
 
-    /** @type {shaka.media.InitSegmentReference} */
+    /**
+     * @type {shaka.media.InitSegmentReference}
+     * @private
+     */
     this.initSegmentReference_ = null;
 
     /** @type {string} */

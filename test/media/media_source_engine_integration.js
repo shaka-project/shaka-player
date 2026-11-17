@@ -338,6 +338,79 @@ describe('MediaSourceEngine', () => {
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
   });
 
+  for (const type of [ContentType.AUDIO, ContentType.VIDEO]) {
+    it('preserves ' + type + ' when removing the other buffer', async () => {
+      await mediaSourceEngine.init(new Map([
+        [ContentType.AUDIO, getFakeStream(metadata.audio)],
+        [ContentType.VIDEO, getFakeStream(metadata.video)],
+      ]), false);
+      await mediaSourceEngine.setDuration(presentationDuration);
+      await Promise.all([
+        appendInit(ContentType.AUDIO),
+        appendInit(ContentType.VIDEO),
+      ]);
+      await Promise.all([
+        append(ContentType.AUDIO, 0),
+        append(ContentType.VIDEO, 0),
+      ]);
+      const remaining = mediaSource.sourceBuffers[
+          type == ContentType.AUDIO ? 0 : 1];
+      const end = mediaSourceEngine.bufferEnd(type);
+      const removedType = type == ContentType.AUDIO ?
+          ContentType.VIDEO : ContentType.AUDIO;
+
+      await mediaSourceEngine.removeSourceBuffer(removedType);
+      expect(mediaSource.sourceBuffers.length).toBe(1);
+      expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+      expect(mediaSourceEngine.bufferEnd(type)).toBe(end);
+      expect(mediaSource.duration).toBe(presentationDuration);
+      await append(type, 1);
+      expect(mediaSourceEngine.bufferEnd(type)).toBeGreaterThan(end);
+    });
+
+    it('preserves ' + type + ' output when removing the other TS output',
+        async () => {
+          const config =
+              shaka.util.PlayerConfiguration.createDefault().mediaSource;
+          config.forceTransmux = true;
+          mediaSourceEngine.configure(config);
+          const stream = shaka.test.StreamingEngineUtil.createMockVideoStream(
+              7, 'video/mp2t');
+          stream.codecs = 'avc1.42c00c,mp4a.40.2';
+          await mediaSourceEngine.init(
+              new Map([[ContentType.VIDEO, stream]]), false,
+              shaka.media.ManifestParser.HLS);
+          await mediaSourceEngine.setDuration(20);
+          const asset = '/base/test/test/assets/' +
+              'hls-ts-muxed-and-separate-audio/video_180_';
+          const first = await Util.fetch(asset + '0.ts');
+          const second = await Util.fetch(asset + '1.ts');
+          const reference = new shaka.media.SegmentReference(
+              0, 2, () => [asset + '0.ts'], 0, null, null, 0, 0, Infinity);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, first, reference, stream, false);
+          const remaining = mediaSource.sourceBuffers[
+              type == ContentType.AUDIO ? 0 : 1];
+          const end = mediaSourceEngine.bufferEnd(type);
+          expect(end).toBeGreaterThan(0);
+
+          const removedType = type == ContentType.AUDIO ?
+              ContentType.VIDEO : ContentType.AUDIO;
+          await mediaSourceEngine.removeSourceBuffer(removedType);
+          expect(mediaSource.sourceBuffers.length).toBe(1);
+          expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+          expect(mediaSourceEngine.bufferEnd(type)).toBe(end);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, second,
+              new shaka.media.SegmentReference(
+                  2, 4, () => [asset + '1.ts'], 0, null, null, 0, 0, Infinity),
+              stream, false);
+          expect(mediaSource.sourceBuffers[0]).toBe(remaining);
+          expect(mediaSourceEngine.bufferEnd(type)).toBeGreaterThan(end);
+          expect(mediaSource.duration).toBe(20);
+        });
+  }
+
   it('removes segments', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
@@ -785,6 +858,166 @@ describe('MediaSourceEngine', () => {
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
+  });
+
+  describe('switching containers without a reset', () => {
+    /** @type {!jasmine.Spy} */
+    let resetSpy;
+    /** @type {!jasmine.Spy} */
+    let onBeforeResetSpy;
+
+    beforeEach(() => {
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.codecSwitchingStrategy =
+          shaka.config.CodecSwitchingStrategy.RELOAD;
+      mediaSourceEngine.configure(config);
+      resetSpy = spyOn(mediaSourceEngine, 'reset').and.callThrough();
+      onBeforeResetSpy = jasmine.createSpy('onBeforeReset')
+          .and.returnValue(Promise.resolve());
+    });
+
+    /**
+     * @param {string} name
+     * @param {shaka.util.ManifestParserUtils.ContentType} type
+     * @param {?number} segmentNumber null for the init segment.
+     * @return {!Promise}
+     */
+    function appendFrom(name, type, segmentNumber) {
+      const streamMetadata = shaka.test.TestScheme.DATA[name][type];
+      const generator = shaka.test.TestScheme.GENERATORS[name][type];
+      const now = Date.now() / 1000;
+      // Transmuxers need a complete stream, e.g. its language for the mdhd.
+      const stream =
+          shaka.test.StreamingEngineUtil.createMockStream(type, /* id= */ 1);
+      stream.mimeType = streamMetadata.mimeType;
+      stream.codecs = streamMetadata.codecs;
+      const segment = segmentNumber == null ?
+          generator.getInitSegment(now) :
+          generator.getSegment(segmentNumber, now);
+      goog.asserts.assert(segment, 'Segments must be loaded');
+      if (segmentNumber == null) {
+        return mediaSourceEngine.appendBuffer(
+            type, segment, /* reference= */ null, stream,
+            /* hasClosedCaptions= */ false);
+      }
+      const start = segmentNumber * streamMetadata.segmentDuration;
+      const reference = new shaka.media.SegmentReference(
+          start, start + streamMetadata.segmentDuration,
+          /* uris= */ () => ['foo://bar'],
+          /* startByte= */ 0,
+          /* endByte= */ null,
+          /* initSegmentReference= */ null,
+          /* timestampOffset= */ 0,
+          /* appendWindowStart= */ 0,
+          /* appendWindowEnd= */ Infinity);
+      return mediaSourceEngine.appendBuffer(
+          type, segment, reference, stream, /* hasClosedCaptions= */ false);
+    }
+
+    /**
+     * @param {string} name
+     * @param {shaka.util.ManifestParserUtils.ContentType} type
+     * @param {string} codecs
+     * @param {number=} timestampOffset
+     * @return {!Promise}
+     */
+    function switchTo(name, type, codecs, timestampOffset = 0) {
+      const streamMetadata = shaka.test.TestScheme.DATA[name][type];
+      return mediaSourceEngine.setStreamProperties(
+          type, timestampOffset,
+          /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity,
+          /* ignoreTimestampOffset= */ false, streamMetadata.mimeType, codecs,
+          new Map([[type, getFakeStream(streamMetadata)]]),
+          Util.spyFunc(onBeforeResetSpy));
+    }
+
+    /**
+     * @param {shaka.util.ManifestParserUtils.ContentType} type
+     * @return {string}
+     * @suppress {visibility}
+     */
+    function getSourceBufferType(type) {
+      return shaka.util.MimeUtils.getBasicType(
+          mediaSourceEngine.sourceBufferTypes_.get(type));
+    }
+
+    // Where TS plays natively (e.g. Safari, Chromecast), it is transmuxed to
+    // fit the MP4 SourceBuffer; elsewhere it is always transmuxed.
+    it('appends TS to an MP4 SourceBuffer with the same codecs', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO,
+          getFakeStream(shaka.test.TestScheme.DATA['sintel'].video));
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ false);
+      await mediaSourceEngine.setDuration(presentationDuration);
+      await appendFrom('sintel', ContentType.VIDEO, null);
+      await appendFrom('sintel', ContentType.VIDEO, 0);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10, 0);
+
+      // Both are H.264, in other profiles.
+      await switchTo('cea-708_ts', ContentType.VIDEO, 'avc1.64001e',
+          /* timestampOffset= */ 10);
+      await appendFrom('cea-708_ts', ContentType.VIDEO, 0);
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      expect(onBeforeResetSpy).not.toHaveBeenCalled();
+      expect(getSourceBufferType(ContentType.VIDEO)).toBe('video/mp4');
+      // The 20s TS segment follows the 10s MP4 one.
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 0);
+      expect(buffered(ContentType.VIDEO, 0)).toBeGreaterThan(29);
+      expect(video.error).toBe(null);
+    });
+
+    // Where raw AAC plays natively (e.g. Chrome), it is transmuxed to fit the
+    // MP4 SourceBuffer; elsewhere it is always transmuxed.
+    it('appends raw AAC to an MP4 SourceBuffer', async () => {
+      if (!deviceDetected.supportsSequenceMode()) {
+        pending('Sequence mode is not supported by the platform.');
+      }
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO,
+          getFakeStream(shaka.test.TestScheme.DATA['sintel'].audio));
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+      await mediaSourceEngine.setDuration(presentationDuration);
+      await appendFrom('sintel', ContentType.AUDIO, null);
+      await appendFrom('sintel', ContentType.AUDIO, 0);
+      const bufferedBefore = buffered(ContentType.AUDIO, 0);
+      expect(bufferedBefore).toBeCloseTo(10, 0);
+
+      // In sequence mode the offset is where the next segment goes.
+      await switchTo('id3-metadata_aac', ContentType.AUDIO, 'mp4a.40.2',
+          bufferedBefore);
+      await appendFrom('id3-metadata_aac', ContentType.AUDIO, 0);
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      expect(onBeforeResetSpy).not.toHaveBeenCalled();
+      expect(getSourceBufferType(ContentType.AUDIO)).toBe('audio/mp4');
+      expect(buffered(ContentType.AUDIO, 0))
+          .toBeGreaterThan(bufferedBefore + 9);
+      expect(video.error).toBe(null);
+    });
+
+    // Nothing turns MP4 into raw AAC, so this one still needs a reset.
+    it('resets from a native raw AAC SourceBuffer to MP4', async () => {
+      if (!MediaSource.isTypeSupported('audio/aac') ||
+          !deviceDetected.supportsSequenceMode()) {
+        pending('Raw AAC codec is not supported by the platform.');
+      }
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO,
+          getFakeStream(shaka.test.TestScheme.DATA['id3-metadata_aac'].audio));
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
+      await appendFrom('id3-metadata_aac', ContentType.AUDIO, 0);
+      expect(getSourceBufferType(ContentType.AUDIO)).toBe('audio/aac');
+
+      await switchTo('sintel', ContentType.AUDIO, 'mp4a.40.2');
+
+      expect(onBeforeResetSpy).toHaveBeenCalled();
+      expect(resetSpy).toHaveBeenCalled();
+      expect(getSourceBufferType(ContentType.AUDIO)).toBe('audio/mp4');
+      await appendFrom('sintel', ContentType.AUDIO, null);
+      await appendFrom('sintel', ContentType.AUDIO, 0);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 0);
+    });
   });
 
   describe('destroy', () => {

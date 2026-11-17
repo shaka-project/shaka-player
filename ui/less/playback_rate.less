@@ -126,3 +126,17 @@
     margin-left: 0;
   }
 }
+
+/* In forced colors mode (e.g. Windows high contrast), backgrounds and borders
+ * are forced to the same colors for every preset, so the chosen preset would
+ * look like the others.  Use the system colors for selected items instead,
+ * opting out so the browser doesn't paint a Canvas backplate behind the
+ * label. */
+@media (forced-colors: active) {
+  .shaka-playback-rate-preset-btn.shaka-chosen-item {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    border-color: Highlight !important;
+    color: HighlightText;
+  }
+}

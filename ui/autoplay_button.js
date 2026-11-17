@@ -51,7 +51,7 @@ shaka.ui.AutoPlayNextButton = class extends shaka.ui.Element {
     this.button_.classList.add('shaka-autoplay-button');
     this.button_.classList.add('shaka-tooltip');
     this.button_.classList.add('shaka-no-propagation');
-    this.button_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.button_, false);
 
     /** @private {!HTMLElement} */
     this.knob_ = shaka.util.Dom.createHTMLElement('span');
@@ -133,13 +133,13 @@ shaka.ui.AutoPlayNextButton = class extends shaka.ui.Element {
       this.icon_.use(Icons['PLAY']);
       this.button_.ariaLabel =
           this.localization.resolve(LocIds.DISABLE_AUTOPLAY);
-      this.button_.ariaPressed = 'true';
+      shaka.ui.Utils.setPressed(this.button_, true);
     } else {
       this.currentState_.textContent = this.localization.resolve(LocIds.OFF);
       this.icon_.use(Icons['PAUSE']);
       this.button_.ariaLabel =
           this.localization.resolve(LocIds.ENABLE_AUTOPLAY);
-      this.button_.ariaPressed = 'false';
+      shaka.ui.Utils.setPressed(this.button_, false);
     }
   }
 

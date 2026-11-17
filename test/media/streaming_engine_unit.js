@@ -520,6 +520,259 @@ describe('StreamingEngine', () => {
     jasmine.clock().uninstall();
   });
 
+  describe('stream ending before the other one', () => {
+    /** @type {!jasmine.Spy} */
+    let supportsSourceBufferRemovalSpy;
+
+    beforeEach(() => {
+      // Do not depend on the browser running the tests.
+      supportsSourceBufferRemovalSpy = spyOn(
+          shaka.device.DeviceFactory.getDevice(),
+          'supportsSourceBufferRemoval').and.returnValue(true);
+    });
+
+    /**
+     * Sets up a VOD presentation whose video goes on to 40 seconds, and whose
+     * audio has |count| segments of |duration| seconds.
+     * @param {number} count
+     * @param {number=} duration
+     * @param {boolean=} multiPeriod Split the segment indexes by Period, like
+     *   multi-Period DASH does.
+     * @return {!Promise}
+     */
+    async function setupShortAudio(count, duration = 10, multiPeriod = false) {
+      setupVod();
+      const audio = /** @type {!shaka.extern.Stream} */ (audioStream);
+      const video = /** @type {!shaka.extern.Stream} */ (videoStream);
+      await audio.createSegmentIndex();
+      await video.createSegmentIndex();
+      const audioIndex = audio.segmentIndex;
+      const videoIndex = video.segmentIndex;
+      goog.asserts.assert(audioIndex && videoIndex, 'Missing segment index');
+
+      const audioReferences = [];
+      for (let i = 0; i < count; i++) {
+        const reference = audioIndex.get(i);
+        reference.startTime = i * duration;
+        reference.endTime = (i + 1) * duration;
+        audioReferences.push(reference);
+      }
+      segmentData[ContentType.AUDIO].segmentDuration = duration;
+      const audioSegmentDuration = duration;
+      segmentData[ContentType.AUDIO].segmentStartTimes =
+          [0, 1, 2, 3].map((i) => i * audioSegmentDuration);
+      const videoReferences = [0, 1, 2, 3].map((i) => videoIndex.get(i));
+      if (multiPeriod) {
+        /**
+         * @param {!Array<!shaka.media.SegmentReference>} references
+         * @return {!shaka.media.MetaSegmentIndex}
+         */
+        const byPeriod = (references) => {
+          const index = new shaka.media.MetaSegmentIndex();
+          index.appendSegmentIndex(
+              new shaka.media.SegmentIndex(references.slice(0, 2)));
+          index.appendSegmentIndex(
+              new shaka.media.SegmentIndex(references.slice(2)));
+          return index;
+        };
+        audio.segmentIndex = byPeriod(audioReferences);
+        video.segmentIndex = byPeriod(videoReferences);
+      } else {
+        audio.segmentIndex = new shaka.media.SegmentIndex(audioReferences);
+        video.segmentIndex = new shaka.media.SegmentIndex(videoReferences);
+      }
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+    }
+
+    async function start() {
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+    }
+
+    it('detaches the audio to play the video-only tail', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledWith(ContentType.AUDIO);
+      expect(mediaSourceEngine.segments[ContentType.AUDIO])
+          .toEqual([true, true, false, false]);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+    });
+
+    it('detaches the audio when it ends in an earlier Period', async () => {
+      await setupShortAudio(2, 10, /* multiPeriod= */ true);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledWith(ContentType.AUDIO);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+    });
+
+    it('recreates the MediaSource without the audio if it cannot remove it',
+        async () => {
+          supportsSourceBufferRemovalSpy.and.returnValue(false);
+          await setupShortAudio(2);
+          await start();
+
+          await runTest();
+
+          expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+          const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+          expect(streamsByType.has(ContentType.AUDIO)).toBe(false);
+          expect(streamsByType.has(ContentType.VIDEO)).toBe(true);
+          expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        });
+
+    it('does not detach before the buffered audio has played', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      /** @type {?number} */
+      let detachedAt = null;
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        detachedAt = presentationTimeInSeconds;
+        return Promise.resolve();
+      });
+      await runTest();
+
+      expect(detachedAt).toBe(20);
+    });
+
+    it('restores the audio on a seek back into it', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      let seekedBack = false;
+      await runTest(() => {
+        if (!seekedBack && presentationTimeInSeconds == 22) {
+          seekedBack = true;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+        }
+      });
+
+      expect(seekedBack).toBe(true);
+      expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+      // The audio ends again after the seek, so it is detached again.
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(2);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
+
+    it('does not append a segment fetched before a reset', async () => {
+      // The video requests cannot be aborted, so one can finish after the
+      // reset that restores the audio.
+      await setupShortAudio(2);
+      netEngineDelays.video = 2;
+      await start();
+
+      const isVideoRequest = (args) => args[1].uris[0].includes('_video_');
+      const isVideoAppend = (args) => args[0] == ContentType.VIDEO;
+      /** @type {?number} */
+      let appendsBeforeReset = null;
+      await runTest(() => {
+        const requests =
+            netEngine.request.calls.allArgs().filter(isVideoRequest).length;
+        const appends = mediaSourceEngine.appendBuffer.calls.allArgs()
+            .filter(isVideoAppend).length;
+        if (appendsBeforeReset == null &&
+            mediaSourceEngine.removeSourceBuffer.calls.count() > 0 &&
+            requests > appends) {
+          appendsBeforeReset = appends;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        }
+      });
+
+      goog.asserts.assert(appendsBeforeReset != null, 'Must have seeked back');
+      const appendsAfterReset = mediaSourceEngine.appendBuffer.calls.allArgs()
+          .filter(isVideoAppend).slice(appendsBeforeReset);
+      expect(appendsAfterReset.length).toBeGreaterThan(0);
+      // The new SourceBuffer gets the init segment first.
+      expect(appendsAfterReset[0][2]).toBe(null);
+    });
+
+    it('restores the audio on a seek back during the detach', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      /** @type {function()} */
+      let finishRemoval = () => {};
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        return new Promise((resolve) => {
+          finishRemoval = resolve;
+        });
+      });
+      let seekedBack = false;
+      await runTest(() => {
+        if (!seekedBack && presentationTimeInSeconds == 22) {
+          seekedBack = true;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+          // The seek cannot reattach the audio until it is detached.
+          expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+          finishRemoval();
+        }
+      });
+
+      expect(seekedBack).toBe(true);
+      expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reset on a seek within the tail', async () => {
+      await setupShortAudio(2);
+      await start();
+
+      let seeked = false;
+      await runTest(() => {
+        if (!seeked && presentationTimeInSeconds == 25) {
+          seeked = true;
+          presentationTimeInSeconds = 30;
+          streamingEngine.seeked();
+        }
+      });
+
+      expect(seeked).toBe(true);
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves a short tail to endOfStream', async () => {
+      // The audio ends at 39 seconds.
+      await setupShortAudio(4, 9.75);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
+
+    it('does not detach in live streams', async () => {
+      await setupShortAudio(2);
+      timeline.isDynamic.and.returnValue(true);
+      await start();
+
+      await runTest();
+
+      expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('live seekable range', () => {
     beforeEach(async () => {
       setupVod();
@@ -653,6 +906,7 @@ describe('StreamingEngine', () => {
     await runTest();
 
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
 
     // Verify buffers.
     expect(mediaSourceEngine.initSegments).toEqual({
@@ -1008,6 +1262,148 @@ describe('StreamingEngine', () => {
     }
   });
 
+  describe('stream data callback with prefetch', () => {
+    const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType;
+
+    /**
+     * @param {boolean} lowLatencyMode
+     * @return {!Promise}
+     */
+    async function playWithPrefetch(lowLatencyMode) {
+      setupVod();
+      manifest.isLowLatency = lowLatencyMode;
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.lowLatencyMode = lowLatencyMode;
+      config.segmentPrefetchLimit = 2;
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      mediaSourceEngine.appendBuffer.and.returnValue(Promise.resolve({
+        mediaTimestamp: null,
+      }));
+      createStreamingEngine(config);
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      await runTest();
+    }
+
+    /**
+     * @param {shaka.net.NetworkingEngine.AdvancedRequestType} advancedType
+     * @return {!Array<shaka.extern.Request>}
+     */
+    function getRequests(advancedType) {
+      return netEngine.request.calls.allArgs()
+          .filter((args) => args[2] && args[2].type == advancedType)
+          .map((args) => args[1]);
+    }
+
+    it('is not passed outside low latency mode', async () => {
+      await playWithPrefetch(/* lowLatencyMode= */ false);
+
+      const requests = getRequests(AdvancedRequestType.MEDIA_SEGMENT)
+          .concat(getRequests(AdvancedRequestType.INIT_SEGMENT));
+      expect(requests.length).toBeGreaterThan(0);
+      for (const request of requests) {
+        expect(request.streamDataCallback).withContext(request.uris[0])
+            .toBeNull();
+      }
+    });
+
+    it('is passed only for MP4 media segments in low latency mode',
+        async () => {
+          if (!window.ReadableStream) {
+            pending('ReadableStream is not supported by the browser.');
+          }
+          await playWithPrefetch(/* lowLatencyMode= */ true);
+
+          const media = getRequests(AdvancedRequestType.MEDIA_SEGMENT);
+          expect(media.length).toBeGreaterThan(0);
+          for (const request of media) {
+            const isMP4 = request.contentType != ContentType.TEXT;
+            expect(!!request.streamDataCallback).withContext(request.uris[0])
+                .toBe(isMP4);
+          }
+          const init = getRequests(AdvancedRequestType.INIT_SEGMENT);
+          for (const request of init) {
+            expect(request.streamDataCallback).withContext(request.uris[0])
+                .toBeNull();
+          }
+        });
+  });
+
+  describe('isChunkedAppend', () => {
+    const StreamingEngine = shaka.media.StreamingEngine;
+
+    /** @type {shaka.extern.Stream} */
+    let videoStream;
+    /** @type {!shaka.media.SegmentReference} */
+    let reference;
+
+    beforeEach(() => {
+      videoStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      reference = new shaka.media.SegmentReference(
+          0, 10, () => ['0.mp4'], 0, null, null, 0, 0, Infinity);
+    });
+
+    /**
+     * @param {string} type
+     * @param {boolean} isLowLatency
+     * @return {shaka.extern.Manifest}
+     */
+    function makeManifest(type, isLowLatency) {
+      const generated = shaka.test.ManifestGenerator.generate();
+      generated.type = type;
+      generated.isLowLatency = isLowLatency;
+      return generated;
+    }
+
+    it('is true for MP4 media segments of low latency DASH', () => {
+      if (!window.ReadableStream) {
+        pending('ReadableStream is not supported by the browser.');
+      }
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, videoStream, reference)).toBe(true);
+    });
+
+    it('is false without low latency', () => {
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, false, videoStream, reference)).toBe(false);
+      const notLowLatency =
+          makeManifest(shaka.media.ManifestParser.DASH, false);
+      expect(StreamingEngine.isChunkedAppend(
+          notLowLatency, true, videoStream, reference)).toBe(false);
+    });
+
+    it('is false for init segments and non-MP4 streams', () => {
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      const init = new shaka.media.InitSegmentReference(
+          () => ['init.mp4'], 0, null);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, videoStream, init)).toBe(false);
+      const tsStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(2, 'video/mp2t');
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, tsStream, reference)).toBe(false);
+    });
+
+    it('needs byterange optimization for HLS', () => {
+      if (!window.ReadableStream) {
+        pending('ReadableStream is not supported by the browser.');
+      }
+      const hls = makeManifest(shaka.media.ManifestParser.HLS, true);
+      expect(StreamingEngine.isChunkedAppend(
+          hls, true, videoStream, reference)).toBe(false);
+      reference.markAsByterangeOptimization();
+      expect(StreamingEngine.isChunkedAppend(
+          hls, true, videoStream, reference)).toBe(true);
+    });
+  });
+
   it('plays when a small gap is present at the beginning', async () => {
     const drift = 0.050;  // 50 ms
 
@@ -1144,7 +1540,8 @@ describe('StreamingEngine', () => {
 
     expect(mediaSourceEngine.setStreamProperties)
         .toHaveBeenCalledWith('video', 0, lt20, gt40, false,
-            videoStream.mimeType, videoStream.codecs, streamsByType);
+            videoStream.mimeType, videoStream.codecs, streamsByType,
+            jasmine.any(Function));
   });
 
   // Regression test for https://github.com/shaka-project/shaka-player/issues/3717
@@ -3386,6 +3783,161 @@ describe('StreamingEngine', () => {
       expect(onError).toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
+
+    describe('with a quota smaller than the buffering goal', () => {
+      /** @type {{audio: number, video: number}} */
+      let quotaErrors;
+      /** @type {number} */
+      let quotaSeconds;
+
+      /**
+       * Default quota: a segment fits if, together with what is buffered
+       * ahead of the playhead, it lasts no more than quotaSeconds.
+       *
+       * @param {string} type
+       * @param {!shaka.media.SegmentReference} reference
+       * @param {number} bufferedAhead
+       * @return {boolean}
+       */
+      function fitsInSeconds(type, reference, bufferedAhead) {
+        const duration = reference.endTime - reference.startTime;
+        return bufferedAhead + duration <= quotaSeconds;
+      }
+
+      /**
+       * @param {function(string, !shaka.media.SegmentReference,
+       *     number):boolean=} fits Decides whether a segment fits.
+       */
+      function setUpQuota(fits = fitsInSeconds) {
+        setupVod();
+
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().streaming;
+        config.rebufferingGoal = 1;
+        config.bufferingGoal = 30;
+
+        mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+        createStreamingEngine(config);
+
+        // Reject a segment that does not fit next to what is buffered ahead
+        // of the playhead.  Content behind the playhead is ignored, as if
+        // MediaSource evicted it on its own.
+        quotaErrors = {audio: 0, video: 0};
+        const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
+        const appendBufferSpy = jasmine.createSpy('appendBuffer');
+        mediaSourceEngine.appendBuffer = appendBufferSpy;
+        appendBufferSpy.and.callFake((type, data, reference) => {
+          if (reference && type != ContentType.TEXT) {
+            const bufferedAhead = mediaSourceEngine.bufferedAheadOfImpl(
+                type, presentationTimeInSeconds);
+            if (!fits(type, reference, bufferedAhead)) {
+              if (type == ContentType.AUDIO) {
+                quotaErrors.audio++;
+              } else {
+                quotaErrors.video++;
+              }
+              throw new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.MEDIA,
+                  shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+                  type);
+            }
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return originalAppendBuffer.call(
+              mediaSourceEngine, type, data, reference);
+        });
+      }
+
+      /**
+       * @param {function()=} callback Executed each time the clock ticks.
+       */
+      async function play(callback) {
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+        playing = true;
+        await runTest(callback);
+      }
+
+      it('reduces the buffering goal to what fit in one step', async () => {
+        // Two 10 second segments fit, the third does not.
+        quotaSeconds = 21;
+        setUpQuota();
+
+        await play();
+
+        expect(quotaErrors).toEqual({audio: 1, video: 1});
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('uses the reduction schedule when no segment fits', async () => {
+        // Only one segment fits, so there is nothing to keep next to it.
+        quotaSeconds = 15;
+        setUpQuota();
+
+        await play();
+
+        expect(quotaErrors.audio + quotaErrors.video).toBeGreaterThan(2);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      it('falls back to the reduction schedule if the quota shrinks',
+          async () => {
+            quotaSeconds = 21;
+            setUpQuota();
+
+            // After the first error the goal is lowered to what fit.  Once
+            // the quota shrinks below that, not even one segment fits next to
+            // the buffer, so the reduction schedule has to take over.
+            await play(() => {
+              if (presentationTimeInSeconds >= 15) {
+                quotaSeconds = 12;
+              }
+            });
+
+            expect(quotaErrors.video).toBeGreaterThan(1);
+            expect(onError).not.toHaveBeenCalled();
+            expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+          });
+
+      it('lowers the goal again for a heavier segment', async () => {
+        // The video quota is in bytes, and the third video segment weighs
+        // three times as much as the others (VBR).  The goal derived from
+        // the light segments is then too high for it, so it is rejected again
+        // once the buffer is down to that goal, and the goal is lowered again.
+        const quotaBytes = 32000;
+        setUpQuota((type, reference) => {
+          if (type != ContentType.VIDEO) {
+            return true;
+          }
+          const segments = segmentData[ContentType.VIDEO].segments;
+          const duration = segmentData[ContentType.VIDEO].segmentDuration;
+          const buffered = mediaSourceEngine.segments[ContentType.VIDEO];
+          let bytesAhead = 0;
+          segments.forEach((segment, i) => {
+            const start = Math.max(i * duration, presentationTimeInSeconds);
+            const end = (i + 1) * duration;
+            if (buffered[i] && end > start) {
+              bytesAhead += segment.byteLength * (end - start) / duration;
+            }
+          });
+          const segment = segments[reference.startTime / duration];
+          return bytesAhead + segment.byteLength <= quotaBytes;
+        });
+        segmentData[ContentType.VIDEO].segments[2] = new ArrayBuffer(30000);
+
+        await play();
+
+        expect(quotaErrors.video).toBeGreaterThan(1);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('VOD drift', () => {
@@ -3838,6 +4390,41 @@ describe('StreamingEngine', () => {
 
       expect(secondRequest.abort).toHaveBeenCalled();
     });
+
+    it('does not fail if segment index is released while creating it',
+        async () => {
+          await prepareForAbort();
+
+          /** @type {shaka.net.NetworkingEngine.PendingRequest} */
+          const secondRequest = lastPendingRequest;
+
+          // The first call to createSegmentIndex() finishes without leaving
+          // a segment index behind, as if the index was closed (for example
+          // by an unload) while it was being created.  Later calls work.
+          const segmentIndex = newVariant.video.segmentIndex;
+          expect(segmentIndex).not.toBe(null);
+          newVariant.video.segmentIndex = null;
+          const firstCall = Promise.withResolvers();
+          let calls = 0;
+          newVariant.video.createSegmentIndex = () => {
+            calls++;
+            if (calls == 1) {
+              return firstCall.promise;
+            }
+            newVariant.video.segmentIndex = segmentIndex;
+            return Promise.resolve();
+          };
+
+          streamingEngine.switchVariant(
+              newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+          firstCall.resolve();
+
+          // The abort decision is skipped, so the pending request goes on.
+          await bufferAndCheck(/* didAbort= */ false);
+
+          expect(secondRequest.abort).not.toHaveBeenCalled();
+          expect(onError).not.toHaveBeenCalled();
+        });
 
     it('still aborts if new segment size unknown', async () => {
       const videoStream = manifest.variants[1].video;

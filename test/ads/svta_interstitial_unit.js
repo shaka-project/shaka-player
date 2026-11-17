@@ -159,6 +159,154 @@ describe('SVTA interstitial playback', () => {
     expect(starts[1].ad.getSequenceLength()).toBe(2);
   });
 
+  describe('with pods and slots carried separately', () => {
+    /**
+     * @param {string} name
+     * @return {!shaka.extern.AdCreativeSignaling.Slot}
+     */
+    function namedSlot(name) {
+      const creative = slot();
+      creative.tracking = [
+        {type: 'impression', urls: [name + '-impression']},
+        {type: 'complete', urls: [name + '-complete']},
+      ];
+      return creative;
+    }
+
+    /**
+     * @param {!Object=} podFields
+     * @param {!Object=} envelopeFields
+     * @return {!shaka.ads.SvtaInterstitialParser.Result}
+     */
+    function parsePod(podFields = {}, envelopeFields = {}) {
+      const pod = Object.assign({start: 0, duration: 20, tracking: [
+        {type: 'podStart', urls: ['pod-start']},
+        {type: 'midpoint', urls: ['pod-midpoint']},
+        {type: 'podEnd', urls: ['pod-end']},
+      ]}, podFields);
+      return shaka.ads.SvtaInterstitialParser.parseInterstitials(
+          Object.assign({version: 2, type: 'pod', payload: [pod]},
+              envelopeFields), 100, 'pod');
+    }
+
+    /**
+     * @param {string} name
+     * @param {number} anchor
+     * @return {!shaka.ads.SvtaInterstitialParser.Result}
+     */
+    function parseSlot(name, anchor) {
+      return shaka.ads.SvtaInterstitialParser.parseInterstitials(
+          {version: 2, type: 'slot', payload: [namedSlot(name)]},
+          anchor, name);
+    }
+
+    /** @param {!shaka.ads.SvtaInterstitialParser.Result} result */
+    async function add(result) {
+      tracker.linkPods(result.pods, result.interstitials);
+      await manager.addInterstitials(result.interstitials);
+    }
+
+    function playPod() {
+      for (let position = 100; position <= 120; position += 5) {
+        advance(position);
+      }
+    }
+
+    /** @return {!Array<string>} */
+    function requested() {
+      return networking.request.calls.allArgs().map((args) => args[1].uris[0]);
+    }
+
+    /** @return {!Array<!shaka.ads.InterstitialAd>} */
+    function startedAds() {
+      return onEvent.calls.allArgs().map((args) => args[0])
+          .filter((event) => event.type == shaka.ads.Utils.AD_STARTED)
+          .map((event) => event.ad);
+    }
+
+    const expected = ['pod-start', 'first-impression', 'pod-midpoint',
+      'first-complete', 'second-impression', 'second-complete', 'pod-end'];
+
+    it('links slots signaled after their pod', async () => {
+      await add(parsePod());
+      await add(parseSlot('first', 100));
+      await add(parseSlot('second', 110));
+      playPod();
+      expect(requested()).toEqual(expected);
+      const ads = startedAds();
+      expect(ads.map((ad) => ad.getPositionInSequence())).toEqual([1, 2]);
+      expect(ads.map((ad) => ad.getSequenceLength())).toEqual([2, 2]);
+    });
+
+    it('links slots signaled before their pod', async () => {
+      await add(parseSlot('second', 110));
+      await add(parseSlot('first', 100));
+      await add(parsePod());
+      playPod();
+      expect(requested()).toEqual(expected);
+      expect(startedAds().map((ad) => ad.getPositionInSequence()))
+          .toEqual([1, 2]);
+    });
+
+    it('measures the pod once when signaling is repeated', async () => {
+      for (let i = 0; i < 2; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        await add(parsePod());
+        // eslint-disable-next-line no-await-in-loop
+        await add(parseSlot('first', 100));
+        // eslint-disable-next-line no-await-in-loop
+        await add(parseSlot('second', 110));
+      }
+      playPod();
+      expect(requested()).toEqual(expected);
+      expect(startedAds().map((ad) => ad.getSequenceLength()))
+          .toEqual([2, 2]);
+    });
+
+    it('resolves remote pod tracking', async () => {
+      networking.setResponseText('pod-remote', JSON.stringify({version: 2,
+        type: 'trackingEvent', payload: [
+          {type: 'podStart', urls: ['remote-pod-start']},
+          {type: 'podEnd', urls: ['remote-pod-end']},
+        ]}));
+      await add(parsePod({$remote: {tracking: 'pod-remote'}},
+          {features: {remoteFields: true}}));
+      await add(parseSlot('first', 100));
+      await add(parseSlot('second', 110));
+      advance(100);
+      await shaka.test.Util.shortDelay(realSetTimeout);
+      for (let position = 105; position <= 120; position += 5) {
+        advance(position);
+      }
+      await shaka.test.Util.shortDelay(realSetTimeout);
+      const urls = requested();
+      expect(urls).toContain('remote-pod-start');
+      expect(urls).toContain('remote-pod-end');
+      expect(urls).not.toContain('pod-start');
+      expect(urls.indexOf('remote-pod-end'))
+          .toBeGreaterThan(urls.indexOf('second-complete'));
+    });
+
+    it('does not link slots outside the pod', async () => {
+      await add(parsePod());
+      const outside = parseSlot('outside', 130);
+      await add(outside);
+      expect(outside.interstitials[0].pod).toBeNull();
+      expect(outside.interstitials[0].podSize).toBe(1);
+    });
+
+    it('does not move slots nested in another pod', async () => {
+      await add(parsePod());
+      const nested = shaka.ads.SvtaInterstitialParser.parseInterstitials(
+          {version: 2, type: 'pod', payload: [
+            {duration: 10, slots: [namedSlot('nested')]},
+          ]}, 100, 'nested');
+      const nestedPod = nested.interstitials[0].pod;
+      await add(nested);
+      expect(nested.interstitials[0].pod).toBe(nestedPod);
+    });
+  });
+
   it('announces skip availability and seeks to the embedded slot end',
       async () => {
         const creative = slot();

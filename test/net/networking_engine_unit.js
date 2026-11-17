@@ -8,7 +8,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   const StatusPromise = shaka.test.StatusPromise;
   const Util = shaka.test.Util;
   const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-  const originalGetBaseUri = shaka.net.NetworkingEngine.getBaseUri_;
+  const originalGetBaseUri = shaka.util.URL.getBaseUri_;
   const originalDefer = shaka.net.Backoff.defer;
 
   /** @type {string} */
@@ -27,7 +27,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   let deferSpy;
 
   beforeAll(() => {
-    shaka.net.NetworkingEngine.getBaseUri_ = () => fakeBaseUri;
+    shaka.util.URL.getBaseUri_ = () => fakeBaseUri;
   });
 
   function makeResolveScheme(spyName) {
@@ -69,7 +69,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   });
 
   afterAll(() => {
-    shaka.net.NetworkingEngine.getBaseUri_ = originalGetBaseUri;
+    shaka.util.URL.getBaseUri_ = originalGetBaseUri;
     shaka.net.Backoff.defer = originalDefer;
   });
 
@@ -95,6 +95,108 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await networkingEngine.request(requestType, request).promise;
       expect(rejectScheme).toHaveBeenCalledTimes(2);
       expect(request.attempt).toBe(1);
+    });
+
+    describe('with a stream data callback', () => {
+      const retryParameters = {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+        stallTimeout: 0,
+        connectionTimeout: 0,
+      };
+
+      /** @type {!Array<!Array<number>>} */
+      let received;
+      /** @type {!Array<?function(BufferSource):!Promise>} */
+      let callbacks;
+
+      beforeEach(() => {
+        received = [];
+        callbacks = [];
+      });
+
+      afterEach(() => {
+        shaka.net.NetworkingEngine.unregisterScheme('stream');
+      });
+
+      /**
+       * Registers a scheme whose attempts stream the given chunks, and fail
+       * all but the last one.
+       *
+       * @param {!Array<!Array<!Array<number>>>} attempts
+       */
+      function registerStreamScheme(attempts) {
+        const plugin = jasmine.createSpy('stream scheme').and.callFake(
+            (uri, request) => {
+              const attempt = callbacks.length;
+              callbacks.push(request.streamDataCallback);
+              const promise = (async () => {
+                for (const chunk of attempts[attempt]) {
+                  // eslint-disable-next-line no-await-in-loop
+                  await request.streamDataCallback(new Uint8Array(chunk));
+                }
+                if (attempt < attempts.length - 1) {
+                  throw error;
+                }
+                return createResponse();
+              })();
+              return new shaka.util.AbortableOperation(
+                  promise, () => Promise.resolve());
+            });
+        shaka.net.NetworkingEngine.registerScheme(
+            'stream', Util.spyFunc(plugin));
+      }
+
+      /** @return {!Promise} */
+      async function streamRequest() {
+        const request = createRequest('stream://foo', retryParameters);
+        request.streamDataCallback = (data) => {
+          received.push(Array.from(shaka.util.BufferUtils.toUint8(data)));
+          return Promise.resolve();
+        };
+        await networkingEngine.request(requestType, request).promise;
+      }
+
+      it('does not deliver the same bytes again on retry', async () => {
+        registerStreamScheme([
+          [[0, 1, 2, 3]],
+          [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1, 2, 3], [4, 5, 6, 7, 8, 9]]);
+      });
+
+      it('skips delivered bytes across chunk boundaries', async () => {
+        registerStreamScheme([
+          [[0, 1], [2, 3, 4]],
+          [[0, 1, 2], [3, 4, 5], [6]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1], [2, 3, 4], [5], [6]]);
+      });
+
+      it('keeps the delivered bytes across several retries', async () => {
+        registerStreamScheme([
+          [[0, 1, 2]],
+          [[0], [1]],
+          [[0, 1, 2, 3, 4]],
+        ]);
+        await streamRequest();
+        expect(received).toEqual([[0, 1, 2], [3, 4]]);
+      });
+
+      it('ignores late data from a failed attempt', async () => {
+        registerStreamScheme([
+          [[0, 1]],
+          [[0, 1, 2, 3]],
+        ]);
+        await streamRequest();
+        await callbacks[0](new Uint8Array([2, 3]));
+        expect(received).toEqual([[0, 1], [2, 3]]);
+      });
     });
 
     it('will retry twice', async () => {
@@ -423,6 +525,47 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await testResolve(secondResolveScheme);
     });
 
+    describe('isStreamingSupported', () => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+
+      it('reports the plugin that handles the scheme', () => {
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(false);
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('streaming')),
+            NetworkingEngine.PluginPriority.PREFERRED,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(true);
+        expect(NetworkingEngine.isStreamingSupported('unknown://foo'))
+            .toBe(false);
+      });
+
+      it('follows the priority of the plugins', () => {
+        const ignored = makeResolveScheme('ignored');
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('application')),
+            NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, /* streamingSupport= */ false);
+        // A streaming plugin of lower priority is not used, so it doesn't
+        // count.
+        NetworkingEngine.registerScheme('resolve', Util.spyFunc(ignored),
+            NetworkingEngine.PluginPriority.PREFERRED,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(false);
+
+        // One of the same or higher priority replaces it.
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('application streaming')),
+            NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(true);
+        expect(ignored).not.toHaveBeenCalled();
+      });
+    });
+
     it('can unregister scheme', async () => {
       shaka.net.NetworkingEngine.unregisterScheme('resolve');
       await expectAsync(
@@ -495,7 +638,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       }
 
       it('infers a scheme for // URIs', async () => {
-        expect(await requestedUri('//foo')).toBe('resolve://foo');
+        // Use a non-empty path: older Chromium (e.g. Chromecast) serializes
+        // an empty path in a non-special scheme as '/', newer ones as ''.
+        expect(await requestedUri('//foo/bar.mpd'))
+            .toBe('resolve://foo/bar.mpd');
       });
 
       it('keeps the port of // URIs', async () => {

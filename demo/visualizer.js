@@ -360,5 +360,6 @@ shakaDemo.Visualizer = class {
 /**
  * How often the visualizer should update, in seconds.
  * @const {number}
+ * @private
  */
 shakaDemo.Visualizer.updateFrequency_ = 0.05;

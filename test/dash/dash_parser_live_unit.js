@@ -721,6 +721,30 @@ describe('DashParser Live', () => {
 
     expect(tickAfter).toHaveBeenCalledTimes(1);
     const delay = tickAfter.calls.mostRecent().args[0];
+    // A zero @minimumUpdatePeriod gets a 1 second floor.
+    expect(delay).toBe(1);
+  });
+
+  it('honors a zero updatePeriod override', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime= */ 0);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.updatePeriod = 0;
+    parser.configure(config);
+
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    await parser.start('https://foo', playerInterface);
+
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+    const delay = tickAfter.calls.mostRecent().args[0];
     expect(delay).toBe(0);
   });
 

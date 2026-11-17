@@ -31,7 +31,10 @@ shaka.ui.ContentTitle = class extends shaka.ui.Element {
     /** @private {shaka.extern.IQueueManager} */
     this.queueManager_ = this.controls.getQueueManager();
 
-    /** @type {!HTMLElement} */
+    /**
+     * @type {!HTMLElement}
+     * @private
+     */
     this.title_ = shaka.util.Dom.createHTMLElement('div');
     this.title_.classList.add('shaka-content-title');
     this.title_.setAttribute('role', 'heading');

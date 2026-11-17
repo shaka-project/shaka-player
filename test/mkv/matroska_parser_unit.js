@@ -301,10 +301,9 @@ describe('MatroskaParser', () => {
         await stream.createSegmentIndex();
         const references = getReferences(stream);
         expect(references.length).toBeGreaterThan(1);
+        const shift = shaka.mkv.MatroskaConstants.MEDIA_TIME_SHIFT;
         for (const reference of references) {
-          expect(reference.timestampOffset).toBe(rawSupported ?
-              // eslint-disable-next-line @stylistic/max-len
-              reference.startTime : -shaka.mkv.MatroskaConstants.MEDIA_TIME_SHIFT);
+          expect(reference.timestampOffset).toBe(rawSupported ? 0 : -shift);
         }
       });
     }

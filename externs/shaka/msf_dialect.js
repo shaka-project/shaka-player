@@ -114,11 +114,14 @@ shaka.extern.MsfSession = class {
    *   SUBSCRIPTION_FILTER parameter, draft-20 in LOCATION_FILTER. A publisher
    *   may still refuse it, in which case the subscription fails rather than
    *   silently starting somewhere else.
-   * @param {boolean=} joinCurrentGroup Also deliver the Group the live edge
-   *   is in from its first Object, rather than only what comes after the
-   *   subscription starts. MSF requires it of the catalog, whose current
-   *   state is the first Object of the latest Group plus the ones after it.
-   *   Draft-18 does it with a Joining FETCH and draft-20 with FILL_PARAMETERS;
+   * @param {boolean=} joinCurrentGroup Also deliver what was published before
+   *   the subscription: the Group the live edge is in from its first Object,
+   *   or, with a startLocation, everything from the start of its Group, since
+   *   a subscription only forwards what is published after it. MSF requires
+   *   it of the catalog, whose current state is the first Object of the
+   *   latest Group plus the ones after it, and a seek needs it to get older
+   *   media at all. Draft-18 does it with a Joining FETCH (Absolute for a
+   *   startLocation) and draft-20 with FILL_PARAMETERS;
    *   the Objects arrive on the same callback as the subscription's, in
    *   Location order and without repeats. A session that cannot do it, or
    *   whose publisher does not answer in time, delivers only what the

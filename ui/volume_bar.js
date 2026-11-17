@@ -55,6 +55,8 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
           'loaded',
           'unloading',
           'trackschanged',
+          'variantchanged',
+          'adaptation',
         ], () => {
           this.checkAvailability();
         });
@@ -62,6 +64,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(this.controls,
         'caststatuschanged',
         () => this.onPresentationVolumeChange_());
+
+    shaka.ui.Utils.onForcedColorsChange(
+        this.eventManager, () => this.updateColors_());
 
     this.eventManager.listenMulti(this.adManager,
         [shaka.ads.Utils.AD_VOLUME_CHANGED, shaka.ads.Utils.AD_MUTED],
@@ -115,6 +120,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     }
 
     this.updateColors_();
+    this.updateValueText_();
   }
 
   /** @private */
@@ -125,23 +131,41 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     const volume = this.ad.getVolume();
     this.setValue(volume * 100);
     this.updateColors_();
+    this.updateValueText_();
   }
 
   /** @private */
   updateColors_() {
-    const colors = this.config_.volumeBarColors;
-    const gradient = ['to right'];
-    gradient.push(colors.level + this.getValue() + '%');
-    gradient.push(colors.base + this.getValue() + '%');
-    gradient.push(colors.base + '100%');
-
-    this.container.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
+    let colors = this.config_.volumeBarColors;
+    if (shaka.ui.Utils.isForcedColorsActive()) {
+      colors = {base: 'CanvasText', level: 'Highlight'};
+    }
+    const value = this.getValue();
+    this.container.style.background = 'linear-gradient(to right, ' +
+        `${colors.level} ${value}%, ${colors.base} ${value}%, ` +
+        `${colors.base} 100%)`;
   }
 
   /** @override */
   updateLocalizedStrings() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
+    this.updateValueText_();
+  }
+
+  /**
+   * Gives screen readers the volume as a percentage instead of the raw
+   * value of the bar, which may have many decimals.
+   *
+   * @private
+   */
+  updateValueText_() {
+    const text = shaka.ui.Utils.buildPercentString(this.getValue() / 100,
+        Array.from(this.localization.getCurrentLocales()));
+    if (text == null) {
+      this.bar.removeAttribute('aria-valuetext');
+    } else {
+      this.bar.setAttribute('aria-valuetext', text);
+    }
   }
 
   /** @override */
@@ -150,7 +174,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     if (this.ad && this.ad.isLinear()) {
       // We can't tell if the Ad has audio or not.
       available = true;
-    } else if (this.player.isVideoOnly()) {
+    } else if (this.player.isPlayingVideoOnly()) {
       available = false;
     }
     shaka.ui.Utils.setDisplay(this.container, available);

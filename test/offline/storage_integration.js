@@ -18,6 +18,7 @@ function drmStorageSupport() {
 }
 
 filterDescribe('Storage', storageSupport, () => {
+  const OfflineUtils = shaka.test.OfflineUtils;
   const Util = shaka.test.Util;
 
   const englishUS = 'en-us';
@@ -1255,6 +1256,535 @@ filterDescribe('Storage', storageSupport, () => {
       await storage.remove(uri.toString());
     });
 
+    it('removes orphaned segments', async () => {
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
+
+      /** @type {!Array<number>} */
+      const ownedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(ownedKeys.length).toBeGreaterThan(0);
+
+      // Store segments that no manifest references, like the ones left by a
+      // download interrupted by closing the page.
+      const orphanedKeys = await withActiveCell((cell) => cell.addSegments([
+        OfflineUtils.createSegmentData([0]),
+        OfflineUtils.createSegmentData([0, 1]),
+      ]));
+
+      expect(await storage.removeOrphanedSegments()).toBe(2);
+
+      /** @type {!Array<number>} */
+      const remainingKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(remainingKeys).toEqual(ownedKeys);
+      for (const key of orphanedKeys) {
+        expect(remainingKeys).not.toContain(key);
+      }
+
+      // The stored content is untouched, and there is nothing left to remove.
+      expect((await storage.list()).length).toBe(1);
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+    });
+
+    it('removes orphaned segments and EME sessions', async () => {
+      await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      /** @type {!Array<number>} */
+      const ownedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      await withActiveCell((cell) => cell.addSegments([
+        OfflineUtils.createSegmentData([0]),
+      ]));
+
+      expect(await storage.removeOrphans()).toBe(true);
+
+      /** @type {!Array<number>} */
+      const remainingKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(remainingKeys).toEqual(ownedKeys);
+    });
+
+    it('references stored segments before the download ends', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      // The stored content references every segment stored so far, so none of
+      // them would be orphaned if the download were interrupted now.
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDB = await waitForReferencedSegments(3);
+      expect(manifestDB.isIncomplete).toBe(true);
+      /** @type {!Array<number>} */
+      const storedKeys =
+          await withActiveCell((cell) => cell.getAllSegmentKeys());
+      expect(getReferencedSegmentKeys(manifestDB))
+          .toEqual(jasmine.arrayWithExactContents(storedKeys));
+
+      /** @type {!Array<shaka.extern.StoredContent>} */
+      const contents = await storage.list();
+      expect(contents.length).toBe(1);
+      expect(contents[0].isIncomplete).toBe(true);
+      expect(contents[0].size).toBe(3 * 16);
+
+      lastSegment.resolve();
+      const stored = await storeOperation.promise;
+      expect(stored.isIncomplete).toBe(false);
+      expect(stored.size).toBe(4 * 16);
+    });
+
+    it('removes referenced segments if aborted mid-store', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+
+      const abort = storeOperation.abort();
+      lastSegment.resolve();
+      await abort;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
+
+      expect(await storage.list()).toEqual([]);
+      expect(await withActiveCell((cell) => cell.getAllSegmentKeys()))
+          .toEqual([]);
+    });
+
+    it('pauses and resumes a download', async () => {
+      /** @type {!Array<?string>} */
+      const progressUris = [];
+      storage.configure('offline.progressCallback', (content, progress) => {
+        progressUris.push(content.offlineUri);
+      });
+
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+
+      // The URI of the content is known while it is being downloaded.
+      const contentUri = (await storage.list())[0].offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+      expect(progressUris).toContain(contentUri);
+
+      const pause = storage.pause(contentUri);
+      lastSegment.resolve();
+      await pause;
+
+      /** @type {shaka.extern.StoredContent} */
+      const paused = await storeOperation.promise;
+      expect(paused.offlineUri).toBe(contentUri);
+      expect(paused.isIncomplete).toBe(true);
+      expect(paused.size).toBe(3 * 16);
+
+      // Only the segment that is missing is downloaded.
+      netEngine.setResponseValue(segment4Uri, new ArrayBuffer(16));
+      netEngine.request.calls.reset();
+      /** @type {shaka.extern.StoredContent} */
+      const resumed =
+          await storage.resume(contentUri, fakeMimeType).promise;
+      expect(resumed.offlineUri).toBe(contentUri);
+      expect(resumed.isIncomplete).toBe(false);
+      expect(resumed.size).toBe(4 * 16);
+      expect(netEngine.request).toHaveBeenCalledOnceWith(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          jasmine.objectContaining({uris: [segment4Uri]}));
+
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+      /** @type {!Array<shaka.extern.StoredContent>} */
+      const contents = await storage.list();
+      expect(contents.length).toBe(1);
+      expect(contents[0].isIncomplete).toBe(false);
+    });
+
+    it('resumes a download interrupted by closing the page', async () => {
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      const contentUri = stored.offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+      await unstoreLastSegment(contentUri);
+
+      netEngine.request.calls.reset();
+      /** @type {shaka.extern.StoredContent} */
+      const resumed =
+          await storage.resume(contentUri, fakeMimeType).promise;
+      expect(resumed.isIncomplete).toBe(false);
+      expect(resumed.size).toBe(4 * 16);
+      expect(netEngine.request).toHaveBeenCalledOnceWith(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          jasmine.objectContaining({uris: [segment4Uri]}));
+    });
+
+    it('resolves right away when resuming complete content', async () => {
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri, 'The content should have a URI!');
+
+      netEngine.request.calls.reset();
+      /** @type {shaka.extern.StoredContent} */
+      const resumed =
+          await storage.resume(stored.offlineUri, fakeMimeType).promise;
+      expect(resumed).toEqual(stored);
+      expect(netEngine.request).not.toHaveBeenCalled();
+    });
+
+    it('does not resume content whose segments changed', async () => {
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      const contentUri = stored.offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+      // No segment of the manifest starts at this time.
+      await unstoreLastSegment(contentUri, (segment) => {
+        segment.startTime += 0.5;
+      });
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.CANNOT_RESUME_CHANGED_CONTENT,
+          contentUri));
+      await expectAsync(storage.resume(contentUri, fakeMimeType).promise)
+          .toBeRejectedWith(expected);
+
+      // The content is kept, so that it can be removed.
+      /** @type {!Array<shaka.extern.StoredContent>} */
+      const contents = await storage.list();
+      expect(contents.length).toBe(1);
+      expect(contents[0].isIncomplete).toBe(true);
+    });
+
+    it('does not resume content that is being downloaded', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+      const contentUri = (await storage.list())[0].offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.CANNOT_RESUME_WHILE_STORING,
+          contentUri));
+      await expectAsync(storage.resume(contentUri, fakeMimeType).promise)
+          .toBeRejectedWith(expected);
+
+      lastSegment.resolve();
+      const stored = await storeOperation.promise;
+      expect(stored.isIncomplete).toBe(false);
+    });
+
+    it('does not resume content downloaded in another page', async () => {
+      if (!navigator.locks) {
+        pending('The Web Locks API is not available.');
+      }
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri, 'The content should have a URI!');
+      const contentUri = stored.offlineUri;
+      await unstoreLastSegment(contentUri);
+
+      // Hold the lock that another page would hold while downloading it.
+      await withLock('shaka-offline-content:' + contentUri, async () => {
+        const expected = Util.jasmineError(new shaka.util.Error(
+            shaka.util.Error.Severity.RECOVERABLE,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.CANNOT_RESUME_WHILE_STORING,
+            contentUri));
+        await expectAsync(storage.resume(contentUri, fakeMimeType).promise)
+            .toBeRejectedWith(expected);
+      });
+
+      const resumed =
+          await storage.resume(contentUri, fakeMimeType).promise;
+      expect(resumed.isIncomplete).toBe(false);
+    });
+
+    it('does not remove orphans while another page stores', async () => {
+      if (!navigator.locks) {
+        pending('The Web Locks API is not available.');
+      }
+      // Hold the lock that another page would hold while downloading.
+      await withLock('shaka-offline-storing', async () => {
+        const expected = Util.jasmineError(new shaka.util.Error(
+            shaka.util.Error.Severity.RECOVERABLE,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.CANNOT_REMOVE_ORPHANS_WHILE_STORING));
+        await expectAsync(storage.removeOrphanedSegments())
+            .toBeRejectedWith(expected);
+      });
+
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+    });
+
+    it('waits for segments that are being downloaded', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+      const contentUri = (await storage.list())[0].offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+
+      // The last segment of each stream.
+      const pendingUris = await getPendingSegmentUris(contentUri);
+      expect(pendingUris.length).toBeGreaterThan(0);
+
+      let fetched = false;
+      const fetches = Promise.all(pendingUris.map((uri) => {
+        return fetchOfflineSegment(uri).promise;
+      })).then((responses) => {
+        fetched = true;
+        return responses;
+      });
+      await Util.delay(0.7);
+      expect(fetched).toBe(false);
+
+      lastSegment.resolve();
+      for (const response of await fetches) {
+        expect(response.data.byteLength).toBe(16);
+      }
+      await storeOperation.promise;
+    });
+
+    it('fails for segments of paused downloads', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+      const contentUri = (await storage.list())[0].offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+      const pendingUris = await getPendingSegmentUris(contentUri);
+
+      // A request made while the content is downloading fails once the
+      // download is paused.
+      const fetch = fetchOfflineSegment(pendingUris[0]).promise;
+      const pause = storage.pause(contentUri);
+      lastSegment.resolve();
+      await pause;
+      await storeOperation.promise;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.SEGMENT_NOT_STORED,
+          contentUri));
+      await expectAsync(fetch).toBeRejectedWith(expected);
+      await expectAsync(fetchOfflineSegment(pendingUris[0]).promise)
+          .toBeRejectedWith(expected);
+    });
+
+    it('stops waiting for a segment when aborted', async () => {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const lastSegment = blockSegment(segment4Uri);
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await waitForReferencedSegments(3);
+      const contentUri = (await storage.list())[0].offlineUri;
+      goog.asserts.assert(contentUri, 'The content should have a URI!');
+      const pendingUris = await getPendingSegmentUris(contentUri);
+
+      const fetch = fetchOfflineSegment(pendingUris[0]);
+      await fetch.abort();
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(fetch.promise).toBeRejectedWith(expected);
+
+      lastSegment.resolve();
+      await storeOperation.promise;
+    });
+
+    /**
+     * @param {string} contentUri
+     * @return {!Promise<!Array<string>>}  The uris of the segments of the
+     *   stored content that are not stored yet, as the player sees them.
+     */
+    async function getPendingSegmentUris(contentUri) {
+      const uri = shaka.offline.OfflineUri.parse(contentUri);
+      goog.asserts.assert(uri, 'The URI should be valid!');
+      const manifestDB = await withActiveCell(async (cell) => {
+        return (await cell.getManifests([uri.key()]))[0];
+      });
+      const converter = new shaka.offline.ManifestConverter(
+          uri.mechanism(), uri.cell(), uri.key());
+      const manifest = converter.fromManifestDB(manifestDB);
+
+      /** @type {!Set<string>} */
+      const uris = new Set();
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.audio, variant.video]) {
+          for (const ref of stream ? stream.segmentIndex : []) {
+            uris.add(ref.getUris()[0]);
+          }
+        }
+      }
+      return Array.from(uris).filter((uri) => {
+        return uri.startsWith('offline:pending');
+      });
+    }
+
+    /**
+     * @param {string} uri
+     * @return {!shaka.extern.IAbortableOperation<shaka.extern.Response>}
+     */
+    function fetchOfflineSegment(uri) {
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], shaka.net.NetworkingEngine.defaultRetryParameters());
+      return shaka.offline.OfflineScheme.plugin(
+          uri, request, shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          () => {});
+    }
+
+    /**
+     * Marks the last segment of stored content as not stored, as if the page
+     * had been closed before it was downloaded.
+     *
+     * @param {string} contentUri
+     * @param {function(shaka.extern.SegmentDB)=} modify
+     * @return {!Promise}
+     */
+    async function unstoreLastSegment(contentUri, modify) {
+      const uri = shaka.offline.OfflineUri.parse(contentUri);
+      goog.asserts.assert(uri, 'The URI should be valid!');
+      await withActiveCell(async (cell) => {
+        const manifestDB = (await cell.getManifests([uri.key()]))[0];
+        /** @type {!Set<number>} */
+        const dataKeys = new Set();
+        for (const stream of manifestDB.streams) {
+          const segment = stream.segments[stream.segments.length - 1];
+          dataKeys.add(segment.dataKey);
+          segment.pendingSegmentRefId = 'last-segment';
+          if (modify) {
+            modify(segment);
+          }
+        }
+        manifestDB.isIncomplete = true;
+        manifestDB.size -= 16;
+        await cell.updateManifest(uri.key(), manifestDB);
+        await cell.removeSegments(Array.from(dataKeys), (key) => {});
+      });
+    }
+
+    /**
+     * Holds a Web Lock while running |callback|.
+     *
+     * @param {string} name
+     * @param {function():!Promise} callback
+     * @return {!Promise}
+     */
+    async function withLock(name, callback) {
+      await navigator.locks.request(name, async (lock) => {
+        await callback();
+      });
+    }
+
+    /**
+     * Makes the request for the given segment wait until the returned promise
+     * is resolved.
+     *
+     * @param {string} uri
+     * @return {!Promise.PromiseWithResolvers}
+     */
+    function blockSegment(uri) {
+      /** @type {!Promise.PromiseWithResolvers} */
+      const block = Promise.withResolvers();
+      netEngine.setResponse(uri, async () => {
+        await block.promise;
+        return new ArrayBuffer(16);
+      });
+      return block;
+    }
+
+    /**
+     * Waits until the only stored content references at least the given
+     * number of segments.
+     *
+     * @param {number} count
+     * @return {!Promise<shaka.extern.ManifestDB>}
+     */
+    async function waitForReferencedSegments(count) {
+      /* eslint-disable no-await-in-loop */
+      for (let attempt = 0; attempt < 100; attempt++) {
+        /** @type {!Array<shaka.extern.ManifestDB>} */
+        const manifests = await withActiveCell(async (cell) => {
+          return Array.from((await cell.getAllManifests()).values());
+        });
+        if (manifests.length) {
+          expect(manifests.length).toBe(1);
+          if (getReferencedSegmentKeys(manifests[0]).length >= count) {
+            return manifests[0];
+          }
+        }
+        await Util.shortDelay();
+      }
+      /* eslint-enable no-await-in-loop */
+      throw new Error('The stored content references too few segments');
+    }
+
+    /**
+     * @param {shaka.extern.ManifestDB} manifestDB
+     * @return {!Array<number>}
+     */
+    function getReferencedSegmentKeys(manifestDB) {
+      /** @type {!Set<number>} */
+      const keys = new Set();
+      for (const stream of manifestDB.streams) {
+        for (const segment of stream.segments) {
+          if (!segment.pendingSegmentRefId) {
+            keys.add(segment.dataKey);
+          }
+          if (segment.initSegmentKey != null &&
+              !segment.pendingInitSegmentRefId) {
+            keys.add(segment.initSegmentKey);
+          }
+        }
+      }
+      return Array.from(keys);
+    }
+
+    it('does not remove orphaned segments while storing', async () => {
+      // Block the network so that the store will not finish.  The segments
+      // stored in the meantime may not be referenced by its manifest yet.
+      /** @type {!Promise.PromiseWithResolvers} */
+      const hangingPromise = netEngine.delayNextRequest();
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.CANNOT_REMOVE_ORPHANS_WHILE_STORING));
+      await expectAsync(storage.removeOrphanedSegments())
+          .toBeRejectedWith(expected);
+      await expectAsync(storage.removeOrphans()).toBeRejectedWith(expected);
+
+      hangingPromise.resolve();
+      await storeOperation.promise;
+
+      expect(await storage.removeOrphanedSegments()).toBe(0);
+      expect((await storage.list()).length).toBe(1);
+    });
+
     it('tracks progress on remove', async () => {
       const selectOneTrack = (tracks) => {
         const allVariants = tracks.filter((t) => {
@@ -1678,6 +2208,24 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
         .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
         .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
+  }
+
+  /**
+   * @param {function(shaka.extern.StorageCell):!Promise<T>} action
+   * @return {!Promise<T>}
+   * @template T
+   */
+  async function withActiveCell(action) {
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      return await action(handle.cell);
+    } finally {
+      await muxer.destroy();
+    }
   }
 
   async function eraseStorage() {

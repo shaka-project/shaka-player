@@ -210,8 +210,9 @@ The following buttons can be added to the overflow menu:
   text track.
 * captions-style-reset: adds a button that restores the default style of the
   captions (font family, font color, font opacity, size, background color,
-  background opacity, character edge style and position). The button is visible only if the content has at
-  least one text track.
+  background opacity, window color, window opacity, character edge style and
+  position), as given by the `captionsStyleDefaults` configuration. The button
+  is visible only if the content has at least one text track.
 * queue: adds a button that opens a menu listing all items in the playback queue.
   Each item displays its title and, if available, a poster thumbnail. The currently
   playing item is highlighted with a checkmark. The button is visible only if there
@@ -419,6 +420,34 @@ const config = {
 }
 ui.configure(config);
 ```
+
+#### Configuring the default style of the captions
+The `captions-style-reset` button restores the style in
+`captionsStyleDefaults`.  It holds settings of the `textDisplayer`
+configuration of the player, and only the style settings are used: font scale
+factor, position area, font family, font variant, font color, font opacity,
+background color, background opacity, window color, window opacity and
+character edge style.  A style setting that is not given is restored to the
+default value of the player.  By default, `captionsStyleDefaults` is empty, so
+the button restores the default style of the player.
+
+The UI does not apply this style when it starts, so give it to the player too:
+
+```js
+ui.configure({
+  'captionsStyleDefaults': {
+    fontColor: '#fff',
+    backgroundOpacity: 0,
+    characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
+  },
+});
+player.configure({
+  textDisplayer: ui.getConfiguration().captionsStyleDefaults,
+});
+```
+
+The style menus show the colors of their presets, like `'#fff'`, by their
+localized name, and other colors as they are given.
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.

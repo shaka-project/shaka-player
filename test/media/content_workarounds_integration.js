@@ -145,6 +145,15 @@ describe('ContentWorkarounds', () => {
       // longer than 30 seconds, fail the test.
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
 
+      // With pattern encryption (cbcs), most of each frame is in the clear, so
+      // some platforms (e.g. Safari) keep playing before the key arrives.
+      // Reaching the playhead goal does not mean the license is done, so wait
+      // for the key status as well.
+      if (!keyStatusSpy.calls.any()) {
+        await waiter.timeoutAfter(10).failOnTimeout(true)
+            .waitForEvent(player, 'keystatuschanged');
+      }
+
       // Check did we have key status change.
       expect(keyStatusSpy).toHaveBeenCalled();
     });

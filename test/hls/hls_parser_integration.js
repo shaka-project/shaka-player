@@ -279,7 +279,7 @@ describe('HlsParser', () => {
     await player.unload();
   });
 
-  it('plays all combinations of video and audio renditions', async () => {
+  it('plays every video and audio rendition', async () => {
     // This asset has two EXT-X-STREAM-INF tags with both AUDIO and VIDEO
     // attributes: 2 resolutions x 3 video renditions (RED has no URI, so it
     // is the variant's own stream) x 3 audio renditions = 18 variants.
@@ -311,14 +311,27 @@ describe('HlsParser', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play every combination from the beginning.
-    for (const variant of variants) {
-      player.selectVariantTrack(variant, /* clearBuffer= */ true);
-      video.currentTime = 0;
-      // eslint-disable-next-line no-await-in-loop
-      await waiter.waitForMovementOrFailOnTimeout(video, 10);
-      const active = player.getVariantTracks().find((t) => t.active);
-      expect(active.id).toBe(variant.id);
+    // Play every video stream from the beginning, each with the next audio
+    // rendition, so that every stream of the asset is played.  The pairing of
+    // renditions into variants is covered by HlsParser unit tests, without the
+    // cost of restarting playback for all 18 variants, which takes most of a
+    // minute on slow devices.
+    const audioLabels = ['Original 128k', 'High Pitch 128k', 'Low Pitch 128k'];
+    let audioIndex = 0;
+    for (const height of [720, 360]) {
+      for (const videoLabel of ['RED', 'GREEN', 'BLUE']) {
+        const audioLabel = audioLabels[audioIndex % audioLabels.length];
+        audioIndex++;
+        const variant = variants.find((v) => v.height == height &&
+            v.videoLabel == videoLabel && v.label == audioLabel);
+        goog.asserts.assert(variant, 'Must have every combination');
+        player.selectVariantTrack(variant, /* clearBuffer= */ true);
+        video.currentTime = 0;
+        // eslint-disable-next-line no-await-in-loop
+        await waiter.waitForMovementOrFailOnTimeout(video, 10);
+        const active = player.getVariantTracks().find((t) => t.active);
+        expect(active.id).toBe(variant.id);
+      }
     }
 
     await player.unload();
@@ -382,9 +395,15 @@ describe('HlsParser', () => {
     // audio and the video, otherwise they are out of sync.
     const activeVariant = player.getManifest().variants.find(
         (variant) => variant.id == activeTrack.id);
-    const getStartTimesBySequence = (stream) => {
+    const getStartTimesBySequence = async (stream) => {
+      // After an ABR switch, the segment index of the new stream is created
+      // asynchronously, so it may not exist yet.
+      if (!stream.segmentIndex) {
+        await stream.createSegmentIndex();
+      }
       const startTimes = new Map();
       const segmentIndex = stream.segmentIndex;
+      goog.asserts.assert(segmentIndex, 'segment index must be non-null');
       const firstPosition = segmentIndex.getNumEvicted();
       const endPosition = firstPosition + segmentIndex.getNumReferences();
       for (let position = firstPosition; position < endPosition; position++) {
@@ -394,8 +413,8 @@ describe('HlsParser', () => {
       }
       return startTimes;
     };
-    const videoStartTimes = getStartTimesBySequence(activeVariant.video);
-    const audioStartTimes = getStartTimesBySequence(activeVariant.audio);
+    const videoStartTimes = await getStartTimesBySequence(activeVariant.video);
+    const audioStartTimes = await getStartTimesBySequence(activeVariant.audio);
     expect(audioStartTimes.size).toBeGreaterThan(0);
     for (const [sequence, startTime] of audioStartTimes) {
       expect(startTime).withContext('sequence ' + sequence)

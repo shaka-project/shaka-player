@@ -39,8 +39,9 @@ shaka.extern.OfflineSupport;
  *
  * @property {?string} offlineUri
  *   An offline URI to access the content. This can be passed directly to
- *   Player. If the uri is null, it means that the content has not finished
- *   downloading and is not ready to play.
+ *   Player once the content is complete, and to Storage's pause(), resume()
+ *   and remove() methods.  It is null only in progress updates sent before the
+ *   content has been created in storage.
  * @property {string} originalManifestUri
  *   The original manifest URI of the content stored.
  * @property {number} duration
@@ -55,8 +56,9 @@ shaka.extern.OfflineSupport;
  * @property {Object} appMetadata
  *   The metadata passed to store().
  * @property {boolean} isIncomplete
- *   If true, the content is still downloading.  Manifests with this set cannot
- *   be played yet.
+ *   If true, the content is still downloading, or its download was paused or
+ *   interrupted, and can be resumed with Storage's resume() method.  Manifests
+ *   with this set cannot be played yet.
  * @exportDoc
  */
 shaka.extern.StoredContent;
@@ -392,6 +394,19 @@ shaka.extern.StorageCell = class {
    * @return {!Promise<!Array<shaka.extern.SegmentDataDB>>}
    */
   getSegments(keys) {}
+
+  /**
+   * Get the keys of all the segments stored in this cell.  Since these are
+   * only the keys and not the segment data, it is assumed that it is feasible
+   * to have them all in memory at one time.
+   *
+   * This is used to find segments that no manifest references any more, so
+   * they can be removed.  If a cell does not implement it, its orphaned
+   * segments will not be removed.
+   *
+   * @return {!Promise<!Array<number>>}
+   */
+  getAllSegmentKeys() {}
 
   /**
    * Add a group of manifests. Will return a promise that resolves with a list

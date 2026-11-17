@@ -36,7 +36,7 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
     this.toggleStereoscopicButton_.classList.add(
         'shaka-toggle-stereoscopic-button');
     this.toggleStereoscopicButton_.classList.add('shaka-tooltip');
-    this.toggleStereoscopicButton_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.toggleStereoscopicButton_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.toggleStereoscopicIcon_ = new shaka.ui.Icon(
@@ -67,8 +67,8 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
         return;
       }
       vr.toggleStereoscopicMode();
-      this.toggleStereoscopicButton_.ariaPressed =
-          vr.isStereoscopicModeEnabled() ? 'true' : 'false';
+      shaka.ui.Utils.setPressed(this.toggleStereoscopicButton_,
+          vr.isStereoscopicModeEnabled());
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {

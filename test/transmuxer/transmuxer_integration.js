@@ -286,6 +286,70 @@ describe('Transmuxer Player', () => {
       await player.unload();
     });
 
+    it('H.264 in TS with GOPs that span segments', async () => {
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Tizen 3 throws 3016 with this content');
+      }
+      // Every other segment starts in the middle of a GOP, without parameter
+      // sets or a key frame.
+      await player.load(
+          '/base/test/test/assets/hls-ts-h264-gop-spans-segments/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play to the end, past every segment boundary.  If that takes longer
+      // than 30 seconds, the checks below fail the test.
+      await waiter.waitForEndOrTimeout(video, 30);
+      expect(video.currentTime).toBeGreaterThan(3.5);
+      // Every segment made it into the buffer.  One dropped for starting in
+      // the middle of a GOP would leave a gap that playback jumps over.
+      expect(video.buffered.length).toBe(1);
+      expect(video.buffered.end(0) - video.buffered.start(0))
+          .toBeGreaterThan(3.5);
+
+      await player.unload();
+    });
+
+    it('H.265 in TS with GOPs that span segments', async () => {
+      if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
+          /* width= */ 640, /* height= */ 360)) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      if (deviceDetected.getDeviceName() === 'Tizen' &&
+          deviceDetected.getVersion() === 3) {
+        pending('Tizen 3 throws 3016 with this content');
+      }
+      // Every other segment starts in the middle of a GOP, without parameter
+      // sets or a key frame.
+      await player.load(
+          '/base/test/test/assets/hls-ts-h265-gop-spans-segments/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+      expect(player.getVideoTracks().length).toBe(1);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play to the end, past every segment boundary.  If that takes longer
+      // than 30 seconds, the checks below fail the test.
+      await waiter.waitForEndOrTimeout(video, 30);
+      expect(video.currentTime).toBeGreaterThan(3.5);
+      // Every segment made it into the buffer.  One dropped for starting in
+      // the middle of a GOP would leave a gap that playback jumps over.
+      expect(video.buffered.length).toBe(1);
+      expect(video.buffered.end(0) - video.buffered.start(0))
+          .toBeGreaterThan(3.5);
+
+      await player.unload();
+    });
+
     it('H.265 in TS', async () => {
       if (!await Util.isTypeSupported('video/mp4; codecs="hvc1.2.4.L123.B0"',
           /* width= */ 640, /* height= */ 360)) {

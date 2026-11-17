@@ -20,8 +20,9 @@ shaka.ui.Utils = class {
    * @param {!HTMLElement} element
    * @param {string} className
    * @return {!HTMLElement}
+   * @private
    */
-  static getFirstDescendantWithClassName(element, className) {
+  static getFirstDescendantWithClassName_(element, className) {
     // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 
     const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
@@ -78,6 +79,58 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Gives the buttons placed directly in a menu the role of a menu item, so
+   * that the menu only contains menu items.  Toggle buttons become menu item
+   * checkboxes, which report their state with aria-checked instead of
+   * aria-pressed.  Buttons that already have a role keep it.
+   *
+   * @param {!HTMLElement} menu
+   */
+  static setMenuItemRoles(menu) {
+    for (const node of Array.from(menu.childNodes)) {
+      if (node.nodeName != 'BUTTON') {
+        continue;
+      }
+      const child = /** @type {!HTMLElement} */ (node);
+      if (child.hasAttribute('role')) {
+        continue;
+      }
+      if (child.hasAttribute('aria-pressed') &&
+          !child.hasAttribute('aria-haspopup')) {
+        child.setAttribute('role', 'menuitemcheckbox');
+        child.setAttribute('aria-checked', child.getAttribute('aria-pressed'));
+      } else {
+        child.setAttribute('role', 'menuitem');
+      }
+      // aria-pressed is only allowed on buttons.  A menu item that opens a
+      // submenu shows its state in its label instead.
+      child.removeAttribute('aria-pressed');
+    }
+  }
+
+
+  /**
+   * Sets the state of a toggle button, which may be a menu item checkbox.
+   * See setMenuItemRoles().
+   *
+   * @param {!HTMLElement} button
+   * @param {boolean} pressed
+   */
+  static setPressed(button, pressed) {
+    switch (button.getAttribute('role')) {
+      case 'menuitemcheckbox':
+        button.setAttribute('aria-checked', pressed.toString());
+        break;
+      case 'menuitem':
+        break;
+      default:
+        button.setAttribute('aria-pressed', pressed.toString());
+        break;
+    }
+  }
+
+
+  /**
    * Clears out a submenu, preserving its "back to overflow menu" button so
    * the submenu can be rebuilt from scratch.
    *
@@ -85,7 +138,7 @@ shaka.ui.Utils = class {
    */
   static clearMenuKeepingBackButton(menu) {
     // 1. Save the back to menu button.
-    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+    const backButton = shaka.ui.Utils.getFirstDescendantWithClassName_(
         menu, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything.
@@ -106,6 +159,42 @@ shaka.ui.Utils = class {
     iconElement.classList.add('shaka-chosen-item');
 
     return iconElement;
+  }
+
+
+  /**
+   * Whether the browser is in forced colors mode (e.g. Windows high contrast).
+   *
+   * In that mode the browser drops the background gradients that range
+   * elements use to paint their progress, so their containers opt out of
+   * forced colors in CSS and must be painted with system colors instead of
+   * the configured ones.
+   *
+   * @return {boolean}
+   */
+  static isForcedColorsActive() {
+    return !!window.matchMedia &&
+        window.matchMedia('(forced-colors: active)').matches;
+  }
+
+
+  /**
+   * Calls the callback when the browser enters or leaves forced colors mode.
+   *
+   * @param {!shaka.util.EventManager} eventManager
+   * @param {function()} callback
+   */
+  static onForcedColorsChange(eventManager, callback) {
+    if (!window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(forced-colors: active)');
+    // Old browsers (e.g. Safari < 14) only support the deprecated
+    // addListener(), and they don't have a forced colors mode anyway.
+    if (!mediaQuery.addEventListener) {
+      return;
+    }
+    eventManager.listen(mediaQuery, 'change', callback);
   }
 
 
@@ -178,6 +267,80 @@ shaka.ui.Utils = class {
 
 
   /**
+   * Builds a spoken form of a duration, e.g. "20 minutes, 34 seconds", for
+   * assistive technologies.  The browser does all the localization, so this
+   * returns null when Intl.DurationFormat is not available.
+   *
+   * @param {number} seconds
+   * @param {!Array<string>} locales
+   * @return {?string}
+   */
+  static buildAccessibleTimeString(seconds, locales) {
+    if (!window.Intl || !('DurationFormat' in Intl)) {
+      return null;
+    }
+    // Intl.DurationFormat only takes whole numbers and does not carry
+    // seconds over into larger units, so break the duration down here.
+    const total = Math.max(0, Math.floor(seconds));
+    try {
+      const key = locales.join(',');
+      const formatters =
+          shaka.ui.Utils.durationFormatters_.getOrInsertComputed(key, () => {
+            return {
+              // Units that are zero are left out of the long style, which
+              // would leave nothing at all for a zero duration.  Use a
+              // second formatter that always shows the seconds for that
+              // case only, since it would also print "0 seconds" on whole
+              // minutes and hours.
+              any: new Intl.DurationFormat(locales, {style: 'long'}),
+              zero: new Intl.DurationFormat(locales,
+                  {style: 'long', secondsDisplay: 'always'}),
+            };
+          });
+      if (!total) {
+        return formatters.zero.format({seconds: 0});
+      }
+      return formatters.any.format({
+        days: Math.floor(total / 86400),
+        hours: Math.floor((total % 86400) / 3600),
+        minutes: Math.floor((total % 3600) / 60),
+        seconds: total % 60,
+      });
+    } catch (e) {
+      // e.g. a malformed locale tag.
+      return null;
+    }
+  }
+
+
+  /**
+   * Builds a localized percentage, e.g. "33%", from a fraction between 0
+   * and 1, or null if the browser can not format it.
+   *
+   * @param {number} fraction
+   * @param {!Array<string>} locales
+   * @return {?string}
+   */
+  static buildPercentString(fraction, locales) {
+    if (!window.Intl || !Intl.NumberFormat) {
+      return null;
+    }
+    try {
+      const key = locales.join(',');
+      const formatter =
+          shaka.ui.Utils.percentFormatters_.getOrInsertComputed(key, () => {
+            return new Intl.NumberFormat(locales,
+                {style: 'percent', maximumFractionDigits: 0});
+          });
+      return formatter.format(fraction);
+    } catch (e) {
+      // e.g. a malformed locale tag.
+      return null;
+    }
+  }
+
+
+  /**
    * Marks a menu item as selected or unselected by toggling the ARIA state
    * and the visual indicator class atomically.
    * @param {!HTMLElement} button
@@ -213,3 +376,22 @@ shaka.ui.Utils = class {
     return uri;
   }
 };
+
+
+/**
+ * The Intl.DurationFormat instances used by buildAccessibleTimeString, by
+ * locale list.  Building one is expensive, and the seek bar asks for a new
+ * string on every time update.
+ *
+ * @private {!Map<string, {any: !Intl.DurationFormat,
+ *                         zero: !Intl.DurationFormat}>}
+ */
+shaka.ui.Utils.durationFormatters_ = new Map();
+
+
+/**
+ * The Intl.NumberFormat instances used by buildPercentString, by locale list.
+ *
+ * @private {!Map<string, !Intl.NumberFormat>}
+ */
+shaka.ui.Utils.percentFormatters_ = new Map();

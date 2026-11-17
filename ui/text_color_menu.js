@@ -52,7 +52,7 @@ shaka.ui.TextColorMenu = class extends shaka.ui.TextStyleMenu {
 
   /** @override */
   getItems() {
-    return ['', ...shaka.ui.TextColorMenu.COLORS.keys()];
+    return ['', ...shaka.ui.TextColorMenu.COLORS_.keys()];
   }
 
   /** @override */
@@ -60,7 +60,7 @@ shaka.ui.TextColorMenu = class extends shaka.ui.TextStyleMenu {
     if (!color) {
       return this.localization.resolve(shaka.ui.Locales.Ids.DEFAULT);
     }
-    const nameId = shaka.ui.TextColorMenu.COLORS.get(color);
+    const nameId = shaka.ui.TextColorMenu.COLORS_.get(color);
     // Colors given by the application are shown as they are.
     return nameId ? this.localization.resolve(nameId) : color;
   }
@@ -112,8 +112,9 @@ shaka.ui.TextColorMenu = class extends shaka.ui.TextStyleMenu {
  * The colors of the menu, with their localized names.
  *
  * @const {!Map<string, string>}
+ * @private
  */
-shaka.ui.TextColorMenu.COLORS = new Map([
+shaka.ui.TextColorMenu.COLORS_ = new Map([
   ['#fff', shaka.ui.Locales.Ids.WHITE],
   ['#ff0', shaka.ui.Locales.Ids.YELLOW],
   ['#0f0', shaka.ui.Locales.Ids.GREEN],

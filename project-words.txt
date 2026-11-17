@@ -2,6 +2,7 @@
 abrstatuschanged
 abrtest
 haspopup
+menuitemcheckbox
 menuitemradio
 adblocker
 audiofocuspaused
@@ -15,6 +16,7 @@ autoplaying
 boundarycrossed
 bufferappending
 canupdatestarttime
+canvastext
 captionselectionupdated
 caststatuschanged
 channelcount
@@ -104,6 +106,7 @@ uiupdated
 unlisten
 unloop
 unmutes
+valuetext
 variantchanged
 vrstatuschanged
 webkitcurrentplaybacktargetiswirelesschanged
@@ -424,6 +427,7 @@ schi
 schm
 scte
 sdtp
+segmenters
 segs
 senc
 sepiff
@@ -492,6 +496,7 @@ udta
 ufid
 unalignable
 unskippable
+unsynchronization
 mpdlink
 urlparam
 uslt

@@ -247,15 +247,15 @@ describe('SsaTextParser', () => {
     describe('alignment of ASS', () => {
       // The numbers are the keys of a numeric keypad.
       const cases = [
-        [1, Cue.displayAlign.AFTER, Cue.textAlign.START],
+        [1, Cue.displayAlign.AFTER, Cue.textAlign.LEFT],
         [2, Cue.displayAlign.AFTER, Cue.textAlign.CENTER],
-        [3, Cue.displayAlign.AFTER, Cue.textAlign.END],
-        [4, Cue.displayAlign.CENTER, Cue.textAlign.START],
+        [3, Cue.displayAlign.AFTER, Cue.textAlign.RIGHT],
+        [4, Cue.displayAlign.CENTER, Cue.textAlign.LEFT],
         [5, Cue.displayAlign.CENTER, Cue.textAlign.CENTER],
-        [6, Cue.displayAlign.CENTER, Cue.textAlign.END],
-        [7, Cue.displayAlign.BEFORE, Cue.textAlign.START],
+        [6, Cue.displayAlign.CENTER, Cue.textAlign.RIGHT],
+        [7, Cue.displayAlign.BEFORE, Cue.textAlign.LEFT],
         [8, Cue.displayAlign.BEFORE, Cue.textAlign.CENTER],
-        [9, Cue.displayAlign.BEFORE, Cue.textAlign.END],
+        [9, Cue.displayAlign.BEFORE, Cue.textAlign.RIGHT],
       ];
       for (const [number, displayAlign, textAlign] of cases) {
         it('is ' + displayAlign + ' and ' + textAlign + ' for ' + number,
@@ -271,15 +271,15 @@ describe('SsaTextParser', () => {
     describe('alignment of SSA', () => {
       // 1 to 3 at the bottom, 5 to 7 at the top, 9 to 11 in the middle.
       const cases = [
-        [1, Cue.displayAlign.AFTER, Cue.textAlign.START],
+        [1, Cue.displayAlign.AFTER, Cue.textAlign.LEFT],
         [2, Cue.displayAlign.AFTER, Cue.textAlign.CENTER],
-        [3, Cue.displayAlign.AFTER, Cue.textAlign.END],
-        [5, Cue.displayAlign.BEFORE, Cue.textAlign.START],
+        [3, Cue.displayAlign.AFTER, Cue.textAlign.RIGHT],
+        [5, Cue.displayAlign.BEFORE, Cue.textAlign.LEFT],
         [6, Cue.displayAlign.BEFORE, Cue.textAlign.CENTER],
-        [7, Cue.displayAlign.BEFORE, Cue.textAlign.END],
-        [9, Cue.displayAlign.CENTER, Cue.textAlign.START],
+        [7, Cue.displayAlign.BEFORE, Cue.textAlign.RIGHT],
+        [9, Cue.displayAlign.CENTER, Cue.textAlign.LEFT],
         [10, Cue.displayAlign.CENTER, Cue.textAlign.CENTER],
-        [11, Cue.displayAlign.CENTER, Cue.textAlign.END],
+        [11, Cue.displayAlign.CENTER, Cue.textAlign.RIGHT],
       ];
       for (const [number, displayAlign, textAlign] of cases) {
         it('is ' + displayAlign + ' and ' + textAlign + ' for ' + number,

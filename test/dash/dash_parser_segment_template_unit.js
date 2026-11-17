@@ -258,6 +258,255 @@ describe('DashParser SegmentTemplate', () => {
       const segments = Array.from(stream.segmentIndex);
       expect(segments.length).toBe(200);
     });
+
+    describe('with @endNumber', () => {
+      it('stops at @endNumber when the period rounds up', async () => {
+        // The period implies 3 segments, but the packager folded the last
+        // 5 seconds into segment 2, so there is no segment 3.
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 25);
+        const lastRef = ManifestParser.makeReference('s2.mp4', 10, 25, baseUri);
+        lastRef.trueEndTime = 20;
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('with @startNumber > 1', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="10" endNumber="11"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 25);
+        const lastRef =
+            ManifestParser.makeReference('s11.mp4', 10, 25, baseUri);
+        lastRef.trueEndTime = 20;
+        const references = [
+          ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('does not extend a segment far from the period end', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 60);
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('does not go beyond the period', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="10"',
+          '  media="s$Number$.mp4" duration="10" />',
+        ], /* duration= */ 30);
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('caps a SegmentTimeline', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="3"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="5" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 60);
+        // The last segment keeps its own end instead of reaching the period
+        // end, since nothing comes after it.
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('caps a SegmentTimeline with @startNumber > 1', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="10" endNumber="11"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="3" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 40);
+        const references = [
+          ManifestParser.makeReference('s10.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s11.mp4', 10, 20, baseUri),
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('finds no SegmentTimeline segment after @endNumber', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="2"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="3" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 40);
+        fakeNetEngine.setResponseText('https://foo', source);
+        const manifest = await parser.start('https://foo', playerInterface);
+        const stream = manifest.variants[0].video;
+        await stream.createSegmentIndex();
+        goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+
+        expect(stream.segmentIndex.find(15)).toBe(1);
+        expect(stream.segmentIndex.find(25)).toBe(null);
+      });
+
+      it('does not stretch a SegmentTimeline that ends at @endNumber',
+          async () => {
+            // The timeline only lists the segments that exist.
+            const source = Dash.makeSimpleManifestText([
+              '<SegmentTemplate startNumber="1" endNumber="2"',
+              '  media="s$Number$.mp4">',
+              '  <SegmentTimeline>',
+              '    <S t="0" d="10" r="1" />',
+              '  </SegmentTimeline>',
+              '</SegmentTemplate>',
+            ], /* duration= */ 40);
+            const references = [
+              ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+              ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+            ];
+            await Dash.testSegmentIndex(source, references);
+          });
+
+      it('still stretches a SegmentTimeline it does not cap', async () => {
+        const source = Dash.makeSimpleManifestText([
+          '<SegmentTemplate startNumber="1" endNumber="3"',
+          '  media="s$Number$.mp4">',
+          '  <SegmentTimeline>',
+          '    <S t="0" d="10" r="2" />',
+          '  </SegmentTimeline>',
+          '</SegmentTemplate>',
+        ], /* duration= */ 31);
+        const lastRef = ManifestParser.makeReference('s3.mp4', 20, 31, baseUri);
+        lastRef.trueEndTime = 30;
+        const references = [
+          ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          lastRef,
+        ];
+        await Dash.testSegmentIndex(source, references);
+      });
+
+      it('is inherited and only caps its own AdaptationSet', async () => {
+        const source = [
+          '<MPD type="static">',
+          '  <Period duration="PT25S">',
+          '    <BaseURL>http://example.com</BaseURL>',
+          '    <AdaptationSet mimeType="video/mp4">',
+          '      <SegmentTemplate startNumber="1" endNumber="2"',
+          '        media="v$Number$.mp4" duration="10" />',
+          '      <Representation bandwidth="500" />',
+          '    </AdaptationSet>',
+          '    <AdaptationSet mimeType="audio/mp4">',
+          '      <Representation bandwidth="100">',
+          '        <SegmentTemplate startNumber="1"',
+          '          media="a$Number$.mp4" duration="10" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('https://foo', source);
+        const manifest = await parser.start('https://foo', playerInterface);
+        const variant = manifest.variants[0];
+        await variant.video.createSegmentIndex();
+        await variant.audio.createSegmentIndex();
+        goog.asserts.assert(variant.video.segmentIndex, 'Null segmentIndex!');
+        goog.asserts.assert(variant.audio.segmentIndex, 'Null segmentIndex!');
+
+        const videoRefs = Array.from(variant.video.segmentIndex);
+        expect(videoRefs.map((r) => r.getUris()[0])).toEqual([
+          'http://example.com/v1.mp4',
+          'http://example.com/v2.mp4',
+        ]);
+        expect(videoRefs[1].endTime).toBe(25);
+
+        const audioRefs = Array.from(variant.audio.segmentIndex);
+        expect(audioRefs.map((r) => r.getUris()[0])).toEqual([
+          'http://example.com/a1.mp4',
+          'http://example.com/a2.mp4',
+          'http://example.com/a3.mp4',
+        ]);
+      });
+
+      describe('for Live', () => {
+        const oldNow = Date.now;
+
+        beforeEach(() => {
+          jasmine.clock().install();
+        });
+
+        afterEach(() => {
+          jasmine.clock().uninstall();
+          Date.now = oldNow;
+        });
+
+        it('does not add references past @endNumber', async () => {
+          const source = Dash.makeSimpleManifestText([
+            '<SegmentTemplate startNumber="1" endNumber="5"',
+            '  media="s$Number$.mp4" duration="2" />',
+          ]);
+
+          Date.now = () => 6 * 1000;
+          fakeNetEngine.setResponseText('https://foo', source);
+          const manifest = await parser.start('https://foo', playerInterface);
+          const stream = manifest.variants[0].video;
+          await stream.createSegmentIndex();
+          goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+          const segmentIndex = /** @type {!shaka.media.SegmentIndex} */(
+            stream.segmentIndex);
+
+          const getUris = () => Array.from(segmentIndex)
+              .map((r) => r.getUris()[0]);
+          expect(getUris()).not.toContain('http://example.com/s5.mp4');
+
+          // Long after segment 5 would have become available.
+          Date.now = () => 60 * 1000;
+          jasmine.clock().tick(60 * 1000);
+          expect(getUris()).toContain('http://example.com/s5.mp4');
+          expect(getUris()).not.toContain('http://example.com/s6.mp4');
+        });
+
+        it('does not start past @endNumber', async () => {
+          const source = Dash.makeSimpleManifestText([
+            '<SegmentTemplate startNumber="1" endNumber="5"',
+            '  media="s$Number$.mp4" duration="2" />',
+          ]);
+
+          Date.now = () => 60 * 1000;
+          fakeNetEngine.setResponseText('https://foo', source);
+          const manifest = await parser.start('https://foo', playerInterface);
+          const stream = manifest.variants[0].video;
+          await stream.createSegmentIndex();
+          goog.asserts.assert(stream.segmentIndex, 'Null segmentIndex!');
+
+          const uris = Array.from(stream.segmentIndex)
+              .map((r) => r.getUris()[0]);
+          expect(uris[uris.length - 1]).toBe('http://example.com/s5.mp4');
+        });
+      });
+    });
   });
 
   describe('index', () => {
@@ -830,6 +1079,36 @@ describe('DashParser SegmentTemplate', () => {
         expect(pos).toBe(0);
       });
 
+      it('follows an @endNumber change in an update', async () => {
+        /**
+         * @param {number} endNumber
+         * @return {shaka.dash.SegmentTemplate.SegmentTemplateInfo}
+         */
+        const makeInfo = (endNumber) => {
+          const ranges = [0, 1, 2, 3].map((i) => ({
+            start: i * 10,
+            end: (i + 1) * 10,
+            unscaledStart: i * 10 * 90000,
+            segmentPosition: i + 1,
+          }));
+          const info = makeTemplateInfo(ranges);
+          info.endNumber = endNumber;
+          return info;
+        };
+        // The period ends at 41.
+        const index = await makeTimelineSegmentIndex(makeInfo(2));
+        expect(index.getNumReferences()).toBe(2);
+        // Segment 2 is the last one, far from the period end.
+        expect(index.get(1).endTime).toBe(20);
+        expect(index.find(25)).toBe(null);
+
+        index.appendTemplateInfo(makeInfo(4), 0, 41);
+        expect(index.getNumReferences()).toBe(4);
+        expect(index.find(25)).toBe(2);
+        // Segment 4 is the last one now, a rounding error from the period end.
+        expect(index.get(3).endTime).toBe(41);
+      });
+
       it('finds correct position if time === first end time', async () => {
         const ranges = [
           {
@@ -1016,15 +1295,15 @@ describe('DashParser SegmentTemplate', () => {
         info.unscaledPresentationTimeOffset = 0;
         const index = await makeTimelineSegmentIndex(info, false);
 
-        // The initial template should contain a timeline of 5
+        // The initial template should contain a timeline of 10
         // initial ranges.
         expect(index.getTimeline().length).toBe(10);
 
-        // The same 5 ranges are now shifted by PTO and not by
+        // The same 10 ranges are now shifted by PTO and not by
         // their internal timestamps.
         // cached: |--|--|--|--|--|
         // next:      |--|--|--|--|--|
-        //         shift is 1x the timescale = 1 range.
+        //         shift is 1x the timescale = 1 second.
         //         the last range shall be added to the cache.
         const nextInfo = makeTemplateInfo(makeRanges(0, 2.0, 10));
         nextInfo.unscaledPresentationTimeOffset = 90000;
@@ -1036,11 +1315,102 @@ describe('DashParser SegmentTemplate', () => {
         // The last segment is the new one, based on the cached
         // presentationTimeOffset.
         expect(timeline[timeline.length - 1]).toEqual({
-          start: 20,
+          start: 19,
           unscaledStart: 1710000,
-          end: 22,
+          end: 21,
           unscaledEnd: 1890000,
         });
+      });
+
+      for (const delta of [-1, 1]) {
+        it(`keeps times and URLs when PTO changes by ${delta}s`, async () => {
+          const info = makeTemplateInfo(makeRanges(0, 2, 10));
+          info.unscaledPresentationTimeOffset = 900000;
+          info.scaledPresentationTimeOffset = 10;
+          info.mediaTemplate = '$Number$-$Time$';
+          const index = await makeTimelineSegmentIndex(info, false);
+          index.evict(4);
+          const iterator = index.getIteratorForTime(18);
+          expect(iterator.next().value.startTime).toBe(18);
+
+          const nextInfo = makeTemplateInfo(makeRanges(4 - delta, 2, 10));
+          nextInfo.unscaledPresentationTimeOffset = (10 + delta) * 90000;
+          nextInfo.scaledPresentationTimeOffset = 10 + delta;
+          nextInfo.mediaTemplate = info.mediaTemplate;
+          for (let i = 0; i < nextInfo.timeline.length; i++) {
+            nextInfo.timeline[i].segmentPosition = i + 3;
+          }
+          index.appendTemplateInfo(nextInfo, 0, 24);
+
+          const reference = iterator.next().value;
+          expect(reference.startTime).toBe(20);
+          expect(reference.endTime).toBe(22);
+          expect(reference.timestampOffset).toBe(-10);
+          expect(reference.getUris()[0].includes('11-2700000')).toBe(true);
+          expect(index.find(20)).toBe(10);
+        });
+      }
+
+      it('preserves iterator times when an earlier period grows', async () => {
+        // Manifest excerpts from issue #10604.  The filler period is reused
+        // with an earlier start and PTO, while the programme period disappears.
+        const makeIndex = async (pto, time, repeats, number, start, end) => {
+          const ranges = makeRanges((time - pto) / 90000, 3.2, repeats + 1);
+          for (let i = 0; i < ranges.length; i++) {
+            ranges[i].unscaledStart = time + i * 288000 - pto;
+            ranges[i].unscaledEnd = time + (i + 1) * 288000 - pto;
+            ranges[i].start = ranges[i].unscaledStart / 90000;
+            ranges[i].end = ranges[i].unscaledEnd / 90000;
+            ranges[i].segmentPosition = number + i;
+          }
+          const info = makeTemplateInfo(ranges);
+          info.unscaledPresentationTimeOffset = pto;
+          info.scaledPresentationTimeOffset = pto / 90000;
+          parser.stop();
+          parser = Dash.makeDashParser();
+          const segmentIndex = await makeTimelineSegmentIndex(info, false);
+          segmentIndex.release();
+          segmentIndex.appendTemplateInfo(info, start, end, null, true);
+          return segmentIndex;
+        };
+        const filler = await makeIndex(13242059339, 13245984960, 4, 45993,
+            147133.992666666, 147193.61);
+        const programme = await makeIndex(13247424960, 13247424960, 52, 45998,
+            147193.61, Infinity);
+        const index = new shaka.media.MetaSegmentIndex();
+        index.appendSegmentIndex(filler);
+        index.appendSegmentIndex(programme);
+        const iterator = index.getIteratorForTime(147344.01);
+        const before = iterator.next().value;
+
+        const update = await makeIndex(13239353340, 13246560960, 57, 45995,
+            147103.926, Infinity);
+        // Use the same parsed template data as the incoming manifest update.
+        const info = makeTemplateInfo(update.getTimeline());
+        info.unscaledPresentationTimeOffset = 13239353340;
+        info.scaledPresentationTimeOffset = 13239353340 / 90000;
+        filler.appendTemplateInfo(info, 147103.926, Infinity, null, true);
+
+        const after = iterator.current();
+        expect(after.startTime).toBeCloseTo(before.startTime, 2);
+        expect(after.endTime).toBeCloseTo(before.endTime, 2);
+        expect(filler.getTimeline()[iterator.currentPosition()].segmentPosition)
+            .toBe(46045);
+        for (const range of filler.getTimeline()) {
+          expect(range.start).toBeCloseTo(range.unscaledStart / 90000, 6);
+          expect(range.end).toBeCloseTo(range.unscaledEnd / 90000, 6);
+        }
+
+        const restored = await makeIndex(13247424900, 13247136960, 57, 45997,
+            147193.61, Infinity);
+        const restoredInfo = makeTemplateInfo(restored.getTimeline());
+        restoredInfo.unscaledPresentationTimeOffset = 13247424900;
+        restoredInfo.scaledPresentationTimeOffset = 13247424900 / 90000;
+        programme.appendTemplateInfo(
+            restoredInfo, 147193.61, Infinity, null, true);
+        expect(iterator.current().startTime).toBeCloseTo(before.startTime, 2);
+        expect(iterator.next().value.startTime)
+            .toBeCloseTo(before.endTime, 2);
       });
     });
 
@@ -1454,6 +1824,7 @@ function makeTemplateInfo(timeline) {
     'segmentDuration': null,
     'timescale': 90000,
     'startNumber': 1,
+    'endNumber': null,
     'scaledPresentationTimeOffset': 0,
     'unscaledPresentationTimeOffset': 0,
     'timeline': timeline,

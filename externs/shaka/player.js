@@ -972,6 +972,35 @@ shaka.extern.HLSMetadata;
 
 
 /**
+ * @typedef {function(string, string):?string}
+ *
+ * @description
+ * Gives the value of a player state parameter of ISO/IEC 23009-1 Annex I.4
+ * (<code>$urn:mpeg:dash:state:&lt;name&gt;#&lt;key&gt;$</code>) from its name
+ * (e.g. <code>'execution-delta'</code>) and its key (the part after
+ * <code>#</code>, e.g. an event id, or <code>''</code>), or null when the
+ * state is not known. Unknown states take the value the spec defines for
+ * them.
+ *
+ * @exportDoc
+ */
+shaka.extern.UrlParamsStateResolver;
+
+
+/**
+ * @typedef {function(shaka.extern.UrlParamsStateResolver=):string}
+ *
+ * @description
+ * Builds the URL query parameters of a request from a RequestParam element
+ * (ISO/IEC 23009-1 Annex I). The optional state resolver gives the values of
+ * the player state parameters.
+ *
+ * @exportDoc
+ */
+shaka.extern.UrlParamsFunction;
+
+
+/**
  * @typedef {{
  *   schemeIdUri: string,
  *   value: string,
@@ -980,7 +1009,7 @@ shaka.extern.HLSMetadata;
  *   id: string,
  *   timescale: number,
  *   eventNode: ?shaka.extern.xml.Node,
- *   urlParams: (?function():string|undefined),
+ *   urlParams: (?shaka.extern.UrlParamsFunction|undefined),
  *   values: (!Array<shaka.extern.MetadataFrame>|undefined),
  * }}
  *
@@ -1003,7 +1032,7 @@ shaka.extern.HLSMetadata;
  *   Provides the timescale, in ticks per second.
  * @property {?shaka.extern.xml.Node} eventNode
  *   The XML element that defines the Event.
- * @property {(?function():string|undefined)} urlParams
+ * @property {(?shaka.extern.UrlParamsFunction|undefined)} urlParams
  *   Optional URL parameters function derived from a RequestParam element
  *   (urn:mpeg:dash:urlparam:2025 scheme) present in the EventStream.
  * @property {(!Array<shaka.extern.MetadataFrame>|undefined)} values
@@ -1669,6 +1698,11 @@ shaka.extern.DashManifestConfiguration;
  *   If set to true, the HLS parser will optimize operation with LL and partial
  *   byte range segments. More info in
  *   https://www.akamai.com/blog/performance/-using-ll-hls-with-byte-range-addressing-to-achieve-interoperabi
+ *   <br>
+ *   It is only used when the networking plugin of the segments passes the data
+ *   on while it is downloaded (see the <code>streamingSupport</code> parameter
+ *   of <code>shaka.net.NetworkingEngine.registerScheme</code>), as the default
+ *   plugin based on the Fetch API does.
  *   <br>
  *   Defaults to <code>true</code>.
  * @property {boolean} allowRangeRequestsToGuessMimeType
@@ -2721,6 +2755,7 @@ shaka.extern.AdsConfiguration;
  *   preferNetworkInformationBandwidth: boolean,
  *   droppedFrames: boolean,
  *   allowAudioFallback: boolean,
+ *   minBufferAheadToUpgrade: number,
  * }}
  *
  * @property {boolean} enabled
@@ -2825,6 +2860,11 @@ shaka.extern.AdsConfiguration;
  *   soon as the bandwidth allows it.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} minBufferAheadToUpgrade
+ *   The minimum amount of buffer, in seconds, required ahead of the current
+ *   playback position before upgrading to a higher bandwidth rendition.
+ *   The recommended value should be defined according to the segment length.
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;

@@ -2373,6 +2373,45 @@ describe('HlsParser', () => {
     expect(actual.variants[0].video).toBeTruthy();
   });
 
+  it('sets the duration without loading audio-only variants', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540\n',
+      'test:/main\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=64,CODECS="mp4a"\n',
+      'test:/audio\n',
+    ].join('');
+
+    const main = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/main', main)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual.variants.length).toBe(2);
+    const muxed = actual.variants.find((v) => v.video);
+    // The muxed audio-video variant has no audio stream of its own.
+    expect(muxed.audio).toBe(null);
+    await muxed.video.createSegmentIndex();
+
+    const timeline = actual.presentationTimeline;
+    expect(timeline.getDuration()).toBe(10);
+    expect(timeline.isLive()).toBe(false);
+  });
+
+
   it('parse image streams', async () => {
     const master = [
       '#EXTM3U\n',
@@ -4072,6 +4111,142 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+  });
+
+  describe('redundant variants', () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    it('groups variants that only differ in URI', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540\n',
+        'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540\n',
+        'video2\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].video.originalId).toBe('video,video2');
+    });
+
+    it('does not group variants with different audio groups', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540,AUDIO="aud1"\n',
+        'video\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+        'RESOLUTION=960x540,AUDIO="aud2"\n',
+        'video2\n',
+        '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+        'CHANNELS="2",URI="audio"\n',
+        '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud2",LANGUAGE="en",',
+        'CHANNELS="6",URI="audio2"\n',
+      ].join('');
+
+      fakeNetEngine.setResponseText('test:/master', master);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.variants.length).toBe(2);
+    });
+
+    describe('with a real NetworkingEngine', () => {
+      /** @type {!shaka.net.NetworkingEngine} */
+      let networkingEngine;
+      /** @type {!jasmine.Spy} */
+      let schemeSpy;
+
+      beforeEach(() => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+          'RESOLUTION=960x540\n',
+          'redundant://a/video.m3u8\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f,mp4a.40.2",',
+          'RESOLUTION=960x540\n',
+          'redundant://b/video.m3u8\n',
+        ].join('');
+        const StringUtils = shaka.util.StringUtils;
+        /** @type {!Map<string, BufferSource>} */
+        const responses = new Map()
+            .set('redundant://host/master.m3u8', StringUtils.toUTF8(master))
+            .set('redundant://b/video.m3u8', StringUtils.toUTF8(media))
+            .set('redundant://b/init.mp4', initSegmentData)
+            .set('redundant://b/main.mp4', segmentData);
+
+        schemeSpy = jasmine.createSpy('redundant scheme')
+            .and.callFake((uri, request, requestType) => {
+              const data = responses.get(uri);
+              if (!data) {
+                return shaka.util.AbortableOperation.failed(
+                    new shaka.util.Error(
+                        shaka.util.Error.Severity.RECOVERABLE,
+                        shaka.util.Error.Category.NETWORK,
+                        shaka.util.Error.Code.BAD_HTTP_STATUS,
+                        uri, 404, null, {}, requestType));
+              }
+              /** @type {shaka.extern.Response} */
+              const response = {
+                uri,
+                originalUri: uri,
+                data,
+                headers: {},
+                originalRequest: request,
+              };
+              return shaka.util.AbortableOperation.completed(response);
+            });
+        shaka.net.NetworkingEngine.registerScheme(
+            'redundant', Util.spyFunc(schemeSpy));
+
+        networkingEngine = new shaka.net.NetworkingEngine();
+        networkingEngine.configure(
+            shaka.util.PlayerConfiguration.createDefault().networking);
+        playerInterface.networkingEngine = networkingEngine;
+
+        config.retryParameters.baseDelay = 1;
+        config.retryParameters.fuzzFactor = 0;
+        parser.configure(config);
+      });
+
+      afterEach(async () => {
+        shaka.net.NetworkingEngine.unregisterScheme('redundant');
+        await networkingEngine.destroy();
+      });
+
+      it('falls back to a redundant variant on error', async () => {
+        const manifest =
+            await parser.start('redundant://host/master.m3u8', playerInterface);
+        expect(manifest.variants.length).toBe(1);
+
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
+        // The working URI goes first, so segments don't hit the failed one.
+        const reference = Array.from(video.segmentIndex)[0];
+        expect(reference.getUris()).toEqual([
+          'redundant://b/main.mp4',
+          'redundant://a/main.mp4',
+        ]);
+
+        const requestedUris = schemeSpy.calls.allArgs().map((args) => args[0]);
+        expect(requestedUris).toContain('redundant://a/video.m3u8');
+        expect(requestedUris).toContain('redundant://b/video.m3u8');
+      });
+    });
   });
 
   it('constructs relative URIs', async () => {
@@ -7669,6 +7844,24 @@ describe('HlsParser', () => {
     const manifestUri = 'https://example.com/master.m3u8';
     fakeNetEngine.setResponseValue(manifestUri, manifestData);
 
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    const mediaPlaylist = (name) => [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXTINF:6,\n',
+      name + '.ts\n',
+      '#EXT-X-ENDLIST\n',
+    ].join('');
+    fakeNetEngine
+        .setResponseText('https://example.com/red.m3u8', mediaPlaylist('red'))
+        .setResponseText('https://example.com/green.m3u8',
+            mediaPlaylist('green'))
+        .setResponseValue('https://example.com/red.ts', tsSegmentData)
+        .setResponseValue('https://example.com/green.ts', tsSegmentData);
+
     const manifest = await parser.start(manifestUri, playerInterface);
 
     // 2 audio renditions x 2 video renditions (RED via the variant's own
@@ -7683,6 +7876,16 @@ describe('HlsParser', () => {
         manifest.variants.map((v) => v.audio.label).sort();
     expect(audioLabels).toEqual(['English', 'English', 'Spanish', 'Spanish']);
 
+    // Every combination of the renditions appears exactly once, and the
+    // variants share one stream per rendition.
+    const pairs =
+        manifest.variants.map((v) => v.video.label + '+' + v.audio.label);
+    expect(pairs.sort()).toEqual([
+      'GREEN+English', 'GREEN+Spanish', 'RED+English', 'RED+Spanish',
+    ]);
+    expect(new Set(manifest.variants.map((v) => v.video)).size).toBe(2);
+    expect(new Set(manifest.variants.map((v) => v.audio)).size).toBe(2);
+
     const redVariant = manifest.variants.find((v) => v.video.label == 'RED');
     expect(redVariant.video.primary).toBe(true);
     expect(redVariant.video.roles).toEqual(['public.main']);
@@ -7690,6 +7893,15 @@ describe('HlsParser', () => {
     const greenVariant =
         manifest.variants.find((v) => v.video.label == 'GREEN');
     expect(greenVariant.video.primary).toBe(false);
+
+    // The URI-less RED rendition plays the variant's own playlist, and GREEN
+    // plays the one from its rendition.
+    await redVariant.video.createSegmentIndex();
+    await greenVariant.video.createSegmentIndex();
+    expect(redVariant.video.segmentIndex.get(0).getUris())
+        .toEqual(['https://example.com/red.ts']);
+    expect(greenVariant.video.segmentIndex.get(0).getUris())
+        .toEqual(['https://example.com/green.ts']);
   });
 
   it('names the video track via a URI-less VIDEO rendition', async () => {

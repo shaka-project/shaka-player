@@ -42,7 +42,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipButton_.classList.add('shaka-pip-button');
     this.pipButton_.classList.add('shaka-tooltip');
     this.pipButton_.classList.add('shaka-no-propagation');
-    this.pipButton_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.pipButton_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.pipIcon_ = new shaka.ui.Icon(this.pipButton_,
@@ -92,9 +92,15 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       this.checkAvailability();
     });
 
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.checkAvailability();
-    });
+    this.eventManager.listenMulti(
+        this.player,
+        [
+          'trackschanged',
+          'variantchanged',
+          'adaptation',
+        ], () => {
+          this.checkAvailability();
+        });
 
     if ('documentPictureInPicture' in window) {
       this.eventManager.listen(window.documentPictureInPicture, 'enter',
@@ -120,7 +126,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.ON);
-    this.pipButton_.ariaPressed = 'true';
+    shaka.ui.Utils.setPressed(this.pipButton_, true);
   }
 
   /** @private */
@@ -131,7 +137,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.OFF);
-    this.pipButton_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.pipButton_, false);
   }
 
   /** @override */
@@ -173,6 +179,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       if (this.controls.isPiPEnabled()) {
         await this.controls.togglePiP();
       }
+    } else if (this.player && this.player.isPlayingAudioOnly() &&
+        !this.controls.shouldUseDocumentPictureInPicture()) {
+      // There are no frames to show, but the video comes back, e.g. when
+      // adaptation stops falling back to audio-only, so stay in
+      // Picture-in-Picture.
+      shaka.ui.Utils.setDisplay(this.pipButton_, false);
     } else {
       shaka.ui.Utils.setDisplay(this.pipButton_, !this.isSubMenuOpened);
     }

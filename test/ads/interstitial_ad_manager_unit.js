@@ -2215,8 +2215,7 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue1));
 
-      // The parser leaves mimeType null; addInterstitials resolves it from the
-      // URI. The detailed field-by-field parsing is covered by
+      // The detailed field-by-field parsing is covered by
       // DashInterstitialParser's own unit tests.
       const interstitials = interstitialAdManager.getInterstitials();
       expect(interstitials.length).toBe(1);
@@ -2247,6 +2246,230 @@ describe('Interstitial Ad manager', () => {
         tracking: null,
       };
       expect(interstitials[0]).toEqual(expectedInterstitial);
+    });
+
+    describe('joining in the middle of a ReplacePresentation', () => {
+      /** @type {number} */
+      let fakeCurrentTime;
+      /** @type {!jasmine.Spy} */
+      let loadSpy;
+      /** @type {!jasmine.Spy} */
+      let preloadSpy;
+      /** @type {!Promise} */
+      let loadCalled;
+
+      beforeEach(() => {
+        fakeCurrentTime = 1;
+        Object.defineProperty(video, 'currentTime', {
+          get: () => fakeCurrentTime,
+          set: (val) => {
+            fakeCurrentTime = val;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(video, 'paused', {
+          get: () => false,
+          configurable: true,
+        });
+        const adPlayer = interstitialAdManager.getPlayer();
+        preloadSpy = spyOn(adPlayer, 'preload')
+            .and.returnValue(Promise.resolve(null));
+        const loaded = Promise.withResolvers();
+        loadCalled = loaded.promise;
+        loadSpy = spyOn(adPlayer, 'load').and.callFake(() => {
+          loaded.resolve();
+          return Promise.resolve();
+        });
+      });
+
+      /**
+       * Adds a 20 s Replace event at 10 s and joins it at 15 s.
+       *
+       * @param {string} attributes Extra ReplacePresentation attributes.
+       * @param {number=} maxDuration
+       * @param {shaka.extern.UrlParamsFunction=} urlParams
+       * @return {!Promise}
+       */
+      async function joinAt15(attributes, maxDuration = 20, urlParams) {
+        const eventNode = TXml.parseXmlString([
+          '<Event duration="20" id="BREAK" presentationTime="10">',
+          '<ReplacePresentation uri="https://ads/test.mpd"',
+          ` maxDuration="${maxDuration}" ${attributes}/>`,
+          '</Event>',
+        ].join(''));
+        goog.asserts.assert(eventNode, 'Should have a event node!');
+        await addRegion({
+          startTime: 10,
+          endTime: 30,
+          id: 'BREAK',
+          schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          eventNode,
+          value: '',
+          timescale: 1,
+          urlParams,
+        });
+        video.dispatchEvent(new Event('timeupdate'));
+        fakeCurrentTime = 15;
+        video.dispatchEvent(new Event('timeupdate'));
+        await shaka.test.Util.shortDelay();
+      }
+
+      /**
+       * The ad player is attached before load() is called, which can take
+       * much longer than a short delay on slow devices such as Chromecast.
+       *
+       * @return {!Promise}
+       */
+      function waitForLoad() {
+        return Promise.race([loadCalled, shaka.test.Util.delay(5)]);
+      }
+
+      /** @return {number} */
+      function getPlayRangeEnd() {
+        return interstitialAdManager.getPlayer().getConfiguration()
+            .playRangeEnd;
+      }
+
+      it('starts from the beginning and clips by default', async () => {
+        await joinAt15('');
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        // No start time: the alternative presentation starts at 0.
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        // The 5 s elapsed since the event start are deducted.
+        expect(getPlayRangeEnd()).toBe(15);
+      });
+
+      it('starts at the join offset with startWithOffset', async () => {
+        await joinAt15('startWithOffset="true"');
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(5);
+        expect(getPlayRangeEnd()).toBe(20);
+      });
+
+      it('plays the whole maxDuration without clip', async () => {
+        await joinAt15('clip="false"');
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        expect(getPlayRangeEnd()).toBe(20);
+      });
+
+      it('is not executed when clipping leaves nothing', async () => {
+        await joinAt15('', /* maxDuration= */ 5);
+
+        expect(loadSpy).not.toHaveBeenCalled();
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-impression'}));
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-started'}));
+        expect(onEventSpy).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'ad-complete'}));
+      });
+
+      describe('player state parameters', () => {
+        /**
+         * Like a RequestParam with queryTemplate="d=$urn:mpeg:dash:state:
+         * execution-delta#<key>$&e=...expected-duration#<key>$&c=...
+         * execution-count#<key>$", with the unknown values of Annex I.4.
+         *
+         * @param {string} key
+         * @return {shaka.extern.UrlParamsFunction}
+         */
+        function makeUrlParams(key) {
+          return (/** shaka.extern.UrlParamsStateResolver= */ resolver) => {
+            const get = (name, unknown) => {
+              const value = resolver ? resolver(name, key) : null;
+              return value != null ? value : unknown;
+            };
+            return [
+              `d=${get('execution-delta', '0')}`,
+              `e=${get('expected-duration', '-1')}`,
+              `c=${get('execution-count', '-1')}`,
+            ].join('&');
+          };
+        }
+
+        it('are those of the execution', async () => {
+          await joinAt15('', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+
+          expect(loadSpy).toHaveBeenCalledTimes(1);
+          // Executed 5 s late, with 15 s left after clipping, for the first
+          // time.
+          expect(loadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test.mpd?d=5&e=15&c=0');
+        });
+
+        it('give the whole maxDuration without clip', async () => {
+          await joinAt15(
+              'clip="false"', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+
+          expect(loadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test.mpd?d=5&e=20&c=0');
+        });
+
+        it('may refer to an event executed before', async () => {
+          await joinAt15('', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+          preloadSpy.calls.reset();
+
+          // A later event, preloaded right away, whose requests carry the
+          // state of the first one.
+          const eventNode = TXml.parseXmlString([
+            '<Event duration="10" id="BREAK2" presentationTime="40">',
+            '<ReplacePresentation uri="https://ads/test2.mpd"',
+            ' maxDuration="10" earliestResolutionTimeOffset="30"/>',
+            '</Event>',
+          ].join(''));
+          goog.asserts.assert(eventNode, 'Should have a event node!');
+          await addRegion({
+            startTime: 40,
+            endTime: 50,
+            id: 'BREAK2',
+            schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+            eventNode,
+            value: '',
+            timescale: 1,
+            urlParams: makeUrlParams('BREAK'),
+          });
+
+          expect(preloadSpy).toHaveBeenCalledTimes(1);
+          // The expected duration is only known for the requested event.
+          expect(preloadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test2.mpd?d=5&e=-1&c=1');
+        });
+      });
+
+      it('is executed only once with executeOnce', async () => {
+        await joinAt15('executeOnce="true"');
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(interstitialAdManager.getInterstitials().length).toBe(0);
+      });
+
+      it('is not used up by a failed execution with executeOnce', async () => {
+        await joinAt15('executeOnce="true"', /* maxDuration= */ 5);
+
+        expect(loadSpy).not.toHaveBeenCalled();
+        // It may still be executed later, e.g. after a seek back before it.
+        expect(interstitialAdManager.getInterstitials().length).toBe(1);
+      });
+
+      it('is executed without clip when joined late', async () => {
+        await joinAt15('clip="false"', /* maxDuration= */ 5);
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        expect(getPlayRangeEnd()).toBe(5);
+      });
     });
 
     it('ignore duplicate alternative MPD', async () => {
@@ -3091,6 +3314,62 @@ describe('Interstitial Ad manager', () => {
         jasmine.objectContaining(eventValue4));
   });
 
+  it('plays mid-roll when no video frames are presented', async () => {
+    // Video frame callbacks never run in a hidden page or for audio-only
+    // content, so the mid-roll must still be found on timeupdate.
+    /** @type {?} */ (deviceDetected.getDeviceType)
+        .and.returnValue(shaka.device.IDevice.DeviceType.DESKTOP);
+    // Assigned, not spied on, because not every tested platform has it.
+    const requestVideoFrameCallback =
+        jasmine.createSpy('requestVideoFrameCallback').and.returnValue(1);
+    video.requestVideoFrameCallback =
+        shaka.test.Util.spyFunc(requestVideoFrameCallback);
+    // Not 0, which would keep the initial (pre-roll) check active.
+    let fakeCurrentTime = 1;
+    Object.defineProperty(video, 'currentTime', {
+      get: () => fakeCurrentTime,
+      set: (val) => {
+        fakeCurrentTime = val;
+      },
+      configurable: true,
+    });
+    Object.defineProperty(video, 'paused', {
+      get: () => false,
+      configurable: true,
+    });
+    const metadata = {
+      type: 'com.apple.quicktime.HLS',
+      startTime: 10,
+      endTime: null,
+      values: [
+        {
+          key: 'ID',
+          data: 'MIDROLL',
+        },
+        {
+          key: 'X-ASSET-URI',
+          data: 'http://foo.bar/test.m3u8',
+        },
+      ],
+    };
+    await addMetadata(metadata);
+
+    expect(requestVideoFrameCallback).toHaveBeenCalled();
+
+    video.dispatchEvent(new Event('timeupdate'));
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({type: 'ad-break-started'}));
+
+    fakeCurrentTime = 10.5;
+    video.dispatchEvent(new Event('timeupdate'));
+    await shaka.test.Util.shortDelay();
+
+    expect(onEventSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining({type: 'ad-break-started'}));
+  });
+
   it('jumping a mid-roll with JUMP restriction is not allowed', async () => {
     const metadata = {
       type: 'com.apple.quicktime.HLS',
@@ -3249,6 +3528,51 @@ describe('Interstitial Ad manager', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining({type: 'ad-started'}));
     });
+  });
+
+  it('does not count embedded slots in the mid-roll break', async () => {
+    let fakeCurrentTime = 1;
+    Object.defineProperty(video, 'currentTime', {
+      get: () => fakeCurrentTime,
+      set: (val) => {
+        fakeCurrentTime = val;
+      },
+      configurable: true,
+    });
+    Object.defineProperty(video, 'paused', {
+      get: () => false,
+      configurable: true,
+    });
+    const slot = {type: 'linear', start: 0, duration: 30, identifiers: []};
+    await interstitialAdManager.addInterstitials(
+        shaka.ads.SvtaInterstitialParser.parseInterstitials(
+            {version: 2, type: 'slot', payload: [slot]}, 10, 'SLOT')
+            .interstitials);
+    for (const id of ['MIDROLL-1', 'MIDROLL-2']) {
+      // eslint-disable-next-line no-await-in-loop
+      await addMetadata({
+        type: 'com.apple.quicktime.HLS',
+        startTime: 10,
+        endTime: null,
+        values: [
+          {key: 'ID', data: id},
+          {key: 'X-ASSET-URI', data: 'http://foo.bar/test.m3u8'},
+        ],
+      });
+    }
+
+    video.dispatchEvent(new Event('timeupdate'));
+    fakeCurrentTime = 10.5;
+    video.dispatchEvent(new Event('timeupdate'));
+    await shaka.test.Util.delay(0.25);
+
+    const ads = onEventSpy.calls.allArgs().map((args) => args[0])
+        .filter((event) => event.type == 'ad-started')
+        .map((event) => event['ad']);
+    const linear = ads.find((ad) => ad.getAdId() == 'MIDROLL-1');
+    expect(linear).toBeTruthy();
+    expect(linear.getSequenceLength()).toBe(2);
+    expect(linear.getPositionInSequence()).toBe(1);
   });
 
   it('don\'t dispatch cue points changed if it is an overlay', async () => {

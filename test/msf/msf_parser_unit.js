@@ -567,6 +567,17 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let objectCallbacks;
     /** @type {!jasmine.Spy} */
     let unsubscribeSpy;
+    /**
+     * What happened to each segmenter the packaging created, in order.
+     *
+     * @type {!Array<{pushes: number, releases: number,
+     *                pushedAfterRelease: boolean}>}
+     */
+    let segmenters;
+    /** @type {boolean} */
+    let segmentersHaveRelease;
+    /** @type {?shaka.util.Error} */
+    let nextPushError;
 
     /**
      * @return {!shaka.extern.MsfSegment}
@@ -578,6 +589,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         data: new Uint8Array([0x01]),
         timestampOffset: 0,
         discontinuitySequence: 0,
+        independent: true,
       };
     }
 
@@ -639,6 +651,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       objectCallbacks = [];
       unsubscribeSpy = jasmine.createSpy('unsubscribeTrack')
           .and.returnValue(Promise.resolve());
+      segmenters = [];
+      segmentersHaveRelease = true;
+      nextPushError = null;
 
       shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
         return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
@@ -649,7 +664,27 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             }),
             initSegmentReference: null,
           }),
-          createSegmenter: () => ({push: () => nextSegments}),
+          createSegmenter: () => {
+            const record =
+                {pushes: 0, releases: 0, pushedAfterRelease: false};
+            segmenters.push(record);
+            const segmenter = /** @type {?} */ ({
+              push: () => {
+                record.pushedAfterRelease ||= record.releases > 0;
+                record.pushes++;
+                if (nextPushError) {
+                  throw nextPushError;
+                }
+                return nextSegments;
+              },
+            });
+            if (segmentersHaveRelease) {
+              segmenter.release = () => {
+                record.releases++;
+              };
+            }
+            return segmenter;
+          },
         }));
       });
     });
@@ -657,6 +692,40 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     afterEach(() => {
       shaka.msf.PackagingRegistry.unregisterPackaging(PACKAGING);
     });
+
+    it('waits for an independent segment before starting the stream',
+        async () => {
+          const stream = makeStream();
+          let ready = false;
+          const indexCreated = stream.createSegmentIndex().then(() => {
+            ready = true;
+          });
+          const dependent = fakeSegment();
+          dependent.startTime = 1;
+          dependent.independent = false;
+          nextSegments = [dependent];
+          objectCallbacks[0](fakeObject(0));
+          await shaka.test.Util.shortDelay();
+
+          expect(ready).toBe(false);
+          expect(stream.segmentIndex.getIteratorForTime(1.5)).toBeNull();
+
+          const independent = fakeSegment();
+          independent.startTime = 2;
+          independent.independent = true;
+          nextSegments = [independent];
+          objectCallbacks[0](fakeObject(0));
+          await indexCreated;
+
+          const following = fakeSegment();
+          following.startTime = 3;
+          following.independent = false;
+          nextSegments = [following];
+          objectCallbacks[0](fakeObject(1));
+          const iterator = stream.segmentIndex.getIteratorForTime(3.5);
+          expect(iterator.next().value.startTime).toBe(2);
+          expect(iterator.next().value.isIndependent()).toBe(false);
+        });
 
     it('stops adding segments when the index closes mid-object', () => {
       // Reporting a completed group to ABR can pick a new variant and switch
@@ -678,6 +747,39 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(() => callback(fakeObject(1))).not.toThrow();
       expect(stream.segmentIndex).toBeNull();
     });
+
+    it('keeps the next group when an object of a group completes late',
+        () => {
+          // The objects of consecutive groups arrive on different streams, so
+          // the last object of a group can complete after the first object of
+          // the next one.  Indexing it used to drop the next group's
+          // references, its keyframe included, leaving a gap of a whole GOP.
+          const stream = makeStream();
+          stream.createSegmentIndex();
+          const callback = objectCallbacks[0];
+
+          const deliver = (group, startTime) => {
+            const segment = fakeSegment();
+            segment.startTime = startTime;
+            nextSegments = [segment];
+            callback(fakeObject(group));
+          };
+
+          deliver(0, 0);
+          deliver(0, 1);
+          // The first two objects of group 1 beat the last one of group 0.
+          deliver(1, 3);
+          deliver(1, 4);
+          deliver(0, 2);
+
+          const index = stream.segmentIndex;
+          goog.asserts.assert(index, 'Segment index should exist!');
+          const startTimes = [];
+          for (let i = 0; i < index.getNumReferences(); i++) {
+            startTimes.push(index.get(i).startTime);
+          }
+          expect(startTimes).toEqual([0, 1, 2, 3, 4]);
+        });
 
     it('withdraws a subscription that closed before SUBSCRIBE_OK', async () => {
       // Until the SUBSCRIBE_OK lands there is no Track Alias, so there is
@@ -774,6 +876,372 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
               shaka.util.Error.Code.MSF_SUBSCRIBE_FAILED,
               'video0',
               'refused')));
+    });
+
+    describe('segmenter release', () => {
+      it('releases the segmenter when the index closes', () => {
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        callback(fakeObject(0));
+
+        stream.closeSegmentIndex();
+        expect(segmenters.length).toBe(1);
+        expect(segmenters[0].releases).toBe(1);
+
+        // An object still in flight from the closed subscription.
+        callback(fakeObject(0));
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].pushedAfterRelease).toBe(false);
+      });
+
+      it('releases the old segmenter when the subscription is replaced',
+          () => {
+            const stream = makeStream();
+            stream.createSegmentIndex();
+            const oldCallback = objectCallbacks[0];
+
+            /** @type {?} */
+            const p = parser;
+            p.resubscribe_(p.activeStreams_.get('/video0'), null);
+
+            expect(segmenters.length).toBe(2);
+            expect(segmenters[0].releases).toBe(1);
+            expect(segmenters[1].releases).toBe(0);
+
+            oldCallback(fakeObject(0));
+            objectCallbacks[1](fakeObject(0));
+            expect(segmenters[0].pushes).toBe(0);
+            expect(segmenters[1].pushes).toBe(1);
+          });
+
+      it('releases the segmenter when push() fails', async () => {
+        const stream = makeStream();
+        const indexCreated = stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        nextPushError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MEDIA,
+            shaka.util.Error.Code.TRANSMUXING_FAILED);
+
+        callback(fakeObject(0));
+        await expectAsync(indexCreated).toBeRejected();
+        expect(segmenters[0].releases).toBe(1);
+
+        callback(fakeObject(1));
+        stream.closeSegmentIndex();
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].releases).toBe(1);
+      });
+
+      it('releases the segmenters of open streams when the parser stops',
+          async () => {
+            const stream = makeStream();
+            stream.createSegmentIndex();
+            const callback = objectCallbacks[0];
+
+            await parser.stop();
+            expect(segmenters[0].releases).toBe(1);
+
+            callback(fakeObject(0));
+            // StreamingEngine may still close the index afterwards.
+            stream.closeSegmentIndex();
+            expect(segmenters[0].pushes).toBe(0);
+            expect(segmenters[0].releases).toBe(1);
+          });
+
+      it('does not feed a segmenter released by an ABR switch', () => {
+        // The bandwidth sample of a completed group can make ABR close the
+        // stream synchronously, before the object reaches the segmenter.
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        const callback = objectCallbacks[0];
+        playerInterface.onSegmentReceived = () => {
+          stream.closeSegmentIndex();
+        };
+
+        callback(fakeObject(0));
+        callback(fakeObject(1));
+        expect(segmenters[0].releases).toBe(1);
+        expect(segmenters[0].pushes).toBe(1);
+        expect(segmenters[0].pushedAfterRelease).toBe(false);
+      });
+
+      it('works with segmenters that do not implement release()', () => {
+        segmentersHaveRelease = false;
+        const stream = makeStream();
+        stream.createSegmentIndex();
+        objectCallbacks[0](fakeObject(0));
+
+        /** @type {?} */
+        const p = parser;
+        expect(() => p.resubscribe_(p.activeStreams_.get('/video0'), null))
+            .not.toThrow();
+        expect(() => stream.closeSegmentIndex()).not.toThrow();
+        expect(segmenters.length).toBe(2);
+      });
+    });
+  });
+
+  describe('segments cut on Group boundaries', () => {
+    const PACKAGING = 'fake-group-test';
+
+    /** @type {!Array<!shaka.extern.MsfSegment>} */
+    let nextSegments;
+    /** @type {?shaka.util.Error} */
+    let nextError;
+    /** @type {!Array<shaka.extern.MsfObjectCallback>} */
+    let objectCallbacks;
+
+    /**
+     * @param {number} startTime
+     * @param {number} group
+     * @return {!shaka.extern.MsfSegment}
+     */
+    function fakeSegment(startTime, group) {
+      return {
+        startTime,
+        duration: 2,
+        data: new Uint8Array([0x01]),
+        timestampOffset: 0,
+        discontinuitySequence: 0,
+        independent: true,
+        group: BigInt(group),
+      };
+    }
+
+    /**
+     * @param {number} group
+     * @return {!shaka.extern.MsfObject}
+     */
+    function fakeObject(group) {
+      return /** @type {!shaka.extern.MsfObject} */ (/** @type {?} */ ({
+        trackAlias: BigInt(7),
+        location: {group: BigInt(group), object: BigInt(0), subgroup: null},
+        data: new Uint8Array([0x01, 0x02]),
+        payloadReadStartMs: 0,
+        receiveTimestampMs: 10,
+      }));
+    }
+
+    /**
+     * Creates the video streams of a catalog whose tracks are alternates of
+     * each other.
+     *
+     * @param {!Array<!Object>} overrides One per track.
+     * @return {!Array<!shaka.extern.Stream>}
+     * @suppress {visibility}
+     */
+    function makeStreams(overrides) {
+      parser.playerInterface_ = playerInterface;
+      parser.presentationTimeline_ = new shaka.msf.MSFPresentationTimeline();
+      parser.msfTransport_ = /** @type {!shaka.msf.MSFTransport} */ (
+        /** @type {?} */ ({
+          getCodec: () => null,
+          subscribeTrack: (namespace, trackName, callback) => {
+            objectCallbacks.push(callback);
+            return new Promise(() => {});
+          },
+          unsubscribeTrack: () => Promise.resolve(),
+          supportsAbsoluteStart: () => false,
+          release: () => {},
+        }));
+
+      for (let i = 0; i < overrides.length; i++) {
+        parser.processTrack_(/** @type {msfCatalog.Track} */ (Object.assign({
+          name: `video${i}`,
+          packaging: PACKAGING,
+          codec: 'avc1.4d401f',
+          isLive: true,
+        }, overrides[i])), new Map(), new Map());
+      }
+      return parser.videoStreams_;
+    }
+
+    /**
+     * Delivers an object whose segmenter answers with the given segments.
+     *
+     * @param {number} callbackIndex
+     * @param {!Array<!shaka.extern.MsfSegment>} segments
+     */
+    function deliver(callbackIndex, segments) {
+      nextSegments = segments;
+      objectCallbacks[callbackIndex](fakeObject(0));
+    }
+
+    /**
+     * @param {!shaka.extern.Stream} stream
+     * @return {!Array<!shaka.media.SegmentReference>}
+     */
+    function referencesOf(stream) {
+      goog.asserts.assert(stream.segmentIndex, 'stream must have an index');
+      return Array.from(stream.segmentIndex);
+    }
+
+    beforeEach(() => {
+      nextSegments = [];
+      nextError = null;
+      objectCallbacks = [];
+
+      shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
+        return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
+          describeTrack: () => ({
+            basicInfo: /** @type {?} */ ({
+              mimeType: 'video/mp2t',
+              codecs: 'avc1.4d401f',
+            }),
+            initSegmentReference: null,
+          }),
+          createSegmenter: () => ({
+            push: () => {
+              if (nextError) {
+                throw nextError;
+              }
+              return nextSegments;
+            },
+          }),
+        }));
+      });
+    });
+
+    afterEach(() => {
+      shaka.msf.PackagingRegistry.unregisterPackaging(PACKAGING);
+    });
+
+    it('lines up a rendition on another clock with its alternate', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5), fakeSegment(102, 6)]);
+
+      // The switch lands on the next Group, on a clock 4900 s ahead.
+      low.createSegmentIndex();
+      deliver(1, [fakeSegment(5004, 7), fakeSegment(5006, 8)]);
+
+      const references = referencesOf(low);
+      expect(references.map((r) => r.startTime)).toEqual([104, 106]);
+      expect(references.map((r) => r.timestampOffset)).toEqual([-4900, -4900]);
+    });
+
+    it('lines up the same Group seen by both renditions', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      low.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 5)]);
+
+      expect(referencesOf(low)[0].startTime).toBe(100);
+    });
+
+    it('leaves renditions that share a clock alone', () => {
+      const [high, low] = makeStreams([{altGroup: 1}, {altGroup: 1}]);
+      high.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      low.createSegmentIndex();
+      // The previous group's end is only an estimate.
+      deliver(1, [fakeSegment(102.04, 6)]);
+
+      expect(referencesOf(low)[0].startTime).toBe(102.04);
+      expect(referencesOf(low)[0].timestampOffset).toBe(0);
+    });
+
+    it('lines up renditions with different keyframe spacings', () => {
+      const [short, long] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 15},
+        {altGroup: 1, keyframeSpacing: 60},
+      ]);
+      short.createSegmentIndex();
+      // Groups 400 to 403 of the short-GOP track cover Objects 6000 to 6059.
+      deliver(0, [
+        fakeSegment(100, 400),
+        fakeSegment(102, 401),
+        fakeSegment(104, 402),
+        fakeSegment(106, 403),
+      ]);
+
+      // Group 100 of the long-GOP track starts at Object 6000 too, on a
+      // clock 4900 s ahead.
+      long.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 100)]);
+
+      const references = referencesOf(long);
+      expect(references[0].startTime).toBe(100);
+      expect(references[0].timestampOffset).toBe(-4900);
+    });
+
+    it('lines up a Group that starts inside an alternate Group', () => {
+      const [long, short] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 60},
+        {altGroup: 1, keyframeSpacing: 15},
+      ]);
+      long.createSegmentIndex();
+      // Objects 6000 to 6059, over 8 seconds.
+      deliver(0, [Object.assign(fakeSegment(100, 100), {duration: 8})]);
+
+      // Group 402 starts at Object 6030, half way into it.
+      short.createSegmentIndex();
+      deliver(1, [fakeSegment(5004, 402)]);
+
+      expect(referencesOf(short)[0].startTime).toBe(104);
+    });
+
+    it('does not take Group numbers of different spacings as alike', () => {
+      const [short, long] = makeStreams([
+        {altGroup: 1, keyframeSpacing: 15},
+        {altGroup: 1, keyframeSpacing: 60},
+      ]);
+      short.createSegmentIndex();
+      // Group 5 of the short-GOP track starts at Object 75.
+      deliver(0, [fakeSegment(100, 5)]);
+
+      // Group 5 of the long-GOP track starts at Object 300, which nothing
+      // has placed yet.
+      long.createSegmentIndex();
+      deliver(1, [fakeSegment(5000, 5)]);
+
+      expect(referencesOf(long)[0].startTime).toBe(5000);
+    });
+
+    it('does not line up tracks outside an alternate group', () => {
+      const [first, second] = makeStreams([{}, {}]);
+      first.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+      second.createSegmentIndex();
+      deliver(1, [fakeSegment(5002, 6)]);
+
+      expect(referencesOf(second)[0].startTime).toBe(5002);
+    });
+
+    it('fails the stream when its segmenter fails', async () => {
+      const [stream] = makeStreams([{}]);
+      const indexCreated = stream.createSegmentIndex();
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER);
+
+      nextError = error;
+      deliver(0, []);
+
+      await expectAsync(indexCreated).toBeRejectedWith(
+          shaka.test.Util.jasmineError(error));
+    });
+
+    it('reports a failure after the first segment to the player', () => {
+      const onErrorSpy = jasmine.createSpy('onError');
+      playerInterface.onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const [stream] = makeStreams([{}]);
+      stream.createSegmentIndex();
+      deliver(0, [fakeSegment(100, 5)]);
+
+      nextError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER);
+      deliver(0, []);
+      deliver(0, []);
+
+      // Only once: everything after the failure is dropped.
+      expect(onErrorSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -951,6 +1419,7 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         data: new Uint8Array([0x01]),
         timestampOffset: 0,
         discontinuitySequence: 0,
+        independent: true,
       };
     }
 
@@ -989,13 +1458,16 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
      *
      * @param {!shaka.extern.Stream} stream
      * @param {!Array<number>} startTimes
+     * @param {number=} secondsPerGroup How the Groups the segments arrive in
+     *   are numbered: one every this many seconds of media from 0.
      */
-    function deliverSegments(stream, startTimes) {
+    function deliverSegments(stream, startTimes, secondsPerGroup = 2) {
       const subscription = lastSubscribeTo('video0');
       expect(subscription).not.toBeNull();
       for (const startTime of startTimes) {
         nextSegments = [fakeSegment(startTime)];
-        subscription.callback(mediaObject(startTime));
+        subscription.callback(
+            mediaObject(Math.floor(startTime / secondsPerGroup)));
       }
       nextSegments = [];
     }
@@ -1154,7 +1626,63 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
       expect(presentationTimeline().getSegmentAvailabilityStart()).toBe(40);
       expect(presentationTimeline().getSegmentAvailabilityEnd()).toBe(104);
+      // And the seek range with it, though nothing before 100 has arrived:
+      // the timeline says where to subscribe to get it.
+      expect(presentationTimeline().getSeekRangeStart()).toBe(40);
     });
+
+    it('limits the seek range to the accessible window', async () => {
+      givenAStartedParser();
+      await processCatalog(
+          [videoTrack({accessibleWindowTime: 30000}), timelineTrack()]);
+      const stream = videoStream();
+      stream.createSegmentIndex();
+      deliverSegments(stream, [100, 102]);
+
+      lastSubscribeTo('history').callback(timelineObject([
+        [40000, [20, 0], 0],
+        [100000, [50, 0], 0],
+        [102000, [51, 0], 0],
+      ]));
+
+      // The timeline describes from 40, but only the last 30 s are
+      // accessible.
+      expect(presentationTimeline().getSegmentAvailabilityEnd()).toBe(104);
+      expect(presentationTimeline().getSegmentAvailabilityStart()).toBe(74);
+      expect(presentationTimeline().getSeekRangeStart()).toBe(74);
+    });
+
+    it('keeps the timeline start when it is inside the accessible window',
+        async () => {
+          givenAStartedParser();
+          await processCatalog(
+              [videoTrack({accessibleWindowTime: 600000}), timelineTrack()]);
+          const stream = videoStream();
+          stream.createSegmentIndex();
+          deliverSegments(stream, [100, 102]);
+
+          lastSubscribeTo('history').callback(timelineObject([
+            [40000, [20, 0], 0],
+            [100000, [50, 0], 0],
+            [102000, [51, 0], 0],
+          ]));
+
+          expect(presentationTimeline().getSegmentAvailabilityStart())
+              .toBe(40);
+        });
+
+    it('does not offer a DVR window from accessibleWindowTime alone',
+        async () => {
+          // Without a media timeline nothing says where to subscribe from.
+          givenAStartedParser();
+          await processCatalog([videoTrack({accessibleWindowTime: 600000})]);
+          const stream = videoStream();
+          stream.createSegmentIndex();
+          deliverSegments(stream, [100, 102]);
+
+          expect(presentationTimeline().getSegmentAvailabilityStart())
+              .toBeGreaterThan(90);
+        });
 
     describe('SCTE-35 event timeline', () => {
       const Fixtures = shaka.test.Scte35;
@@ -1379,6 +1907,333 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           });
     });
 
+    describe('ad creative signaling event timeline', () => {
+      const EVENT_TYPE = 'urn:svta:advertising-wg:ad-creative-signaling';
+
+      /** @type {!jasmine.Spy} */
+      let onRegionSpy;
+
+      beforeEach(() => {
+        onRegionSpy = jasmine.createSpy('onTimelineRegionAdded');
+        playerInterface.onTimelineRegionAdded =
+            shaka.test.Util.spyFunc(onRegionSpy);
+      });
+
+      /**
+       * @param {!Object=} extra
+       * @return {msfCatalog.Track}
+       */
+      function adCreativeTrack(extra) {
+        return /** @type {msfCatalog.Track} */ (Object.assign({
+          name: 'ad-creative',
+          packaging: 'eventtimeline',
+          eventType: EVENT_TYPE,
+          isLive: true,
+        }, extra || {}));
+      }
+
+      /**
+       * A two-slot pod, as in the draft's worked example.
+       *
+       * @param {number=} duration
+       * @return {!Object}
+       */
+      function podEnvelope(duration = 45.045) {
+        return {
+          version: 2,
+          type: 'pod',
+          payload: [{
+            start: 0,
+            duration,
+            slots: [
+              {type: 'linear', start: 0, duration: 30.03,
+                identifiers: [{scheme: 'urn:smpte:ul', value: 'ad1'}],
+                tracking: [{type: 'impression',
+                  urls: ['https://example.com/imp?a=1&b=2']}]},
+              {type: 'linear', start: 30.03, duration: duration - 30.03,
+                identifiers: [{scheme: 'urn:smpte:ul', value: 'ad2'}]},
+            ],
+          }],
+        };
+      }
+
+      /**
+       * @param {!Array<!Object>} records
+       * @param {number=} object
+       */
+      function deliver(records, object = 0) {
+        const subscription = lastSubscribeTo('ad-creative');
+        expect(subscription).not.toBeNull();
+        subscription.callback(timelineObject(records, object));
+      }
+
+      /** @return {!Array<shaka.extern.TimelineRegionInfo>} */
+      function regions() {
+        return onRegionSpy.calls.allArgs().map((args) => args[0]);
+      }
+
+      it('reports a pod as a region spanning it', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 480500, data: podEnvelope(), sig: 'ignored'}]);
+
+        expect(regions()).toEqual([jasmine.objectContaining({
+          schemeIdUri: EVENT_TYPE,
+          startTime: 480.5,
+          endTime: 480.5 + 45.045,
+          id: 'msf_m_480500',
+        })]);
+      });
+
+      it('carries the envelope as the DASH ad creative signaling parser ' +
+          'reads it', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 480500, data: podEnvelope()}]);
+
+        const result =
+            shaka.ads.SvtaInterstitialParser.parseRegion(regions()[0]);
+        expect(result.interstitials.length).toBe(2);
+        const [first, second] = result.interstitials;
+        expect(first).toEqual(jasmine.objectContaining({
+          startTime: 480.5,
+          endTime: 480.5 + 30.03,
+          playbackMode: 'embedded',
+          podPosition: 1,
+          podSize: 2,
+        }));
+        // An ampersand in the JSON survives the trip through the Event text.
+        expect(first.adCreativeSignaling.tracking[0].urls).toEqual(
+            ['https://example.com/imp?a=1&b=2']);
+        expect(second.startTime).toBeCloseTo(480.5 + 30.03, 6);
+        expect(second.endTime).toBeCloseTo(480.5 + 45.045, 6);
+      });
+
+      it('names a pod by its index, whatever it carries', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 1000, data: podEnvelope()}], /* object= */ 0);
+        // The publisher repeats it in the next Group, and then sends a
+        // different record at the same index.
+        deliver([{m: 1000, data: podEnvelope()}], /* object= */ 0);
+        deliver([{m: 1000, data: podEnvelope(60)}], /* object= */ 1);
+
+        expect(regions().map((region) => region.id)).toEqual(
+            ['msf_m_1000', 'msf_m_1000']);
+      });
+
+      it('places a Location with the media timeline its depends names',
+          async () => {
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack(),
+              adCreativeTrack({depends: ['history']})]);
+            lastSubscribeTo('history').callback(
+                timelineObject([[0, [0, 0], 0], [2002, [1, 0], 0]]));
+
+            deliver([{l: [1, 0], data: podEnvelope(15)}]);
+
+            expect(regions()).toEqual([jasmine.objectContaining({
+              startTime: 2.002,
+              endTime: 2.002 + 15,
+              id: 'msf_l_1,0',
+            })]);
+          });
+
+      it('ends a region without timed payload where it starts', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([{m: 2000, data: {version: 2, type: 'trackingEvent',
+          payload: [{type: 'impression', urls: ['https://example.com/']}]}}]);
+
+        expect(regions()).toEqual([jasmine.objectContaining({
+          startTime: 2, endTime: 2})]);
+      });
+
+      it('discards a record without an envelope', async () => {
+        givenAStartedParser();
+        await processCatalog([videoTrack(), adCreativeTrack()]);
+
+        deliver([
+          {m: 1000, data: 'not an object'},
+          {m: 2000, data: [podEnvelope()]},
+          {m: 3000, data: podEnvelope()},
+        ]);
+
+        expect(regions().map((region) => region.startTime)).toEqual([3]);
+      });
+
+      describe('through the ad manager', () => {
+        /** @type {!shaka.Player} */
+        let player;
+        /** @type {!shaka.test.FakeVideo} */
+        let video;
+        /** @type {!shaka.test.FakeNetworkingEngine} */
+        let adNetworking;
+        /** @type {!shaka.extern.IAdManager} */
+        let adManager;
+        /** @type {!Array<!shaka.extern.IAd>} */
+        let startedAds;
+
+        beforeEach(() => {
+          video = new shaka.test.FakeVideo();
+          Object.assign(video, {style: document.createElement('video').style});
+          video.readyState = 4;
+          video.duration = Infinity;
+          player = new shaka.Player(null, null, (instance) => {
+            adNetworking = new shaka.test.FakeNetworkingEngine();
+            adNetworking.setDefaultValue(new ArrayBuffer(0));
+            instance.createNetworkingEngine = () => adNetworking;
+          });
+          spyOn(player, 'getMediaElement').and.returnValue(video);
+          spyOn(player, 'isRemotePlayback').and.returnValue(false);
+          spyOn(deviceDetected, 'getDeviceType')
+              .and.returnValue(shaka.device.IDevice.DeviceType.TV);
+
+          const manager = player.getAdManager();
+          goog.asserts.assert(manager, 'The ads build has an ad manager');
+          adManager = manager;
+          const adsConfig = shaka.util.PlayerConfiguration.createDefault().ads;
+          adsConfig.customPlayheadTracker = false;
+          adsConfig.supportsMultipleMediaElements = false;
+          adsConfig.allowStartInMiddleOfInterstitial = false;
+          adManager.configure(adsConfig);
+          startedAds = [];
+          adManager.addEventListener(shaka.ads.Utils.AD_STARTED, (event) => {
+            startedAds.push(event['ad']);
+          });
+
+          // What the player does with each region the parser reports.
+          onRegionSpy.and.callFake((region) => {
+            adManager.onDASHMetadata(region);
+          });
+        });
+
+        afterEach(async () => {
+          try {
+            adManager.release();
+          } finally {
+            jasmine.clock().uninstall();
+          }
+          await player.destroy();
+        });
+
+        /** @param {number} position */
+        function advance(position) {
+          video.currentTime = position;
+          jasmine.clock().tick(25);
+        }
+
+        /** @return {!Array<string>} */
+        function requested() {
+          return adNetworking.request.calls.allArgs()
+              .map((args) => args[1].uris[0]);
+        }
+
+        /** Lets the ad manager schedule what it was handed. */
+        async function settle() {
+          for (let i = 0; i < 20; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await Promise.resolve();
+          }
+        }
+
+        /** @return {!Object} */
+        function trackedPod() {
+          return {
+            version: 2,
+            type: 'pod',
+            payload: [{
+              start: 0,
+              duration: 20,
+              tracking: [
+                {type: 'podStart', urls: ['pod-start']},
+                {type: 'podEnd', urls: ['pod-end']},
+              ],
+              slots: [
+                {type: 'linear', start: 0, duration: 10,
+                  identifiers: [{scheme: 'test', value: 'first'}],
+                  tracking: [
+                    {type: 'impression', urls: ['first-impression?a=1&b=2']},
+                    {type: 'complete', urls: ['first-complete']},
+                  ]},
+                {type: 'linear', start: 10, duration: 10,
+                  identifiers: [{scheme: 'test', value: 'second'}],
+                  tracking: [
+                    {type: 'impression', urls: ['second-impression']},
+                    {type: 'complete', urls: ['second-complete']},
+                  ]},
+              ],
+            }],
+          };
+        }
+
+        it('plays a pod as embedded ads and sends its beacons', async () => {
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 100; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(requested()).toEqual([
+            'pod-start', 'first-impression?a=1&b=2', 'first-complete',
+            'second-impression', 'second-complete', 'pod-end',
+          ]);
+          expect(startedAds.map((ad) => ad.getPositionInSequence()))
+              .toEqual([1, 2]);
+          expect(startedAds[0].getSequenceLength()).toBe(2);
+          expect(startedAds[0].isClientRendering()).toBe(false);
+        });
+
+        it('measures a pod repeated in later Groups once', async () => {
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          advance(100);
+          // The independent Object of the next Group repeats the record.
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 105; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(requested().filter((uri) => uri == 'pod-start').length)
+              .toBe(1);
+          expect(startedAds.length).toBe(2);
+        });
+
+        it('schedules nothing when SVTA is disabled', async () => {
+          const adsConfig = shaka.util.PlayerConfiguration.createDefault().ads;
+          adsConfig.customPlayheadTracker = false;
+          adsConfig.disableSVTA = true;
+          adManager.configure(adsConfig);
+          givenAStartedParser();
+          await processCatalog([videoTrack(), adCreativeTrack()]);
+          jasmine.clock().install();
+
+          deliver([{m: 100000, data: trackedPod()}]);
+          await settle();
+          for (let position = 100; position <= 120; position += 5) {
+            advance(position);
+          }
+
+          expect(onRegionSpy).toHaveBeenCalledTimes(1);
+          expect(requested()).toEqual([]);
+          expect(startedAds).toEqual([]);
+        });
+      });
+    });
+
     describe('seeking', () => {
       /** @type {!shaka.test.FakeVideo} */
       let video;
@@ -1426,8 +2281,9 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         expect(subscribes.length).toBe(before + 1);
         expect(lastSubscribeTo('video0').startLocation).toEqual(
             {group: BigInt(30), object: BigInt(0), subgroup: null});
-        // A seek names its own starting point; there is nothing to join.
-        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(false);
+        // A subscription only forwards what is published after it, so what
+        // was published from the seek point on has to be filled in.
+        expect(lastSubscribeTo('video0').joinCurrentGroup).toBe(true);
         // The old subscription is withdrawn: it delivers from where the
         // player no longer is.
         expect(unsubscribeSpy).toHaveBeenCalled();
@@ -1460,6 +2316,154 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
             await shaka.test.Util.shortDelay();
 
             expect(subscribes.length).toBe(after);
+          });
+
+      it('jumps ahead within the past by starting over', async () => {
+        await givenALiveStreamWithTimeline();
+
+        seekTo(41);
+        await shaka.test.Util.shortDelay();
+        expect(lastSubscribeTo('video0').startLocation).toEqual(
+            {group: BigInt(20), object: BigInt(0), subgroup: null});
+
+        // The subscription from Group 20 would get to Group 30 in the end,
+        // but only after delivering everything in between.
+        seekTo(61);
+        await shaka.test.Util.shortDelay();
+
+        expect(lastSubscribeTo('video0').startLocation).toEqual(
+            {group: BigInt(30), object: BigInt(0), subgroup: null});
+      });
+
+      it('jumps a gap just short of the index instead of starting over',
+          async () => {
+            // Where a live start lands when another stream's Group began a
+            // little earlier than this one's.
+            await givenALiveStreamWithTimeline();
+            const before = subscribes.length;
+
+            seekTo(99.5);
+            await shaka.test.Util.shortDelay();
+
+            expect(subscribes.length).toBe(before);
+            expect(unsubscribeSpy).not.toHaveBeenCalled();
+          });
+
+      it('does not follow a timeline to Groups the live edge has not reached',
+          async () => {
+            // A media timeline that disagrees with the media puts a past time
+            // in a Group that has not been published.
+            // A subscription from there waits for it for minutes, while the
+            // one already following the live edge brings it anyway.
+            givenAStartedParser();
+            await processCatalog([videoTrack(), timelineTrack()]);
+            const stream = videoStream();
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+            // Groups numbered one every four seconds, where the timeline
+            // below says every two: the live edge is in Group 25.
+            deliverSegments(stream, [100, 102], /* secondsPerGroup= */ 4);
+            lastSubscribeTo('history').callback(timelineObject([
+              [40000, [20, 0], 0],
+              [60000, [30, 0], 0],
+              [100000, [50, 0], 0],
+              [102000, [51, 0], 0],
+            ]));
+            video = new shaka.test.FakeVideo();
+            parser.setMediaElement(
+                /** @type {!HTMLMediaElement} */ (/** @type {?} */ (video)));
+            const before = subscribes.length;
+
+            // The timeline puts 61 s in Group 30, which is ahead of Group 25,
+            // the first one the live subscription delivered.
+            seekTo(61);
+            await shaka.test.Util.shortDelay();
+
+            expect(subscribes.length).toBe(before);
+            expect(unsubscribeSpy).not.toHaveBeenCalled();
+          });
+
+      it('starts a stream switched to behind the live edge at the playhead',
+          async () => {
+            // An ABR switch after a seek into the DVR window. From the live
+            // edge the new stream would hold nothing the player can use.
+            const stream = await givenALiveStreamWithTimeline();
+            seekTo(61);
+            await shaka.test.Util.shortDelay();
+
+            stream.closeSegmentIndex();
+            video.currentTime = 65;
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+
+            expect(lastSubscribeTo('video0').startLocation).toEqual(
+                {group: BigInt(30), object: BigInt(0), subgroup: null});
+          });
+
+      it('starts a stream switched to at the live edge before any seek',
+          async () => {
+            // The playhead reads 0 until playback starts, which is no
+            // position to subscribe from.
+            const stream = await givenALiveStreamWithTimeline();
+
+            stream.closeSegmentIndex();
+            stream.createSegmentIndex();
+            await shaka.test.Util.shortDelay();
+
+            expect(lastSubscribeTo('video0').startLocation).toBeNull();
+          });
+
+      it('moves to where the fill starts when it starts later', async () => {
+        // A relay fills only from what its cache still holds, however far
+        // back the timeline reaches, and StreamingEngine would never buffer
+        // that far ahead of the playhead.
+        await givenALiveStreamWithTimeline();
+        seekTo(41);
+        await shaka.test.Util.shortDelay();
+        const fill = lastSubscribeTo('video0');
+        expect(fill.startLocation).toEqual(
+            {group: BigInt(20), object: BigInt(0), subgroup: null});
+
+        nextSegments = [fakeSegment(80)];
+        fill.callback(mediaObject(40));
+        nextSegments = [];
+
+        expect(video.currentTime).toBe(80);
+      });
+
+      it('moves to the first Group start when nothing could be filled',
+          async () => {
+            // With nothing to fill, the subscription delivers from the
+            // middle of the live Group, where decoding cannot begin.
+            await givenALiveStreamWithTimeline();
+            seekTo(41);
+            await shaka.test.Util.shortDelay();
+            const fill = lastSubscribeTo('video0');
+
+            const dependent = fakeSegment(103);
+            dependent.independent = false;
+            nextSegments = [dependent];
+            fill.callback(mediaObject(51));
+            expect(video.currentTime).toBe(41);
+
+            nextSegments = [fakeSegment(104)];
+            fill.callback(mediaObject(52));
+            nextSegments = [];
+
+            expect(video.currentTime).toBe(104);
+          });
+
+      it('leaves the playhead alone when the fill starts where asked',
+          async () => {
+            await givenALiveStreamWithTimeline();
+            seekTo(41);
+            await shaka.test.Util.shortDelay();
+
+            nextSegments = [fakeSegment(40)];
+            lastSubscribeTo('video0').callback(mediaObject(20));
+            nextSegments = [];
+
+            expect(video.currentTime).toBe(41);
           });
 
       it('goes back to the live edge on a seek to live', async () => {

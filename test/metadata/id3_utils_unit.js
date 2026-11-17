@@ -400,6 +400,27 @@ describe('Id3Utils', () => {
     expect(typeof frames[0].data).toBe('number');
   });
 
+  // Issue: https://github.com/shaka-project/shaka-player/issues/10935
+  it('parses every bit of the transportStreamTimestamp', () => {
+    const owner = 'com.apple.streaming.transportStreamTimestamp';
+    const ownerBytes = Array.from(owner).map((c) => c.charCodeAt(0));
+    const parse = (pts) => {
+      const payload = new Uint8Array([
+        ...ownerBytes,
+        0,
+        0, 0, 0, pts[0],
+        pts[1], pts[2], pts[3], pts[4],
+      ]);
+      const frame = Id3Generator.generateId3Frame('PRIV', payload);
+      return Id3Utils.getID3Frames(Id3Generator.generateId3(frame))[0].data;
+    };
+
+    // 457665 = 0x6fbc1, whose odd low byte used to be misread by ~2ms.
+    expect(parse([0, 0x00, 0x06, 0xfb, 0xc1])).toBe(457665 / 90);
+    expect(parse([0, 0xff, 0xff, 0xff, 0xff])).toBe(0xffffffff / 90);
+    expect(parse([1, 0x00, 0x00, 0x00, 0x5a])).toBe((0x100000000 + 90) / 90);
+  });
+
   it('returns null for malformed TXXX frame', () => {
     const payload = new Uint8Array([
       3,
@@ -428,5 +449,164 @@ describe('Id3Utils', () => {
     const frames = Id3Utils.getID3Frames(id3);
 
     expect(frames[0].data).toBe('google');
+  });
+
+  describe('tag layout', () => {
+    const toBytes = (s) => Array.from(s).map((c) => c.charCodeAt(0));
+    const syncsafe = (n) =>
+      [(n >> 21) & 0x7f, (n >> 14) & 0x7f, (n >> 7) & 0x7f, n & 0x7f];
+    const bigEndian = (n) =>
+      [(n >>> 24) & 0xff, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+
+    /**
+     * @param {number} version
+     * @param {string} type
+     * @param {!Array<number>} body
+     * @param {number=} format The second frame flags byte.
+     * @return {!Array<number>}
+     */
+    const frame = (version, type, body, format = 0) => [
+      ...toBytes(type),
+      ...(version == 4 ? syncsafe(body.length) : bigEndian(body.length)),
+      0, format,
+      ...body,
+    ];
+
+    /**
+     * @param {string} description
+     * @param {string} value
+     * @return {!Array<number>}
+     */
+    const txxx = (description, value) =>
+      [3, ...toBytes(description), 0, ...toBytes(value)];
+
+    /**
+     * @param {number} version
+     * @param {number} flags
+     * @param {!Array<number>} body
+     * @return {!Array<number>}
+     */
+    const tag = (version, flags, body) => {
+      const sizeAndFlags = [version, 0, flags, ...syncsafe(body.length)];
+      const footer = flags & 0x10 ? [...toBytes('3DI'), ...sizeAndFlags] : [];
+      return [...toBytes('ID3'), ...sizeAndFlags, ...body, ...footer];
+    };
+
+    /**
+     * @param {!Array<number>} bytes
+     * @return {!Array<string>}
+     */
+    const descriptions = (bytes) => Id3Utils.getID3Frames(
+        new Uint8Array(bytes)).map((f) => `${f.description}=${f.data}`);
+
+    const audio = [0xff, 0xf1, 0x50, 0x80];
+
+    it('reads the tag after one that ends in padding', () => {
+      const padded = tag(3, 0, [
+        ...frame(3, 'TXXX', txxx('a', '1')),
+        ...new Array(20).fill(0),
+      ]);
+      const next = tag(3, 0, frame(3, 'TXXX', txxx('b', '2')));
+
+      expect(descriptions([...padded, ...next])).toEqual(['a=1', 'b=2']);
+    });
+
+    it('returns every adjacent tag as ID3 data', () => {
+      const one = tag(3, 0, frame(3, 'TXXX', txxx('a', '1')));
+      const data = new Uint8Array([...one, ...one, ...one, ...audio]);
+
+      expect(Id3Utils.getID3Data(data).length).toBe(one.length * 3);
+    });
+
+    it('accounts for the ID3v2.4 footer', () => {
+      const withFooter = tag(4, 0x10, frame(4, 'TXXX', txxx('a', '1')));
+      const next = tag(4, 0, frame(4, 'TXXX', txxx('b', '2')));
+      const data = [...withFooter, ...next, ...audio];
+
+      expect(Id3Utils.getID3Data(new Uint8Array(data)).length)
+          .toBe(withFooter.length + next.length);
+      expect(descriptions(data)).toEqual(['a=1', 'b=2']);
+    });
+
+    it('skips an ID3v2.3 extended header with a CRC', () => {
+      // Size (excluding itself), flags with the CRC bit, padding size, CRC.
+      const extendedHeader =
+          [...bigEndian(10), 0x80, 0, 0, 0, 0, 0, 1, 2, 3, 4];
+      const id3 = tag(3, 0x40,
+          [...extendedHeader, ...frame(3, 'TXXX', txxx('a', '1'))]);
+
+      expect(descriptions(id3)).toEqual(['a=1']);
+      expect(Id3Utils.getID3Data(new Uint8Array([...id3, ...audio])).length)
+          .toBe(id3.length);
+    });
+
+    it('skips an ID3v2.4 extended header', () => {
+      // Syncsafe size (including itself), one flag byte, no flags set.
+      const extendedHeader = [...syncsafe(6), 1, 0];
+      const id3 = tag(4, 0x40,
+          [...extendedHeader, ...frame(4, 'TXXX', txxx('a', '1'))]);
+
+      expect(descriptions(id3)).toEqual(['a=1']);
+      expect(Id3Utils.getID3Data(new Uint8Array([...id3, ...audio])).length)
+          .toBe(id3.length);
+    });
+
+    it('removes ID3v2.3 tag unsynchronization', () => {
+      // 0x1ffe0 is stored as 00 01 ff 00 e0.
+      const priv = [
+        ...toBytes('com.apple.streaming.transportStreamTimestamp'), 0,
+        0, 0, 0, 0, 0, 0x01, 0xff, 0x00, 0xe0,
+      ];
+      const id3 = tag(3, 0x80, frame(3, 'PRIV', priv));
+
+      expect(Id3Utils.getID3Frames(new Uint8Array(id3))[0].data)
+          .toBe(0x1ffe0 / 90);
+    });
+
+    it('removes ID3v2.4 frame unsynchronization', () => {
+      // Latin-1 'a' = 'ÿA', with the 0x00 inserted after 0xff.
+      const value = [0, 0x61, 0, 0xff, 0x00, 0x41];
+      const id3 = tag(4, 0, frame(4, 'TXXX', value, 0x02));
+
+      expect(descriptions(id3)).toEqual(['a=\u00ffA']);
+    });
+
+    it('skips the ID3v2.4 data length indicator', () => {
+      const body = txxx('a', '1');
+      const id3 = tag(4, 0,
+          frame(4, 'TXXX', [...syncsafe(body.length), ...body], 0x01));
+
+      expect(descriptions(id3)).toEqual(['a=1']);
+    });
+
+    it('skips compressed frames', () => {
+      const id3 = tag(3, 0, [
+        ...frame(3, 'TXXX', [0, 0, 0, 9, 1, 2, 3], 0x80),
+        ...frame(3, 'TXXX', txxx('b', '2')),
+      ]);
+
+      expect(descriptions(id3)).toEqual(['b=2']);
+    });
+
+    it('does not parse a truncated transportStreamTimestamp', () => {
+      const priv = [
+        ...toBytes('com.apple.streaming.transportStreamTimestamp'), 0,
+        0, 0, 0, 0,
+      ];
+      const id3 = tag(3, 0, frame(3, 'PRIV', priv));
+
+      expect(Id3Utils.getID3Frames(new Uint8Array(id3))[0].data)
+          .toEqual(jasmine.any(ArrayBuffer));
+    });
+
+    it('reads ID3v2.3 frames larger than 127 bytes', () => {
+      const long = 'x'.repeat(200);
+      const id3 = tag(3, 0, [
+        ...frame(3, 'TXXX', txxx('a', long)),
+        ...frame(3, 'TXXX', txxx('b', '2')),
+      ]);
+
+      expect(descriptions(id3)).toEqual([`a=${long}`, 'b=2']);
+    });
   });
 });

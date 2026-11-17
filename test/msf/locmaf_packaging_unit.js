@@ -24,7 +24,12 @@ filterDescribe('shaka.msf.packaging.Locmaf', isMSFSupported, () => {
    */
   let protectedInit;
 
+  /** @type {!Uint8Array} */
+  let audioInit;
+
   beforeAll(async () => {
+    audioInit = BufferUtils.toUint8(
+        await Util.fetch('/base/test/test/assets/sintel-audio-init.mp4'));
     clearInit = BufferUtils.toUint8(
         await Util.fetch('/base/test/test/assets/cea-init.mp4'));
     protectedInit = BufferUtils.toUint8(await Util.fetch(
@@ -203,6 +208,41 @@ filterDescribe('shaka.msf.packaging.Locmaf', isMSFSupported, () => {
   });
 
   describe('the segmenter', () => {
+    it('marks only the Group start as independently decodable video', () => {
+      const {packaging} = describe_(makeTrack(), clearInit);
+      const segmenter = packaging.createSegmenter();
+      const data = fullObject({
+        [Field.TFHD_DEFAULT_SAMPLE_DURATION]: 3000,
+        [Field.TFDT_BASE_MEDIA_DECODE_TIME]: 90000,
+        [Field.TRUN_SAMPLE_COUNT]: 1,
+      }, /* payloadLength= */ 5);
+
+      expect(segmenter.push(object(data))[0].independent).toBe(true);
+      const following = object(data);
+      following.location.object = BigInt(1);
+      expect(segmenter.push(following)[0].independent).toBe(false);
+
+      const nextGroup = object(data);
+      nextGroup.location.group = BigInt(1);
+      expect(segmenter.push(nextGroup)[0].independent).toBe(true);
+    });
+
+    it('keeps audio objects independently decodable within a Group', () => {
+      const {packaging} = describe_(
+          makeTrack({codec: 'mp4a.40.2'}), audioInit);
+      const segmenter = packaging.createSegmenter();
+      const data = fullObject({
+        [Field.TFHD_DEFAULT_SAMPLE_DURATION]: 1024,
+        [Field.TFDT_BASE_MEDIA_DECODE_TIME]: 0,
+        [Field.TRUN_SAMPLE_COUNT]: 1,
+      }, /* payloadLength= */ 5);
+
+      expect(segmenter.push(object(data))[0].independent).toBe(true);
+      const following = object(data);
+      following.location.object = BigInt(1);
+      expect(segmenter.push(following)[0].independent).toBe(true);
+    });
+
     it('reconstructs a chunk using the trex track ID', () => {
       const {packaging, description} = describe_(makeTrack(), clearInit);
       expect(description).not.toBe(null);

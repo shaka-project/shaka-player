@@ -480,6 +480,27 @@ describe('VttTextParser', () => {
         });
   });
 
+  // https://www.w3.org/TR/webvtt1/#webvtt-cue-size
+  it('defaults the size to 100%', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test', size: 100},
+          {startTime: 25, endTime: 45, payload: 'Test2', size: 100},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n' +
+        '00:00:25.000 --> 00:00:45.000 position:90%\n' +
+        'Test2\n\n',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   it('supports align setting', () => {
     verifyHelper(
         [

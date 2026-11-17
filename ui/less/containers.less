@@ -272,7 +272,8 @@
   // Poster: contain, sharp, fills the placeholder at the bottom of the stack.
   .pip-poster {
     position: absolute;
-    inset: 0;
+    .inset();
+
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -282,7 +283,8 @@
   // darkens slightly so the icon and label remain legible.
   .pip-blur-overlay {
     position: absolute;
-    inset: 0;
+    .inset();
+
     backdrop-filter: blur(18px) brightness(0.55);
     z-index: 1;
   }
@@ -303,7 +305,8 @@
   // Expanding pulse ring behind the button.
   .pip-pulse-ring {
     position: absolute;
-    inset: 0;
+    .inset();
+
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 35%);
     animation: pip-pulse 2s ease-out infinite;
@@ -645,6 +648,20 @@
   transition-delay: 0ms;
 }
 
+/* The poster shown while only the audio of a video is played, e.g. after
+ * falling back to an audio-only variant at very low bandwidths. */
+.shaka-audio-only-poster {
+  .absolute-position();
+  .fill-container();
+  .hide-when-shaka-controls-disabled();
+
+  background-color: #000;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
 /* The buffering spinner. */
 .shaka-spinner-container {
   .absolute-position();
@@ -683,5 +700,25 @@
 
   * {
     cursor: none !important;
+  }
+}
+
+/* In forced colors mode (e.g. Windows high contrast), the colors of the
+ * controls are forced to the user's palette, but the video behind them is
+ * not.  Text gets an opaque backplate from the browser, but icons don't, so
+ * give the controls an opaque background to keep them legible.  The top
+ * panel is often empty, so only its buttons get a background. */
+@media (forced-colors: active) {
+  /* The bottom controls don't fade out with the controls (only their
+   * children do), so only paint them while the controls are shown. */
+  .shaka-controls-container[shown="true"] .shaka-bottom-controls,
+  .shaka-controls-container[casting="true"] .shaka-bottom-controls,
+  .shaka-controls-top-button-panel > button {
+    background-color: Canvas;
+  }
+
+  .shaka-big-buttons-container button {
+    background-color: Canvas;
+    outline: 1px solid CanvasText;
   }
 }

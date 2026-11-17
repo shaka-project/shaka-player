@@ -320,6 +320,64 @@ describe('URL', () => {
     });
   });
 
+  describe('toAbsolute', /** @suppress {accessControls} */ () => {
+    const originalGetBaseUri = shaka.util.URL.getBaseUri_;
+
+    /** @type {string} */
+    let fakeBaseUri;
+
+    beforeAll(() => {
+      shaka.util.URL.getBaseUri_ = () => fakeBaseUri;
+    });
+
+    beforeEach(() => {
+      fakeBaseUri = 'https://page.example/dir/index.html';
+    });
+
+    afterAll(() => {
+      shaka.util.URL.getBaseUri_ = originalGetBaseUri;
+    });
+
+    it('resolves relative paths against the document base', () => {
+      expect(shaka.util.URL.toAbsolute('thumbs/main.vtt'))
+          .toBe('https://page.example/dir/thumbs/main.vtt');
+    });
+
+    it('resolves path-only URIs against the document base', () => {
+      expect(shaka.util.URL.toAbsolute('/thumbs/main.vtt?a=1'))
+          .toBe('https://page.example/thumbs/main.vtt?a=1');
+    });
+
+    it('takes the scheme of the document base for // URIs', () => {
+      expect(shaka.util.URL.toAbsolute('//cdn.example/main.vtt'))
+          .toBe('https://cdn.example/main.vtt');
+    });
+
+    it('keeps a colon in the query string of a relative URI', () => {
+      expect(shaka.util.URL.toAbsolute('main.vtt?t=12:00'))
+          .toBe('https://page.example/dir/main.vtt?t=12:00');
+    });
+
+    it('returns URIs with a scheme unchanged', () => {
+      const uris = [
+        'http://other.example/a/../main.vtt',
+        'offline:manifest/1',
+        'test:sintel_no_text_compiled',
+        'blob:https://page.example/1234',
+        'data:text/vtt,WEBVTT',
+      ];
+      for (const uri of uris) {
+        expect(shaka.util.URL.toAbsolute(uri)).toBe(uri);
+      }
+    });
+
+    it('returns the URI unchanged on an opaque base', () => {
+      fakeBaseUri = 'blob:https://page.example/1234';
+      expect(shaka.util.URL.toAbsolute('thumbs/main.vtt'))
+          .toBe('thumbs/main.vtt');
+    });
+  });
+
   describe('applyUrlParams', () => {
     it('returns URI unchanged when paramFn is null', () => {
       const uri = 'https://example.com/path';

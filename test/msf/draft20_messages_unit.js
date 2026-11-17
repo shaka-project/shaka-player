@@ -122,6 +122,36 @@ filterDescribe('shaka.msf.draft20.MessageWriter', isMSFSupported, () => {
     });
   });
 
+  describe('fillParam', () => {
+    it('should ask for the current Group as StartGroup 1', () => {
+      const param = writer.fillParam(null);
+
+      expect(param.type).toBe(BigInt(0x23));
+      expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
+        0x01, // Parameter count
+        0x21, 0x01, 0x01, // LOCATION_FILTER, StartGroup = 1
+      ]);
+    });
+
+    it('should fill from a start in the past', () => {
+      const param = writer.fillParam({group: BigInt(7), object: BigInt(3)});
+
+      expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
+        0x01, // Parameter count
+        0x21, 0x02, 0x07, 0x03, // LOCATION_FILTER, {7, 3}
+      ]);
+    });
+
+    it('should leave a fill from the origin to the subscription filter', () => {
+      // Two zeroed fields would read as the Next Object in draft-20.
+      const param = writer.fillParam({group: BigInt(0), object: BigInt(0)});
+
+      expect(Array.from(/** @type {!Uint8Array} */(param.value))).toEqual([
+        0x00, // Parameter count
+      ]);
+    });
+  });
+
   describe('inherited messages', () => {
     it('should serialize SUBSCRIBE exactly as draft-18 does', () => {
       // Every message body but FETCH is unchanged, so this proves the

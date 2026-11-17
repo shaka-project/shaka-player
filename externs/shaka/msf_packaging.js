@@ -45,7 +45,7 @@ shaka.extern.MsfPackaging = class {
    * @param {!Uint8Array} initData The track's resolved initialization data,
    *   empty when the catalog carries none. Its meaning is packaging-specific:
    *   an MP4 initialization segment for CMAF, PAT/PMT transport packets for
-   *   m2ts.
+   *   mpeg2ts.
    * @return {?shaka.extern.MsfTrackDescription}
    * @exportDoc
    */
@@ -53,8 +53,9 @@ shaka.extern.MsfPackaging = class {
 
   /**
    * Creates a segmenter for the track this instance described. Called each
-   * time the stream's segment index is created, so a track that is unsubscribed
-   * and resubscribed starts from a clean segmenter.
+   * time the stream's segment index is created or its subscription is
+   * replaced, so a track that is unsubscribed and resubscribed starts from a
+   * clean segmenter.
    *
    * @param {shaka.extern.MsfCodec=} codec The negotiated draft's primitive
    *   codec. A packaging whose objects carry MoQT-encoded fields -- Object
@@ -81,7 +82,7 @@ shaka.extern.MsfPackaging = class {
  *   corresponding catalog fields.
  * @property {shaka.media.InitSegmentReference} initSegmentReference
  *   The initialization segment to attach to every segment of this track, or
- *   null for packagings that have none, such as m2ts.
+ *   null for packagings that have none, such as mpeg2ts.
  * @exportDoc
  */
 shaka.extern.MsfTrackDescription;
@@ -96,6 +97,8 @@ shaka.extern.MsfTrackDescription;
  *   data: !Uint8Array,
  *   timestampOffset: number,
  *   discontinuitySequence: number,
+ *   group: (bigint|undefined),
+ *   independent: boolean,
  * }}
  *
  * @property {number} startTime
@@ -106,13 +109,20 @@ shaka.extern.MsfTrackDescription;
  *   The bytes to append.
  * @property {number} timestampOffset
  *   Added to the media's own timestamps at append time. Zero unless the
- *   packaging shifts media off its own timeline, as m2ts does to stay
+ *   packaging shifts media off its own timeline, as mpeg2ts does to stay
  *   monotonic across a PCR discontinuity.
+ * @property {boolean} independent
+ *   Whether decoding can begin at this segment.
  * @property {number} discontinuitySequence
  *   Increments whenever the media timeline is discontinuous with the previous
  *   segment, or -1 when the packaging cannot have discontinuities. Downstream
  *   this resets the transport-stream rollover reference and forces a fresh
  *   transmuxed initialization segment.
+ * @property {(bigint|undefined)} group
+ *   The Group the segment was cut from, for packagings that cut segments on
+ *   Group boundaries. It lets the player line up the renditions of an
+ *   alternate group whose media do not share a clock, by placing the same
+ *   Group at the same presentation time.
  * @exportDoc
  */
 shaka.extern.MsfSegment;
@@ -136,6 +146,16 @@ shaka.extern.MsfSegmenter = class {
    * @exportDoc
    */
   push(obj) {}
+
+  /**
+   * Frees whatever the segmenter holds. Called once, when the parser drops
+   * the segmenter: its stream is closed, its subscription is replaced after a
+   * seek, push() failed, or the parser stops. push() is not called after it.
+   * Implementing this is optional.
+   *
+   * @exportDoc
+   */
+  release() {}
 };
 
 

@@ -155,6 +155,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.MenuBase {
             name);
       }
     }
+    shaka.ui.Utils.setMenuItemRoles(this.overflowMenu_);
   }
 
   /** @private */

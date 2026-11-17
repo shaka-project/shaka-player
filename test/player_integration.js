@@ -236,7 +236,10 @@ describe('Player', () => {
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .timeoutAfter(40)
+          // The second playback covers all 42 seconds of the presentation.
+          // The waiter does not speed up playback on Tizen, so allow time to
+          // play it in real time.
+          .timeoutAfter(60)
           .failOnTimeout(true);
       // wait for Dynamic to static
       await waiter.waitUntilVodTransition(video);
@@ -464,6 +467,21 @@ describe('Player', () => {
 
       player.selectTextTrack(newTrack);
       expect(player.getTextTracks()[0].active).toBe(true);
+    });
+
+    it('with external text tracks with a relative URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+
+      const relativeUri = 'base/test/test/assets/text-clip.vtt';
+      const newTrack = await player.addTextTrackAsync(
+          relativeUri, 'en', 'subtitles', 'text/vtt');
+      expect(player.getTextTracks()).toEqual([newTrack]);
+
+      // The track is anchored to the page, like fetch() would do, so it can
+      // later serve as a base for URIs found in the text itself.
+      const stream = player.getManifest().textStreams[0];
+      expect(stream.segmentIndex.get(0).getUris())
+          .toEqual([new URL(relativeUri, location.href).href]);
     });
 
     it('with cea closed captions', async () => {
@@ -1002,10 +1020,17 @@ describe('Player', () => {
     it('has the correct number of arguments in compiled callbacks', () => {
       // Get the default configuration for both the compiled & uncompiled
       // versions for comparison.
-      const compiledConfig = (new compiledShaka.Player()).getConfiguration();
-      const uncompiledConfig = (new shaka.Player()).getConfiguration();
+      const compiledPlayer = new compiledShaka.Player();
+      const uncompiledPlayer = new shaka.Player();
+      const compiledConfig = compiledPlayer.getConfiguration();
+      const uncompiledConfig = uncompiledPlayer.getConfiguration();
 
       compareConfigFunctions(compiledConfig, uncompiledConfig);
+
+      return Promise.all([
+        compiledPlayer.destroy(),
+        uncompiledPlayer.destroy(),
+      ]);
 
       /**
        * Find all the callbacks in the configuration recursively and compare
@@ -1272,6 +1297,16 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(30);
       expect(chapter3.endTime).toBe(61.349);
     });
+
+    it('adds external chapters with a relative URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      await player.addChaptersTrack(
+          'base/test/test/assets/chapters.vtt', 'en');
+
+      const chapters = await player.getChaptersAsync('en');
+      expect(chapters.length).toBe(3);
+      expect(chapters[0].title).toBe('Chapter 1');
+    });
   });  // describe('addChaptersTrack')
 
   it('requires a license server for HLS ClearKey content', async () => {
@@ -1386,6 +1421,19 @@ describe('Player', () => {
       expect(defaultThumbs1.length).toBe(3);
       expect(defaultThumbs2.length).toBe(3);
     });
+
+    // https://github.com/shaka-project/shaka-player/issues/10750
+    it('resolves relative cue payloads of a relative track URI', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const newTrack = await player.addThumbnailsTrack(
+          'base/test/test/assets/thumbnails-sprites.vtt');
+
+      const thumbnail = await player.getThumbnails(newTrack.id, 0);
+      expect(thumbnail.uris).toEqual([
+        new URL('/base/test/test/assets/image1.jpg#xywh=0,0,160,90',
+            location.href).href,
+      ]);
+    });
   });  // describe('addThumbnailsTrack')
 
   it('preload', async () => {
@@ -1479,26 +1527,27 @@ describe('Player', () => {
   describe('supports nextUrl', () => {
     const urlWithNextUrl = 'test:sintel_next_url_compiled';
 
-    it('with preload', async () => {
-      player.configure('streaming.preloadNextUrlWindow', 30);
+    /** @return {!Promise} */
+    async function playToNextUrl() {
       await player.load(urlWithNextUrl);
       await video.play();
       await waiter.timeoutAfter(30).waitForEnd(video);
       expect(player.getAssetUri()).toBe(urlWithNextUrl);
-      // Delay needed to load the next URL.
-      await shaka.test.Util.delay(1);
+      // The next URL is loaded on the media element's ended event, which some
+      // platforms (such as the Google TV Streamer) fire more than a second
+      // after the end is reached.
+      await waiter.timeoutAfter(10).waitForEvent(player, 'loaded');
       expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+    }
+
+    it('with preload', async () => {
+      player.configure('streaming.preloadNextUrlWindow', 30);
+      await playToNextUrl();
     });
 
     it('without preload', async () => {
       player.configure('streaming.preloadNextUrlWindow', 0);
-      await player.load(urlWithNextUrl);
-      await video.play();
-      await waiter.timeoutAfter(30).waitForEnd(video);
-      expect(player.getAssetUri()).toBe(urlWithNextUrl);
-      // Delay needed to load the next URL.
-      await shaka.test.Util.delay(1);
-      expect(player.getAssetUri()).not.toBe(urlWithNextUrl);
+      await playToNextUrl();
     });
   });
 

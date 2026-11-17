@@ -494,18 +494,42 @@ describe('MenuGroup', () => {
       expect(focus).toHaveBeenCalledTimes(1);
     });
 
-    it('loops Tab inside the innermost level', () => {
+    it('wraps the arrow keys inside the innermost level', () => {
       get('test-outer-button').click();
       get('test-inner-button').click();
       const back = getBackButton('test-inner-menu');
       const last = get('test-menu-c-button');
       const focus = spyOn(back, 'focus').and.callThrough();
       focusForKeyboardTest(last);
-      const event = createKeydownEvent('Tab');
+      const event = createKeydownEvent('ArrowDown');
       last.dispatchEvent(event);
       expect(event.defaultPrevented).toBe(true);
       expect(focus).toHaveBeenCalled();
-      window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Tab'}));
+    });
+
+    it('returns one level on ArrowLeft', () => {
+      get('test-outer-button').click();
+      const innerButton = get('test-inner-button');
+      innerButton.click();
+      const focus = spyOn(innerButton, 'focus').and.callThrough();
+      const button = get('test-menu-b-button');
+      focusForKeyboardTest(button);
+      const event = createKeydownEvent('ArrowLeft');
+      button.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(isShown(get('test-inner-menu'))).toBe(false);
+      expect(isShown(get('test-outer-menu'))).toBe(true);
+      expect(focus).toHaveBeenCalled();
+    });
+
+    it('gives its elements menu item roles', () => {
+      const menu = get('test-outer-menu');
+      for (const child of Array.from(menu.childNodes)) {
+        if (child.nodeName == 'BUTTON') {
+          expect(/** @type {!HTMLElement} */ (child).getAttribute('role'))
+              .toMatch(/^menuitem/);
+        }
+      }
     });
 
     it('marks its elements as being in a menu group', () => {
@@ -876,6 +900,97 @@ describe('MenuGroup', () => {
           expect(getStyleSelection(className)).toBe(defaultLabel);
         }
         expect(isDisplayed(getStyleMenu())).toBe(true);
+      });
+
+      it('restores the configured default style', async () => {
+        videoContainer['ui'].configure('captionsStyleDefaults', {
+          fontScaleFactor: 1.25,
+          positionArea: shaka.config.PositionArea.TOP_CENTER,
+          fontFamily: shaka.config.FontFamily.SMALL_CAPITALS,
+          fontVariant: 'small-caps',
+          fontColor: '#fff',
+          fontOpacity: 0.75,
+          backgroundColor: '#080808',
+          backgroundOpacity: 0,
+          windowColor: '#f00',
+          windowOpacity: 0.25,
+          characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
+        });
+        await setTextTracks([createTextTrack(false)]);
+        player.configure({
+          textDisplayer: {
+            fontScaleFactor: 2,
+            fontColor: '#ff0',
+            backgroundOpacity: 0.5,
+            characterEdgeStyle: shaka.config.CharacterEdgeStyle.RAISED,
+          },
+        });
+        await openStyleMenu();
+
+        get('shaka-caption-style-reset-button').click();
+        await Util.shortDelay();
+
+        const config = player.getConfiguration().textDisplayer;
+        expect(config.fontScaleFactor).toBe(1.25);
+        expect(config.positionArea)
+            .toBe(shaka.config.PositionArea.TOP_CENTER);
+        expect(config.fontFamily)
+            .toBe(shaka.config.FontFamily.SMALL_CAPITALS);
+        expect(config.fontVariant).toBe('small-caps');
+        expect(config.fontColor).toBe('#fff');
+        expect(config.fontOpacity).toBe(0.75);
+        expect(config.backgroundColor).toBe('#080808');
+        expect(config.backgroundOpacity).toBe(0);
+        expect(config.windowColor).toBe('#f00');
+        expect(config.windowOpacity).toBe(0.25);
+        expect(config.characterEdgeStyle)
+            .toBe(shaka.config.CharacterEdgeStyle.OUTLINE);
+
+        // The style options show the restored values.
+        const localization = controls.getLocalization();
+        expect(getStyleSelection('shaka-caption-size-button')).toBe('125%');
+        expect(getStyleSelection('shaka-caption-font-color-button'))
+            .toBe(localization.resolve(shaka.ui.Locales.Ids.WHITE));
+      });
+
+      it('restores the default value of the player for the settings not ' +
+          'configured', async () => {
+        videoContainer['ui'].configure('captionsStyleDefaults', {
+          backgroundOpacity: 0,
+          characterEdgeStyle: shaka.config.CharacterEdgeStyle.OUTLINE,
+        });
+        await setTextTracks([createTextTrack(false)]);
+        player.configure({
+          textDisplayer: {
+            fontScaleFactor: 1.5,
+            fontColor: '#ff0',
+            backgroundOpacity: 0.5,
+            characterEdgeStyle: shaka.config.CharacterEdgeStyle.RAISED,
+          },
+        });
+
+        get('shaka-caption-style-reset-button').click();
+        await Util.shortDelay();
+
+        const config = player.getConfiguration().textDisplayer;
+        expect(config.backgroundOpacity).toBe(0);
+        expect(config.characterEdgeStyle)
+            .toBe(shaka.config.CharacterEdgeStyle.OUTLINE);
+        expect(config.fontScaleFactor).toBe(1);
+        expect(config.fontColor).toBe('');
+      });
+
+      it('ignores the settings that are not part of the style', async () => {
+        videoContainer['ui'].configure('captionsStyleDefaults', {
+          subtitleDelay: 5,
+        });
+        await setTextTracks([createTextTrack(false)]);
+        player.configure('textDisplayer.subtitleDelay', 2);
+
+        get('shaka-caption-style-reset-button').click();
+        await Util.shortDelay();
+
+        expect(player.getConfiguration().textDisplayer.subtitleDelay).toBe(2);
       });
     });
   });

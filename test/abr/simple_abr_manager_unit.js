@@ -401,6 +401,83 @@ describe('SimpleAbrManager', () => {
     expect(chosen.id).toBe(10);
   });
 
+  describe('restrictToElementSize', () => {
+    /** @type {!HTMLVideoElement} */
+    let mockVideo;
+
+    /**
+     * @param {number} width
+     * @param {number} height
+     */
+    function setElementSize(width, height) {
+      Object.defineProperty(mockVideo, 'clientWidth', {
+        get: () => width,
+        configurable: true,
+      });
+      Object.defineProperty(mockVideo, 'clientHeight', {
+        get: () => height,
+        configurable: true,
+      });
+    }
+
+    /**
+     * @param {!Array<!Array<number>>} sizes [width, height] per variant, in
+     *   ascending order; the variant id is the index.
+     */
+    function setLadder(sizes) {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        sizes.forEach(([width, height], index) => {
+          manifest.addVariant(index, (variant) => {
+            variant.bandwidth = 1e5 * (index + 1);
+            variant.addVideo(index, (stream) => {
+              stream.size(width, height);
+            });
+          });
+        });
+      });
+      abrManager.setVariants(manifest.variants, false);
+    }
+
+    beforeEach(() => {
+      // The element size is only followed with a ResizeObserver.
+      if (!('ResizeObserver' in window)) {
+        pending('ResizeObserver is not available.');
+      }
+      mockVideo = /** @type {!HTMLVideoElement} */ (
+        document.createElement('video'));
+      // Plenty of bandwidth, so only the element size limits the choice.
+      config.defaultBandwidthEstimate = 100e6;
+      config.restrictToElementSize = true;
+      config.ignoreDevicePixelRatio = true;
+      abrManager.configure(config);
+      abrManager.setMediaElement(mockVideo);
+    });
+
+    it('caps a landscape ladder at the smallest variant covering a ' +
+       'landscape element', () => {
+      setElementSize(500, 281);
+      setLadder([[256, 144], [640, 360], [1280, 720], [1920, 1080]]);
+
+      expect(abrManager.chooseVariant().id).toBe(1);
+    });
+
+    it('caps a portrait ladder at the smallest variant covering a ' +
+       'portrait element', () => {
+      setElementSize(281, 500);
+      setLadder([[144, 256], [360, 640], [720, 1280], [1080, 1920]]);
+
+      expect(abrManager.chooseVariant().id).toBe(1);
+    });
+
+    it('caps a landscape ladder at the smallest variant covering a ' +
+       'portrait element', () => {
+      setElementSize(281, 500);
+      setLadder([[256, 144], [640, 360], [1280, 720], [1920, 1080]]);
+
+      expect(abrManager.chooseVariant().id).toBe(2);
+    });
+  });
+
   describe('dropped frame protection', /** @suppress {accessControls} */ () => {
     /** @type {!HTMLVideoElement} */
     let mockVideo;
@@ -527,6 +604,139 @@ describe('SimpleAbrManager', () => {
       abrManager.checkDroppedFrames_();
 
       expect(restrictVideoCallback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('minimum buffer ahead', /** @suppress {accessControls} */ () => {
+    /** @type {(number|null)} */
+    let currentBandwidth;
+
+    /** @type {number} */
+    let presentationTime;
+
+    /** @type {!Array<!shaka.extern.BufferedRange>} */
+    let bufferedRanges;
+
+    beforeEach(() => {
+      config.minBufferAheadToUpgrade = 15;
+      abrManager.configure(config);
+
+      currentBandwidth = 1e6;
+      presentationTime = 100;
+      bufferedRanges = [{start: 100, end: 120}];
+
+      /** @type {shaka.extern.AbrManager.PlayerInterface} */
+      const playerInterface = {
+        getPresentationTime: () => presentationTime,
+        getBufferedInfo: () => bufferedRanges,
+        getCurrentVariantTotalBandwidth: () => currentBandwidth,
+      };
+
+      abrManager.setPlayerInterface(playerInterface);
+    });
+
+    it('allows upgrade with sufficient buffer ahead', () => {
+      bufferedRanges = [{start: 100, end: 120}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade with insufficient buffer ahead', () => {
+      bufferedRanges = [{start: 100, end: 110}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('allows upgrade at the exact buffer threshold', () => {
+      bufferedRanges = [{start: 100, end: 115}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('allows downgrade regardless of buffer', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[0])).toBe(true);
+    });
+
+    it('allows equivalent bandwidth regardless of buffer', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[1])).toBe(true);
+    });
+
+    it('allows initial selection without a current variant', () => {
+      currentBandwidth = null;
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade when buffer is empty', () => {
+      bufferedRanges = [];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade when playback is before the buffer', () => {
+      bufferedRanges = [{start: 110, end: 140}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade when playback is after the buffer', () => {
+      bufferedRanges = [{start: 70, end: 90}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('does not count buffered data after a gap', () => {
+      bufferedRanges = [
+        {start: 100, end: 105},
+        {start: 110, end: 140},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('uses the range containing playback position', () => {
+      presentationTime = 115;
+      bufferedRanges = [
+        {start: 90, end: 105},
+        {start: 110, end: 135},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(true);
+    });
+
+    it('blocks upgrade when playback is inside a gap', () => {
+      presentationTime = 107;
+      bufferedRanges = [
+        {start: 100, end: 105},
+        {start: 110, end: 140},
+      ];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
+    });
+
+    it('blocks upgrade at the end of a buffered range', () => {
+      presentationTime = 120;
+      bufferedRanges = [{start: 100, end: 120}];
+
+      expect(abrManager.isBufferAheadToUpgradeEnough_(
+          variants[3])).toBe(false);
     });
   });
 });

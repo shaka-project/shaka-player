@@ -83,7 +83,6 @@ describe('DashInterstitialParser', () => {
           /* id= */ 'PREROLL');
 
       const interstitial = DashInterstitialParser.parseRegion(region);
-      // The parser leaves mimeType null; the manager resolves it later.
       /** @type {!shaka.extern.AdInterstitial} */
       const expectedInterstitial = {
         id: 'PREROLL',
@@ -91,7 +90,7 @@ describe('DashInterstitialParser', () => {
         startTime: 0,
         endTime: 1,
         uri: 'test.mpd',
-        mimeType: null,
+        mimeType: 'application/dash+xml',
         isSkippable: false,
         skipOffset: null,
         skipFor: null,
@@ -128,7 +127,7 @@ describe('DashInterstitialParser', () => {
         startTime: 1,
         endTime: 2,
         uri: 'test.mpd',
-        mimeType: null,
+        mimeType: 'application/dash+xml',
         isSkippable: true,
         skipOffset: 0,
         skipFor: null,
@@ -166,6 +165,54 @@ describe('DashInterstitialParser', () => {
       expect(interstitial.endTime).toBe(1);
     });
 
+    it('parses clip and startWithOffset of a replace event', () => {
+      const defaults = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(defaults, 'Should parse an interstitial!');
+      expect(defaults.clip).toBe(true);
+      expect(defaults.startWithOffset).toBe(false);
+
+      const explicit = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd" clip="false" ' +
+              'startWithOffset="true"/></Event>'));
+      goog.asserts.assert(explicit, 'Should parse an interstitial!');
+      expect(explicit.clip).toBe(false);
+      expect(explicit.startWithOffset).toBe(true);
+    });
+
+    it('parses executeOnce of alternative MPD events', () => {
+      const byDefault = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(byDefault, 'Should parse an interstitial!');
+      expect(byDefault.once).toBe(false);
+
+      const replace = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="test.mpd" executeOnce="true"/>' +
+              '</Event>'));
+      goog.asserts.assert(replace, 'Should parse an interstitial!');
+      expect(replace.once).toBe(true);
+
+      const insert = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="test.mpd" executeOnce="true"/>' +
+              '</Event>'));
+      goog.asserts.assert(insert, 'Should parse an interstitial!');
+      expect(insert.once).toBe(true);
+    });
+
+    it('leaves clip and startWithOffset unset for an insert event', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="test.mpd"/></Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.clip).toBeUndefined();
+      expect(interstitial.startWithOffset).toBeUndefined();
+    });
+
     it('parses earliestResolutionTimeOffset scaled by the timescale', () => {
       const region = makeRegion(
           'urn:mpeg:dash:event:alternativeMPD:insert:2025',
@@ -177,6 +224,24 @@ describe('DashInterstitialParser', () => {
       goog.asserts.assert(interstitial, 'Should parse an interstitial!');
       // 20 (in timescale units) / timescale(2) = 10 seconds.
       expect(interstitial.resolutionTimeOffset).toBe(10);
+    });
+
+    it('assumes an MPD for an alternative MPD URI without extension', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          '<Event><ReplacePresentation uri="https://ads.test/sgai/ads?b=1"/>' +
+              '</Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.mimeType).toBe('application/dash+xml');
+    });
+
+    it('takes the MIME type of a known alternative MPD URI extension', () => {
+      const interstitial = DashInterstitialParser.parseRegion(makeRegion(
+          'urn:mpeg:dash:event:alternativeMPD:insert:2025',
+          '<Event><InsertPresentation uri="https://ads.test/ad.m3u8"/>' +
+              '</Event>'));
+      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
+      expect(interstitial.mimeType).toBe('application/x-mpegurl');
     });
 
     it('returns null for an alternative MPD without a URI', () => {

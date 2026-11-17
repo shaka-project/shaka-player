@@ -43,7 +43,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteButton_.classList.add('shaka-remote-button');
     this.remoteButton_.classList.add('shaka-tooltip');
     this.remoteButton_.classList.add('shaka-no-propagation');
-    this.remoteButton_.ariaPressed = 'false';
+    shaka.ui.Utils.setPressed(this.remoteButton_, false);
 
     /** @private {!shaka.ui.Icon} */
     this.remoteIcon_ = new shaka.ui.Icon(this.remoteButton_,
@@ -174,8 +174,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.callbackId_ = -1;
       }
     }
-    this.remoteButton_.ariaPressed =
-        this.remote_?.state == 'connected' ? 'true' : 'false';
+    shaka.ui.Utils.setPressed(this.remoteButton_,
+        this.remote_?.state == 'connected');
   }
 
   /** @override */

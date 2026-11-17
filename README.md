@@ -11,6 +11,11 @@ adaptive media formats (such as [DASH][] and [HLS][]) in a browser,
 without using plugins or Flash.  Instead, Shaka Player uses the open web
 standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
+Shaka Player also supports experimental playback of MSF streams and Matroska
+(MKV) files. See [MOQT Streaming Format (MSF)](#moqt-streaming-format-msf-experimental)
+and [Matroska (MKV) features](#matroska-mkv-features-experimental) for supported
+features, codecs and requirements.
+
 Shaka Player also supports [offline storage and playback][] of media using
 [IndexedDB][].  Content can be stored on any browser.  Storage of licenses
 depends on browser support.
@@ -83,10 +88,14 @@ NOTES for iOS and iPadOS:
 
 ## Manifest format support matrix
 
-|Format|Video On-Demand|Live |Event|In-Progress Recording|
-|:----:|:-------------:|:---:|:---:|:-------------------:|
-|DASH  |**Y**          |**Y**| -   |**Y**                |
-|HLS   |**Y**          |**Y**|**Y**| -                   |
+|Format                  |Video On-Demand|Live |Event|In-Progress Recording|
+|:----------------------:|:-------------:|:---:|:---:|:-------------------:|
+|DASH                    |**Y**          |**Y**| -   |**Y**                |
+|HLS                     |**Y**          |**Y**|**Y**| -                   |
+|MSF (Experimental)      | -             |**Y**| -   | -                   |
+|MKV (Experimental)      |**Y**          | -   | -   | -                   |
+
+MSF and Matroska support are only included in the experimental build.
 
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
@@ -205,11 +214,11 @@ For details on the HLS format and these tags' meanings, see https://datatracker.
 ## MOQT Streaming Format (MSF) (Experimental)
 
 Features supported:
- - Media over QUIC Transport [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/), [draft-20](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/20/), [draft-21](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/21/) and [draft-22](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/22/)
+ - Media over QUIC Transport [draft-18](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/18/), [draft-20](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/20/), [draft-21](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/21/), [draft-22](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/22/) and [draft-23](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/23/)
  - MSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-msf/01/) and CMSF [draft-1](https://datatracker.ietf.org/doc/draft-ietf-moq-cmsf/01/)
  - Audio, Video and Text
  - ABR
- - DRM support for Widevine, PlayReady, FairPlay and ClearKey, using the CMSF ContentProtection
+ - DRM support for Widevine, PlayReady, FairPlay, WisePlay and ClearKey, using the CMSF ContentProtection
  - MP4 / CMAF support
  - LoC [draft-2](https://datatracker.ietf.org/doc/draft-ietf-moq-loc/02/) support
  - LOCMAF [draft-1](https://datatracker.ietf.org/doc/draft-einarsson-moq-locmaf/01/) support (`locmafVersion` 0.3)
@@ -223,6 +232,27 @@ Features supported:
 Features **not** supported:
  - VOD
  - MOQT Streaming Format catalog updates
+
+Note: This module is experimental and is only included in the experimental build.
+
+
+## Matroska (MKV) features (Experimental)
+
+Features supported:
+ - VOD playback of Matroska video (`.mkv`) and audio-only (`.mka`) files
+ - Seeking using the file's Cues (seek index)
+ - Multiple video, audio and subtitle tracks
+ - Chapters
+
+Supported codecs:
+ - Video: H.264 (AVC), H.265 (HEVC), AV1, VP9 and VP8
+ - Audio: AAC, AC-3, E-AC-3, Opus, MP3, FLAC and Vorbis
+ - Subtitles: SubRip (SRT), ASCII, SSA and ASS
+
+Requirements:
+ - A Matroska file with a Cues seek index
+ - A server that supports HTTP byte-range requests
+ - A browser with MediaSource Extensions support for the selected codecs
 
 Note: This module is experimental and is only included in the experimental build.
 
@@ -247,8 +277,9 @@ Note: This module is experimental and is only included in the experimental build
 **Only supported on browsers with Media Source Extensions SourceBuffer support
 and WebCodecs**
 
- - HEVC (H.265) playback on browsers without native HEVC decoding support,
-   such as Firefox or Chrome on Linux (transcoding to H.264 provided by
+ - HEVC (H.265) playback on devices with no hardware HEVC decoder, where
+   Chrome (Windows, Linux) and Firefox (Windows, without the HEVC extension)
+   have no software fallback (transcoding to H.264 provided by
    [@hevcjs/shaka-plugin][], must be separately included)
 
  - Live demo : [hevcjs.dev/demo/shaka.html][]
@@ -300,11 +331,15 @@ NOTES:
 |:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
 |DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
 |HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
+|MSF       |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
 
 NOTES:
- - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
-   Safari. We do support FairPlay through MSE/EME, however. See the
-   `streaming.useNativeHlsForFairPlay` configuration value.
+ - ¹: On Safari, FairPlay HLS uses MSE/EME by default when available.
+   Set `streaming.useNativeHlsForFairPlay` to `true` to prefer native HLS
+   playback (the default is `false`). Native fallback for certain unsupported
+   encrypted HLS loads is controlled by
+   `streaming.fallbackToNativeHlsOnMseError`, enabled by default on Apple
+   browsers. See [FairPlay support](docs/tutorials/fairplay.md) for details.
 
 
 ## Media container and subtitle support

@@ -407,18 +407,56 @@ describe('TransmuxerProxy', () => {
       expect(transmuxCalls[1].args[0]['reqId']).toBe(1);
     });
 
-    it('sends destroy message and terminates worker on destroy', async () => {
-      const id = getInstanceId(transmuxer);
-      const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
-      simulateTransmuxed(id, 0, new ArrayBuffer(1));
-      await p;
+    it('sends destroy message and terminates worker after destroy',
+        async () => {
+          jasmine.clock().install();
+          try {
+            const id = getInstanceId(transmuxer);
+            const p =
+                transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+            simulateTransmuxed(id, 0, new ArrayBuffer(1));
+            await p;
 
-      transmuxer.destroy();
+            transmuxer.destroy();
 
-      expect(mockWorker.postMessage).toHaveBeenCalledWith(
-          jasmine.objectContaining({'cmd': 'destroy'}));
-      expect(mockWorker.terminate).toHaveBeenCalled();
-    });
+            expect(mockWorker.postMessage).toHaveBeenCalledWith(
+                jasmine.objectContaining({'cmd': 'destroy'}));
+            expect(mockWorker.terminate).not.toHaveBeenCalled();
+            jasmine.clock().tick(10000);
+            expect(mockWorker.terminate).toHaveBeenCalled();
+          } finally {
+            jasmine.clock().uninstall();
+          }
+        });
+
+    it('reuses the worker for an instance created right after destroy',
+        async () => {
+          jasmine.clock().install();
+          try {
+            let p =
+                transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+            simulateTransmuxed(getInstanceId(transmuxer), 0,
+                new ArrayBuffer(1));
+            await p;
+            // E.g. a MediaSource reset.
+            transmuxer.destroy();
+            transmuxer = new TransmuxerProxy(mockInner, FAKE_WORKER_URL);
+            const workerClass = window['Worker'];
+            const newWorker = jasmine.createSpy('Worker');
+            window['Worker'] = newWorker;
+            p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
+            window['Worker'] = workerClass;
+            simulateTransmuxed(getInstanceId(transmuxer), 0,
+                new ArrayBuffer(1));
+            await p;
+
+            jasmine.clock().tick(20000);
+            expect(newWorker).not.toHaveBeenCalled();
+            expect(mockWorker.terminate).not.toHaveBeenCalled();
+          } finally {
+            jasmine.clock().uninstall();
+          }
+        });
 
     it('destroy rejects pending transmux', async () => {
       const p = transmuxer.transmux(fakeData, fakeStream, null, 10, 'video');
@@ -629,6 +667,7 @@ describe('TransmuxerProxy', () => {
    * exists solely to suppress visibility rules for these actions.
    */
   function resetClassState() {
+    shaka.transmuxer.TransmuxerProxy.idleTimer_.stop();
     shaka.transmuxer.TransmuxerProxy.sharedWorker_ = null;
     shaka.transmuxer.TransmuxerProxy.activeInstances_.clear();
   }

@@ -28,11 +28,17 @@ goog.requireType('cml.cmcd.CmcdValidationOptions');
 goog.requireType('cml.cmcd.CmcdValidationResult');
 
 
-/** @private @const {!Set<string>} */
+/**
+ * @private
+ * @const {!Set<string>}
+ */
 cml.cmcd.validateCmcdValues_HUNDRED_ROUNDING_KEYS_ =
     new Set(['bl', 'dl', 'mtp', 'rtp', 'tbl']);
 
-/** @private @const {!Set<string>} */
+/**
+ * @private
+ * @const {!Set<string>}
+ */
 cml.cmcd.validateCmcdValues_INTEGER_ROUNDING_KEYS_ =
     new Set(['br', 'd', 'tb']);
 

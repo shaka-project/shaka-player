@@ -44,6 +44,12 @@ shakaDemo.AssetCard = class {
     this.progressCircleBar_ = document.createElementNS(svgNs, 'circle');
     /** @private {function(!shakaDemo.AssetCard)} */
     this.remakeButtonsFn_ = remakeButtonsFn;
+    /**
+     * The button that pauses the download of the asset, which stays enabled
+     * while the asset is being downloaded.
+     * @private {?HTMLButtonElement}
+     */
+    this.pauseButton_ = null;
 
     // Lay out the card.
     this.card_.classList.add('mdl-card-wide');
@@ -246,6 +252,7 @@ shakaDemo.AssetCard = class {
   /** Remake the buttons of the card. */
   remakeButtons() {
     shaka.util.Dom.removeAllChildren(this.actions_);
+    this.pauseButton_ = null;
     this.remakeButtonsFn_(this);
   }
 
@@ -386,15 +393,77 @@ shakaDemo.AssetCard = class {
       });
       styleAsDownloadButton(
           deleteButton, deleteButton, shakaDemo.Icons.OFFLINE_PIN);
+    } else if (this.asset_.storedProgress < 1) {
+      // The asset is being downloaded.
+      const pauseButton = this.addButton(null, async () => {
+        pauseButton.disabled = true;
+        await this.asset_.pauseCallback();
+      });
+      pauseButton.title = 'Pause the download';
+      this.pauseButton_ = pauseButton;
+      styleAsDownloadButton(pauseButton, pauseButton, shakaDemo.Icons.PAUSE);
+    } else if (this.asset_.isPartiallyStored()) {
+      const resumeButton = this.addButton(null, () => {
+        this.attachResumeDialog_(resumeButton);
+      });
+      resumeButton.title = 'Resume the download';
+      styleAsDownloadButton(
+          resumeButton, resumeButton, shakaDemo.Icons.DOWNLOAD);
     } else {
-      const downloadButton = this.addButton(null, async () => {
+      const downloadButton = this.addButton(null, () => {
         downloadButton.disabled = true;
-        await this.asset_.storeCallback();
-        this.remakeButtons();
+        this.download_(this.asset_.storeCallback);
       });
       styleAsDownloadButton(
           downloadButton, downloadButton, shakaDemo.Icons.DOWNLOAD);
     }
+  }
+
+  /**
+   * Runs a download of the asset, showing the button that pauses it while it
+   * runs.
+   *
+   * @param {?function()} download
+   * @return {!Promise}
+   * @private
+   */
+  async download_(download) {
+    goog.asserts.assert(download, 'A download callback is expected!');
+    // The callback marks the asset as being downloaded before it yields.
+    const done = download();
+    this.remakeButtons();
+    await done;
+    this.remakeButtons();
+  }
+
+  /**
+   * @param {!HTMLButtonElement} resumeButton
+   * @private
+   */
+  attachResumeDialog_(resumeButton) {
+    const parentDiv = this.card_.parentElement;
+    if (!parentDiv) {
+      return;
+    }
+
+    this.makeDialogue_(parentDiv, 'The download is incomplete.', [
+      {
+        text: 'Resume',
+        callback: async () => {
+          resumeButton.disabled = true;
+          await this.download_(this.asset_.resumeCallback);
+        },
+      },
+      {
+        text: 'Delete',
+        callback: async () => {
+          resumeButton.disabled = true;
+          await this.asset_.unstoreCallback();
+          this.remakeButtons();
+        },
+      },
+      {text: 'Cancel', callback: async () => {}},
+    ]);
   }
 
   /**
@@ -420,6 +489,26 @@ shakaDemo.AssetCard = class {
    * @private
    */
   makeYesNoDialogue_(parentDiv, text, callback) {
+    this.makeDialogue_(parentDiv, text, [
+      {
+        text: 'Yes',
+        callback: async () => {
+          await callback();
+          this.remakeButtons();
+        },
+      },
+      {text: 'No', callback: async () => {}},
+    ]);
+  }
+
+  /**
+   * @param {!Element} parentDiv
+   * @param {string} text
+   * @param {!Array<{text: string, callback: function():!Promise}>} buttons
+   *   The dialog is closed before the callback of the chosen button is called.
+   * @private
+   */
+  makeDialogue_(parentDiv, text, buttons) {
     const dialog =
       /** @type {!HTMLDialogElement} */(document.createElement('dialog'));
     dialog.classList.add('mdl-dialog');
@@ -448,14 +537,12 @@ shakaDemo.AssetCard = class {
       buttonsDiv.appendChild(button);
       button.blur();
     };
-    makeButton('Yes', async () => {
-      dialog.close();
-      await callback();
-      this.remakeButtons();
-    });
-    makeButton('No', () => {
-      dialog.close();
-    });
+    for (const button of buttons) {
+      makeButton(button.text, async () => {
+        dialog.close();
+        await button.callback();
+      });
+    }
 
     dialog.showModal();
   }
@@ -467,7 +554,8 @@ shakaDemo.AssetCard = class {
     if (this.asset_.storedProgress < 1) {
       this.progressCircle_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {
-        if (button instanceof HTMLButtonElement) {
+        if (button instanceof HTMLButtonElement &&
+            button != this.pauseButton_) {
           button.disabled = true;
         }
       }

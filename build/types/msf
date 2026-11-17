@@ -12,7 +12,8 @@
 +../../lib/msf/packaging/cmaf.js
 +../../lib/msf/packaging/loc.js
 +../../lib/msf/packaging/locmaf.js
-+../../lib/msf/packaging/m2ts.js
++../../lib/msf/packaging/mpeg2ts_program.js
++../../lib/msf/packaging/mpeg2ts.js
 +../../lib/msf/msf_classes.js
 +../../lib/msf/msf_parser.js
 +../../lib/msf/msf_presentation_timeline.js
@@ -28,5 +29,7 @@
 +../../lib/msf/drafts/draft20/messages.js
 +../../lib/msf/drafts/draft22/dialect.js
 +../../lib/msf/drafts/draft22/messages.js
++../../lib/msf/drafts/draft23/dialect.js
++../../lib/msf/drafts/draft23/messages.js
 
 +../../lib/transmuxer/loc_transmuxer.js

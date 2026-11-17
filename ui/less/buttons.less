@@ -43,12 +43,11 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 80%), 0 2px 6px rgba(0, 0, 0, 60%);
 }
 
-/* Use a consistent outline focus style across browsers. */
+/* Outline on focus is important for accessibility, but it doesn't look great.
+ * Mouse users get no outline, keyboard users get the focus ring below. */
 .shaka-controls-container {
   button:focus, input:focus {
-    /* Most browsers will fall back to "Highlight" (system setting) color for
-     * the focus outline. */
-    outline: 1px solid Highlight;
+    outline: none;
   }
 
   /* Disable this Mozilla-specific focus ring, since we have an outline defined
@@ -59,12 +58,35 @@
   }
 }
 
-/* Outline on focus is important for accessibility, but
- * it doesn't look great. This removes the outline for
- * mouse users while leaving it for keyboard users. */
-.shaka-controls-container:not(.shaka-keyboard-navigation) {
+/* The focus ring is a single accent-colored outline, chosen to contrast with
+ * both bright and dark video behind the controls. */
+.shaka-controls-container.shaka-keyboard-navigation {
   button:focus, input:focus {
-    outline: none;
+    outline:
+      var(--shaka-focus-ring-width) solid var(--shaka-focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  /* The button panels and the menus clip their content (the menus scroll,
+   * and the panel buttons are as tall as their panel), so they would cut a
+   * ring drawn outside of their items.  Draw it inside instead. */
+  .shaka-controls-button-panel,
+  .shaka-controls-top-button-panel,
+  .shaka-overflow-menu,
+  .shaka-context-menu,
+  .shaka-settings-menu {
+    button:focus, input:focus {
+      outline-offset: calc(-1 * var(--shaka-focus-ring-width));
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  /* The outline must use a system color to be visible. */
+  .shaka-controls-container.shaka-keyboard-navigation {
+    button:focus, input:focus {
+      outline-color: Highlight;
+    }
   }
 }
 

@@ -178,6 +178,9 @@ describe('Player', () => {
       ],
       abrFactory: () => abrManager,
       textDisplayFactory: (player) => textDisplayer,
+      // Otherwise, the resolution of the screen of the device running the tests
+      // would filter out variants in their manifests.
+      ignoreHardwareResolution: true,
     });
 
     onError = jasmine.createSpy('error event');
@@ -543,6 +546,14 @@ describe('Player', () => {
         expect(status).toBe(expectedStatus);
       }
 
+      /**
+       * @suppress {accessControls}
+       * @param {!shaka.util.Error} error
+       */
+      async function raiseError(error) {
+        await player.onError_(error);
+      }
+
       function multiVariantManifest() {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
@@ -585,6 +596,31 @@ describe('Player', () => {
 
         expect(variant.disabledUntilTime).toBe(0);
       });
+
+      it('keeps stream disabled after a critical error until retry',
+          async () => {
+            multiVariantManifest();
+
+            await player.load(fakeManifestUri, 0, fakeMimeType);
+
+            const variant = manifest.variants[0];
+            const videoStream =
+            /** @type {shaka.extern.Stream} */ (variant.video);
+
+            player.disableStream(videoStream, disableTimeInSeconds);
+
+            onError.and.stub();
+            await raiseError(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.NETWORK,
+                shaka.util.Error.Code.HTTP_ERROR));
+
+            expect(variant.disabledUntilTime).toBeGreaterThan(Date.now()/1000);
+
+            expect(player.retryStreaming()).toBe(true);
+
+            expect(variant.disabledUntilTime).toBe(0);
+          });
 
       it('does not restore stream if disabled time did not elapsed',
           async () => {
@@ -692,6 +728,28 @@ describe('Player', () => {
 
         expect(player.disableStream(videoStream, disableTimeInSeconds))
             .toBe(false);
+      });
+
+      /** @suppress {accessControls} */
+      function clearStreamingEngine() {
+        player.streamingEngine_ = null;
+      }
+
+      it('does nothing when the StreamingEngine is gone', async () => {
+        multiVariantManifest();
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const variant = manifest.variants[0];
+        const videoStream = /** @type {shaka.extern.Stream} */ (variant.video);
+
+        // A segment request can fail while the player unloads, after the
+        // StreamingEngine is gone but before the manifest is cleared.
+        clearStreamingEngine();
+
+        expect(player.disableStream(videoStream, disableTimeInSeconds))
+            .toBe(false);
+        expect(variant.disabledUntilTime).toBe(0);
       });
 
       describe('does not disable stream if there not alternate stream', () => {
@@ -2183,6 +2241,73 @@ describe('Player', () => {
       await player.load(preloadManager);
     });
 
+    it('does not leave a failed preload unhandled', async () => {
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      const parser = new shaka.test.FakeManifestParser(manifest);
+      parser.start.and.callFake(() => Promise.reject(error));
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      // Let the preload fail before anything waits on it.
+      await shaka.test.Util.shortDelay();
+
+      await expectAsync(preloadManager.waitForFinish())
+          .toBeRejectedWith(shaka.test.Util.jasmineError(error));
+      await preloadManager.destroy();
+    });
+
+    it('reports no bandwidth estimate before the first load', async () => {
+      // Regression test for #10824: before load() creates the AbrManager,
+      // asking for the estimate threw and broke Content Steering reloads.
+      const parser = new shaka.test.FakeManifestParser(manifest);
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+
+      const preloadManager = await player.preload(
+          fakeManifestUri, 0, fakeMimeType);
+      await preloadManager.waitForFinish();
+
+      expect(parser.playerInterface.getBandwidthEstimate()).toBeNaN();
+      await preloadManager.destroy();
+    });
+
+    describe('initial variant choice', () => {
+      // See #10825.
+      it('starts from the playing asset\'s bandwidth estimate', async () => {
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        abrManager.getBandwidthEstimate.and.returnValue(30e6);
+        // The test AbrManager is shared with the player, so only look at the
+        // calls made for the preload.
+        abrManager.configure.calls.reset();
+
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        expect(abrManager.configure).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              defaultBandwidthEstimate: 30e6,
+              useNetworkInformation: false,
+            }));
+        await preloadManager.destroy();
+      });
+
+      it('keeps the configured ABR settings before any load', async () => {
+        const preloadManager = await player.preload(
+            fakeManifestUri, 0, fakeMimeType);
+        await preloadManager.waitForFinish();
+
+        expect(abrManager.configure).toHaveBeenCalledWith(
+            player.getConfiguration().abr);
+        await preloadManager.destroy();
+      });
+    });
+
     describe('prefetches the segment that contains the start time', () => {
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
@@ -2449,6 +2574,75 @@ describe('Player', () => {
           goog.asserts.assert(videoTrack, 'video track must exist');
           expect(videoTrack.language).toBe('sgn-US');
         });
+  });
+
+  describe('isPlayingAudioOnly and isPlayingVideoOnly', () => {
+    it('are false before loading', () => {
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+    });
+
+    it('are true for content without video or audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isAudioOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isVideoOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+    });
+
+    it('follow the variant being played', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10);
+          variant.addVideo(11);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+
+      // E.g. an audio-only or a video-only variant mixed with audio-video
+      // ones.
+      const variant = manifest.variants[0];
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {video: null}));
+      expect(player.isPlayingAudioOnly()).toBe(true);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+      expect(player.isAudioOnly()).toBe(false);
+
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {audio: null}));
+      expect(player.isPlayingVideoOnly()).toBe(true);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('consider audio muxed into the video', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d401f,mp4a.40.2';
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(player.isPlayingVideoOnly()).toBe(false);
+      expect(player.isPlayingAudioOnly()).toBe(false);
+    });
   });
 
   describe('tracks', () => {
@@ -4542,6 +4736,52 @@ describe('Player', () => {
     }
   });
 
+  describe('complete event', () => {
+    beforeEach(async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    // An app may unload the content on 'complete', before the next poll and
+    // before 'ended', so the regions at the very end must be polled first.
+    it('polls the playhead observers before it is dispatched', () => {
+      /** @type {!Array<string>} */
+      const order = [];
+      spyOn(getPlayheadObservers(), 'poll').and.callFake(() => {
+        order.push('poll');
+      });
+      player.addEventListener('complete', () => order.push('complete'));
+      spyOn(player, 'seekRange').and.returnValue({start: 0, end: 20});
+
+      video.currentTime = 20;
+      // Each progress update reports one milestone: started, the three
+      // quartiles, then complete.
+      for (let i = 0; i < 5; i++) {
+        onVideoProgress();
+      }
+
+      expect(order).toEqual(['poll', 'complete']);
+    });
+
+    /**
+     * @return {!shaka.media.PlayheadObserverManager}
+     * @suppress {accessControls}
+     */
+    function getPlayheadObservers() {
+      goog.asserts.assert(player.playheadObservers_, 'Must have observers');
+      return player.playheadObservers_;
+    }
+
+    /** @suppress {accessControls} */
+    function onVideoProgress() {
+      player.onVideoProgress_();
+    }
+  });
+
   describe('unplayable content', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
@@ -5648,6 +5888,24 @@ describe('Player', () => {
       // When we have nothing loaded, we go back to not audio-only status.
       expect(player.isAudioOnly()).toBe(false);
     });
+
+    it('is not audio-only when some variants carry video', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isAudioOnly()).toBe(false);
+    });
   });
 
   describe('isVideoOnly', () => {
@@ -5685,6 +5943,43 @@ describe('Player', () => {
 
       await player.unload();
       // When we have nothing loaded, we go back to not video-only status.
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants carry audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3);
+          variant.addAudio(4);
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
+      expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only when some variants mux audio', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(3, (stream) => {
+            stream.codecs = 'avc1.4d401f,mp4a.40.2';
+          });
+        });
+      });
+      // Mixed variant types are filtered on load today, so add the filtered
+      // variant back afterwards to simulate future support for them.
+      const filteredVariant = manifest.variants[0];
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      player.getManifest().variants.unshift(filteredVariant);
       expect(player.isVideoOnly()).toBe(false);
     });
   });
@@ -6348,6 +6643,76 @@ describe('Player', () => {
             }
           });
     });
+  });
+
+  describe('MSF live start', () => {
+    beforeEach(() => {
+      const timeline = new shaka.msf.MSFPresentationTimeline();
+      timeline.setStatic(false);
+      manifest.type = shaka.media.ManifestParser.MSF;
+      manifest.presentationTimeline = timeline;
+      for (const variant of manifest.variants) {
+        for (const stream of [variant.video, variant.audio]) {
+          if (!stream) {
+            continue;
+          }
+          const isVideo = stream.type == ContentType.VIDEO;
+          const refs = [];
+          // A retained older GOP ensures startup does not choose the start
+          // of the DVR window. Audio frames have different boundaries.
+          for (let i = 0; i < 15; i++) {
+            const start = 100 + i / 10 + (isVideo ? 0 : -0.02);
+            const ref = new shaka.media.SegmentReference(
+                start, start + 0.1, () => [], 0, null, null, 0, 0, Infinity);
+            if (isVideo && i % 10) {
+              ref.markAsNonIndependent();
+            }
+            refs.push(ref);
+          }
+          stream.segmentIndex = new shaka.media.SegmentIndex(refs);
+          timeline.notifySegments(refs);
+        }
+      }
+      timeline.lockStartTime();
+    });
+
+    it('starts at the current GOP with audio covering its keyframe',
+        async () => {
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('also aligns audio when segment boundary startup is requested',
+        async () => {
+          player.configure('streaming.startAtSegmentBoundary', true);
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('aligns startup when the application already selected a variant',
+        async () => {
+          player.addEventListener('streaming', () => {
+            const track = player.getVariantTracks()[0];
+            player.selectVariantTrack(track);
+          });
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
+        });
+
+    it('preserves an explicit start time', async () => {
+      await player.load(fakeManifestUri, 100.3, fakeMimeType);
+      expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(100.3);
+    });
+
+    it('starts audio-only content at the last available audio frame',
+        async () => {
+          for (const variant of manifest.variants) {
+            variant.video = null;
+          }
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)())
+              .toBeCloseTo(101.38, 6);
+        });
   });
 
   describe('config streaming.startAtSegmentBoundary', () => {
