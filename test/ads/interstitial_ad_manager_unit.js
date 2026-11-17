@@ -2253,6 +2253,8 @@ describe('Interstitial Ad manager', () => {
       let fakeCurrentTime;
       /** @type {!jasmine.Spy} */
       let loadSpy;
+      /** @type {!Promise} */
+      let loadCalled;
 
       beforeEach(() => {
         fakeCurrentTime = 1;
@@ -2269,7 +2271,12 @@ describe('Interstitial Ad manager', () => {
         });
         const adPlayer = interstitialAdManager.getPlayer();
         spyOn(adPlayer, 'preload').and.returnValue(Promise.resolve(null));
-        loadSpy = spyOn(adPlayer, 'load').and.returnValue(Promise.resolve());
+        const loaded = Promise.withResolvers();
+        loadCalled = loaded.promise;
+        loadSpy = spyOn(adPlayer, 'load').and.callFake(() => {
+          loaded.resolve();
+          return Promise.resolve();
+        });
       });
 
       /**
@@ -2302,6 +2309,16 @@ describe('Interstitial Ad manager', () => {
         await shaka.test.Util.shortDelay();
       }
 
+      /**
+       * The ad player is attached before load() is called, which can take
+       * much longer than a short delay on slow devices such as Chromecast.
+       *
+       * @return {!Promise}
+       */
+      function waitForLoad() {
+        return Promise.race([loadCalled, shaka.test.Util.delay(5)]);
+      }
+
       /** @return {number} */
       function getPlayRangeEnd() {
         return interstitialAdManager.getPlayer().getConfiguration()
@@ -2310,6 +2327,7 @@ describe('Interstitial Ad manager', () => {
 
       it('starts from the beginning and clips by default', async () => {
         await joinAt15('');
+        await waitForLoad();
 
         expect(loadSpy).toHaveBeenCalledTimes(1);
         // No start time: the alternative presentation starts at 0.
@@ -2320,6 +2338,7 @@ describe('Interstitial Ad manager', () => {
 
       it('starts at the join offset with startWithOffset', async () => {
         await joinAt15('startWithOffset="true"');
+        await waitForLoad();
 
         expect(loadSpy).toHaveBeenCalledTimes(1);
         expect(loadSpy.calls.argsFor(0)[1]).toBe(5);
@@ -2328,6 +2347,7 @@ describe('Interstitial Ad manager', () => {
 
       it('plays the whole maxDuration without clip', async () => {
         await joinAt15('clip="false"');
+        await waitForLoad();
 
         expect(loadSpy).toHaveBeenCalledTimes(1);
         expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
@@ -2348,6 +2368,7 @@ describe('Interstitial Ad manager', () => {
 
       it('is executed only once with executeOnce', async () => {
         await joinAt15('executeOnce="true"');
+        await waitForLoad();
 
         expect(loadSpy).toHaveBeenCalledTimes(1);
         expect(interstitialAdManager.getInterstitials().length).toBe(0);
@@ -2363,6 +2384,7 @@ describe('Interstitial Ad manager', () => {
 
       it('is executed without clip when joined late', async () => {
         await joinAt15('clip="false"', /* maxDuration= */ 5);
+        await waitForLoad();
 
         expect(loadSpy).toHaveBeenCalledTimes(1);
         expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
