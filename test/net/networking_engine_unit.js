@@ -525,6 +525,47 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await testResolve(secondResolveScheme);
     });
 
+    describe('isStreamingSupported', () => {
+      const NetworkingEngine = shaka.net.NetworkingEngine;
+
+      it('reports the plugin that handles the scheme', () => {
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(false);
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('streaming')),
+            NetworkingEngine.PluginPriority.PREFERRED,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(true);
+        expect(NetworkingEngine.isStreamingSupported('unknown://foo'))
+            .toBe(false);
+      });
+
+      it('follows the priority of the plugins', () => {
+        const ignored = makeResolveScheme('ignored');
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('application')),
+            NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, /* streamingSupport= */ false);
+        // A streaming plugin of lower priority is not used, so it doesn't
+        // count.
+        NetworkingEngine.registerScheme('resolve', Util.spyFunc(ignored),
+            NetworkingEngine.PluginPriority.PREFERRED,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(false);
+
+        // One of the same or higher priority replaces it.
+        NetworkingEngine.registerScheme('resolve',
+            Util.spyFunc(makeResolveScheme('application streaming')),
+            NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, /* streamingSupport= */ true);
+        expect(NetworkingEngine.isStreamingSupported('resolve://foo'))
+            .toBe(true);
+        expect(ignored).not.toHaveBeenCalled();
+      });
+    });
+
     it('can unregister scheme', async () => {
       shaka.net.NetworkingEngine.unregisterScheme('resolve');
       await expectAsync(
