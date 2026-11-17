@@ -1904,6 +1904,89 @@ describe('DrmEngine', () => {
         expect(keyIds.length).toBe(2);
       });
 
+      it('rechecks keys after DRM discovery with duplicate init data',
+          async () => {
+            const initData = new Uint8Array([1]);
+            tweakDrmInfos((drmInfos) => {
+              drmInfos[0].initData = [{initDataType: 'cenc', initData}];
+            });
+            await initAndAttach();
+            session1.keyStatuses.forEach.and.callFake((callback) => {
+              callback('usable', makeKeyId(3));
+            });
+            session1.on['keystatuseschange']({target: session1});
+            await Util.shortDelay();
+            expect(drmEngine.getKeyStatuses()).toEqual({'03': 'usable'});
+            onKeyStatusSpy.calls.reset();
+
+            // A lazy playlist reveals a different key but the same init data.
+            const stream = manifest.variants[0].video;
+            const info = shaka.util.ManifestParserUtils.createDrmInfo(
+                'drm.abc', 'cenc', [
+                  {initDataType: 'cenc', initData: initData.slice()},
+                ]);
+            info.keyIds.add('04');
+            stream.keyIds = info.keyIds;
+            stream.drmInfos = [info];
+            const filterer = new shaka.media.ManifestFilterer(
+                shaka.util.PlayerConfiguration.createDefault(),
+                {width: Infinity, height: Infinity}, drmEngine);
+            filterer.processDrmInfos('drm.abc', stream);
+
+            // Switching must wait until the parser has finished with the index.
+            expect(onKeyStatusSpy).not.toHaveBeenCalled();
+            expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+            expect(session1.generateRequest).toHaveBeenCalledTimes(1);
+            await Util.shortDelay();
+            expect(onKeyStatusSpy).toHaveBeenCalledWith({'03': 'usable'});
+            expect(drmEngine.getKeyStatuses()['04']).toBeUndefined();
+          });
+
+      for (const order of ['before', 'after']) {
+        it('updates sessions started ' + order + ' a DRM discovery recheck',
+            async () => {
+              await initAndAttach();
+              await sendEncryptedEvent();
+              session1.keyStatuses.forEach.and.callFake((callback) => {
+                callback('usable', makeKeyId(1));
+              });
+              session1.on['keystatuseschange']({target: session1});
+              await Util.shortDelay();
+              expect(drmEngine.getKeyStatuses()).toEqual({'01': 'usable'});
+              onKeyStatusSpy.calls.reset();
+
+              if (order == 'before') {
+                drmEngine.newInitData('cenc', new Uint8Array(2));
+              }
+              drmEngine.updateCurrentDrmInfo(
+                  manifest.variants[0].video.drmInfos[0]);
+              if (order == 'after') {
+                drmEngine.newInitData('cenc', new Uint8Array(2));
+              }
+              session2.keyStatuses.forEach.and.callFake((callback) => {
+                callback('status-pending', makeKeyId(2));
+              });
+              session2.on['keystatuseschange']({target: session2});
+              await Util.shortDelay();
+              // An already queued notification may include the pending key.
+              // Keep the known usable key and await the new session's result.
+              expect(drmEngine.getKeyStatuses()['01']).toBe('usable');
+              expect(drmEngine.getKeyStatuses()['02']).not.toBe('usable');
+
+              session2.keyStatuses.forEach.and.callFake((callback) => {
+                callback('usable', makeKeyId(2));
+              });
+              session2.on['keystatuseschange']({target: session2});
+              await Util.shortDelay();
+              expect(onKeyStatusSpy).toHaveBeenCalledWith({
+                '01': 'usable', '02': 'usable',
+              });
+              expect(drmEngine.getKeyStatuses()).toEqual({
+                '01': 'usable', '02': 'usable',
+              });
+            });
+      }
+
       // See https://github.com/shaka-project/shaka-player/issues/1541
       it('does not invoke callback until all sessions are loaded', async () => {
         // Set up init data overrides in the manifest so that we get multiple
