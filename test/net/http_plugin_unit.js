@@ -36,7 +36,6 @@ function httpPluginTests(usingFetch) {
       jasmine.Fetch.install();
       const MockFetch = window.fetch;
       const MockAbortController = window.AbortController;
-      const MockReadableStream = window.ReadableStream;
       const MockHeaders = window.Headers;
       jasmine.Fetch.uninstall();
       // Now plug this mock into HttpRequest directly, so it does not interfere
@@ -44,7 +43,6 @@ function httpPluginTests(usingFetch) {
       // source-map-support.
       shaka.net.HttpFetchPlugin['fetch_'] = MockFetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = MockAbortController;
-      shaka.net.HttpFetchPlugin['ReadableStream_'] = MockReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = MockHeaders;
     } else {
       // Install the mock only briefly in the global namespace, to get a handle
@@ -156,7 +154,6 @@ function httpPluginTests(usingFetch) {
     if (usingFetch) {
       shaka.net.HttpFetchPlugin['fetch_'] = window.fetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
-      shaka.net.HttpFetchPlugin['ReadableStream_'] = window.ReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = window.Headers;
     } else {
       shaka.net.HttpXHRPlugin['Xhr_'] = window.XMLHttpRequest;
@@ -238,6 +235,213 @@ function httpPluginTests(usingFetch) {
           .promise).toBeRejectedWith(expected);
 
       expect(streamDataCallback).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Byte streams can be constructed since Chrome 89, but the plugin is
+     * supported from Chrome 66.
+     *
+     * @return {boolean}
+     */
+    function byteStreams() {
+      try {
+        // eslint-disable-next-line no-new
+        new ReadableStream({type: 'bytes'});
+        return true;
+      } catch (e) {  // eslint-disable-line no-restricted-syntax
+        return false;
+      }
+    }
+    const streams = () => shaka.net.HttpFetchPlugin.isSupported();
+
+    filterDescribe('with a body in chunks', streams, () => {
+      /** @type {function(string, !RequestInit)} */
+      let mockFetch;
+      /** @type {?} */
+      let originalByobReader;
+      /** @type {?jasmine.Spy} */
+      let byobRead;
+
+      /** @type {!Array<!Uint8Array>} */
+      const chunks = [
+        new Uint8Array([1, 2, 3]),
+        new Uint8Array([4, 5]),
+        new Uint8Array([6, 7, 8, 9]),
+      ];
+      const fullBody = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+      // Fetch bodies are byte streams where BYOB readers are supported for
+      // them.
+      const byobSupported = !!window.ReadableStreamBYOBReader;
+
+      beforeEach(() => {
+        mockFetch = shaka.net.HttpFetchPlugin['fetch_'];
+        originalByobReader =
+            shaka.net.HttpFetchPlugin['ReadableStreamBYOBReader_'];
+        byobRead = byobSupported ?
+            spyOn(window.ReadableStreamBYOBReader['prototype'], 'read')
+                .and.callThrough() :
+            null;
+      });
+
+      afterEach(() => {
+        shaka.net.HttpFetchPlugin['fetch_'] = mockFetch;
+        shaka.net.HttpFetchPlugin['ReadableStreamBYOBReader_'] =
+            originalByobReader;
+      });
+
+      /**
+       * Makes fetch respond with |chunks|, one per pull.
+       *
+       * @param {?string} contentLength
+       * @param {boolean} byteStream
+       * @param {!Object<string, string>=} extraHeaders
+       */
+      function respondWithChunks(contentLength, byteStream, extraHeaders) {
+        shaka.net.HttpFetchPlugin['fetch_'] = () => {
+          let index = 0;
+          /** @type {!ReadableStreamSource} */
+          const source = {
+            pull: (controller) => {
+              if (index < chunks.length) {
+                // A byte stream transfers the chunks it is given.
+                controller.enqueue(chunks[index++].slice());
+              } else {
+                controller.close();
+                // A pending BYOB read only ends once it is responded to.
+                const byobRequest = controller['byobRequest'];
+                if (byobRequest) {
+                  byobRequest.respond(0);
+                }
+              }
+            },
+          };
+          if (byteStream) {
+            source.type = 'bytes';
+          }
+          const body = new ReadableStream(source);
+          const headers = new Headers(extraHeaders || {});
+          if (contentLength != null) {
+            headers.set('Content-Length', contentLength);
+          }
+          return Promise.resolve(new Response(body, {status: 200, headers}));
+        };
+      }
+
+      /**
+       * @param {?function(BufferSource):!Promise} streamDataCallback
+       * @param {shaka.extern.ProgressUpdated=} progress
+       * @return {!Promise<shaka.extern.Response>}
+       */
+      function download(streamDataCallback, progress) {
+        const uri = 'https://foo.bar/chunks';
+        const request = shaka.net.NetworkingEngine.makeRequest(
+            [uri], retryParameters, streamDataCallback);
+        return plugin(uri, request, requestType, progress || progressUpdated,
+            headersReceived, {}).promise;
+      }
+
+      /** @param {boolean} expected */
+      function expectByob(expected) {
+        if (byobRead) {
+          expect(byobRead.calls.any()).toBe(expected);
+        }
+      }
+
+      for (const byteStream of [false, true]) {
+        // A BYOB reader can only be used on a byte stream, and with a known
+        // length.
+        const usesByob = byteStream && byobSupported;
+
+        const name = byteStream ? 'as a byte stream' : 'as a default stream';
+        filterDescribe(name, byteStream ? byteStreams : streams, () => {
+          it('joins the chunks when the length is known', async () => {
+            respondWithChunks(String(fullBody.byteLength), byteStream);
+            const response = await download(null);
+            expect(shaka.util.BufferUtils.toUint8(response.data))
+                .toEqual(fullBody);
+            expect(response.data.byteLength).toBe(fullBody.byteLength);
+            expectByob(usesByob);
+          });
+
+          it('joins the chunks when the length is unknown', async () => {
+            respondWithChunks(null, byteStream);
+            const response = await download(null);
+            expect(shaka.util.BufferUtils.toUint8(response.data))
+                .toEqual(fullBody);
+            expectByob(false);
+          });
+
+          it('handles a body larger than the Content-Length', async () => {
+            // As for a compressed response whose Content-Encoding is not
+            // exposed, where Content-Length is the size before decoding.
+            respondWithChunks('4', byteStream);
+            const response = await download(null);
+            expect(shaka.util.BufferUtils.toUint8(response.data))
+                .toEqual(fullBody);
+            expectByob(usesByob);
+          });
+
+          it('handles a body smaller than the Content-Length', async () => {
+            respondWithChunks('100', byteStream);
+            const response = await download(null);
+            expect(shaka.util.BufferUtils.toUint8(response.data))
+                .toEqual(fullBody);
+            expect(response.data.byteLength).toBe(fullBody.byteLength);
+            expectByob(usesByob);
+          });
+
+          it('streams the data before resolving', async () => {
+            respondWithChunks(String(fullBody.byteLength), byteStream);
+            /** @type {!Array<!Uint8Array>} */
+            const streamed = [];
+            const streamDataCallback = async (data) => {
+              await Util.shortDelay();
+              // Kept as given: it must stay valid after the next reads.
+              streamed.push(shaka.util.BufferUtils.toUint8(data));
+            };
+            const response = await download(streamDataCallback);
+            expect(shaka.util.Uint8ArrayUtils.concat(...streamed))
+                .toEqual(fullBody);
+            expect(shaka.util.BufferUtils.toUint8(response.data))
+                .toEqual(fullBody);
+          });
+
+          it('reports all the bytes as progress', async () => {
+            respondWithChunks(String(fullBody.byteLength), byteStream);
+            let bytes = 0;
+            let lastRemaining = -1;
+            const progress = (time, chunkBytes, remaining) => {
+              bytes += chunkBytes;
+              lastRemaining = remaining;
+            };
+            await download(null, progress);
+            expect(bytes).toBe(fullBody.byteLength);
+            expect(lastRemaining).toBe(0);
+          });
+        });
+      }
+
+      filterDescribe('with a byte stream', byteStreams, () => {
+        it('does not use a BYOB reader for a compressed response', async () => {
+          respondWithChunks('4', /* byteStream= */ true,
+              {'Content-Encoding': 'gzip'});
+          const response = await download(null);
+          expect(shaka.util.BufferUtils.toUint8(response.data))
+              .toEqual(fullBody);
+          expectByob(false);
+        });
+
+        it('reads a byte stream without BYOB support', async () => {
+          shaka.net.HttpFetchPlugin['ReadableStreamBYOBReader_'] = undefined;
+          const length = String(fullBody.byteLength);
+          respondWithChunks(length, /* byteStream= */ true);
+          const response = await download(null);
+          expect(shaka.util.BufferUtils.toUint8(response.data))
+              .toEqual(fullBody);
+          expectByob(false);
+        });
+      });
     });
   }
 

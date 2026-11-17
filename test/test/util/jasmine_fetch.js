@@ -113,8 +113,10 @@ jasmine.Fetch = class {
 
       const body = {
         getReader: () => {
+          // The whole stubbed response comes as a single chunk.
           const sequence = [{
-            done: false, value: {byteLength: 100},
+            done: false,
+            value: shaka.util.BufferUtils.toUint8(stubbed.response.response),
           }, {
             done: true, value: null,
           }];

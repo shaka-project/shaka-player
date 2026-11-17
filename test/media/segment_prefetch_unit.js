@@ -365,6 +365,62 @@ describe('SegmentPrefetch', () => {
       expect(fetchDispatcher).toHaveBeenCalledTimes(3 + 1);
     });
   });
+
+  describe('stream data', () => {
+    /** @type {?function(BufferSource):!Promise} */
+    let dispatchedCallback;
+    /** @type {function(shaka.extern.Response)} */
+    let resolveResponse;
+    /** @type {!jasmine.Spy} */
+    let streamDataCallback;
+
+    beforeEach(() => {
+      dispatchedCallback = null;
+      streamDataCallback =
+          jasmine.createSpy('streamDataCallback').and.resolveTo();
+      fetchDispatcher.and.callFake((ref, stream, callback) => {
+        dispatchedCallback = callback || null;
+        const response = new Promise((resolve) => {
+          resolveResponse = resolve;
+        });
+        return new shaka.net.NetworkingEngine.PendingRequest(
+            response, () => Promise.resolve(),
+            new shaka.net.NetworkingEngine.NumBytesRemainingClass());
+      });
+      segmentPrefetch = new shaka.media.SegmentPrefetch(
+          1, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false);
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      expect(dispatchedCallback).not.toBeNull();
+    });
+
+    it('passes chunks buffered before the callback was set', async () => {
+      await dispatchedCallback(new Uint8Array([1, 2]));
+      segmentPrefetch.getPrefetchedSegment(
+          references[0], Util.spyFunc(streamDataCallback));
+      await dispatchedCallback(new Uint8Array([3]));
+
+      expect(streamDataCallback).toHaveBeenCalledOnceWith(
+          new Uint8Array([1, 2, 3]));
+    });
+
+    it('drops buffered chunks once the request is done', async () => {
+      await dispatchedCallback(new Uint8Array([1, 2]));
+      resolveResponse(/** @type {shaka.extern.Response} */ ({
+        uri: references[0].getUris()[0],
+        data: new Uint8Array([1, 2]),
+        headers: {},
+      }));
+      await shaka.test.Util.shortDelay();
+
+      // The full response is used instead of the stream data, so the chunks
+      // are never passed on.
+      const op = segmentPrefetch.getPrefetchedSegment(
+          references[0], Util.spyFunc(streamDataCallback));
+      const result = await op.promise;
+      expect(result.data).toEqual(new Uint8Array([1, 2]));
+      expect(streamDataCallback).not.toHaveBeenCalled();
+    });
+  });
   /**
    * Creates a URI string.
    *
