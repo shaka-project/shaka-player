@@ -4861,6 +4861,43 @@ describe('DashParser Manifest', () => {
           expect(region.urlParams()).toBe('tok=abc');
         });
 
+    it('gives the player state to altmpd RequestParam', async () => {
+      const source = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri=' +
+        '"urn:mpeg:dash:event:alternativeMPD:replace:2025">',
+        '      <RequestParam includeInRequests="altmpd"',
+        '          queryTemplate=' +
+        '"d=$urn:mpeg:dash:state:execution-delta#1$&amp;' +
+        'c=$urn:mpeg:dash:state:execution-count#1$"/>',
+        '      <Event id="1" presentationTime="0" duration="1"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
+      const region = onTimelineRegionAddedSpy.calls.mostRecent().args[0];
+      // Without a state resolver, the values of an unknown state.
+      expect(region.urlParams()).toBe('d=0&c=-1');
+      const resolver = jasmine.createSpy('resolver').and.callFake(
+          (name, key) => name == 'execution-delta' ? '2.5' : null);
+      expect(region.urlParams(shaka.test.Util.spyFunc(resolver)))
+          .toBe('d=2.5&c=-1');
+      expect(resolver).toHaveBeenCalledWith('execution-delta', '1');
+      expect(resolver).toHaveBeenCalledWith('execution-count', '1');
+    });
+
     it('uses callback RequestParam for callback events', async () => {
       const source = [
         '<MPD>',

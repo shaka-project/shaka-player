@@ -83,6 +83,7 @@ shaka.extern.AdCuePoint;
  *   playoutLimit: ?number,
  *   clip: (boolean|undefined),
  *   startWithOffset: (boolean|undefined),
+ *   urlParams: (?shaka.extern.UrlParamsFunction|undefined),
  *   once: boolean,
  *   pre: boolean,
  *   post: boolean,
@@ -161,6 +162,11 @@ shaka.extern.AdCuePoint;
  *   <code>true</code>. This maps to the DASH
  *   <code>ReplacePresentation@startWithOffset</code> attribute, whose default
  *   is <code>false</code>.
+ * @property {(?shaka.extern.UrlParamsFunction|undefined)} urlParams
+ *   For DASH alternative MPD events, the URL parameters of the request
+ *   (ISO/IEC 23009-1 Annex I). <code>uri</code> carries them with the values
+ *   of an unknown player state; the player builds them again with the actual
+ *   state when it requests the interstitial.
  * @property {boolean} once
  *   Indicates that the interstitial should only be played once.
  * @property {boolean} pre

@@ -2253,6 +2253,8 @@ describe('Interstitial Ad manager', () => {
       let fakeCurrentTime;
       /** @type {!jasmine.Spy} */
       let loadSpy;
+      /** @type {!jasmine.Spy} */
+      let preloadSpy;
       /** @type {!Promise} */
       let loadCalled;
 
@@ -2270,7 +2272,8 @@ describe('Interstitial Ad manager', () => {
           configurable: true,
         });
         const adPlayer = interstitialAdManager.getPlayer();
-        spyOn(adPlayer, 'preload').and.returnValue(Promise.resolve(null));
+        preloadSpy = spyOn(adPlayer, 'preload')
+            .and.returnValue(Promise.resolve(null));
         const loaded = Promise.withResolvers();
         loadCalled = loaded.promise;
         loadSpy = spyOn(adPlayer, 'load').and.callFake(() => {
@@ -2284,13 +2287,14 @@ describe('Interstitial Ad manager', () => {
        *
        * @param {string} attributes Extra ReplacePresentation attributes.
        * @param {number=} maxDuration
+       * @param {shaka.extern.UrlParamsFunction=} urlParams
        * @return {!Promise}
        */
-      async function joinAt15(attributes, maxDuration = 20) {
+      async function joinAt15(attributes, maxDuration = 20, urlParams) {
         const eventNode = TXml.parseXmlString([
           '<Event duration="20" id="BREAK" presentationTime="10">',
-          `<ReplacePresentation uri="test.mpd" maxDuration="${maxDuration}"`,
-          ` ${attributes}/>`,
+          '<ReplacePresentation uri="https://ads/test.mpd"',
+          ` maxDuration="${maxDuration}" ${attributes}/>`,
           '</Event>',
         ].join(''));
         goog.asserts.assert(eventNode, 'Should have a event node!');
@@ -2302,6 +2306,7 @@ describe('Interstitial Ad manager', () => {
           eventNode,
           value: '',
           timescale: 1,
+          urlParams,
         });
         video.dispatchEvent(new Event('timeupdate'));
         fakeCurrentTime = 15;
@@ -2364,6 +2369,81 @@ describe('Interstitial Ad manager', () => {
             jasmine.objectContaining({type: 'ad-started'}));
         expect(onEventSpy).not.toHaveBeenCalledWith(
             jasmine.objectContaining({type: 'ad-complete'}));
+      });
+
+      describe('player state parameters', () => {
+        /**
+         * Like a RequestParam with queryTemplate="d=$urn:mpeg:dash:state:
+         * execution-delta#<key>$&e=...expected-duration#<key>$&c=...
+         * execution-count#<key>$", with the unknown values of Annex I.4.
+         *
+         * @param {string} key
+         * @return {shaka.extern.UrlParamsFunction}
+         */
+        function makeUrlParams(key) {
+          return (/** shaka.extern.UrlParamsStateResolver= */ resolver) => {
+            const get = (name, unknown) => {
+              const value = resolver ? resolver(name, key) : null;
+              return value != null ? value : unknown;
+            };
+            return [
+              `d=${get('execution-delta', '0')}`,
+              `e=${get('expected-duration', '-1')}`,
+              `c=${get('execution-count', '-1')}`,
+            ].join('&');
+          };
+        }
+
+        it('are those of the execution', async () => {
+          await joinAt15('', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+
+          expect(loadSpy).toHaveBeenCalledTimes(1);
+          // Executed 5 s late, with 15 s left after clipping, for the first
+          // time.
+          expect(loadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test.mpd?d=5&e=15&c=0');
+        });
+
+        it('give the whole maxDuration without clip', async () => {
+          await joinAt15(
+              'clip="false"', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+
+          expect(loadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test.mpd?d=5&e=20&c=0');
+        });
+
+        it('may refer to an event executed before', async () => {
+          await joinAt15('', /* maxDuration= */ 20, makeUrlParams('BREAK'));
+          await waitForLoad();
+          preloadSpy.calls.reset();
+
+          // A later event, preloaded right away, whose requests carry the
+          // state of the first one.
+          const eventNode = TXml.parseXmlString([
+            '<Event duration="10" id="BREAK2" presentationTime="40">',
+            '<ReplacePresentation uri="https://ads/test2.mpd"',
+            ' maxDuration="10" earliestResolutionTimeOffset="30"/>',
+            '</Event>',
+          ].join(''));
+          goog.asserts.assert(eventNode, 'Should have a event node!');
+          await addRegion({
+            startTime: 40,
+            endTime: 50,
+            id: 'BREAK2',
+            schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+            eventNode,
+            value: '',
+            timescale: 1,
+            urlParams: makeUrlParams('BREAK'),
+          });
+
+          expect(preloadSpy).toHaveBeenCalledTimes(1);
+          // The expected duration is only known for the requested event.
+          expect(preloadSpy.calls.argsFor(0)[0])
+              .toBe('https://ads/test2.mpd?d=5&e=-1&c=1');
+        });
       });
 
       it('is executed only once with executeOnce', async () => {
