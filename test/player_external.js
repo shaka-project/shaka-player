@@ -311,10 +311,15 @@ describe('Player', () => {
       AdUtils.AD_ERROR,
     ];
     for (const type of types) {
-      eventManager.listen(adManager, type, () => {
+      eventManager.listen(adManager, type, (event) => {
         // A linear ad is the one the quartile checks apply to.
         const ad = adManager.getCurrentAd();
-        if (type == AdUtils.AD_STARTED && ad && !ad.isLinear()) {
+        if (type == AdUtils.AD_ERROR && isUnsupportedAdMedia(event)) {
+          // The ad's media can't play in this browser, e.g. the HEVC-only
+          // ads of the Apple interstitial sample in headless Chrome: the ad
+          // is skipped, as it should be.
+          events.push('unsupported ' + type);
+        } else if (type == AdUtils.AD_STARTED && ad && !ad.isLinear()) {
           events.push('non-linear ' + type);
         } else {
           events.push(type);
@@ -322,6 +327,18 @@ describe('Player', () => {
       });
     }
     return events;
+  }
+
+  /**
+   * @param {!Event} event An ad-error event.
+   * @return {boolean} True if the ad failed because the browser does not
+   *   support its media.
+   */
+  function isUnsupportedAdMedia(event) {
+    const original = event['originalEvent'];
+    const error = original && (original.detail || original);
+    return !!error &&
+        error.code == shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER;
   }
 
   /**
