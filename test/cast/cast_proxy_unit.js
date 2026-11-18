@@ -381,6 +381,32 @@ filterDescribe('CastProxy', castProxySupport, () => {
         expect(trickPlaySpy).toHaveBeenCalledWith(5);
       });
 
+      it('uses local live getters until the first remote update', () => {
+        mockSender.isCasting.and.returnValue(true);
+        mockSender.hasRemoteProperties.and.returnValue(false);
+        const values = {
+          getPlayheadTimeAsDate: new Date(1700000000123),
+          getPresentationStartTimeAsDate: new Date(1699999900000),
+          getSegmentAvailabilityDuration: 120,
+          getLiveLatency: 5,
+        };
+        for (const name of Object.keys(values)) {
+          const localGetter = jasmine.createSpy(name)
+              .and.returnValue(values[name]);
+          mockPlayer[name] = localGetter;
+          const player = /** @type {!Object} */(proxy.getPlayer());
+          expect(player[name]()).toBe(values[name]);
+          expect(localGetter.calls.mostRecent().object).toBe(mockPlayer);
+        }
+        expect(mockSender.get).not.toHaveBeenCalled();
+
+        mockSender.hasRemoteProperties.and.returnValue(true);
+        mockSender.get.and.returnValue(() => null);
+        expect(proxy.getPlayer().getPlayheadTimeAsDate()).toBeNull();
+        expect(mockSender.get).toHaveBeenCalledWith(
+            'player', 'getPlayheadTimeAsDate');
+      });
+
       it('always returns a local NetworkingEngine', () => {
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
