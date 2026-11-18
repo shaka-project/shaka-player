@@ -34,6 +34,8 @@ describe('CastUtils', () => {
       'preload',
       'destroyAllPreloads',
       'addFont',
+      // Used by the interstitials of the primary content, not by apps.
+      'getUrlParamState',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
