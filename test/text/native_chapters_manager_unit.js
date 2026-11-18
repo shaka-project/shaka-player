@@ -94,15 +94,8 @@ describe('NativeChaptersManager', () => {
     player.release();
   });
 
-  it('does not create tracks without native controls', async () => {
-    createManager();
-    await flush();
-    expect(getTrackNodes().length).toBe(0);
-  });
-
-  it('creates a chapters track per language with controls', async () => {
+  it('creates a chapters track per language', async () => {
     chaptersByLanguage.set('es', [makeChapter('a', 0, 20, 'Todo')]);
-    video.controls = true;
     createManager();
     await flush();
 
@@ -123,43 +116,8 @@ describe('NativeChaptersManager', () => {
     ]);
   });
 
-  it('follows the controls attribute', async () => {
-    createManager();
-    await flush();
-    expect(getTrackNodes().length).toBe(0);
-
-    video.controls = true;
-    await flush();
-    expect(getTrackNodes().length).toBe(1);
-
-    video.controls = false;
-    await flush();
-    expect(getTrackNodes().length).toBe(0);
-  });
-
-  it('follows the native fullscreen presentation mode', async () => {
-    let presentationMode = 'inline';
-    Object.defineProperty(video, 'webkitPresentationMode', {
-      configurable: true,
-      get: () => presentationMode,
-    });
-    createManager();
-    await flush();
-    expect(getTrackNodes().length).toBe(0);
-
-    presentationMode = 'fullscreen';
-    video.dispatchEvent(new Event('webkitpresentationmodechanged'));
-    await flush();
-    expect(getTrackNodes().length).toBe(1);
-
-    presentationMode = 'inline';
-    video.dispatchEvent(new Event('webkitpresentationmodechanged'));
-    await flush();
-    expect(getTrackNodes().length).toBe(0);
-  });
 
   it('updates the cues when the chapters change', async () => {
-    video.controls = true;
     createManager();
     await flush();
     const firstTrackNode = getTrackNodes()[0];
@@ -189,14 +147,12 @@ describe('NativeChaptersManager', () => {
       makeChapter('1', 0, 10, 'Intro'),
       makeChapter('2', 10, 10, 'Empty'),
     ]);
-    video.controls = true;
     createManager();
     await flush();
     expect(getCues(getTrackNodes()[0]).map((c) => c.id)).toEqual(['1']);
   });
 
   it('removes its tracks on release', async () => {
-    video.controls = true;
     createManager();
     await flush();
     expect(getTrackNodes().length).toBe(1);
@@ -206,8 +162,6 @@ describe('NativeChaptersManager', () => {
     expect(getTrackNodes().length).toBe(0);
 
     // Once released, events are ignored.
-    video.controls = false;
-    video.controls = true;
     player.dispatchEvent(new shaka.util.FakeEvent('trackschanged'));
     await flush();
     expect(getTrackNodes().length).toBe(0);
@@ -218,7 +172,6 @@ describe('NativeChaptersManager', () => {
       document.createElement('track'));
     trackNode.kind = 'chapters';
     video.appendChild(trackNode);
-    video.controls = true;
     createManager();
     await flush();
     expect(manager.isManagedTrack(trackNode.track)).toBe(false);
