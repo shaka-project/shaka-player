@@ -202,6 +202,20 @@ describe('Player', () => {
   });
 
   describe('destroy', () => {
+    it('stops and releases the AbrManager after saving a preload', async () => {
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      abrManager.stop.calls.reset();
+
+      const preloadManager = await player.unloadAndSavePreload();
+      // Otherwise it would stay enabled and keep switching this Player's
+      // streams, e.g. on a network change, even after destroy().
+      expect(abrManager.stop).toHaveBeenCalled();
+
+      await preloadManager.destroy();
+      await player.destroy();
+      expect(abrManager.release).toHaveBeenCalled();
+    });
+
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
       await player.load(fakeManifestUri, 0, fakeMimeType);
