@@ -61,6 +61,14 @@ describe('Player', () => {
     document.body.removeChild(video);
   });
 
+  it('exports live getters used by the Cast receiver', () => {
+    for (const name of
+      shaka.cast.CastUtils.PlayerGetterMethodsThatRequireLive.keys()) {
+      const getter = /** @type {!Object} */(player)[name];
+      expect(getter).withContext(name).toEqual(jasmine.any(Function));
+    }
+  });
+
   describe('seek range', () => {
     // Regression test for Issue #3675.
     it('has a reasonable seek range after going from live to VOD', async () => {
