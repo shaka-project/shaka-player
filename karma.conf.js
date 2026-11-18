@@ -518,14 +518,24 @@ module.exports = (config) => {
     'test/test/util/cml-cmcd/*.js',
   ]);
 
+  if (settings.test_custom_asset || settings.external) {
+    // The external asset tests read the demo asset list while their describe()
+    // blocks run.  Load it as a setup file, so it is in place before any test
+    // file loads.  Loading it with the test files would race against
+    // test/demo/demo_unit.js, whose goog.require() loads the same files, and
+    // whichever ran second would throw "Namespace already declared".
+    clientArgs.setupFiles.push(...resolveGlobs([
+      'demo/common/asset.js',
+      'demo/common/assets.js',
+    ]));
+  }
+
   clientArgs.testFiles = [];
 
   if (settings.test_custom_asset) {
     // If testing custom assets, we don't serve other unit or integration tests.
     // External asset tests are the basis for custom asset testing, so this file
     // is automatically included.
-    clientArgs.testFiles.push('demo/common/asset.js');
-    clientArgs.testFiles.push('demo/common/assets.js');
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
@@ -537,8 +547,6 @@ module.exports = (config) => {
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
-      clientArgs.testFiles.push('demo/common/asset.js');
-      clientArgs.testFiles.push('demo/common/assets.js');
       clientArgs.testFiles.push('test/**/*_external.js');
     }
   }

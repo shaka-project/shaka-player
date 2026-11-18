@@ -267,6 +267,164 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * Get why the browser cannot play the asset's manifest and media, if it
+   * cannot.  Key systems are not checked here.
+   *
+   * @param {shaka.extern.SupportType} support
+   * @return {?string} Null if the manifest and media are supported.
+   */
+  getMediaUnsupportedReason(support) {
+    const Feature = shakaAssets.Feature;
+
+    // Does the browser support the asset's manifest type?
+    if (this.features.includes(Feature.DASH) &&
+        !support.manifest['application/dash+xml']) {
+      return 'Your browser does not support MPEG-DASH manifests.';
+    }
+    if (this.features.includes(Feature.HLS) &&
+        !support.manifest['application/x-mpegurl']) {
+      return 'Your browser does not support HLS manifests.';
+    }
+    if (this.features.includes(Feature.MKV) &&
+        !support.manifest['video/x-matroska']) {
+      return 'Your browser does not support MKV files.';
+    }
+
+    // Does the asset contain a playable container?
+    const containers = [];
+    if (this.features.includes(Feature.WEBM)) {
+      containers.push('video/webm');
+    }
+    if (this.features.includes(Feature.MP4)) {
+      containers.push('video/mp4');
+    }
+    if (this.features.includes(Feature.MP2TS)) {
+      containers.push('video/mp2t');
+    }
+    if (this.features.includes(Feature.MKV)) {
+      // The MKV files are repackaged to MP4 (or to WebM, for VP8 and Vorbis).
+      containers.push('video/mp4');
+      containers.push('video/webm');
+    }
+    if (this.features.includes(Feature.CONTAINERLESS)) {
+      containers.push('audio/aac');
+    }
+    // Without MSE, Apple browsers play MP4 and TS natively.
+    const nativeApple = !(window.ManagedMediaSource || window.MediaSource) &&
+        !!navigator.vendor && navigator.vendor.includes('Apple');
+    const isContainerSupported = (type) => !!support.media[type] ||
+        (nativeApple && (type == 'video/mp4' || type == 'video/mp2t'));
+    if (containers.length && !containers.some(isContainerSupported)) {
+      return 'Your browser does not support the required video format.';
+    }
+
+    // Each codec feature is a requirement of its own, met by any one of its
+    // codec strings: an asset with DD (AC-3) audio is unplayable without AC-3
+    // support, however playable its video is.
+    /** @type {!Array<{feature: shakaAssets.Feature, types: !Array<string>}>} */
+    const codecs = [
+      {
+        feature: Feature.DOLBY_VISION_P5,
+        types: [
+          'video/mp4; codecs="dvh1.05.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_P8_1,
+        types: [
+          'video/mp4; codecs="hvc1.2.4.L120.b0"',
+          'video/mp4; codecs="dvh1.08.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_P8_4,
+        types: [
+          'video/mp4; codecs="hvc1.2.4.L123.b0"',
+          'video/mp4; codecs="dvh1.08.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_P10,
+        types: [
+          'video/mp4; codecs="dav1.10.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_P10_1,
+        types: [
+          'video/mp4; codecs="av01.0.31M.10.0.111.09.16.09.0"',
+          'video/mp4; codecs="dav1.10.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_P10_4,
+        types: [
+          'video/mp4; codecs="av01.0.31M.10.0.112.09.18.09.0"',
+          'video/mp4; codecs="dav1.10.01"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_VISION_3D,
+        types: [
+          'video/mp4; codecs="dvh1.20.01"',
+        ],
+      },
+      {
+        feature: Feature.AV1,
+        types: [
+          'video/mp4; codecs="av01.0.01M.08"',
+        ],
+      },
+      {
+        feature: Feature.HEVC,
+        types: [
+          'video/mp4; codecs="hvc1.1.6.L93.90"',
+          'video/mp4; codecs="hev1.1.6.L93.90"',
+        ],
+      },
+      {
+        feature: Feature.MV_HEVC,
+        types: [
+          'video/mp4; codecs="hvc1.2.20000000.L153.B0"',
+        ],
+      },
+      {
+        feature: Feature.APAC,
+        types: [
+          'audio/mp4; codecs="apac.31.00"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_DIGITAL,
+        types: [
+          'audio/mp4; codecs="ac-3"',
+        ],
+      },
+      {
+        feature: Feature.DOLBY_DIGITAL_PLUS,
+        types: [
+          'audio/mp4; codecs="ec-3"',
+        ],
+      },
+      {
+        feature: Feature.AC_4,
+        types: [
+          'audio/mp4; codecs="ac-4.02.01.03"',
+        ],
+      },
+    ];
+    for (const {feature, types} of codecs) {
+      if (this.features.includes(feature) &&
+          !types.some((type) => support.media[type])) {
+        return 'Your browser does not support the required codecs (' +
+            feature + ').';
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * @param {!Object} extraConfig
    * @return {!ShakaDemoAssetInfo}
    */
