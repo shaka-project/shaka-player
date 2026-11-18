@@ -1315,6 +1315,64 @@ describe('Player', () => {
       expect(chapters.length).toBe(3);
       expect(chapters[0].title).toBe('Chapter 1');
     });
+
+    it('mirrors the chapters into a native chapters track', async () => {
+      if (!deviceDetected.supportsNativeChapters()) {
+        pending('The native media controls do not list chapters.');
+      }
+      const getNativeChaptersTracks = () => Array.from(video.textTracks)
+          .filter((t) => t.kind == 'chapters');
+      /** @return {!Promise<TextTrack>} */
+      const waitForNativeChaptersTrack = async () => {
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline) {
+          const track = getNativeChaptersTracks()[0];
+          if (track && track.cues && track.cues.length) {
+            return track;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          await shaka.test.Util.shortDelay();
+        }
+        return null;
+      };
+
+      video.controls = true;
+      try {
+        await player.load('test:sintel_no_text_compiled');
+        await player.addChaptersTrack(
+            'base/test/test/assets/chapters.vtt', 'en');
+
+        const nativeTrack = await waitForNativeChaptersTrack();
+        expect(nativeTrack).not.toBe(null);
+        expect(nativeTrack.language).toBe('en');
+        const cues = Array.from(nativeTrack.cues || []).map((cue) => {
+          return [cue.startTime, cue.endTime,
+            /** @type {!VTTCue} */ (cue).text];
+        });
+        expect(cues).toEqual([
+          [0, 5, 'Chapter 1'],
+          [5, 10, 'Chapter 2'],
+          [10, 20, 'Chapter 3'],
+        ]);
+
+        // The mirrored track is not reported back as another chapters track.
+        expect(player.getChaptersTracks().length).toBe(1);
+        expect((await player.getChaptersAsync('en')).length).toBe(3);
+
+        // Without the native controls, the track goes away.
+        video.controls = false;
+        await shaka.test.Util.delay(0.1);
+        expect(getNativeChaptersTracks().length).toBe(0);
+
+        video.controls = true;
+        expect(await waitForNativeChaptersTrack()).not.toBe(null);
+
+        await player.unload();
+        expect(getNativeChaptersTracks().length).toBe(0);
+      } finally {
+        video.controls = false;
+      }
+    });
   });  // describe('addChaptersTrack')
 
   it('requires a license server for HLS ClearKey content', async () => {

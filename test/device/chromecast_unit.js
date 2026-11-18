@@ -51,4 +51,10 @@ describe('Chromecast', () => {
     Util.setUserAgent(chromecastAndroid);
     expect(new Chromecast().rejectCodecs()).toEqual([]);
   });
+
+  it('does not support native chapters', () => {
+    Util.setUserAgentData(null);
+    Util.setUserAgent(chromecastAndroid);
+    expect(new Chromecast().supportsNativeChapters()).toBe(false);
+  });
 });

@@ -88,6 +88,7 @@
 
 +../../lib/text/cue.js
 +../../lib/text/cue_region.js
++../../lib/text/native_chapters_manager.js
 +../../lib/text/native_text_displayer.js
 +../../lib/text/speech_to_text.js
 +../../lib/text/stub_text_displayer.js

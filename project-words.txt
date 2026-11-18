@@ -109,7 +109,9 @@ unmutes
 valuetext
 variantchanged
 vrstatuschanged
+webkitbeginfullscreen
 webkitcurrentplaybacktargetiswirelesschanged
+webkitendfullscreen
 webkitkeyadded
 webkitkeyerror
 webkitkeymessage

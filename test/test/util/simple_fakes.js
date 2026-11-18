@@ -215,9 +215,17 @@ shaka.test.FakeVideo = class {
     this.offsetHeight = 1000;
     /** @private {!Array<!Element>} */
     this.children_ = [];
+    const documentEventTarget = new shaka.util.FakeEventTarget();
     this.ownerDocument = {
       // We just need to fake createElement for tracks.
       createElement: (tagName) => new shaka.test.FakeTrackElement(),
+      // And the events, for the listeners on the document (e.g. fullscreen).
+      // eslint-disable-next-line no-restricted-syntax
+      addEventListener: documentEventTarget.addEventListener.bind(
+          documentEventTarget),
+      // eslint-disable-next-line no-restricted-syntax
+      removeEventListener: documentEventTarget.removeEventListener.bind(
+          documentEventTarget),
     };
 
     /** @type {!jasmine.Spy} */
