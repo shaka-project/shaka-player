@@ -95,6 +95,10 @@ describe('SVTA interstitial playback', () => {
     const started = onEvent.calls.allArgs().map((args) => args[0])
         .find((event) => event.type == shaka.ads.Utils.AD_STARTED);
     expect(started.ad instanceof shaka.ads.InterstitialAd).toBe(true);
+    // The event carries the interstitial that describes the ad, with its
+    // signaling.
+    expect(started.interstitial).toBe(ads[0]);
+    expect(started.interstitial.adCreativeSignaling).toBeTruthy();
     expect(started.ad.getDuration()).toBe(10);
     expect(started.ad.getRemainingTime()).toBe(5);
     expect(started.ad.isClientRendering()).toBe(false);
