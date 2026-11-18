@@ -162,6 +162,33 @@ describe('CastUtils', () => {
       }
     });
 
+    it('transfers Dates at the root and in nested objects and arrays', () => {
+      const date = new Date(1700000000123);
+      const roundTrip = (value) =>
+        CastUtils.deserialize(CastUtils.serialize(value));
+      expect(roundTrip(date)).toEqual(date);
+      expect(roundTrip({update: {player: {
+        getPlayheadTimeAsDate: date,
+        getPresentationStartTimeAsDate: null,
+      }}, dates: [date, {date}]})).toEqual({update: {player: {
+        getPlayheadTimeAsDate: date,
+        getPresentationStartTimeAsDate: null,
+      }}, dates: [date, {date}]});
+    });
+
+    it('preserves invalid Dates', () => {
+      const date = CastUtils.deserialize(
+          CastUtils.serialize(new Date(NaN)));
+      expect(date).toEqual(jasmine.any(Date));
+      expect(date.getTime()).toBeNaN();
+    });
+
+    it('leaves date strings and null unchanged', () => {
+      const values = ['2023-11-14T22:13:20.123Z', 'Date', null];
+      expect(CastUtils.deserialize(CastUtils.serialize(values)))
+          .toEqual(values);
+    });
+
     it('transfers real Events', () => {
       const event = new CustomEvent('myEventType');
 
