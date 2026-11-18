@@ -507,6 +507,55 @@ describe('NativeTextDisplayer', () => {
     });
   });
 
+  describe('track configuration', () => {
+    // WebKit runs its automatic text track selection (driven by the system
+    // language) over every track whose mode has not been changed by script
+    // since it was added to the media element, and that selection replaces
+    // the player's choice.  See https://github.com/shaka-project/shaka-player/issues/10893
+    it('changes the mode of every track after adding it', async () => {
+      await displayer.destroy();
+
+      /** @type {!Map<!shaka.test.FakeTrackElement, !Array<string>>} */
+      const modesSetWhileAttached = new Map();
+
+      video.ownerDocument.createElement = () => {
+        const trackNode = new shaka.test.FakeTrackElement();
+        const modes = [];
+        modesSetWhileAttached.set(trackNode, modes);
+        let mode = 'disabled';
+        Object.defineProperty(trackNode.track, 'mode', {
+          get: () => mode,
+          set: (value) => {
+            if (trackNode.parentNode && value !== mode) {
+              modes.push(value);
+            }
+            mode = value;
+          },
+        });
+        return trackNode;
+      };
+
+      /** @type {!Array<shaka.extern.TextTrack>} */
+      const textTracks = [
+        {id: 0, active: false, language: 'en'},
+        {id: 1, active: true, language: 'zh-Hans'},
+        {id: 2, active: false, language: 'es'},
+      ];
+      player['getTextTracks'] = () => textTracks;
+      /** @suppress {checkTypes} */
+      displayer = new NativeTextDisplayer(player);
+
+      expect(modesSetWhileAttached.size).toBe(3);
+      for (const trackNode of modesSetWhileAttached.keys()) {
+        expect(trackNode.parentNode).toBe(video);
+        expect(modesSetWhileAttached.get(trackNode).length).toBeGreaterThan(0);
+      }
+
+      const finalModes = video.textTracks.map((t) => t.mode);
+      expect(finalModes).toEqual(['disabled', 'hidden', 'disabled']);
+    });
+  });
+
   describe('destroy', () => {
     it('deletes the TextTrack it created', async () => {
       // There should only be the one track created by this displayer.

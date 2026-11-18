@@ -6796,6 +6796,77 @@ describe('Player', () => {
     });
   });
 
+  describe('config textDisplayFactory default', () => {
+    /** @type {function(!shaka.Player):shaka.extern.TextDisplayer} */
+    let textDisplayFactory;
+    /** @type {?} */
+    let fakeVideo;
+
+    /**
+     * @return {function(!shaka.Player):shaka.extern.TextDisplayer}
+     * @suppress {accessControls}
+     */
+    function getDefaultTextDisplayFactory() {
+      return player.defaultConfig_().textDisplayFactory;
+    }
+
+    beforeEach(() => {
+      textDisplayFactory = getDefaultTextDisplayFactory();
+      fakeVideo = video;
+      player.setVideoContainer(
+          /** @type {!HTMLElement} */ (document.createElement('div')));
+
+      const fakeDisplayer = {};
+      spyOn(shaka.text, 'UITextDisplayer').and.returnValue(fakeDisplayer);
+      spyOn(shaka.text, 'NativeTextDisplayer').and.returnValue(fakeDisplayer);
+    });
+
+    afterEach(() => {
+      player.setVideoContainer(null);
+    });
+
+    it('uses the UI displayer inline', () => {
+      fakeVideo.webkitPresentationMode = 'inline';
+      fakeVideo.webkitDisplayingFullscreen = false;
+      textDisplayFactory(player);
+      expect(shaka.text.UITextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.NativeTextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses the native displayer in fullscreen', () => {
+      fakeVideo.webkitPresentationMode = 'fullscreen';
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses the native displayer in picture-in-picture', () => {
+      fakeVideo.webkitPresentationMode = 'picture-in-picture';
+      fakeVideo.webkitDisplayingFullscreen = false;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
+    });
+
+    // When WebKit fires webkitpresentationmodechanged on the way back to
+    // inline, webkitDisplayingFullscreen is still true.
+    it('uses the UI displayer when leaving fullscreen', () => {
+      fakeVideo.webkitPresentationMode = 'inline';
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.UITextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.NativeTextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses webkitDisplayingFullscreen without presentation modes', () => {
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('config streaming.failureCallback default', () => {
     /** @type {jasmine.Spy} */
     let retryStreaming;
