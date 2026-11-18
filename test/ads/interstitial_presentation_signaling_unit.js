@@ -34,6 +34,8 @@ describe('Interstitial presentation signaling', () => {
   let regions;
   /** @type {number} */
   let duration;
+  /** @type {!Array<!Array<number>>} */
+  let periods;
 
   beforeEach(async () => {
     // Allows us to use a timer instead of requestVideoFrameCallback.
@@ -66,9 +68,9 @@ describe('Interstitial presentation signaling', () => {
         adContainer, player, shaka.test.Util.spyFunc(onEventSpy),
         undefined, (...args) => tracker.create(...args), {
           accepts: (interstitial) => !interstitial.adCreativeSignaling,
-          parse: (interstitial, presentationRegions) =>
+          parse: (interstitial, presentationRegions, manifest) =>
             shaka.ads.AdManager.parsePresentationSignaling(
-                interstitial, presentationRegions),
+                interstitial, presentationRegions, manifest),
         });
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
     config.supportsMultipleMediaElements = true;
@@ -76,12 +78,11 @@ describe('Interstitial presentation signaling', () => {
 
     regions = [];
     duration = 10;
+    periods = [[0, 10]];
     const preloadManager = /** @type {?} */ ({
-      waitForManifest: () => Promise.resolve(),
+      waitForFinish: () => Promise.resolve(),
       getRegions: () => regions,
-      getManifest: () => ({
-        presentationTimeline: {getDuration: () => duration},
-      }),
+      getManifest: () => createManifest(periods),
       destroy: () => Promise.resolve(),
     });
     const adPlayer = manager.getPlayer();
@@ -100,6 +101,33 @@ describe('Interstitial presentation signaling', () => {
     tracker.release();
     await player.destroy();
   });
+
+  /**
+   * A DASH manifest whose segments are in the given Periods.
+   *
+   * @param {!Array<!Array<number>>} periodRanges The start and end of each
+   *   Period.
+   * @return {shaka.extern.Manifest}
+   */
+  function createManifest(periodRanges) {
+    const references = [];
+    for (const [start, end] of periodRanges) {
+      for (let time = start; time < end; time += 2) {
+        references.push({appendWindowStart: start, appendWindowEnd: end});
+      }
+    }
+    return /** @type {?} */ ({
+      type: shaka.media.ManifestParser.DASH,
+      periodCount: periodRanges.length,
+      presentationTimeline: {getDuration: () => duration},
+      variants: [
+        {audio: null, video: {segmentIndex: null}},
+        {audio: null, video: {segmentIndex: {
+          forEachTopLevelReference: (fn) => references.forEach(fn),
+        }}},
+      ],
+    });
+  }
 
   /**
    * @param {string} id
@@ -150,12 +178,16 @@ describe('Interstitial presentation signaling', () => {
   /**
    * Schedules a ReplacePresentation of a list MPD at 10 s and plays into it.
    *
+   * @param {number=} joinTime The time of the primary content when the
+   *   interstitial starts.
+   * @param {string=} attributes More attributes of the ReplacePresentation.
    * @return {!Promise}
    */
-  async function startBreak() {
+  async function startBreak(joinTime = 10.2, attributes = '') {
     const eventNode = TXml.parseXmlString([
       '<Event duration="10" id="BREAK" presentationTime="10">',
-      '<ReplacePresentation uri="https://ads/list.mpd" maxDuration="10"/>',
+      '<ReplacePresentation uri="https://ads/list.mpd" maxDuration="10" ' +
+          attributes + '/>',
       '</Event>',
     ].join(''));
     goog.asserts.assert(eventNode, 'Should have an event node!');
@@ -171,7 +203,7 @@ describe('Interstitial presentation signaling', () => {
     goog.asserts.assert(interstitial, 'Should have an interstitial!');
     await manager.addInterstitials([interstitial]);
     video.dispatchEvent(new Event('timeupdate'));
-    baseTime = 10.2;
+    baseTime = joinTime;
     video.dispatchEvent(new Event('timeupdate'));
     await Promise.race([loadCalled, shaka.test.Util.delay(5)]);
   }
@@ -379,6 +411,108 @@ describe('Interstitial presentation signaling', () => {
     expect(loadSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('presents each Period of a list MPD as an ad of its own', async () => {
+    periods = [[0, 4], [4, 10]];
+    await startBreak();
+
+    expect(loadSpy).toHaveBeenCalledTimes(1);
+    expect(eventsOfType(Utils.AD_INTERSTITIAL_PRELOADED).length).toBe(2);
+    let started = eventsOfType(Utils.AD_STARTED);
+    expect(started.length).toBe(1);
+    const first = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
+    expect(first.getAdId()).toBe('BREAK_shaka_asset_0');
+    expect(started[0]['interstitial'].groupId).toBe('BREAK');
+    expect(first.getSequenceLength()).toBe(2);
+    expect(first.getPositionInSequence()).toBe(1);
+
+    const adVideo = getAdVideo();
+    fakeAdPlayback(adVideo);
+    playAdTo(adVideo, 0.05);
+    expect(first.getDuration()).toBe(4);
+    playAdTo(adVideo, 3.9);
+    playAdTo(adVideo, 4.2);
+
+    started = eventsOfType(Utils.AD_STARTED);
+    expect(started.length).toBe(2);
+    const second = /** @type {!shaka.ads.InterstitialAd} */ (started[1]['ad']);
+    expect(second.getAdId()).toBe('BREAK_shaka_asset_1');
+    expect(second.getPositionInSequence()).toBe(2);
+    expect(second.getDuration()).toBe(6);
+    expect(adEventTypes()).toEqual([
+      Utils.AD_STARTED,
+      Utils.AD_COMPLETE,
+      Utils.AD_STOPPED,
+      Utils.AD_STARTED,
+    ]);
+    expect(loadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('clips the Periods of a list MPD to the interstitial', async () => {
+    // The break lasts 10 s, so the third Period is not played.
+    periods = [[0, 4], [4, 12], [12, 16]];
+    duration = 16;
+    await startBreak();
+
+    expect(eventsOfType(Utils.AD_INTERSTITIAL_PRELOADED).length).toBe(2);
+    const started = eventsOfType(Utils.AD_STARTED);
+    const first = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
+    expect(first.getSequenceLength()).toBe(2);
+
+    const adVideo = getAdVideo();
+    fakeAdPlayback(adVideo);
+    playAdTo(adVideo, 4.2);
+    const second = /** @type {!shaka.ads.InterstitialAd} */ (
+      eventsOfType(Utils.AD_STARTED)[1]['ad']);
+    expect(second.getPositionInSequence()).toBe(2);
+    expect(second.getDuration()).toBe(6);
+  });
+
+  it('presents the Periods left when joined late', async () => {
+    periods = [[0, 6], [6, 10]];
+    // Joined 5 s into the break, without startWithOffset: the first 5 s of
+    // the media are played.
+    await startBreak(/* joinTime= */ 15);
+
+    expect(manager.getPlayer().getConfiguration().playRangeEnd).toBe(5);
+    const started = eventsOfType(Utils.AD_STARTED);
+    expect(started.length).toBe(1);
+    const ad = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
+    expect(ad.getPositionInSequence()).toBe(1);
+    expect(ad.getSequenceLength()).toBe(1);
+    const adVideo = getAdVideo();
+    fakeAdPlayback(adVideo);
+    playAdTo(adVideo, 0.05);
+    expect(ad.getDuration()).toBe(5);
+  });
+
+  it('joins the Period of a list MPD at the join position', async () => {
+    periods = [[0, 4], [4, 10]];
+    await startBreak(/* joinTime= */ 15, 'startWithOffset="true"');
+
+    expect(manager.getPlayer().getConfiguration().playRangeEnd).toBe(10);
+    const started = eventsOfType(Utils.AD_STARTED);
+    expect(started.length).toBe(1);
+    const ad = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
+    expect(ad.getSequenceLength()).toBe(1);
+    const adVideo = getAdVideo();
+    fakeAdPlayback(adVideo);
+    playAdTo(adVideo, 5);
+    expect(ad.getDuration()).toBe(6);
+    expect(ad.getRemainingTime()).toBe(5);
+  });
+
+  it('prefers the slots of a list MPD to its Periods', async () => {
+    periods = [[0, 4], [4, 10]];
+    regions = [svtaRegion('creative', 0, 10)];
+    await startBreak();
+
+    const started = eventsOfType(Utils.AD_STARTED);
+    expect(started.length).toBe(1);
+    const ad = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
+    expect(ad.getAdId()).toBe('creative');
+    expect(ad.getSequenceLength()).toBe(1);
+  });
+
   describe('parsePresentationSignaling', () => {
     /** @type {!shaka.extern.AdInterstitial} */
     let interstitial;
@@ -455,6 +589,36 @@ describe('Interstitial presentation signaling', () => {
           }]);
 
       expect(ads).toEqual([]);
+    });
+
+    it('reads the Periods of a DASH presentation without slots', () => {
+      const ads = shaka.ads.AdManager.parsePresentationSignaling(
+          interstitial, [], createManifest([[0, 4], [4, 6], [6, 10]]));
+
+      expect(ads.map((ad) => [ad.start, ad.end]))
+          .toEqual([[0, 4], [4, 6], [6, 10]]);
+      for (const ad of ads) {
+        expect(ad.interstitial).not.toBe(interstitial);
+        expect(ad.interstitial.id).toBe('BREAK');
+      }
+    });
+
+    it('reads the Periods when SVTA is not read', () => {
+      const ads = shaka.ads.AdManager.parsePresentationSignaling(
+          interstitial, [svtaRegion('creative', 0, 10)],
+          createManifest([[0, 4], [4, 10]]), /* readSvta= */ false);
+
+      expect(ads.map((ad) => [ad.start, ad.end])).toEqual([[0, 4], [4, 10]]);
+      expect(ads[0].interstitial.adCreativeSignaling).toBeUndefined();
+    });
+
+    it('ignores single-Period and non-DASH presentations', () => {
+      expect(shaka.ads.AdManager.parsePresentationSignaling(
+          interstitial, [], createManifest([[0, 10]]))).toEqual([]);
+      const hls = createManifest([[0, 4], [4, 10]]);
+      hls.type = shaka.media.ManifestParser.HLS;
+      expect(shaka.ads.AdManager.parsePresentationSignaling(
+          interstitial, [], hls)).toEqual([]);
     });
   });
 });
