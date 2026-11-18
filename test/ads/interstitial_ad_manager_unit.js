@@ -3238,6 +3238,7 @@ describe('Interstitial Ad manager', () => {
         jasmine.objectContaining(eventValue2));
     const eventValue3 = {
       type: 'ad-started',
+      interstitial: jasmine.objectContaining({id: 'PREROLL', pre: true}),
     };
     expect(onEventSpy).toHaveBeenCalledWith(
         jasmine.objectContaining(eventValue3));
@@ -3566,13 +3567,18 @@ describe('Interstitial Ad manager', () => {
     video.dispatchEvent(new Event('timeupdate'));
     await shaka.test.Util.delay(0.25);
 
-    const ads = onEventSpy.calls.allArgs().map((args) => args[0])
-        .filter((event) => event.type == 'ad-started')
-        .map((event) => event['ad']);
+    const started = onEventSpy.calls.allArgs().map((args) => args[0])
+        .filter((event) => event.type == 'ad-started');
+    const ads = started.map((event) => event['ad']);
     const linear = ads.find((ad) => ad.getAdId() == 'MIDROLL-1');
     expect(linear).toBeTruthy();
     expect(linear.getSequenceLength()).toBe(2);
     expect(linear.getPositionInSequence()).toBe(1);
+    // Each event carries the interstitial that describes its ad.
+    const interstitials = started.map((event) => event['interstitial']);
+    expect(interstitials).toContain(jasmine.objectContaining({
+      id: 'MIDROLL-1',
+    }));
   });
 
   it('don\'t dispatch cue points changed if it is an overlay', async () => {
