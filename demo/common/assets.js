@@ -2735,6 +2735,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2755,6 +2756,7 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2773,6 +2775,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.EYEVINN)
       .addKeySystem(shakaAssets.KeySystem.CLEAR_KEY)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2790,6 +2793,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2811,6 +2815,7 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addKeySystem(shakaAssets.KeySystem.FAIRPLAY)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2829,6 +2834,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://moqlivemock.demo.osaas.io/moq',
       /* source= */ shakaAssets.Source.EYEVINN)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
@@ -2850,6 +2856,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .setExtraConfig({
         manifest: {
@@ -2865,6 +2872,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2881,6 +2889,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2897,6 +2906,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2913,6 +2923,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2929,6 +2940,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2945,6 +2957,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
@@ -2961,6 +2974,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://relay.moqtail.dev',
       /* source= */ shakaAssets.Source.MOQTAIL)
       .addFeature(shakaAssets.Feature.MSF)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .setExtraConfig({
