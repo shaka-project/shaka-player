@@ -75,7 +75,6 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   updateVideoRoles_() {
-    // Remove old shaka-resolutions
     shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
 
     /** @type {!Array<shaka.extern.VideoTrack>} */
@@ -150,12 +149,25 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
             () => this.onVideoRoleSelected_(role, language, label));
 
         const span = shaka.util.Dom.createHTMLElement('span');
-        const hasRealLanguage = (language && language != 'und') || label;
-        if (roleIsRedundant && hasRealLanguage) {
+        const hasLanguage = language && language != 'und';
+        if (hasLanguage &&
+            shaka.ui.VideoTypeSelection.SIGN_ROLES_.includes(role)) {
+          if (shaka.ui.LanguageUtils.isKnownSignLanguage(language)) {
+            span.textContent = this.getLanguageLabel_(language, null);
+          } else {
+            span.textContent = this.getRoleLabel_(role);
+            if (showLanguage) {
+              span.textContent +=
+                  ' (' + this.getLanguageLabel_(language, null) + ')';
+            }
+          }
+        } else if (!role && label) {
+          span.textContent = label;
+        } else if (roleIsRedundant && (hasLanguage || label)) {
           span.textContent = this.getLanguageLabel_(language, label);
         } else {
           span.textContent = this.getRoleLabel_(role);
-          if (showLanguage && hasRealLanguage) {
+          if (showLanguage && (hasLanguage || label)) {
             span.textContent +=
                 ' (' + this.getLanguageLabel_(language, label) + ')';
           }
@@ -182,15 +194,13 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
    */
   getRoleLabel_(role) {
     const LocIds = shaka.ui.Locales.Ids;
-    switch (role) {
-      case 'main':
-      case '':
-        return this.localization.resolve(LocIds.VIDEO_MAIN);
-      case 'sign':
-        return this.localization.resolve(LocIds.VIDEO_SIGN);
-      default:
-        return role;
+    if (shaka.ui.VideoTypeSelection.MAIN_ROLES_.includes(role)) {
+      return this.localization.resolve(LocIds.VIDEO_MAIN);
     }
+    if (shaka.ui.VideoTypeSelection.SIGN_ROLES_.includes(role)) {
+      return this.localization.resolve(LocIds.VIDEO_SIGN);
+    }
+    return role;
   }
 
   /**
@@ -233,6 +243,23 @@ shaka.ui.VideoTypeSelection = class extends shaka.ui.SettingsMenu {
     });
   }
 };
+
+/**
+ * @const {!Array<string>}
+ * @private
+ */
+shaka.ui.VideoTypeSelection.MAIN_ROLES_ = ['', 'main'];
+
+/**
+ * @const {!Array<string>}
+ * @private
+ */
+shaka.ui.VideoTypeSelection.SIGN_ROLES_ = [
+  // DASH
+  'sign',
+  // HLS
+  'public.accessibility.sign-language-interpretation',
+];
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}

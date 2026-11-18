@@ -564,25 +564,11 @@ shaka.ui.LanguageUtils = class {
           locales.push(locale);
         }
         const languageNames = new Intl.DisplayNames(locales,
-            {type: 'language', languageDisplay: 'standard'});
+            {type: 'language', languageDisplay: 'standard', fallback: 'none'});
         const languageName = languageNames.of(canonicalLocale);
-        const looksLikeUnresolvedCode = (name) => {
-          const firstChar = name.charAt(0);
-          return firstChar === firstChar.toLowerCase() &&
-              firstChar !== firstChar.toUpperCase();
-        };
-        // Only prefer it when it's reliable.  Intl.DisplayNames falls back
-        // to echoing the (possibly re-canonicalized) language identifier
-        // itself when it has no display name for it -- e.g. 'dse' (Dutch
-        // Sign Language) has no display name in some ICU versions, so 'dse'
-        // is returned as-is.  Such fallbacks are always still-raw BCP-47
-        // subtags, which start with a lowercase letter; real display names
-        // are title-cased (or start with an uncased character, for scripts
-        // without letter case).  Reject the lowercase-start case so we don't
-        // show a code like "Dse" as if it were a real name.
+        // With fallback disabled, a missing name is returned as undefined.
         if (languageName &&
-            languageName.toLowerCase() != canonicalLocale.toLowerCase() &&
-            !looksLikeUnresolvedCode(languageName)) {
+            languageName.toLowerCase() != canonicalLocale.toLowerCase()) {
           return languageName.charAt(0).toUpperCase() + languageName.slice(1);
         }
       } catch (e) {
@@ -603,6 +589,19 @@ shaka.ui.LanguageUtils = class {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Checks whether the locale is one of the sign languages known to the UI.
+   * @param {string} locale
+   * @return {boolean}
+   */
+  static isKnownSignLanguage(locale) {
+    const LanguageUtils = shaka.ui.LanguageUtils;
+    const tag = locale.toLowerCase();
+    const language = shaka.util.LanguageUtils.getBase(tag);
+    return LanguageUtils.SIGN_LANGUAGE_ALIASES_.has(tag) ||
+        LanguageUtils.SIGN_LANGUAGE_CODES_.has(language);
   }
 };
 
@@ -642,3 +641,10 @@ shaka.ui.LanguageUtils.SIGN_LANGUAGE_ALIASES_ = new Map([
   ['sgn-pt', 'psr'], ['sgn-se', 'swl'], ['sgn-us', 'ase'],
   ['sgn-za', 'sfs'],
 ]);
+
+/**
+ * @const {!Set<string>}
+ * @private
+ */
+shaka.ui.LanguageUtils.SIGN_LANGUAGE_CODES_ =
+    new Set(shaka.ui.LanguageUtils.SIGN_LANGUAGE_ALIASES_.values());
