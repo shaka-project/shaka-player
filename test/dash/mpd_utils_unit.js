@@ -209,6 +209,19 @@ describe('MpdUtils', () => {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
+    it('ignores segments starting at or after the Period end', () => {
+      const timePoints = [
+        createTimePoint(0, 10, 1),
+        createTimePoint(20, 10, 0),
+        createTimePoint(30, 10, 0),
+      ];
+      const result = [
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+      ];
+      checkTimePoints(timePoints, result, 1, 0, 20);
+    });
+
     it('handles gaps', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
