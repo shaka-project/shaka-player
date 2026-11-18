@@ -931,6 +931,40 @@ describe('DashParser Live', () => {
     expect(timeline.getSeekRangeEnd()).toBe(302);
   });
 
+  it('does not list a segment before its availabilityTimeOffset', async () => {
+    // Each 8 s segment is available 1 s after it starts: 8 - 7.
+    const manifestText = [
+      '<MPD type="dynamic" minimumUpdatePeriod="PT8S"',
+      '    timeShiftBufferDepth="PT1M"',
+      '    maxSegmentDuration="PT8S"',
+      '    availabilityStartTime="1970-01-01T00:00:00Z">',
+      '  <Period id="1" start="PT0S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '         <BaseURL>http://example.com</BaseURL>',
+      '         <SegmentTemplate availabilityTimeOffset="7" ',
+      '          availabilityTimeComplete="false" timescale="90000"',
+      '          startNumber="0" media="s$Number$.mp4" duration="720000" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('https://foo', manifestText);
+    playerInterface.isLowLatencyMode = () => true;
+
+    // The segment [96, 104] is available from 97; [104, 112] only from 105.
+    Date.now = () => 100500;
+    const manifest = await parser.start('https://foo', playerInterface);
+    const stream = manifest.variants[0].video;
+    await stream.createSegmentIndex();
+
+    const references = Array.from(
+        /** @type {!shaka.media.SegmentIndex} */ (stream.segmentIndex));
+    const last = references[references.length - 1];
+    expect(last.startTime).toBe(96);
+  });
+
   describe('availabilityWindowOverride', () => {
     it('overrides @timeShiftBufferDepth', async () => {
       const manifestText = [
