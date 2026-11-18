@@ -534,6 +534,46 @@ describe('CastSender', () => {
           update.player.seekRange);
     });
 
+    it('returns live getter methods with their result types', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const p = sender.cast();
+      fakeSessionConnection();
+      await p;
+
+      const values = {
+        getPlayheadTimeAsDate: new Date(1700000000123),
+        getPresentationStartTimeAsDate: new Date(1699999900000),
+        getSegmentAvailabilityDuration: 120,
+        getLiveLatency: 5,
+      };
+      fakeSessionMessage({
+        type: 'update',
+        update: {player: {isLive: true, ...values}},
+      });
+
+      for (const name of Object.keys(values)) {
+        const getter = sender.get('player', name);
+        expect(getter).toEqual(jasmine.any(Function));
+        const value = getter();
+        const expected = values[name];
+        if (expected instanceof Date) {
+          expect(value).toEqual(jasmine.any(Date));
+          expect(value.getTime()).toBe(expected.getTime());
+        } else {
+          expect(value).toBe(expected);
+        }
+      }
+
+      // An existing getter must read the latest update, including null dates.
+      const getter = sender.get('player', 'getPlayheadTimeAsDate');
+      fakeSessionMessage({
+        type: 'update',
+        update: {player: {getPlayheadTimeAsDate: null}},
+      });
+      expect(getter()).toBeNull();
+    });
+
     it('returns functions for video and player methods', () => {
       sender.init();
       expect(sender.get('video', 'play')).toEqual(jasmine.any(Function));
