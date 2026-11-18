@@ -23,6 +23,15 @@ describe('LanguageUtils (UI)', () => {
           .toBe('English');
     });
 
+    it('accepts localized names that begin with a lowercase letter', () => {
+      if (!window.Intl || !('DisplayNames' in Intl)) {
+        pending('Intl.DisplayNames is unavailable');
+      }
+      localization.changeLocale(['fr']);
+      expect(LanguageUtils.getLanguageName('en', localization, true))
+          .toBe('Anglais');
+    });
+
     it('does not show a raw re-canonicalized code as a language name', () => {
       // Regression test for
       // https://github.com/shaka-project/shaka-player/issues/10198
