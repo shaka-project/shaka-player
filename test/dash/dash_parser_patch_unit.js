@@ -282,6 +282,56 @@ describe('DashParser Patch', () => {
       fakeNetEngine.expectNoRequest('https://bar', manifestRequest, patchContext);
     });
 
+    it('keeps the manifest and patches again after a 425', async () => {
+      // A server answers 425 Too Early while it has no MPD newer than the
+      // requested publishTime.  That is not an error.
+      fakeNetEngine.setResponse('https://bar', () => {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.RECOVERABLE,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS,
+            'https://bar/', 425, 'same publishTime in both MPDs', {},
+            manifestRequest, 'https://bar/');
+      });
+
+      await parser.start('https://foo', playerInterface);
+      fakeNetEngine.request.calls.reset();
+
+      /** @type {!jasmine.Spy} */
+      const tickAfter = updateTickSpy();
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('https://bar/', manifestRequest, patchContext);
+      // The patch request is not retried; the next update asks again.
+      const request = fakeNetEngine.request.calls.argsFor(0)[1];
+      expect(request.retryParameters.maxAttempts).toBe(1);
+      expect(tickAfter).toHaveBeenCalled();
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('https://bar/', manifestRequest, patchContext);
+    });
+
+    it('falls back to a full MPD when the patch request fails', async () => {
+      fakeNetEngine.setResponse('https://bar', () => {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.RECOVERABLE,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS,
+            'https://bar/', 404, '', {}, manifestRequest, 'https://bar/');
+      });
+
+      await parser.start('https://foo', playerInterface);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+      fakeNetEngine.expectRequest('https://bar/', manifestRequest, patchContext);
+      fakeNetEngine.expectRequest(
+          'https://foo', manifestRequest, manifestContext);
+    });
+
     it('replaces PatchLocation with new URL', async () => {
       await parser.start('https://foo', playerInterface);
 
