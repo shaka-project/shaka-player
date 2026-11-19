@@ -1559,6 +1559,148 @@ describe('StreamingEngine', () => {
     }
   });
 
+  describe('stream data callback with prefetch', () => {
+    const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType;
+
+    /**
+     * @param {boolean} lowLatencyMode
+     * @return {!Promise}
+     */
+    async function playWithPrefetch(lowLatencyMode) {
+      setupVod();
+      manifest.isLowLatency = lowLatencyMode;
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.lowLatencyMode = lowLatencyMode;
+      config.segmentPrefetchLimit = 2;
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      mediaSourceEngine.appendBuffer.and.returnValue(Promise.resolve({
+        mediaTimestamp: null,
+      }));
+      createStreamingEngine(config);
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+
+      await runTest();
+    }
+
+    /**
+     * @param {shaka.net.NetworkingEngine.AdvancedRequestType} advancedType
+     * @return {!Array<shaka.extern.Request>}
+     */
+    function getRequests(advancedType) {
+      return netEngine.request.calls.allArgs()
+          .filter((args) => args[2] && args[2].type == advancedType)
+          .map((args) => args[1]);
+    }
+
+    it('is not passed outside low latency mode', async () => {
+      await playWithPrefetch(/* lowLatencyMode= */ false);
+
+      const requests = getRequests(AdvancedRequestType.MEDIA_SEGMENT)
+          .concat(getRequests(AdvancedRequestType.INIT_SEGMENT));
+      expect(requests.length).toBeGreaterThan(0);
+      for (const request of requests) {
+        expect(request.streamDataCallback).withContext(request.uris[0])
+            .toBeNull();
+      }
+    });
+
+    it('is passed only for MP4 media segments in low latency mode',
+        async () => {
+          if (!window.ReadableStream) {
+            pending('ReadableStream is not supported by the browser.');
+          }
+          await playWithPrefetch(/* lowLatencyMode= */ true);
+
+          const media = getRequests(AdvancedRequestType.MEDIA_SEGMENT);
+          expect(media.length).toBeGreaterThan(0);
+          for (const request of media) {
+            const isMP4 = request.contentType != ContentType.TEXT;
+            expect(!!request.streamDataCallback).withContext(request.uris[0])
+                .toBe(isMP4);
+          }
+          const init = getRequests(AdvancedRequestType.INIT_SEGMENT);
+          for (const request of init) {
+            expect(request.streamDataCallback).withContext(request.uris[0])
+                .toBeNull();
+          }
+        });
+  });
+
+  describe('isChunkedAppend', () => {
+    const StreamingEngine = shaka.media.StreamingEngine;
+
+    /** @type {shaka.extern.Stream} */
+    let videoStream;
+    /** @type {!shaka.media.SegmentReference} */
+    let reference;
+
+    beforeEach(() => {
+      videoStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+      reference = new shaka.media.SegmentReference(
+          0, 10, () => ['0.mp4'], 0, null, null, 0, 0, Infinity);
+    });
+
+    /**
+     * @param {string} type
+     * @param {boolean} isLowLatency
+     * @return {shaka.extern.Manifest}
+     */
+    function makeManifest(type, isLowLatency) {
+      const generated = shaka.test.ManifestGenerator.generate();
+      generated.type = type;
+      generated.isLowLatency = isLowLatency;
+      return generated;
+    }
+
+    it('is true for MP4 media segments of low latency DASH', () => {
+      if (!window.ReadableStream) {
+        pending('ReadableStream is not supported by the browser.');
+      }
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, videoStream, reference)).toBe(true);
+    });
+
+    it('is false without low latency', () => {
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, false, videoStream, reference)).toBe(false);
+      const notLowLatency =
+          makeManifest(shaka.media.ManifestParser.DASH, false);
+      expect(StreamingEngine.isChunkedAppend(
+          notLowLatency, true, videoStream, reference)).toBe(false);
+    });
+
+    it('is false for init segments and non-MP4 streams', () => {
+      const dash = makeManifest(shaka.media.ManifestParser.DASH, true);
+      const init = new shaka.media.InitSegmentReference(
+          () => ['init.mp4'], 0, null);
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, videoStream, init)).toBe(false);
+      const tsStream =
+          shaka.test.StreamingEngineUtil.createMockVideoStream(2, 'video/mp2t');
+      expect(StreamingEngine.isChunkedAppend(
+          dash, true, tsStream, reference)).toBe(false);
+    });
+
+    it('needs byterange optimization for HLS', () => {
+      if (!window.ReadableStream) {
+        pending('ReadableStream is not supported by the browser.');
+      }
+      const hls = makeManifest(shaka.media.ManifestParser.HLS, true);
+      expect(StreamingEngine.isChunkedAppend(
+          hls, true, videoStream, reference)).toBe(false);
+      reference.markAsByterangeOptimization();
+      expect(StreamingEngine.isChunkedAppend(
+          hls, true, videoStream, reference)).toBe(true);
+    });
+  });
+
   it('plays when a small gap is present at the beginning', async () => {
     const drift = 0.050;  // 50 ms
 

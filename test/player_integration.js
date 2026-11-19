@@ -61,6 +61,14 @@ describe('Player', () => {
     document.body.removeChild(video);
   });
 
+  it('exports live getters used by the Cast receiver', () => {
+    for (const name of
+      shaka.cast.CastUtils.PlayerGetterMethodsThatRequireLive.keys()) {
+      const getter = /** @type {!Object} */(player)[name];
+      expect(getter).withContext(name).toEqual(jasmine.any(Function));
+    }
+  });
+
   describe('seek range', () => {
     // Regression test for Issue #3675.
     it('has a reasonable seek range after going from live to VOD', async () => {
@@ -1306,6 +1314,48 @@ describe('Player', () => {
       const chapters = await player.getChaptersAsync('en');
       expect(chapters.length).toBe(3);
       expect(chapters[0].title).toBe('Chapter 1');
+    });
+
+    it('mirrors the chapters into a native chapters track', async () => {
+      const getNativeChaptersTracks = () => Array.from(video.textTracks)
+          .filter((t) => t.kind == 'chapters');
+      /** @return {!Promise<TextTrack>} */
+      const waitForNativeChaptersTrack = async () => {
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline) {
+          const track = getNativeChaptersTracks()[0];
+          if (track && track.cues && track.cues.length) {
+            return track;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          await shaka.test.Util.shortDelay();
+        }
+        return null;
+      };
+
+      await player.load('test:sintel_no_text_compiled');
+      await player.addChaptersTrack(
+          'base/test/test/assets/chapters.vtt', 'en');
+
+      const nativeTrack = await waitForNativeChaptersTrack();
+      expect(nativeTrack).not.toBe(null);
+      expect(nativeTrack.language).toBe('en');
+      const cues = Array.from(nativeTrack.cues || []).map((cue) => {
+        return [cue.startTime, cue.endTime,
+          /** @type {!VTTCue} */ (cue).text];
+      });
+      expect(cues).toEqual([
+        [0, 5, 'Chapter 1'],
+        [5, 10, 'Chapter 2'],
+        [10, 20, 'Chapter 3'],
+      ]);
+
+      // The mirrored track is not reported back as another chapters track.
+      expect(player.getChaptersTracks().length).toBe(1);
+      expect((await player.getChaptersAsync('en')).length).toBe(3);
+
+      await player.unload();
+      expect(getNativeChaptersTracks().length).toBe(0);
     });
   });  // describe('addChaptersTrack')
 

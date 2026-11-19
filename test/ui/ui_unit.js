@@ -2793,7 +2793,7 @@ describe('UI', () => {
             expect(new Set(labels).size).toBe(2);
           });
 
-      it('keeps the role label when languages differ across roles',
+      it('keeps the sign language role when tracks use spoken language tags',
           async () => {
             const manifest =
                 shaka.test.ManifestGenerator.generate((manifest) => {
@@ -2806,13 +2806,13 @@ describe('UI', () => {
                   manifest.addVariant(2, (variant) => {
                     variant.addVideo(3, (stream) => {
                       stream.roles = ['sign'];
-                      stream.language = 'sgn-US';
+                      stream.language = 'fr';
                     });
                   });
                   manifest.addVariant(4, (variant) => {
                     variant.addVideo(5, (stream) => {
                       stream.roles = ['sign'];
-                      stream.language = 'sgn-NL';
+                      stream.language = 'de';
                     });
                   });
                 });
@@ -2833,6 +2833,134 @@ describe('UI', () => {
                 .toBe(2);
             expect(new Set(labels).size).toBe(3);
           });
+
+      const signRoles = [
+        ['DASH', 'sign'],
+        ['HLS', 'public.accessibility.sign-language-interpretation'],
+      ];
+      for (const [format, signRole] of signRoles) {
+        it(`names and selects ${format} sign language tracks`, async () => {
+          const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(0, (variant) => {
+              variant.addVideo(1, (stream) => {
+                stream.label = 'Regular';
+              });
+            });
+            manifest.addVariant(2, (variant) => {
+              variant.addVideo(3, (stream) => {
+                stream.roles = [signRole];
+                stream.language = 'ase';
+              });
+            });
+            manifest.addVariant(4, (variant) => {
+              variant.addVideo(5, (stream) => {
+                stream.roles = [signRole];
+                stream.language = 'bfi';
+                stream.label = 'BSL';
+              });
+            });
+            manifest.addVariant(6, (variant) => {
+              variant.addVideo(7, (stream) => {
+                stream.roles = [signRole];
+                stream.label = 'Interpreter';
+              });
+            });
+            manifest.addVariant(8, (variant) => {
+              variant.bandwidth = 1000000;
+              variant.addVideo(9, (stream) => {
+                stream.roles = [signRole];
+                stream.language = 'ase';
+              });
+            });
+            manifest.addVariant(10, (variant) => {
+              variant.addVideo(11, (stream) => {
+                stream.roles = [signRole];
+                stream.language = 'qxy';
+              });
+            });
+          });
+          shaka.media.ManifestParser.registerParserByMime(
+              fakeMimeType,
+              () => new shaka.test.FakeManifestParser(manifest));
+
+          await player.load(
+              /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+          await updateVideoTypeMenu();
+
+          expect(getVideoTypeLabels().sort()).toEqual([
+            'American Sign Language', 'British Sign Language', 'Regular',
+            'Sign language (Interpreter)', 'Sign language (Unrecognized (qxy))',
+          ]);
+          const buttons = Array.from(
+              videoTypeMenu.querySelectorAll('button[role="menuitemradio"]'));
+          const british = buttons.find(
+              (button) => button.textContent == 'British Sign Language');
+          british.click();
+
+          expect(player.getConfiguration().preferredVideo[0]).toEqual(
+              jasmine.objectContaining({
+                role: signRole,
+                language: 'bfi',
+                label: 'BSL',
+              }));
+          await updateVideoTypeMenu();
+          const selected = '[aria-checked="true"]';
+          expect(videoTypeMenu.querySelector(selected).textContent)
+              .toBe('British Sign Language');
+
+          const interpreterLabel = 'Sign language (Interpreter)';
+          const interpreter = Array.from(
+              videoTypeMenu.querySelectorAll('button[role="menuitemradio"]'))
+              .find((button) => button.textContent == interpreterLabel);
+          interpreter.click();
+          await updateVideoTypeMenu();
+          expect(videoTypeMenu.querySelector(selected).textContent)
+              .toBe(interpreterLabel);
+
+          const regular = Array.from(
+              videoTypeMenu.querySelectorAll('button[role="menuitemradio"]'))
+              .find((button) => button.textContent == 'Regular');
+          regular.click();
+          await updateVideoTypeMenu();
+          expect(videoTypeMenu.querySelector(selected).textContent)
+              .toBe('Regular');
+        });
+
+        it(`keeps ${format} sign tracks without language tags distinct`,
+            async () => {
+              const manifest =
+                  shaka.test.ManifestGenerator.generate((manifest) => {
+                    manifest.addVariant(0, (variant) => {
+                      variant.addVideo(1, (stream) => {
+                        stream.roles = [signRole];
+                        stream.label = 'Interpreter A';
+                      });
+                    });
+                    manifest.addVariant(2, (variant) => {
+                      variant.addVideo(3, (stream) => {
+                        stream.roles = [signRole];
+                        stream.label = 'Interpreter B';
+                      });
+                    });
+                    manifest.addVariant(4, (variant) => {
+                      variant.addVideo(5, (stream) => {
+                        stream.roles = [signRole];
+                      });
+                    });
+                  });
+              shaka.media.ManifestParser.registerParserByMime(
+                  fakeMimeType,
+                  () => new shaka.test.FakeManifestParser(manifest));
+
+              await player.load(
+                  /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+              await updateVideoTypeMenu();
+
+              expect(getVideoTypeLabels().sort()).toEqual([
+                'Interpreter A', 'Interpreter B', 'Sign language',
+              ]);
+            });
+      }
 
       function getVideoTypeLabels() {
         return Array.from(videoTypeMenu.querySelectorAll(

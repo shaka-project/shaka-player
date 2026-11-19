@@ -4653,6 +4653,83 @@ describe('DashParser Manifest', () => {
           .toEqual(['https://foo/init.mp4?tok=&a=1']);
     });
 
+    // Annex I.4, Table I.5: the values for a player state that is not known.
+    it('replaces player state parameters with their unknown values',
+        async () => {
+          const state = (name) => `$urn:mpeg:dash:state:${name}$`;
+          // No @queryString and no @useMPDUrlQuery: the template's own content
+          // is still inserted (see the Alternative MPD example in G.29.1).
+          const template = [
+            `d=${state('execution-delta#42')}`,
+            `e=${state('expected-duration#42')}`,
+            `c=${state('execution-count#42')}`,
+            `p=${state('previous-state')}`,
+            `l=${state('lang#audio')}`,
+            `v=${state('video')}`,
+          ].join('&amp;');
+          const source = [
+            '<MPD minBufferTime="PT75S">',
+            '  <EssentialProperty schemeIdUri="urn:mpeg:dash:urlparam:2025"/>',
+            '  <Period id="1" duration="PT30S">',
+            `    <RequestParam queryTemplate="${template}"/>`,
+            '    <AdaptationSet mimeType="video/mp4">',
+            '      <Representation id="1" bandwidth="1">',
+            '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+            '            initialization="init.mp4">',
+            '          <SegmentTimeline>',
+            '            <S t="0" d="30" />',
+            '          </SegmentTimeline>',
+            '        </SegmentTemplate>',
+            '      </Representation>',
+            '    </AdaptationSet>',
+            '  </Period>',
+            '</MPD>',
+          ].join('\n');
+
+          fakeNetEngine.setResponseText('https://foo', source);
+          const manifest = await parser.start('https://foo', playerInterface);
+          const variant = manifest.variants[0];
+          await variant.video.createSegmentIndex();
+          goog.asserts.assert(variant.video.segmentIndex, 'Null segmentIndex!');
+
+          const ref = Array.from(variant.video.segmentIndex)[0];
+          expect(ref.getUris()).toEqual([
+            'https://foo/l-1.mp4?d=0&e=-1&c=-1&p=normal&l=und&v=',
+          ]);
+        });
+
+    it('replaces player state parameters in @queryString', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <EssentialProperty schemeIdUri="urn:mpeg:dash:urlparam:2025"/>',
+        '  <Period id="1" duration="PT30S">',
+        '    <RequestParam queryTemplate="$querypart$"',
+        '        queryString=' +
+        '"a=$urn:mpeg:dash:state:execution-count#1$&amp;b=$urn:x$"/>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="1" bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
+        '            initialization="init.mp4">',
+        '          <SegmentTimeline>',
+        '            <S t="0" d="30" />',
+        '          </SegmentTimeline>',
+        '        </SegmentTemplate>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('https://foo', source);
+      const manifest = await parser.start('https://foo', playerInterface);
+      const variant = manifest.variants[0];
+      await variant.video.createSegmentIndex();
+      goog.asserts.assert(variant.video.segmentIndex, 'Null segmentIndex!');
+
+      const ref = Array.from(variant.video.segmentIndex)[0];
+      expect(ref.getUris()).toEqual(['https://foo/l-1.mp4?a=-1&b=']);
+    });
+
     it('concatenates the MPD query with RequestParam @queryString',
         async () => {
           const source = [
@@ -4784,6 +4861,43 @@ describe('DashParser Manifest', () => {
           expect(region.urlParams()).toBe('tok=abc');
         });
 
+    it('gives the player state to altmpd RequestParam', async () => {
+      const source = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri=' +
+        '"urn:mpeg:dash:event:alternativeMPD:replace:2025">',
+        '      <RequestParam includeInRequests="altmpd"',
+        '          queryTemplate=' +
+        '"d=$urn:mpeg:dash:state:execution-delta#1$&amp;' +
+        'c=$urn:mpeg:dash:state:execution-count#1$"/>',
+        '      <Event id="1" presentationTime="0" duration="1"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
+      const region = onTimelineRegionAddedSpy.calls.mostRecent().args[0];
+      // Without a state resolver, the values of an unknown state.
+      expect(region.urlParams()).toBe('d=0&c=-1');
+      const resolver = jasmine.createSpy('resolver').and.callFake(
+          (name, key) => name == 'execution-delta' ? '2.5' : null);
+      expect(region.urlParams(shaka.test.Util.spyFunc(resolver)))
+          .toBe('d=2.5&c=-1');
+      expect(resolver).toHaveBeenCalledWith('execution-delta', '1');
+      expect(resolver).toHaveBeenCalledWith('execution-count', '1');
+    });
+
     it('uses callback RequestParam for callback events', async () => {
       const source = [
         '<MPD>',
@@ -4881,6 +4995,49 @@ describe('DashParser Manifest', () => {
           expect(steeringCall.args[1].uris[0])
               .toBe('https://steering.example.com/manifest?tok=abc');
         });
+
+    it('gives the player state to steering RequestParam', async () => {
+      const source = [
+        '<MPD type="static">',
+        '  <RequestParam includeInRequests="steering"',
+        '      queryTemplate="v=$urn:mpeg:dash:state:video$"/>',
+        '  <ContentSteering queryBeforeStart="true">',
+        '    https://steering.example.com/manifest',
+        '  </ContentSteering>',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate media="s$Number$.mp4"',
+        '            startNumber="1" duration="5"/>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      const contentSteering = JSON.stringify({
+        'VERSION': 1,
+        'TTL': 300,
+        'PATHWAY-PRIORITY': [],
+      });
+
+      fakeNetEngine.setResponseText('https://foo.example.com/mpd', source);
+      fakeNetEngine.setResponseText(
+          'https://steering.example.com/manifest?v=avc1.4d002a,420000',
+          contentSteering);
+      playerInterface.urlParamsStateResolver =
+          (name, key) => name == 'video' ? 'avc1.4d002a,420000' : null;
+
+      await parser.start('https://foo.example.com/mpd', playerInterface);
+
+      const steeringType =
+          shaka.net.NetworkingEngine.RequestType.CONTENT_STEERING;
+      const steeringCall = fakeNetEngine.request.calls.all().find(
+          (call) => call.args[0] === steeringType);
+      expect(steeringCall).toBeDefined();
+      expect(steeringCall.args[1].uris[0])
+          .toBe('https://steering.example.com/manifest?v=avc1.4d002a,420000');
+    });
   });
 
   it('mixing SegmentTemplate-SegmentTimeline with SegmentTemplate-numbering', async () => { // eslint-disable-line @stylistic/max-len

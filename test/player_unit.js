@@ -213,6 +213,20 @@ describe('Player', () => {
   });
 
   describe('destroy', () => {
+    it('stops and releases the AbrManager after saving a preload', async () => {
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      abrManager.stop.calls.reset();
+
+      const preloadManager = await player.unloadAndSavePreload();
+      // Otherwise it would stay enabled and keep switching this Player's
+      // streams, e.g. on a network change, even after destroy().
+      expect(abrManager.stop).toHaveBeenCalled();
+
+      await preloadManager.destroy();
+      await player.destroy();
+      expect(abrManager.release).toHaveBeenCalled();
+    });
+
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
       await player.load(fakeManifestUri, 0, fakeMimeType);
@@ -3031,6 +3045,82 @@ describe('Player', () => {
       expect(player.isPlayingVideoOnly()).toBe(false);
       expect(player.isPlayingAudioOnly()).toBe(false);
     });
+  });
+
+  // ISO/IEC 23009-1 Annex I.4.
+  describe('getUrlParamState', () => {
+    it('is not known before loading', () => {
+      expect(player.getUrlParamState('audio', '')).toBe(null);
+      expect(player.getUrlParamState('video', '')).toBe(null);
+      expect(player.getUrlParamState('lang', 'audio')).toBe(null);
+      expect(player.getUrlParamState('encryption', '')).toBe(null);
+    });
+
+    it('describes the variant being played', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+            stream.bandwidth = 128000;
+            stream.originalLanguage = 'tlh';
+          });
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d002a';
+            stream.bandwidth = 420000;
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      expect(player.getUrlParamState('audio', '')).toBe('mp4a.40.2,128000');
+      expect(player.getUrlParamState('video', '')).toBe('avc1.4d002a,420000');
+      expect(player.getUrlParamState('lang', 'audio')).toBe('tlh');
+      // No text is shown.
+      expect(player.getUrlParamState('lang', 'text')).toBe(null);
+      expect(player.getUrlParamState('encryption', '')).toBe('nenc');
+      // Not a state the player describes.
+      expect(player.getUrlParamState('execution-delta', '42')).toBe(null);
+    });
+
+    it('follows the base layer with the dependent one', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1.4d002a';
+            stream.bandwidth = 420000;
+          });
+        });
+      });
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const variant = manifest.variants[0];
+      const dependency = Object.assign({}, variant.video, {
+        codecs: 'lvc1',
+        bandwidth: 100000,
+      });
+      streamingEngine.getCurrentVariant.and.returnValue(
+          Object.assign({}, variant, {
+            video: Object.assign({}, variant.video, {
+              dependencyStream: dependency,
+            }),
+          }));
+
+      expect(player.getUrlParamState('video', ''))
+          .toBe('avc1.4d002a,420000,lvc1,100000');
+    });
+
+    it('does not know the scheme of encrypted content without DRM',
+        async () => {
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(1, (variant) => {
+              variant.addVideo(11, (stream) => {
+                stream.encrypted = true;
+              });
+            });
+          });
+          await player.load(fakeManifestUri, 0, fakeMimeType);
+
+          expect(player.getUrlParamState('encryption', '')).toBe(null);
+        });
   });
 
   describe('tracks', () => {
@@ -7087,6 +7177,21 @@ describe('Player', () => {
           expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(101);
         });
 
+    it('starts with audio when it joined after the video keyframe',
+        async () => {
+          // The audio subscription joined one Group later than the video.
+          for (const variant of manifest.variants) {
+            const audioIndex = /** @type {!shaka.media.SegmentIndex} */ (
+              variant.audio.segmentIndex);
+            const refs = Array.from(audioIndex)
+                .filter((ref) => ref && ref.startTime > 101.05);
+            variant.audio.segmentIndex = new shaka.media.SegmentIndex(refs);
+          }
+          await player.load(fakeManifestUri, null, fakeMimeType);
+          expect(shaka.test.Util.spyFunc(playhead.getTime)())
+              .toBeCloseTo(101.08, 6);
+        });
+
     it('preserves an explicit start time', async () => {
       await player.load(fakeManifestUri, 100.3, fakeMimeType);
       expect(shaka.test.Util.spyFunc(playhead.getTime)()).toBe(100.3);
@@ -7152,6 +7257,77 @@ describe('Player', () => {
       expect(variant.audio.segmentIndex.getIteratorForTime(0)).toBeNull();
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+  });
+
+  describe('config textDisplayFactory default', () => {
+    /** @type {function(!shaka.Player):shaka.extern.TextDisplayer} */
+    let textDisplayFactory;
+    /** @type {?} */
+    let fakeVideo;
+
+    /**
+     * @return {function(!shaka.Player):shaka.extern.TextDisplayer}
+     * @suppress {accessControls}
+     */
+    function getDefaultTextDisplayFactory() {
+      return player.defaultConfig_().textDisplayFactory;
+    }
+
+    beforeEach(() => {
+      textDisplayFactory = getDefaultTextDisplayFactory();
+      fakeVideo = video;
+      player.setVideoContainer(
+          /** @type {!HTMLElement} */ (document.createElement('div')));
+
+      const fakeDisplayer = {};
+      spyOn(shaka.text, 'UITextDisplayer').and.returnValue(fakeDisplayer);
+      spyOn(shaka.text, 'NativeTextDisplayer').and.returnValue(fakeDisplayer);
+    });
+
+    afterEach(() => {
+      player.setVideoContainer(null);
+    });
+
+    it('uses the UI displayer inline', () => {
+      fakeVideo.webkitPresentationMode = 'inline';
+      fakeVideo.webkitDisplayingFullscreen = false;
+      textDisplayFactory(player);
+      expect(shaka.text.UITextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.NativeTextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses the native displayer in fullscreen', () => {
+      fakeVideo.webkitPresentationMode = 'fullscreen';
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses the native displayer in picture-in-picture', () => {
+      fakeVideo.webkitPresentationMode = 'picture-in-picture';
+      fakeVideo.webkitDisplayingFullscreen = false;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
+    });
+
+    // When WebKit fires webkitpresentationmodechanged on the way back to
+    // inline, webkitDisplayingFullscreen is still true.
+    it('uses the UI displayer when leaving fullscreen', () => {
+      fakeVideo.webkitPresentationMode = 'inline';
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.UITextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.NativeTextDisplayer).not.toHaveBeenCalled();
+    });
+
+    it('uses webkitDisplayingFullscreen without presentation modes', () => {
+      fakeVideo.webkitDisplayingFullscreen = true;
+      textDisplayFactory(player);
+      expect(shaka.text.NativeTextDisplayer).toHaveBeenCalled();
+      expect(shaka.text.UITextDisplayer).not.toHaveBeenCalled();
     });
   });
 

@@ -143,6 +143,7 @@ shaka.extern.ManifestParser = class {
  *   addFont: function(string, string),
  *   getStreamingRetryParameters: function():!shaka.extern.RetryParameters,
  *   onSegmentReceived: function(number, number),
+ *   urlParamsStateResolver: (shaka.extern.UrlParamsStateResolver|undefined),
  * }}
  *
  * @description
@@ -193,6 +194,11 @@ shaka.extern.ManifestParser = class {
  * @property {function(number, number)} onSegmentReceived
  *   Called by manifest parser, to provide to the ABR estimator gets a bandwidth
  *   sample when the manifest parser doesn't use the Network Engine.
+ * @property {(shaka.extern.UrlParamsStateResolver|
+ *            undefined)} urlParamsStateResolver
+ *   Optional. Gives the player state parameters of the requests built from
+ *   RequestParam elements (ISO/IEC 23009-1 Annex I.4) that the player knows:
+ *   audio, video, lang and encryption.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

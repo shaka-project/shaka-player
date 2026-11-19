@@ -267,6 +267,26 @@ describe('HlsParser live', () => {
         await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
+      it('pushes the grown duration to the player', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const updateDuration = spyOn(playerInterface, 'updateDuration');
+
+        const manifest = await testInitialManifest(master, media, [ref1]);
+        expect(manifest.presentationTimeline.getDuration()).toBe(2);
+        updateDuration.calls.reset();
+
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        expect(manifest.presentationTimeline.getDuration()).toBe(4);
+        expect(updateDuration).toHaveBeenCalledTimes(1);
+
+        // Nothing new in the playlist: the duration is not pushed again.
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        expect(updateDuration).toHaveBeenCalledTimes(1);
+      });
+
       it('updates all variants', async () => {
         const secondVariant = [
           '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
@@ -824,8 +844,7 @@ describe('HlsParser live', () => {
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
     });
 
-    it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line @stylistic/max-len
-      playerInterface.isLowLatencyMode = () => true;
+    describe('with partial and preload hinted segments and BYTERANGE', () => {
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -850,8 +869,32 @@ describe('HlsParser live', () => {
         'BYTERANGE-LENGTH=210\n',
       ].join('');
 
-      // If ReadableStream is defined we can apply some optimizations
-      if (window.ReadableStream) {
+      beforeEach(() => {
+        playerInterface.isLowLatencyMode = () => true;
+      });
+
+      afterEach(() => {
+        // Put back the global test scheme (test/test/util/test_scheme.js) that
+        // the plugin registered by these tests replaced; other suites load
+        // test: URIs through it.
+        shaka.net.NetworkingEngine.unregisterScheme('test');
+        shaka.net.NetworkingEngine.registerScheme(
+            'test', shaka.test.TestScheme.plugin);
+      });
+
+      /** @param {boolean} streamingSupport */
+      function registerTestScheme(streamingSupport) {
+        // The fake networking engine handles the requests; this only tells
+        // the parser what the plugin of the segments supports.
+        shaka.net.NetworkingEngine.registerScheme('test',
+            () => shaka.util.AbortableOperation.aborted(),
+            shaka.net.NetworkingEngine.PluginPriority.APPLICATION,
+            /* progressSupport= */ true, streamingSupport);
+      }
+
+      it('joins the parts with a streaming plugin', async () => {
+        registerTestScheme(/* streamingSupport= */ true);
+
         const ref = makeReference(
             'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
@@ -868,14 +911,28 @@ describe('HlsParser live', () => {
 
         await testInitialManifest(master, mediaWithPartialSegments,
             [ref, ref2]);
-      } else {
+      });
+
+      it('keeps the parts with a plugin that does not stream', async () => {
+        // Joining the parts would append nothing of a segment until all of it
+        // is downloaded, which is later than with the parts.
+        registerTestScheme(/* streamingSupport= */ false);
+        await testInitialManifest(master, mediaWithPartialSegments,
+            makePartialRefs());
+      });
+
+      /** @return {!Array<!shaka.media.SegmentReference>} */
+      function makePartialRefs() {
         const partialRef = makeReference(
             'test:/ref1.mp4', 0, 2, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 199);
+        partialRef.partial = true;
 
         const partialRef2 = makeReference(
             'test:/ref1.mp4', 2, 4, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 200, /* endByte= */ 429);
+        partialRef2.partial = true;
+        partialRef2.lastPartial = true;
 
         const ref = makeReference(
             'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
@@ -886,10 +943,12 @@ describe('HlsParser live', () => {
         const partialRef3 = makeReference(
             'test:/ref2.mp4', 4, 6, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+        partialRef3.partial = true;
 
         const preloadRef = makeReference(
             'test:/ref2.mp4', 6, 7.5, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
+        preloadRef.partial = true;
         preloadRef.markAsPreload();
         preloadRef.markAsNonIndependent();
 
@@ -898,9 +957,7 @@ describe('HlsParser live', () => {
             '', 4, 7.5, /* syncTime= */ null,
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 419,
             /* timestampOffset= */ 0, [partialRef3, preloadRef]);
-
-        await testInitialManifest(master, mediaWithPartialSegments,
-            [ref, ref2]);
+        return [ref, ref2];
       }
     });
 
@@ -970,6 +1027,24 @@ describe('HlsParser live', () => {
 
         const manifest = await testInitialManifest(master, media, [ref1]);
         await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+      });
+
+      it('does not push the duration to the player when it ends', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const updateDuration = spyOn(playerInterface, 'updateDuration');
+
+        const manifest = await testInitialManifest(master, media, [ref1]);
+        await testUpdate(manifest, mediaWithAdditionalSegment, [ref1, ref2]);
+        // The MediaSource duration of a live stream stays infinite, also
+        // after the transition to VOD.
+        await testUpdate(
+            manifest, mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n',
+            [ref1, ref2]);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+        expect(updateDuration).not.toHaveBeenCalled();
       });
 
       it('evicts removed segments', async () => {
