@@ -66,6 +66,7 @@
 +../../lib/media/quality_observer.js
 +../../lib/media/region_observer.js
 +../../lib/media/region_timeline.js
++../../lib/media/segment_byte_tracker.js
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
 +../../lib/media/streaming_engine.js
