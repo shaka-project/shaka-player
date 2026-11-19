@@ -15,6 +15,8 @@ describe('VR', () => {
   let gl;
   /** @type {?} */
   let player;
+  /** @type {boolean} */
+  let contextLost;
 
   /**
    * @return {?}
@@ -33,6 +35,7 @@ describe('VR', () => {
       getProgramParameter: () => true,
       getAttribLocation: () => 0,
       getUniformLocation: (program, name) => name,
+      isContextLost: () => contextLost,
     };
     const spies = new Map();
     return new Proxy({}, {
@@ -77,6 +80,7 @@ describe('VR', () => {
   }
 
   beforeEach(() => {
+    contextLost = false;
     video = shaka.test.UiUtils.createVideoElement();
     // Pretend that a frame is available, so that the view is rendered.
     Object.defineProperty(video, 'readyState', {value: 4});
@@ -170,6 +174,42 @@ describe('VR', () => {
 
       vrWebgl.setFieldOfView(50);
       expect(vrWebgl.getFieldOfView()).toBe(50);
+    });
+
+    it('deletes its WebGL resources on release', () => {
+      createVRWebgl('equirectangular');
+      vrWebgl.release();
+      vrWebgl = null;
+
+      expect(gl.deleteProgram).toHaveBeenCalledTimes(1);
+      expect(gl.deleteShader).toHaveBeenCalledTimes(2);
+      expect(gl.deleteBuffer).toHaveBeenCalledTimes(3);
+      expect(gl.deleteTexture).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not draw while the context is lost', () => {
+      createVRWebgl('equirectangular');
+      gl.drawElements.calls.reset();
+
+      contextLost = true;
+      vrWebgl.rotateViewGlobal(0.1, 0, 0);
+      expect(gl.drawElements).not.toHaveBeenCalled();
+    });
+
+    it('recreates its resources and keeps the view on restore', () => {
+      createVRWebgl('equirectangular');
+      vrWebgl.setFieldOfView(42);
+      vrWebgl.toggleStereoscopicMode();
+      expect(gl.createProgram).toHaveBeenCalledTimes(1);
+
+      gl.drawElements.calls.reset();
+      vrWebgl.restoreContext();
+
+      expect(gl.createProgram).toHaveBeenCalledTimes(2);
+      expect(gl.createTexture).toHaveBeenCalledTimes(2);
+      expect(gl.drawElements).toHaveBeenCalled();
+      expect(vrWebgl.getFieldOfView()).toBe(42);
+      expect(vrWebgl.isStereoscopicModeEnabled()).toBe(true);
     });
 
     it('stops a fast drag at the pitch boundary', () => {

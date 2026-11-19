@@ -110,6 +110,8 @@ unmutes
 valuetext
 variantchanged
 vrstatuschanged
+webglcontextlost
+webglcontextrestored
 webkitcurrentplaybacktargetiswirelesschanged
 webkitkeyadded
 webkitkeyerror
