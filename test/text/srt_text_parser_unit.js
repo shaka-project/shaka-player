@@ -91,6 +91,27 @@ describe('SrtTextParser', () => {
         });
   });
 
+  it('supports a dot as the milliseconds separator', () => {
+    verifyHelper(
+        [
+          {startTime: 20.5, endTime: 40.25, payload: 'Test'},
+          {startTime: 41, endTime: 50, payload: 'Test2'},
+        ],
+        '1\n' +
+        '00:00:20.500 --> 00:00:40.250\n' +
+        'Test\n\n' +
+        '2\n' +
+        '00:41.000 --> 00:50.000\n' +
+        'Test2',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   it('supports payload stylized', () => {
     verifyHelper(
         [
