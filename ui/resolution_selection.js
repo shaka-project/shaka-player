@@ -139,7 +139,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     }
 
     /** @type {string} */
-    const mark = this.getQualityMark_(track.width, track.height);
+    const mark = this.getQualityMark_(
+        track.width, track.height, track.pixelAspectRatio);
     this.qualityMark.textContent = mark;
     this.qualityMark.style.display = mark !== '' ? '' : 'none';
     if (this.overflowQualityMark) {
@@ -149,25 +150,45 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /**
+   * Returns a nominal height for quality labels using a 16:9 reference frame.
+   * For example, a 1920x800 video keeps its 1080p label after the black
+   * bars have been cropped from a 1920x1080 frame.
+   *
    * @param {?number} width
    * @param {?number} height
+   * @param {?string} pixelAspectRatio
+   * @return {number}
+   * @private
+   */
+  getResolutionHeight_(width, height, pixelAspectRatio) {
+    if (!width || !height) {
+      return 0;
+    }
+    let hasSquarePixels = true;
+    if (pixelAspectRatio) {
+      const parts = pixelAspectRatio.split(':').map(Number);
+      if (parts.length === 2) {
+        hasSquarePixels = parts[0] === parts[1];
+      } else if (parts.length === 1) {
+        hasSquarePixels = parts[0] === 1;
+      }
+    }
+    if (height > width && hasSquarePixels) {
+      [width, height] = [height, width];
+    }
+    return Math.max(height, Math.round(width * 9 / 16));
+  }
+
+  /**
+   * @param {?number} width
+   * @param {?number} height
+   * @param {?string=} pixelAspectRatio
    * @return {string}
    * @private
    */
-  getQualityMark_(width, height) {
-    if (!width || !height) {
-      return '';
-    }
-    let trackHeight = height;
-    let trackWidth = width;
-    if (trackHeight > trackWidth) {
-      // Vertical video.
-      [trackWidth, trackHeight] = [trackHeight, trackWidth];
-    }
-    const aspectRatio = trackWidth / trackHeight;
-    if (aspectRatio > (16 / 9)) {
-      trackHeight = Math.round(trackWidth * 9 / 16);
-    }
+  getQualityMark_(width, height, pixelAspectRatio = null) {
+    const trackHeight = this.getResolutionHeight_(
+        width, height, pixelAspectRatio);
     const qualityMarks = this.controls.getConfig().qualityMarks;
     if (trackHeight >= 8640) {
       return trackHeight + 'p';
@@ -412,7 +433,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       span.textContent = label;
       button.appendChild(span);
 
-      const mark = this.getQualityMark_(track.width, track.height);
+      const mark = this.getQualityMark_(
+          track.width, track.height, track.pixelAspectRatio);
       if (mark !== '') {
         const markEl = shaka.util.Dom.createHTMLElement('sup');
         markEl.classList.add('shaka-quality-mark');
@@ -439,29 +461,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   getResolutionLabel_(track, tracks) {
-    let trackHeight = track.height || 0;
-    let trackWidth = track.width || 0;
-    let hasSquarePixels = true;
-
-    if (track.pixelAspectRatio) {
-      // Convert pixel aspect ratio string into two integers '2:1' -> 2 and 1
-      const parts = track.pixelAspectRatio
-          .split(':').map((value) => Number(value));
-      if (parts.length === 2) {
-        hasSquarePixels = parts[0] === parts[1];
-      } else if (parts.length === 1) {
-        hasSquarePixels = parts[0] === 1;
-      }
-    }
-    if (trackHeight > trackWidth && hasSquarePixels) {
-      // Vertical video.
-      [trackWidth, trackHeight] = [trackHeight, trackWidth];
-    }
-    let height = trackHeight;
-    const aspectRatio = trackWidth / trackHeight;
-    if (aspectRatio > (16 / 9)) {
-      height = Math.round(trackWidth * 9 / 16);
-    }
+    const height = this.getResolutionHeight_(
+        track.width, track.height, track.pixelAspectRatio);
     let text = height + 'p';
     const frameRates = new Set();
     for (const item of tracks) {
