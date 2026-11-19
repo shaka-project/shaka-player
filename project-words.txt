@@ -87,6 +87,7 @@ spacebar
 stalldetected
 startstreaming
 statechanged
+stereoscopicmodechanged
 submenuclose
 submenuopen
 textchanged
