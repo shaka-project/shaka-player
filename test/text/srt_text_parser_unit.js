@@ -70,6 +70,33 @@ describe('SrtTextParser', () => {
         });
   });
 
+  it('supports whitespace on the lines between cues', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+          {startTime: 50, endTime: 60, payload: 'Test3'},
+        ],
+        '1\n' +
+        '00:00:20,000 --> 00:00:40,000\n' +
+        'Test\n' +
+        ' \n' +
+        '2\n' +
+        '00:00:40,000 --> 00:00:50,000\n' +
+        'Test2\n' +
+        '\t\n' +
+        '3\n' +
+        '00:00:50,000 --> 00:01:00,000\n' +
+        'Test3',
+        {
+          periodStart: 0,
+          segmentStart: 0,
+          segmentEnd: 0,
+          vttOffset: 0,
+          isMpegTs: false,
+        });
+  });
+
   it('supports multiple cues', () => {
     verifyHelper(
         [
