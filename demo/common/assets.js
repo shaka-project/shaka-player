@@ -2046,6 +2046,18 @@ shakaAssets.testAssets = [
         displayInVrMode: true,
         defaultVrProjectionMode: 'equirectangular',
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Skydive (MP4, VR fisheye)',
+      /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/fisheye.png',
+      /* manifestUri= */ 'https://videos.electroteque.org/360/fisheye/fisheye.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'fisheye',
+      }),
   // }}}
 
   // BBC assets {{{
