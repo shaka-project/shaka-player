@@ -295,9 +295,15 @@ describe('Interstitial presentation signaling', () => {
     await startBreak();
 
     const preloaded = eventsOfType(Utils.AD_INTERSTITIAL_PRELOADED)
-        .map((event) =>
-          event['interstitial'].adCreativeSignaling.identifiers[0].value);
-    expect(preloaded).toEqual(['first', 'second']);
+        .map((event) => event['interstitial']);
+    expect(preloaded.map((ad) => ad.adCreativeSignaling.identifiers[0].value))
+        .toEqual(['first', 'second']);
+    // Like the assets of an HLS asset list, each ad has an id of its own and
+    // is grouped under the interstitial.
+    expect(preloaded.map((ad) => [ad.id, ad.groupId])).toEqual([
+      ['BREAK_shaka_asset_0', 'BREAK'],
+      ['BREAK_shaka_asset_1', 'BREAK'],
+    ]);
   });
 
   it('presents each slot of a list MPD as an ad of its own', async () => {
@@ -329,6 +335,8 @@ describe('Interstitial presentation signaling', () => {
     expect(started.map((event) =>
       event['interstitial'].adCreativeSignaling.identifiers[0].value))
         .toEqual(['first', 'second']);
+    expect(started.map((event) => event['interstitial'].id))
+        .toEqual(['BREAK_shaka_asset_0', 'BREAK_shaka_asset_1']);
     expect(second.getDuration()).toBe(5);
     expect(second.getRemainingTime()).toBeCloseTo(4.8, 5);
     expect(adEventTypes()).toEqual([
@@ -355,8 +363,9 @@ describe('Interstitial presentation signaling', () => {
     const started = eventsOfType(Utils.AD_STARTED);
     expect(started.length).toBe(1);
     const gap = /** @type {!shaka.ads.InterstitialAd} */ (started[0]['ad']);
-    expect(gap.getAdId()).toBe('BREAK');
+    expect(gap.getAdId()).toBe('BREAK_shaka_asset_0');
     expect(gap.getSequenceLength()).toBe(2);
+    expect(started[0]['interstitial'].groupId).toBe('BREAK');
   });
 
   it('presents the interstitial as such without slots', async () => {
