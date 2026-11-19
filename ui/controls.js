@@ -2786,9 +2786,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Get the angle of the north.
+   * Get the angle of the north, which is the direction of the initial view.
    *
-   * @return {?number}
+   * @return {?number} In degrees, from 0 to 360, increasing as the view turns
+   *   to the right.  Null if not playing VR content.
    * @export
    */
   getVRNorth() {
@@ -2814,7 +2815,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * is increased, a larger part of the video will be seen, but with less
    * detail.
    *
-   * @param {number} fieldOfView In degrees
+   * @param {number} fieldOfView In degrees, from 20 to 100.  Values out of
+   *   this range are clamped.
    * @export
    */
   setVRFieldOfView(fieldOfView) {

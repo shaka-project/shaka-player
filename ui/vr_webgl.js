@@ -55,6 +55,12 @@ shaka.ui.VRWebgl = class {
     /** @private {!Float32Array} */
     this.currentQuaternion_ = shaka.ui.MatrixQuaternion.create();
 
+    /**
+     * The direction of the initial view, used as the north.
+     * @private {!Array<number>}
+     */
+    this.initialForward_ = [0, 0, -1];
+
     /** @private {?WebGLProgram} */
     this.shaderProgram_ = null;
 
@@ -78,6 +84,13 @@ shaka.ui.VRWebgl = class {
 
     /** @private {!Float32Array} */
     this.identityMatrix_ = shaka.ui.Matrix4x4.create();
+
+    /**
+     * Reused by rotateViewGlobal, which runs for every pointer move and
+     * device orientation event.
+     * @private {!Float32Array}
+     */
+    this.rotationMatrix_ = shaka.ui.Matrix4x4.create();
 
     /** @private {?Float32Array} */
     this.diff_ = null;
@@ -181,45 +194,6 @@ shaka.ui.VRWebgl = class {
   }
 
   /**
-   * @param {!Float32Array} quat
-   * @return {{pitch: number, yaw: number, roll: number}} as radians
-   * @private
-   */
-  toEulerAngles_(quat) {
-    const angles = {
-      pitch: 0,
-      yaw: 0,
-      roll: 0,
-    };
-    const x = quat[0];
-    const y = quat[1];
-    const z = quat[2];
-    const w = quat[3];
-    const x2 = x * x;
-    const y2 = y * y;
-    const z2 = z * z;
-    const w2 = w * w;
-    const unit = x2 + y2 + z2 + w2;
-    const test = x * w - y * z;
-    if (test > 0.499995 * unit) {
-      // singularity at the north pole
-      angles.pitch = Math.PI / 2;
-      angles.yaw = 2 * Math.atan2(y, x);
-      angles.roll = 0;
-    } else if (test < -0.499995 * unit) {
-      // singularity at the south pole
-      angles.pitch = -Math.PI / 2;
-      angles.yaw = 2 * Math.atan2(y, x);
-      angles.roll = 0;
-    } else {
-      angles.pitch = Math.asin(2 * (x * z - w * y));
-      angles.yaw = Math.atan2(2 * (x * w + y * z), 1 - 2 * (z2 + w2));
-      angles.roll = Math.atan2(2 * (x * y + z * w), 1 - 2 * (y2 + z2));
-    }
-    return angles;
-  }
-
-  /**
    * Toggle stereoscopic mode
    */
   toggleStereoscopicMode() {
@@ -311,8 +285,13 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   initMatrices_() {
-    shaka.ui.Matrix4x4.lookAt(
-        this.viewMatrix_, [0, 0, 0], [1, 0, 0], [0, 1, 0]);
+    // The cube is drawn without a look-at transform, so its initial view is
+    // the identity.
+    if (this.projectionMode_ != 'cubemap') {
+      shaka.ui.Matrix4x4.lookAt(
+          this.viewMatrix_, [0, 0, 0], [1, 0, 0], [0, 1, 0]);
+    }
+    this.initialForward_ = shaka.ui.VRWebgl.getForward_(this.viewMatrix_);
     shaka.ui.Matrix4x4.getRotation(
         this.originalQuaternion_, this.viewMatrix_);
     shaka.ui.Matrix4x4.scale(
@@ -564,7 +543,7 @@ shaka.ui.VRWebgl = class {
       this.gl_.uniformMatrix4fv(
           this.projectionMatrixUniform_, false, this.projectionMatrix_);
       this.gl_.uniformMatrix4fv(
-          this.modelViewMatrixUniform_, false, this.viewProjectionMatrix_);
+          this.modelViewMatrixUniform_, false, this.viewMatrix_);
     } else {
       this.gl_.uniformMatrix4fv(
           this.vpMatrixUniform_, false, this.viewProjectionMatrix_);
@@ -677,42 +656,37 @@ shaka.ui.VRWebgl = class {
       pitchBoundary /= 2;
     }
 
-    let matrix;
-    if (this.projectionMode_ == 'cubemap') {
-      matrix = this.viewProjectionMatrix_;
-    } else {
-      matrix = this.viewMatrix_;
-    }
+    const matrix = this.viewMatrix_;
+    const rotation = this.rotationMatrix_;
+    const identity = shaka.ui.VRWebgl.IDENTITY_MATRIX_;
 
-    // Variable to limit the movement
-    this.positionX_ += yaw;
-    this.positionY_ += pitch;
+    // Limit the movement.  A movement that goes past a boundary stops at
+    // the boundary, instead of being dropped, so fast drags still reach it.
+    const clamp = (value, boundary) =>
+      Math.min(Math.max(value, -boundary), boundary);
+    const positionX = clamp(this.positionX_ + yaw, yawBoundary);
+    const positionY = clamp(this.positionY_ + pitch, pitchBoundary);
+    yaw = positionX - this.positionX_;
+    pitch = positionY - this.positionY_;
+    this.positionX_ = positionX;
+    this.positionY_ = positionY;
 
-    if (this.positionX_ < yawBoundary &&
-      this.positionX_ > -yawBoundary) {
+    if (yaw) {
       // Rotate global axis
       shaka.ui.Matrix4x4.rotateY(matrix, matrix, yaw);
-    } else {
-      this.positionX_ -= yaw;
     }
 
-    if (this.positionY_ < pitchBoundary &&
-      this.positionY_ > -pitchBoundary) {
-      const out = shaka.ui.Matrix4x4.create();
-      shaka.ui.Matrix4x4.rotateX(out, shaka.ui.Matrix4x4.create(), -1 * pitch);
+    if (pitch) {
+      shaka.ui.Matrix4x4.rotateX(rotation, identity, -1 * pitch);
       // Rotate local axis
-      shaka.ui.Matrix4x4.multiply(matrix, out, matrix);
-    } else {
-      // Doing this we restart the value to the previous position,
-      // to not maintain a value over 90º or under -90º.
-      this.positionY_ -= pitch;
+      shaka.ui.Matrix4x4.multiply(matrix, rotation, matrix);
     }
 
-    const out2 = shaka.ui.Matrix4x4.create();
-    shaka.ui.Matrix4x4.rotateZ(out2, shaka.ui.Matrix4x4.create(), roll);
-
-    // Rotate local axis
-    shaka.ui.Matrix4x4.multiply(matrix, out2, matrix);
+    if (roll) {
+      shaka.ui.Matrix4x4.rotateZ(rotation, identity, roll);
+      // Rotate local axis
+      shaka.ui.Matrix4x4.multiply(matrix, rotation, matrix);
+    }
 
     this.renderGL_(false);
   }
@@ -721,18 +695,7 @@ shaka.ui.VRWebgl = class {
    * @param {number} amount
    */
   zoom(amount) {
-    const zoomMin = 20;
-    const zoomMax = 100;
-    amount /= 50;
-    if (this.fieldOfView_ >= zoomMin && this.fieldOfView_ <= zoomMax) {
-      this.fieldOfView_ += amount;
-    }
-    if (this.fieldOfView_ < zoomMin) {
-      this.fieldOfView_ = zoomMin;
-    } else if (this.fieldOfView_ > zoomMax) {
-      this.fieldOfView_ = zoomMax;
-    }
-    this.renderGL_(false);
+    this.setFieldOfView(this.fieldOfView_ + amount / 50);
   }
 
   /**
@@ -746,7 +709,10 @@ shaka.ui.VRWebgl = class {
    * @param {number} fieldOfView
    */
   setFieldOfView(fieldOfView) {
-    this.fieldOfView_ = fieldOfView;
+    // A field of view of 0 would make the projection degenerate.
+    this.fieldOfView_ = Math.min(Math.max(fieldOfView,
+        shaka.ui.VRWebgl.MIN_FIELD_OF_VIEW),
+    shaka.ui.VRWebgl.MAX_FIELD_OF_VIEW);
     this.renderGL_(false);
   }
 
@@ -754,19 +720,26 @@ shaka.ui.VRWebgl = class {
    * @return {number}
    */
   getNorth() {
-    shaka.ui.Matrix4x4.getRotation(this.currentQuaternion_, this.viewMatrix_);
+    const initial = this.initialForward_;
+    const current = shaka.ui.VRWebgl.getForward_(this.viewMatrix_);
+    // The angle between the horizontal components of both directions, around
+    // the vertical axis.  It is positive when the view turns to the right.
+    const cross = initial[2] * current[0] - initial[0] * current[2];
+    const dot = initial[0] * current[0] + initial[2] * current[2];
+    const degrees = Math.atan2(-cross, dot) * 180 / Math.PI;
+    return degrees < 0 ? degrees + 360 : degrees;
+  }
 
-    const angles = this.toEulerAngles_(this.currentQuaternion_);
-
-    const normalizedDir = {
-      x: Math.cos(angles.yaw) * Math.cos(angles.pitch),
-      y: Math.sin(angles.yaw) * Math.cos(angles.pitch),
-      z: Math.sin(angles.pitch),
-    };
-
-    const northYaw = Math.acos(normalizedDir.x);
-
-    return ((northYaw * 180) / Math.PI);
+  /**
+   * @param {!Float32Array} viewMatrix
+   * @return {!Array<number>} The direction the view looks at, in world
+   *   coordinates.
+   * @private
+   */
+  static getForward_(viewMatrix) {
+    // The camera looks at -Z in its own space.  The view matrix is a rotation,
+    // so its inverse is its transpose.
+    return [-viewMatrix[2], -viewMatrix[6], -viewMatrix[10]];
   }
 
   /**
@@ -778,6 +751,17 @@ shaka.ui.VRWebgl = class {
     if (firstTime) {
       shaka.ui.Matrix4x4.getRotation(
           this.currentQuaternion_, this.viewMatrix_);
+      const current = this.currentQuaternion_;
+      const original = this.originalQuaternion_;
+      const dot = current[0] * original[0] + current[1] * original[1] +
+          current[2] * original[2] + current[3] * original[3];
+      if (dot < 0) {
+        // q and -q are the same rotation.  Interpolate from the one closer
+        // to the original, so the view takes the shortest way back.
+        for (let i = 0; i < 4; i++) {
+          current[i] = -current[i];
+        }
+      }
       this.cont_ = 0;
       this.diff_ = shaka.ui.MatrixQuaternion.create();
       this.diff_[0] =
@@ -796,14 +780,10 @@ shaka.ui.VRWebgl = class {
     this.currentQuaternion_[3] -= this.diff_[3];
 
     // Set the view to the original matrix
-    const out = shaka.ui.Matrix4x4.create();
-
     shaka.ui.MatrixQuaternion.normalize(
         this.currentQuaternion_, this.currentQuaternion_);
 
-    shaka.ui.Matrix4x4.fromQuat(out, this.currentQuaternion_);
-
-    this.viewMatrix_ = out;
+    shaka.ui.Matrix4x4.fromQuat(this.viewMatrix_, this.currentQuaternion_);
 
     if (this.resetTimer_) {
       this.resetTimer_.stop();
@@ -818,8 +798,7 @@ shaka.ui.VRWebgl = class {
         this.renderGL_(false);
       }).tickAfter(shaka.ui.VRWebgl.ANIMATION_DURATION_ / steps);
     } else {
-      shaka.ui.Matrix4x4.fromQuat(out, this.originalQuaternion_);
-      this.viewMatrix_ = out;
+      shaka.ui.Matrix4x4.fromQuat(this.viewMatrix_, this.originalQuaternion_);
     }
   }
 };
@@ -828,3 +807,25 @@ shaka.ui.VRWebgl = class {
  * @const {number}
  */
 shaka.ui.VRWebgl.ANIMATION_DURATION_ = 0.5;
+
+/**
+ * Never modified.
+ *
+ * @const {!Float32Array}
+ * @private
+ */
+shaka.ui.VRWebgl.IDENTITY_MATRIX_ = shaka.ui.Matrix4x4.create();
+
+/**
+ * The minimum field of view, in degrees.
+ *
+ * @const {number}
+ */
+shaka.ui.VRWebgl.MIN_FIELD_OF_VIEW = 20;
+
+/**
+ * The maximum field of view, in degrees.
+ *
+ * @const {number}
+ */
+shaka.ui.VRWebgl.MAX_FIELD_OF_VIEW = 100;
