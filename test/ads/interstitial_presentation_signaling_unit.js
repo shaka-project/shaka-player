@@ -70,7 +70,8 @@ describe('Interstitial presentation signaling', () => {
           accepts: (interstitial) => !interstitial.adCreativeSignaling,
           parse: (interstitial, presentationRegions, manifest) =>
             shaka.ads.AdManager.parsePresentationSignaling(
-                interstitial, presentationRegions, manifest),
+                interstitial, presentationRegions, manifest,
+                /* readSvta= */ true),
         });
     const config = shaka.util.PlayerConfiguration.createDefault().ads;
     config.supportsMultipleMediaElements = true;
@@ -530,7 +531,8 @@ describe('Interstitial presentation signaling', () => {
 
     it('reads DASH EventStream carriage', () => {
       const ads = shaka.ads.AdManager.parsePresentationSignaling(
-          interstitial, [svtaRegion('creative', 2, 8)]);
+          interstitial, [svtaRegion('creative', 2, 8)],
+          /* manifest= */ null, /* readSvta= */ true);
 
       expect(ads.length).toBe(1);
       expect(ads[0].start).toBe(2);
@@ -564,7 +566,8 @@ describe('Interstitial presentation signaling', () => {
         ],
       };
       const ads = shaka.ads.AdManager.parsePresentationSignaling(
-          interstitial, [region]);
+          interstitial, [region], /* manifest= */ null,
+          /* readSvta= */ true);
 
       expect(ads.length).toBe(1);
       expect(ads[0].start).toBe(3);
@@ -586,14 +589,15 @@ describe('Interstitial presentation signaling', () => {
             id: '1',
             timescale: 1000,
             eventNode,
-          }]);
+          }], /* manifest= */ null, /* readSvta= */ true);
 
       expect(ads).toEqual([]);
     });
 
     it('reads the Periods of a DASH presentation without slots', () => {
       const ads = shaka.ads.AdManager.parsePresentationSignaling(
-          interstitial, [], createManifest([[0, 4], [4, 6], [6, 10]]));
+          interstitial, [], createManifest([[0, 4], [4, 6], [6, 10]]),
+          /* readSvta= */ true);
 
       expect(ads.map((ad) => [ad.start, ad.end]))
           .toEqual([[0, 4], [4, 6], [6, 10]]);
@@ -614,11 +618,12 @@ describe('Interstitial presentation signaling', () => {
 
     it('ignores single-Period and non-DASH presentations', () => {
       expect(shaka.ads.AdManager.parsePresentationSignaling(
-          interstitial, [], createManifest([[0, 10]]))).toEqual([]);
+          interstitial, [], createManifest([[0, 10]]),
+          /* readSvta= */ true)).toEqual([]);
       const hls = createManifest([[0, 4], [4, 10]]);
       hls.type = shaka.media.ManifestParser.HLS;
       expect(shaka.ads.AdManager.parsePresentationSignaling(
-          interstitial, [], hls)).toEqual([]);
+          interstitial, [], hls, /* readSvta= */ true)).toEqual([]);
     });
   });
 });
