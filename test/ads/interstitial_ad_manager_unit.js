@@ -2350,6 +2350,16 @@ describe('Interstitial Ad manager', () => {
         expect(getPlayRangeEnd()).toBe(20);
       });
 
+      it('clips to the event when maxDuration is longer', async () => {
+        await joinAt15('', /* maxDuration= */ 30);
+        await waitForLoad();
+
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(loadSpy.calls.argsFor(0)[1]).toBe(null);
+        // Only the 15 s left of the event are played.
+        expect(getPlayRangeEnd()).toBe(15);
+      });
+
       it('plays the whole maxDuration without clip', async () => {
         await joinAt15('clip="false"');
         await waitForLoad();
