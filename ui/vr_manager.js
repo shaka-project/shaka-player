@@ -505,6 +505,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     // Detect device movement
     if (this.config_.enableVrDeviceMotion && window.DeviceOrientationEvent) {
       let deviceOrientationListener = false;
+      // The permission is resolved asynchronously.  Ignore the result if this
+      // view was released or replaced in the meantime.
+      const vrWebgl = this.vrWebgl_;
+      const isCurrentView = () => this.vrWebgl_ == vrWebgl;
       // See: https://dev.to/li/how-to-requestpermission-for-devicemotion-and-deviceorientation-events-in-ios-13-46g2
       if (typeof DeviceMotionEvent.requestPermission == 'function') {
         const userGestureEvents = ['click', 'mouseup'];
@@ -514,20 +518,28 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         const userGestureListener = () => {
           DeviceMotionEvent.requestPermission().then((newPermissionState) => {
             if (newPermissionState !== 'granted' ||
-                deviceOrientationListener) {
+                deviceOrientationListener || !isCurrentView()) {
               return;
             }
             deviceOrientationListener = true;
             this.setupDeviceOrientationListener_();
+          }).catch(() => {
+            // The permission was not granted.
           });
         };
         const listenToUserGesturesAgain = () => {
+          if (!isCurrentView()) {
+            return;
+          }
           this.eventManager_.unlistenMulti(
               this.container_, userGestureEvents, userGestureListener);
           this.eventManager_.listenOnceMulti(
               this.container_, userGestureEvents, userGestureListener);
         };
         DeviceMotionEvent.requestPermission().then((permissionState) => {
+          if (!isCurrentView()) {
+            return;
+          }
           if (permissionState !== 'granted') {
             listenToUserGesturesAgain();
             return;
@@ -570,15 +582,44 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
       const toRadians = shaka.ui.VRManager.TO_RADIANS_;
 
-      const orientation = screen.orientation.angle;
-      if (orientation == 90 || orientation == -90) {
-        this.vrWebgl_.rotateViewGlobal(
-            alphaDif * toRadians * -1, gammaDif * toRadians * -1, 0);
-      } else {
-        this.vrWebgl_.rotateViewGlobal(
-            alphaDif * toRadians * -1, betaDif * toRadians, 0);
+      // The beta and gamma axes are relative to the device, so the one that
+      // tilts the view up and down, and its sign, depend on how the screen
+      // is rotated.
+      let pitchDif;
+      switch (shaka.ui.VRManager.getScreenOrientationAngle_()) {
+        case 90:
+          pitchDif = -gammaDif;
+          break;
+        case 180:
+          pitchDif = -betaDif;
+          break;
+        case 270:
+          pitchDif = gammaDif;
+          break;
+        default:
+          pitchDif = betaDif;
+          break;
       }
+      this.vrWebgl_.rotateViewGlobal(
+          alphaDif * toRadians * -1, pitchDif * toRadians, 0);
     });
+  }
+
+  /**
+   * Returns the rotation of the screen, normalized to 0, 90, 180 or 270
+   * degrees.
+   *
+   * @return {number}
+   * @private
+   */
+  static getScreenOrientationAngle_() {
+    // screen.orientation is missing on iOS before 16.4, unless the
+    // orientation polyfill is installed.
+    if (!screen.orientation) {
+      return 0;
+    }
+    const angle = screen.orientation.angle % 360;
+    return angle < 0 ? angle + 360 : angle;
   }
 
   /**
