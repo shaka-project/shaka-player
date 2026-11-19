@@ -67,21 +67,34 @@ shaka.ui.ToggleStereoscopicButton = class extends shaka.ui.Element {
         return;
       }
       vr.toggleStereoscopicMode();
-      shaka.ui.Utils.setPressed(this.toggleStereoscopicButton_,
-          vr.isStereoscopicModeEnabled());
+    });
+
+    // The mode can also change through the API, or when the VR view is
+    // recreated for new content.
+    this.eventManager.listen(vr, 'stereoscopicmodechanged', () => {
+      this.updatePressed_();
     });
 
     this.eventManager.listen(vr, 'vrstatuschanged', () => {
       this.checkAvailability();
+      this.updatePressed_();
     });
 
     this.checkAvailability();
+    this.updatePressed_();
   }
 
   /** @override */
   checkAvailability() {
     shaka.ui.Utils.setDisplay(this.toggleStereoscopicButton_,
         this.controls.isPlayingVR() && !this.isSubMenuOpened);
+  }
+
+  /** @private */
+  updatePressed_() {
+    const vr = this.controls.getVR();
+    shaka.ui.Utils.setPressed(this.toggleStereoscopicButton_,
+        vr.isPlayingVR() && vr.isStereoscopicModeEnabled());
   }
 
   /** @override */

@@ -280,6 +280,14 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       return;
     }
     this.vrWebgl_.toggleStereoscopicMode();
+    this.dispatchStereoscopicModeChanged_();
+  }
+
+  /**
+   * @private
+   */
+  dispatchStereoscopicModeChanged_() {
+    this.dispatchEvent(new shaka.util.FakeEvent('stereoscopicmodechanged'));
   }
 
   /**
@@ -365,10 +373,15 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         const hfovChanged = newProjectionMode == 'fisheye' &&
             this.vrWebgl_.getHfov() != newHfov;
         if (currentProjectionMode != newProjectionMode || hfovChanged) {
+          const wasStereoscopic = this.vrWebgl_.isStereoscopicModeEnabled();
           this.eventManager_.removeAll();
           this.vrWebgl_.release();
           this.init_(newProjectionMode, newHfov);
-          // Re-initialization the status does not change.
+          // Re-initialization the status does not change, but the new view
+          // starts without the stereoscopic mode.
+          if (wasStereoscopic) {
+            this.dispatchStereoscopicModeChanged_();
+          }
         }
       }
     } else if (this.canvas_ && this.vrWebgl_) {
