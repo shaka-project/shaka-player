@@ -226,9 +226,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Get the angle of the north.
+   * Get the angle of the north, which is the direction of the initial view.
    *
-   * @return {?number}
+   * @return {?number} In degrees, from 0 to 360, increasing as the view turns
+   *   to the right.
    */
   getNorth() {
     if (!this.vrWebgl_) {
@@ -261,12 +262,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       shaka.log.alwaysWarn('Not playing VR content');
       return;
     }
-    if (fieldOfView < 0) {
-      shaka.log.alwaysWarn('Field of view should be greater than 0');
-      fieldOfView = 0;
-    } else if (fieldOfView > 100) {
-      shaka.log.alwaysWarn('Field of view should be less than 100');
-      fieldOfView = 100;
+    const min = shaka.ui.VRWebgl.MIN_FIELD_OF_VIEW;
+    const max = shaka.ui.VRWebgl.MAX_FIELD_OF_VIEW;
+    if (fieldOfView < min) {
+      shaka.log.alwaysWarn('Field of view should be at least ' + min);
+    } else if (fieldOfView > max) {
+      shaka.log.alwaysWarn('Field of view should be at most ' + max);
     }
     this.vrWebgl_.setFieldOfView(fieldOfView);
   }
