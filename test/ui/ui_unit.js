@@ -1130,6 +1130,34 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      for (const example of [
+        {width: 720, height: 576, ratio: '16:15', label: '576p', mark: ''},
+        {width: 1920, height: 800, ratio: null, label: '1080p', mark: 'HD'},
+        {width: 1080, height: 1920, ratio: '1:1', label: '1080p', mark: 'HD'},
+        {width: 720, height: 1080, ratio: '2:1', label: '1080p', mark: 'HD'},
+      ]) {
+        it('labels and marks ' + example.width + 'x' + example.height +
+            ' consistently', () => {
+          spyOn(player, 'getVideoTracks').and.returnValue([
+            /** @type {shaka.extern.VideoTrack} */ ({
+              active: true,
+              width: example.width,
+              height: example.height,
+              pixelAspectRatio: example.ratio,
+              roles: [],
+            }),
+          ]);
+          player.dispatchEvent(new shaka.util.FakeEvent('trackschanged'));
+
+          const button = resolutionsMenu.querySelector('.explicit-resolution');
+          expect(button.querySelector('span').textContent).toBe(example.label);
+          const mark = button.querySelector('sup');
+          expect(mark ? mark.textContent : '').toBe(example.mark);
+          expect(videoContainer.querySelector('.shaka-current-quality-mark')
+              .textContent).toBe(example.mark);
+        });
+      }
+
       it('uses customTrackLabel with "video" type to override resolution ' +
           'labels', async () => {
         const manifest = shaka.test.ManifestGenerator.generate(
