@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.15.69](https://github.com/shaka-project/shaka-player/compare/v4.15.68...v4.15.69) (2026-11-20)
+
+
+### Bug Fixes
+
+* **DASH:** Don't request LL-DASH segments before they are available ([#10988](https://github.com/shaka-project/shaka-player/issues/10988)) ([350d75a](https://github.com/shaka-project/shaka-player/commit/350d75a7adddb9321c9f496a3a21b32d033fb43b))
+* **DASH:** Ignore SegmentTimeline segments starting after the Period end ([#10993](https://github.com/shaka-project/shaka-player/issues/10993)) ([045226e](https://github.com/shaka-project/shaka-player/commit/045226eccc055c8e33f34234ea3091f25cd4d95e))
+* **DRM:** Recheck key statuses after stream DRM discovery ([#11009](https://github.com/shaka-project/shaka-player/issues/11009)) ([9e4b075](https://github.com/shaka-project/shaka-player/commit/9e4b075f27440098c174a3a65486b4e9b3d59dbf)), closes [#11008](https://github.com/shaka-project/shaka-player/issues/11008)
+* **SRT:** Split cues on blank lines that contain whitespace ([#11018](https://github.com/shaka-project/shaka-player/issues/11018)) ([5867c8d](https://github.com/shaka-project/shaka-player/commit/5867c8d5064b22c3ea342c5f2d22fb4493fc9e08))
+
+
+### Performance Improvements
+
+* **net:** Read fetch bodies once, with a BYOB reader when possible ([#10983](https://github.com/shaka-project/shaka-player/issues/10983)) ([37cbd24](https://github.com/shaka-project/shaka-player/commit/37cbd243a806269ee57c46149883fe040f5ddcfa))
+
 ## [4.15.68](https://github.com/shaka-project/shaka-player/compare/v4.15.67...v4.15.68) (2026-11-13)
 
 
