@@ -153,6 +153,13 @@
   pointer-events: none;
 }
 
+/* While VR content is displayed, dragging or pinching the controls container
+ * moves or zooms the view instead of panning or zooming the page.  Scrollable
+ * menus inside it still scroll. */
+.shaka-vr-gestures {
+  touch-action: none;
+}
+
 /* Container for controls positioned at the top of the video container:
  * controls button panel. */
 .shaka-top-controls {

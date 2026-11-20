@@ -64,6 +64,9 @@ shaka.ui.VRWebgl = class {
     /** @private {?WebGLProgram} */
     this.shaderProgram_ = null;
 
+    /** @private {!Array<!WebGLShader>} */
+    this.shaders_ = [];
+
     /** @private {?WebGLBuffer} */
     this.verticesBuffer_ = null;
 
@@ -177,7 +180,62 @@ shaka.ui.VRWebgl = class {
 
     this.resetTimer_?.stop();
     this.resetTimer_ = null;
+
+    // The context is shared with the next instance, so delete the resources
+    // of this one.
+    this.deleteGLResources_();
   }
+
+  /**
+   * Recreates the WebGL resources after the context was restored.  The view
+   * (orientation, field of view and stereoscopic mode) is kept.
+   */
+  restoreContext() {
+    // The resources of the lost context are no longer valid.
+    this.shaderProgram_ = null;
+    this.shaders_ = [];
+    this.verticesBuffer_ = null;
+    this.verticesTextureCoordBuffer_ = null;
+    this.verticesIndexBuffer_ = null;
+    this.texture_ = null;
+    // Size the canvas and the viewport again.
+    this.previousCanvasWidth_ = 0;
+    this.previousCanvasHeight_ = 0;
+    this.initGLResources_();
+    this.renderGL_();
+  }
+
+  /**
+   * @private
+   */
+  deleteGLResources_() {
+    const gl = this.gl_;
+    if (this.shaderProgram_) {
+      gl.deleteProgram(this.shaderProgram_);
+      this.shaderProgram_ = null;
+    }
+    for (const shader of this.shaders_) {
+      gl.deleteShader(shader);
+    }
+    this.shaders_ = [];
+    for (const buffer of [
+      this.verticesBuffer_,
+      this.verticesTextureCoordBuffer_,
+      this.verticesIndexBuffer_,
+    ]) {
+      if (buffer) {
+        gl.deleteBuffer(buffer);
+      }
+    }
+    this.verticesBuffer_ = null;
+    this.verticesTextureCoordBuffer_ = null;
+    this.verticesIndexBuffer_ = null;
+    if (this.texture_) {
+      gl.deleteTexture(this.texture_);
+      this.texture_ = null;
+    }
+  }
+
 
   /**
    * @return {string}
@@ -218,10 +276,7 @@ shaka.ui.VRWebgl = class {
    */
   init_() {
     this.initMatrices_();
-    this.initGL_();
-    this.initGLShaders_();
-    this.initGLBuffers_();
-    this.initGLTexture_();
+    this.initGLResources_();
 
     const setupListeners = () => {
       if (this.video_.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
@@ -284,6 +339,16 @@ shaka.ui.VRWebgl = class {
   /**
    * @private
    */
+  initGLResources_() {
+    this.initGL_();
+    this.initGLShaders_();
+    this.initGLBuffers_();
+    this.initGLTexture_();
+  }
+
+  /**
+   * @private
+   */
   initMatrices_() {
     // The cube is drawn without a look-at transform, so its initial view is
     // the identity.
@@ -325,6 +390,7 @@ shaka.ui.VRWebgl = class {
     this.gl_.attachShader(this.shaderProgram_, vertexShader);
     this.gl_.attachShader(this.shaderProgram_, fragmentShader);
     this.gl_.linkProgram(this.shaderProgram_);
+    this.shaders_ = [vertexShader, fragmentShader];
 
     // If creating the shader program failed, alert
     if (!this.gl_.getProgramParameter(
@@ -361,7 +427,7 @@ shaka.ui.VRWebgl = class {
    * Read and generate WebGL shader
    *
    * @param {number} glType Type of shader requested.
-   * @return {?WebGLShader}
+   * @return {!WebGLShader}
    * @private
    */
   getGLShader_(glType) {
@@ -392,7 +458,9 @@ shaka.ui.VRWebgl = class {
         }
         break;
       default:
-        return null;
+        goog.asserts.assert(false, 'Unknown shader type!');
+        source = '';
+        break;
     }
 
     const shader = this.gl_.createShader(glType);
@@ -408,7 +476,7 @@ shaka.ui.VRWebgl = class {
 
     goog.asserts.assert(shader, 'Should have a shader!');
 
-    return shader;
+    return /** @type {!WebGLShader} */ (shader);
   }
 
   /**
@@ -467,7 +535,8 @@ shaka.ui.VRWebgl = class {
     const loadMode = this.player_.getLoadMode();
     const isMSE = loadMode == shaka.Player.LoadMode.MEDIA_SOURCE;
     if (!this.video_ || this.video_.readyState < 2 ||
-        (!isMSE && this.video_.playbackRate == 0)) {
+        (!isMSE && this.video_.playbackRate == 0) ||
+        this.gl_.isContextLost()) {
       return;
     }
     shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,

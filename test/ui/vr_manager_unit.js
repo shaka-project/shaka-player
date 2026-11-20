@@ -19,6 +19,8 @@ describe('VRManager', () => {
   let vrManager;
   /** @type {!jasmine.Spy} */
   let rotateSpy;
+  /** @type {!jasmine.Spy} */
+  let zoomSpy;
 
   /**
    * Headless browsers have no WebGL, so the view gets a fake context.  Every
@@ -48,11 +50,12 @@ describe('VRManager', () => {
 
   /**
    * @param {string} projectionMode
+   * @param {boolean=} displayInVrMode
    * @return {shaka.extern.UIConfiguration}
    */
-  function vrConfig(projectionMode) {
+  function vrConfig(projectionMode, displayInVrMode = true) {
     return /** @type {shaka.extern.UIConfiguration} */ ({
-      displayInVrMode: true,
+      displayInVrMode,
       defaultVrProjectionMode: projectionMode,
       enableVrDeviceMotion: true,
       enableVrWheelZoom: false,
@@ -82,11 +85,28 @@ describe('VRManager', () => {
     window.dispatchEvent(event);
   }
 
+  /**
+   * @param {string} type
+   * @param {number} pointerId
+   * @param {number} x
+   * @param {number} y
+   */
+  function dispatchPointer(type, pointerId, x, y) {
+    container.dispatchEvent(new PointerEvent(type, {
+      pointerId,
+      clientX: x,
+      clientY: y,
+      button: type == 'pointermove' ? -1 : 0,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }
+
   beforeEach(() => {
     // The VR manager only looks for a WebGL context where the browser
     // supports WebGL.  The context itself is fake.
-    if (!window.WebGLRenderingContext || !window.DeviceOrientationEvent) {
-      pending('WebGL or device orientation events are not available');
+    if (!window.WebGLRenderingContext) {
+      pending('WebGL is not available');
     }
     container = shaka.util.Dom.createHTMLElement('div');
     document.body.appendChild(container);
@@ -104,6 +124,8 @@ describe('VRManager', () => {
     // The VR manager creates its own view, so spy on all instances.
     // eslint-disable-next-line no-restricted-syntax
     rotateSpy = spyOn(shaka.ui.VRWebgl.prototype, 'rotateViewGlobal');
+    // eslint-disable-next-line no-restricted-syntax
+    zoomSpy = spyOn(shaka.ui.VRWebgl.prototype, 'zoom');
   });
 
   afterEach(() => {
@@ -118,6 +140,9 @@ describe('VRManager', () => {
 
     beforeEach(() => {
       angle = 0;
+      if (!window.DeviceOrientationEvent) {
+        pending('Device orientation events are not available');
+      }
       // Some browsers do not have screen.orientation without the polyfill.
       if (!screen.orientation) {
         pending('screen.orientation is not available');
@@ -188,6 +213,9 @@ describe('VRManager', () => {
     let originalRequestPermission;
 
     beforeEach(() => {
+      if (!window.DeviceOrientationEvent || !window.DeviceMotionEvent) {
+        pending('Device motion events are not available');
+      }
       resolvePermissions = [];
       // Only some browsers ask for the permission, so add it where it is
       // missing.
@@ -233,5 +261,103 @@ describe('VRManager', () => {
       dispatchOrientation(2, 3);
       expect(rotateSpy).toHaveBeenCalledTimes(1);
     });
+  });
+
+  describe('pointer gestures', () => {
+    beforeEach(() => {
+      if (!window.PointerEvent) {
+        pending('Pointer Events are not available');
+      }
+    });
+
+    it('pans the view while a pointer is down', () => {
+      createVRManager();
+      expect(container.classList.contains('shaka-vr-gestures')).toBe(true);
+
+      dispatchPointer('pointermove', 1, 10, 10);
+      expect(rotateSpy).not.toHaveBeenCalled();
+
+      dispatchPointer('pointerdown', 1, 10, 10);
+      dispatchPointer('pointermove', 1, 20, 10);
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+
+      dispatchPointer('pointerup', 1, 20, 10);
+      dispatchPointer('pointermove', 1, 30, 10);
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops panning when the pointer is cancelled', () => {
+      createVRManager();
+      dispatchPointer('pointerdown', 1, 10, 10);
+      dispatchPointer('pointercancel', 1, 10, 10);
+
+      // A new touch starts from its own position.
+      dispatchPointer('pointerdown', 2, 100, 100);
+      dispatchPointer('pointermove', 2, 101, 100);
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+      const yaw = rotateSpy.calls.argsFor(0)[0];
+      expect(yaw).toBeCloseTo(-0.6 * Math.PI / 180, 5);
+    });
+
+    it('zooms with two pointers', () => {
+      createVRManager();
+      dispatchPointer('pointerdown', 1, 0, 0);
+      dispatchPointer('pointerdown', 2, 100, 0);
+      dispatchPointer('pointermove', 2, 50, 0);
+      expect(rotateSpy).not.toHaveBeenCalled();
+      expect(zoomSpy).toHaveBeenCalledOnceWith(50 * 5);
+
+      // The remaining pointer pans again.
+      dispatchPointer('pointerup', 2, 50, 0);
+      dispatchPointer('pointermove', 1, 10, 0);
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores gestures that start on the controls', () => {
+      createVRManager();
+      const button = shaka.util.Dom.createHTMLElement('button');
+      button.classList.add('shaka-no-propagation');
+      container.appendChild(button);
+      button.dispatchEvent(new PointerEvent('pointerdown', {
+        pointerId: 1,
+        button: 0,
+        bubbles: true,
+      }));
+      dispatchPointer('pointermove', 1, 50, 50);
+      expect(rotateSpy).not.toHaveBeenCalled();
+    });
+
+    it('stops the gestures when VR is disabled', () => {
+      createVRManager();
+      vrManager.configure(vrConfig('equirectangular', false));
+      expect(vrManager.isPlayingVR()).toBe(false);
+      expect(container.classList.contains('shaka-vr-gestures')).toBe(false);
+    });
+  });
+
+  it('does not change the status without WebGL', () => {
+    /** @type {?} */ (canvas).getContext = () => null;
+    const onStatusChanged = jasmine.createSpy('onStatusChanged');
+    createVRManager();
+    vrManager.addEventListener(
+        'vrstatuschanged', shaka.test.Util.spyFunc(onStatusChanged));
+    vrManager.configure(vrConfig('cubemap'));
+    expect(vrManager.isPlayingVR()).toBe(false);
+    expect(onStatusChanged).not.toHaveBeenCalled();
+    expect(canvas.style.display).toBe('none');
+  });
+
+  it('restores the view when the context is restored', () => {
+    // eslint-disable-next-line no-restricted-syntax
+    const restoreSpy = spyOn(shaka.ui.VRWebgl.prototype, 'restoreContext');
+    createVRManager();
+
+    const lost = new Event('webglcontextlost', {cancelable: true});
+    canvas.dispatchEvent(lost);
+    // Otherwise the browser does not restore the context.
+    expect(lost.defaultPrevented).toBe(true);
+
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+    expect(restoreSpy).toHaveBeenCalledTimes(1);
   });
 });

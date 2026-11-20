@@ -76,6 +76,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.pinchDistance_ = null;
 
+    /**
+     * The position of the active pointers, by pointer id.
+     * @private {!Map<number, {x: number, y: number}>}
+     */
+    this.pointers_ = new Map();
+
     /** @private {number} */
     this.prevAlpha_ = 0;
 
@@ -90,6 +96,8 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
 
     /** @private {?number} */
     this.vrHfov_ = null;
+
+    this.listenToContextLoss_();
 
     this.loadEventManager_.listen(player, 'loading', () => {
       if (this.vrWebgl_) {
@@ -171,6 +179,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.loadEventManager_ = null;
     }
     if (this.eventManager_) {
+      this.stopGestures_();
       this.eventManager_.release();
       this.eventManager_ = null;
     }
@@ -359,24 +368,32 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.video_.parentElement.insertBefore(
             this.canvas_, this.video_.nextElementSibling);
         this.gl_ = this.getGL_(this.canvas_);
+        this.listenToContextLoss_();
       }
       const newProjectionMode =
           this.vrAsset_ || this.config_.defaultVrProjectionMode;
       const newHfov = this.vrHfov_ || 180;
       if (!this.vrWebgl_) {
-        this.canvas_.style.display = '';
         this.init_(newProjectionMode, newHfov);
-        this.dispatchEvent(new shaka.util.FakeEvent(
-            'vrstatuschanged',
-            (new Map()).set('newStatus', this.isPlayingVR())));
+        if (this.vrWebgl_) {
+          this.canvas_.style.display = '';
+          this.dispatchEvent(new shaka.util.FakeEvent(
+              'vrstatuschanged',
+              (new Map()).set('newStatus', this.isPlayingVR())));
+        } else {
+          // Without WebGL there is nothing to display, and the status does
+          // not change.
+          this.canvas_.style.display = 'none';
+        }
       } else {
         const currentProjectionMode = this.vrWebgl_.getProjectionMode();
         const hfovChanged = newProjectionMode == 'fisheye' &&
             this.vrWebgl_.getHfov() != newHfov;
         if (currentProjectionMode != newProjectionMode || hfovChanged) {
           const wasStereoscopic = this.vrWebgl_.isStereoscopicModeEnabled();
-          this.eventManager_.removeAll();
+          this.stopGestures_();
           this.vrWebgl_.release();
+          this.vrWebgl_ = null;
           this.init_(newProjectionMode, newHfov);
           // Re-initialization the status does not change, but the new view
           // starts without the stereoscopic mode.
@@ -387,13 +404,37 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       }
     } else if (this.canvas_ && this.vrWebgl_) {
       this.canvas_.style.display = 'none';
-      this.eventManager_.removeAll();
+      this.stopGestures_();
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
       this.dispatchEvent(new shaka.util.FakeEvent(
           'vrstatuschanged',
           (new Map()).set('newStatus', this.isPlayingVR())));
     }
+  }
+
+  /**
+   * The browser can lose the WebGL context at any time, for example when the
+   * GPU is reset or when a mobile browser reclaims its resources.  Prevent
+   * the default action of the event, so that the context can be restored,
+   * and recreate the WebGL resources when it is.
+   *
+   * @private
+   */
+  listenToContextLoss_() {
+    if (!this.canvas_) {
+      return;
+    }
+    this.loadEventManager_.listen(this.canvas_, 'webglcontextlost', (e) => {
+      shaka.log.warning('VR WebGL context lost');
+      e.preventDefault();
+    });
+    this.loadEventManager_.listen(this.canvas_, 'webglcontextrestored', () => {
+      shaka.log.info('VR WebGL context restored');
+      if (this.vrWebgl_) {
+        this.vrWebgl_.restoreContext();
+      }
+    });
   }
 
   /**
@@ -436,84 +477,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   setupVRListeners_() {
-    // Start
-    this.eventManager_.listen(this.container_, 'mousedown', (event) => {
-      if (!this.onGesture_ && event.button == 0 &&
-          this.canStartGesture_(event.target)) {
-        this.gestureStart_(event.clientX, event.clientY);
-      }
-    });
-    if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.container_, 'touchstart', (e) => {
-        const event = /** @type {!TouchEvent} */(e);
-        if (event.touches.length == 2) {
-          // Stop panning and start a pinch zoom gesture.
-          this.onGesture_ = false;
-          this.pinchDistance_ = this.getPinchDistance_(event);
-        } else if (!this.onGesture_ &&
-            this.canStartGesture_(event.target)) {
-          this.gestureStart_(
-              event.touches[0].clientX, event.touches[0].clientY);
-        }
-      });
-    }
-
-    // Zoom
-    this.eventManager_.listen(this.container_, 'wheel', (e) => {
-      if (!this.onGesture_ && this.config_.enableVrWheelZoom &&
-          this.canStartGesture_(e.target)) {
-        const event = /** @type {!WheelEvent} */(e);
-        this.vrWebgl_.zoom(event.deltaY);
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    });
-
-    // Move
-    this.eventManager_.listen(this.container_, 'mousemove', (event) => {
-      if (this.onGesture_) {
-        this.gestureMove_(event.clientX, event.clientY);
-      }
-    });
-    if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.container_, 'touchmove', (e) => {
-        const event = /** @type {!TouchEvent} */(e);
-        if (this.pinchDistance_ != null && event.touches.length == 2) {
-          const newPinchDistance = this.getPinchDistance_(event);
-          this.vrWebgl_.zoom(
-              (this.pinchDistance_ - newPinchDistance) *
-              shaka.ui.VRManager.PINCH_ZOOM_FACTOR_);
-          this.pinchDistance_ = newPinchDistance;
-          e.preventDefault();
-        } else if (this.onGesture_) {
-          this.gestureMove_(
-              event.touches[0].clientX, event.touches[0].clientY);
-          e.preventDefault();
-        }
-      });
-    }
-
-    // End
-    this.eventManager_.listenMulti(
-        this.container_, ['mouseleave', 'mouseup'], () => {
-          this.onGesture_ = false;
-        });
-    if (navigator.maxTouchPoints > 0) {
-      this.eventManager_.listen(this.container_, 'touchend', (e) => {
-        const event = /** @type {!TouchEvent} */(e);
-        this.onGesture_ = false;
-        if (event.touches.length == 2) {
-          this.pinchDistance_ = this.getPinchDistance_(event);
-        } else {
-          this.pinchDistance_ = null;
-        }
-        if (event.touches.length == 1) {
-          // Continue panning with the remaining finger.
-          this.gestureStart_(
-              event.touches[0].clientX, event.touches[0].clientY);
-        }
-      });
-    }
+    this.setupGestureListeners_();
 
     // Detect device movement
     if (this.config_.enableVrDeviceMotion && window.DeviceOrientationEvent) {
@@ -636,6 +600,113 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * Pointer Events handle the mouse, touch and pen in the same way.  The
+   * pointer is captured by the container, so a drag keeps moving the view
+   * after the pointer leaves it.
+   *
+   * @private
+   */
+  setupGestureListeners_() {
+    // Zoom
+    this.eventManager_.listen(this.container_, 'wheel', (e) => {
+      if (!this.pointers_.size && this.config_.enableVrWheelZoom &&
+          this.canStartGesture_(e.target)) {
+        const event = /** @type {!WheelEvent} */(e);
+        this.vrWebgl_.zoom(event.deltaY);
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+
+    if (!window.PointerEvent) {
+      // Only old devices without a pointing device, such as Tizen 3 TVs,
+      // lack Pointer Events.
+      return;
+    }
+
+    // The browser must not pan or zoom the page while the view is dragged
+    // or pinched.  Scrollable menus inside the container keep scrolling.
+    this.container_.classList.add('shaka-vr-gestures');
+
+    // Start
+    this.eventManager_.listen(this.container_, 'pointerdown', (e) => {
+      const event = /** @type {!PointerEvent} */(e);
+      // Only the primary button of a mouse or pen, and any touch.
+      if (event.button != 0 || !this.canStartGesture_(event.target)) {
+        return;
+      }
+      this.pointers_.set(event.pointerId, {x: event.clientX, y: event.clientY});
+      try {
+        this.container_.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // The pointer is no longer active.
+      }
+      this.updateGesture_();
+    });
+
+    // Move
+    this.eventManager_.listen(this.container_, 'pointermove', (e) => {
+      const event = /** @type {!PointerEvent} */(e);
+      const pointer = this.pointers_.get(event.pointerId);
+      if (!pointer) {
+        return;
+      }
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      if (this.pinchDistance_ != null) {
+        const newPinchDistance = this.getPinchDistance_();
+        this.vrWebgl_.zoom(
+            (this.pinchDistance_ - newPinchDistance) *
+            shaka.ui.VRManager.PINCH_ZOOM_FACTOR_);
+        this.pinchDistance_ = newPinchDistance;
+      } else if (this.onGesture_) {
+        this.gestureMove_(pointer.x, pointer.y);
+      }
+    });
+
+    // End.  The browser can also cancel a pointer, for example for a system
+    // gesture, or release its capture.
+    this.eventManager_.listenMulti(this.container_,
+        ['pointerup', 'pointercancel', 'lostpointercapture'], (e) => {
+          const event = /** @type {!PointerEvent} */(e);
+          if (this.pointers_.delete(event.pointerId)) {
+            this.updateGesture_();
+          }
+        });
+  }
+
+  /**
+   * Starts the gesture that matches the active pointers: one pointer pans the
+   * view, and two pointers pinch to zoom.
+   *
+   * @private
+   */
+  updateGesture_() {
+    this.onGesture_ = false;
+    this.pinchDistance_ = null;
+    if (this.pointers_.size == 1) {
+      // Start panning, or continue with the remaining finger after a pinch.
+      const pointer = this.pointers_.values().next().value;
+      this.gestureStart_(pointer.x, pointer.y);
+    } else if (this.pointers_.size == 2) {
+      this.pinchDistance_ = this.getPinchDistance_();
+    }
+  }
+
+  /**
+   * Stops listening to the gestures and to the device motion.
+   *
+   * @private
+   */
+  stopGestures_() {
+    this.eventManager_.removeAll();
+    this.container_.classList.remove('shaka-vr-gestures');
+    this.pointers_.clear();
+    this.onGesture_ = false;
+    this.pinchDistance_ = null;
+  }
+
+  /**
    * Returns true if a VR gesture can start on this element. Gestures that
    * start on the controls (buttons, menus, seek bar) should not move the
    * view.
@@ -652,14 +723,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @param {!TouchEvent} event
-   * @return {number}
+   * @return {number} The distance between the first two active pointers.
    * @private
    */
-  getPinchDistance_(event) {
-    return Math.hypot(
-        event.touches[0].clientX - event.touches[1].clientX,
-        event.touches[0].clientY - event.touches[1].clientY);
+  getPinchDistance_() {
+    const [first, second] = this.pointers_.values();
+    return Math.hypot(first.x - second.x, first.y - second.y);
   }
 
   /**
