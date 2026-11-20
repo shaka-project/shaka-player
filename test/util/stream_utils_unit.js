@@ -1151,6 +1151,61 @@ describe('StreamUtils', () => {
       expect(manifest.variants[0].video.id).toBe(2);
     });
 
+    it('keeps audio-only variants when choosing a video codec', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'hvc1.1.6.L93.90');
+          });
+          variant.addAudio(2);
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(4, (stream) => {
+            stream.mime('video/mp4', 'avc1.4d401f');
+          });
+          variant.addAudio(2);
+        });
+        manifest.addVariant(5, (variant) => {
+          variant.addAudio(6);
+        });
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */['avc1'],
+          /* preferredAudioCodecs= */[],
+          /* preferredDecodingAttributes= */[],
+          /* preferredTextFormats= */ []);
+
+      expect(manifest.variants.map((v) => v.id)).toEqual([3, 5]);
+    });
+
+    it('chooses decoding attributes with audio-only variants', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1);
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3);
+        });
+      });
+      navigator.mediaCapabilities.decodingInfo =
+          shaka.test.Util.spyFunc(decodingInfoSpy);
+      decodingInfoSpy.and.returnValue(
+          Promise.resolve({supported: true, smooth: true}));
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false, /* srcEquals= */ false,
+          /* preferredKeySystems= */ []);
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredDecodingAttributes= */
+          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH],
+          /* preferredTextFormats= */ []);
+      expect(manifest.variants.length).toBe(2);
+    });
+
     it('chooses preferred text format', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant720Avc1(manifest);

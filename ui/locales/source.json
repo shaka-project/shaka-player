@@ -23,6 +23,10 @@
     "description": "Label for a button used to select an audio track which contains audio description.",
     "message": "Audio description"
   },
+  "AUDIO_ONLY": {
+    "description": "Label for a button used to play only the audio of a video, and for the quality chosen automatically when only the audio is played, e.g. to keep playing at very low bandwidths.",
+    "message": "Audio only"
+  },
   "AUTOPLAY": {
     "description": "The text content of a name label for the autoplay button.  When autoplay is enabled, the next item in the playback queue starts playing automatically when the current one ends.",
     "message": "Autoplay"
