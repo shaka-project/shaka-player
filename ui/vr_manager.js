@@ -187,6 +187,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
     }
+    this.video_.classList.remove('shaka-vr-video');
 
     // FakeEventTarget implements IReleasable
     super.release();
@@ -377,6 +378,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.init_(newProjectionMode, newHfov);
         if (this.vrWebgl_) {
           this.canvas_.style.display = '';
+          this.video_.classList.add('shaka-vr-video');
           this.dispatchEvent(new shaka.util.FakeEvent(
               'vrstatuschanged',
               (new Map()).set('newStatus', this.isPlayingVR())));
@@ -404,6 +406,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       }
     } else if (this.canvas_ && this.vrWebgl_) {
       this.canvas_.style.display = 'none';
+      this.video_.classList.remove('shaka-vr-video');
       this.stopGestures_();
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
