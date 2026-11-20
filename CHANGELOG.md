@@ -1,5 +1,35 @@
 # Changelog
 
+## [5.2.19](https://github.com/shaka-project/shaka-player/compare/v5.2.18...v5.2.19) (2026-11-20)
+
+
+### Bug Fixes
+
+* **Cast:** Preserve live getter methods and Date results ([#10996](https://github.com/shaka-project/shaka-player/issues/10996)) ([ccd1c21](https://github.com/shaka-project/shaka-player/commit/ccd1c21866a08ea9c28890171204ae8667baff0f))
+* **DASH:** Don't fail MPD Patch updates on 425 Too Early ([#10989](https://github.com/shaka-project/shaka-player/issues/10989)) ([854446b](https://github.com/shaka-project/shaka-player/commit/854446b228e4c3b0ae784dfbaacf81953b0cda8d))
+* **DASH:** Don't request LL-DASH segments before they are available ([#10988](https://github.com/shaka-project/shaka-player/issues/10988)) ([26da283](https://github.com/shaka-project/shaka-player/commit/26da283160efce61c0f7c1c868be7da75046df28))
+* **DASH:** Ignore SegmentTimeline segments starting after the Period end ([#10993](https://github.com/shaka-project/shaka-player/issues/10993)) ([b162612](https://github.com/shaka-project/shaka-player/commit/b162612db538a0d97224d8f8db18f0cf403d9fa4))
+* **DASH:** Insert the unknown values of Annex I player state parameters ([#10978](https://github.com/shaka-project/shaka-player/issues/10978)) ([aacd629](https://github.com/shaka-project/shaka-player/commit/aacd629e46eb3f15ffcd612eb892a594774dfb35))
+* Don't keep a copy of prefetched segments outside low latency ([#10981](https://github.com/shaka-project/shaka-player/issues/10981)) ([d4b7db4](https://github.com/shaka-project/shaka-player/commit/d4b7db491329b33c0335953707c0aa5804d0b74c))
+* Don't leak an enabled AbrManager when saving a preload ([#10992](https://github.com/shaka-project/shaka-player/issues/10992)) ([5f59938](https://github.com/shaka-project/shaka-player/commit/5f599385b04cb390d4c57a871a4606ac86cacde5))
+* **DRM:** Recheck key statuses after stream DRM discovery ([#11009](https://github.com/shaka-project/shaka-player/issues/11009)) ([7edc02b](https://github.com/shaka-project/shaka-player/commit/7edc02b6025d9b490d041d4d639740cea5861e51)), closes [#11008](https://github.com/shaka-project/shaka-player/issues/11008)
+* **HLS:** Push the growing duration of EVENT playlists to MediaSource ([#10746](https://github.com/shaka-project/shaka-player/issues/10746)) ([e120786](https://github.com/shaka-project/shaka-player/commit/e1207862295f4033bd77aea4007f9d23f7b10f41))
+* **net:** Fix duplicates bytes from a retry ([#10965](https://github.com/shaka-project/shaka-player/issues/10965)) ([475d502](https://github.com/shaka-project/shaka-player/commit/475d502d9df5461dcb65cabcd04efb7d9a3592b6)), closes [#10939](https://github.com/shaka-project/shaka-player/issues/10939)
+* Poll the playhead observers before reporting complete ([#10975](https://github.com/shaka-project/shaka-player/issues/10975)) ([031cfb5](https://github.com/shaka-project/shaka-player/commit/031cfb509651c24bb6a1aa9fedbfb6b2226a4100))
+* **SRT:** Accept a dot as the milliseconds separator ([#11017](https://github.com/shaka-project/shaka-player/issues/11017)) ([60b1fe8](https://github.com/shaka-project/shaka-player/commit/60b1fe88d16a5c1492c5bcc2512f5aa982cbb00e))
+* **SRT:** Fix raw markup and lost colors in subtitles with nested font tags ([#10970](https://github.com/shaka-project/shaka-player/issues/10970)) ([3f23cd3](https://github.com/shaka-project/shaka-player/commit/3f23cd3928cb5c24493f43aa632e9348ea625c6c))
+* **SRT:** Split cues on blank lines that contain whitespace ([#11018](https://github.com/shaka-project/shaka-player/issues/11018)) ([f17a407](https://github.com/shaka-project/shaka-player/commit/f17a4076cd2f47f712b0d5d6e322ebc8773ea20f))
+* **Text:** Keep the selected text track in Safari native fullscreen and PiP ([#10997](https://github.com/shaka-project/shaka-player/issues/10997)) ([c1a083c](https://github.com/shaka-project/shaka-player/commit/c1a083cfa75ff2dcaf9f3d3361fb7c7ff8559dc3)), closes [#10893](https://github.com/shaka-project/shaka-player/issues/10893)
+* **UI:** Align quality marks with resolution labels ([#11015](https://github.com/shaka-project/shaka-player/issues/11015)) ([fb625b7](https://github.com/shaka-project/shaka-player/commit/fb625b76c5deff182917ad03db73e1a65eb3fc31))
+* **UI:** Fix the VR view rotation, reset and north ([#11012](https://github.com/shaka-project/shaka-player/issues/11012)) ([09ab9ca](https://github.com/shaka-project/shaka-player/commit/09ab9ca007630baf3307c12abb6d07babf32bc2f))
+* **UI:** Fix VR device orientation in all screen rotations ([#11014](https://github.com/shaka-project/shaka-player/issues/11014)) ([5676967](https://github.com/shaka-project/shaka-player/commit/567696779798c53c9ff2f2b5c81626587507f251))
+* **UI:** Localize sign language video track names ([#10999](https://github.com/shaka-project/shaka-player/issues/10999)) ([2642e4a](https://github.com/shaka-project/shaka-player/commit/2642e4abee0d1bc1bcbc92fdc5b9d44ffbc5780d))
+
+
+### Performance Improvements
+
+* **net:** Read fetch bodies once, with a BYOB reader when possible ([#10983](https://github.com/shaka-project/shaka-player/issues/10983)) ([f838f54](https://github.com/shaka-project/shaka-player/commit/f838f540b9682a07de54c8d9e7d2f364d8fc4159))
+
 ## [5.2.18](https://github.com/shaka-project/shaka-player/compare/v5.2.17...v5.2.18) (2026-11-13)
 
 
