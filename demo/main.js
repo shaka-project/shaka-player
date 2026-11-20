@@ -1606,14 +1606,12 @@ shakaDemo.Main = class {
       this.drmConfiguration_(asset);
       this.controls_.getCastProxy().setAppData({'asset': asset});
       const ui = this.video_['ui'];
-      if (asset.extraUiConfig) {
-        ui.configure(asset.extraUiConfig);
-      } else {
-        const uiConfig = {
-          displayInVrMode: false,
-        };
-        ui.configure(uiConfig);
-      }
+      // The stereo layout of a VR asset does not apply to the next one.
+      const uiConfig = {
+        displayInVrMode: false,
+        defaultVrStereoLayout: 'mono',
+      };
+      ui.configure(Object.assign(uiConfig, asset.extraUiConfig));
 
       const queueManager = this.controls_.getQueueManager();
       await queueManager.removeAllItems();

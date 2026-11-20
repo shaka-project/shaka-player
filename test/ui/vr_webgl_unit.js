@@ -106,6 +106,13 @@ describe('VR', () => {
       return vrWebgl;
     }
 
+    /** @return {!Array<!Array<number>>} The eye rects set since a reset. */
+    function eyeRects() {
+      return gl.uniform4f.calls.allArgs()
+          .filter((args) => args[0] == 'uEyeRect')
+          .map((args) => Array.from(args).slice(1));
+    }
+
     beforeEach(() => {
       jasmine.clock().install();
     });
@@ -238,6 +245,40 @@ describe('VR', () => {
       // Looking up does not change the north.
       vrWebgl.rotateViewGlobal(0, 40 * toRadians, 0);
       expect(vrWebgl.getNorth()).toBeCloseTo(330, 3);
+    });
+
+    it('displays the view of each eye of stereo content', () => {
+      createVRWebgl('equirectangular');
+      vrWebgl.setStereoLayout(shaka.ui.VRWebgl.StereoLayout.TOP_BOTTOM);
+
+      // In mono, the left eye, on top.
+      gl.uniform4f.calls.reset();
+      vrWebgl.rotateViewGlobal(0.1, 0, 0);
+      expect(eyeRects()).toEqual([[0, 0, 1, 0.5]]);
+
+      gl.uniform4f.calls.reset();
+      vrWebgl.toggleStereoscopicMode();
+      expect(eyeRects()).toEqual([[0, 0, 1, 0.5], [0, 0.5, 1, 0.5]]);
+
+      gl.uniform4f.calls.reset();
+      vrWebgl.setStereoLayout(shaka.ui.VRWebgl.StereoLayout.LEFT_RIGHT);
+      expect(eyeRects()).toEqual([[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]]);
+
+      gl.uniform4f.calls.reset();
+      vrWebgl.setStereoLayout(shaka.ui.VRWebgl.StereoLayout.MONO);
+      expect(eyeRects()).toEqual([[0, 0, 1, 1], [0, 0, 1, 1]]);
+    });
+
+    it('keeps the filtering inside the view of each eye', () => {
+      Object.defineProperty(video, 'videoWidth', {value: 1000});
+      Object.defineProperty(video, 'videoHeight', {value: 2000});
+      createVRWebgl('equirectangular');
+      vrWebgl.setStereoLayout(shaka.ui.VRWebgl.StereoLayout.TOP_BOTTOM);
+      const clamps = gl.uniform2f.calls.allArgs()
+          .filter((args) => args[0] == 'uEyeClamp');
+      // Half a texel of a 1000x1000 view.
+      expect(Array.from(clamps[clamps.length - 1]).slice(1))
+          .toEqual([0.0005, 0.0005]);
     });
 
     it('renders on animation frames without video frame callbacks', () => {

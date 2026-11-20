@@ -1223,6 +1223,17 @@ shakaDemo.Config = class {
       'cubemap': 'Cubemap',
     };
 
+    const vrStereoLayoutOptions = {
+      'mono': 'mono',
+      'top-bottom': 'top-bottom',
+      'left-right': 'left-right',
+    };
+    const vrStereoLayoutNames = {
+      'mono': 'Mono',
+      'top-bottom': 'Top-Bottom',
+      'left-right': 'Left-Right',
+    };
+
     const docLink = this.resolveExternLink_('.UIConfiguration');
     this.addSection_('UI', docLink)
         .addUISelectInput_('Audio Track Label Format',
@@ -1290,6 +1301,10 @@ shakaDemo.Config = class {
             'defaultVrProjectionMode',
             vrProjectionModeOptions,
             vrProjectionModeNames)
+        .addUISelectInput_('Default VR Stereo Layout',
+            'defaultVrStereoLayout',
+            vrStereoLayoutOptions,
+            vrStereoLayoutNames)
         .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
         .addUIBoolInput_('Enable VR Wheel Zoom', 'enableVrWheelZoom')
         .addUIBoolInput_('Prefer Video Fullscreen In VisionOS',
