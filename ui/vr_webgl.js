@@ -559,6 +559,9 @@ shaka.ui.VRWebgl = class {
         this.gl_.isContextLost()) {
       return;
     }
+    // A wider field of view, or a different aspect ratio, can move the view
+    // out of the image.
+    this.rotateView_(0, 0, 0);
     shaka.ui.Matrix4x4.perspective(this.projectionMatrix_,
         this.fieldOfView_ * Math.PI / 180, this.getAspectRatio_(), 0.1, 100.0);
 
@@ -736,15 +739,17 @@ shaka.ui.VRWebgl = class {
    * @param {!number} roll Roll.
    */
   rotateViewGlobal(yaw, pitch, roll) {
-    let yawBoundary = Infinity;
-    let pitchBoundary = 90.0 * Math.PI / 180;
+    this.rotateView_(yaw, pitch, roll);
+    this.renderGL_(false);
+  }
 
-    if (this.projectionMode_ == 'halfequirectangular' ||
-        this.projectionMode_ == 'fisheye') {
-      yawBoundary = 90.0 * Math.PI / 180;
-      pitchBoundary /= 2;
-    }
-
+  /**
+   * @param {number} yaw
+   * @param {number} pitch
+   * @param {number} roll
+   * @private
+   */
+  rotateView_(yaw, pitch, roll) {
     const matrix = this.viewMatrix_;
     const rotation = this.rotationMatrix_;
     const identity = shaka.ui.VRWebgl.IDENTITY_MATRIX_;
@@ -753,8 +758,21 @@ shaka.ui.VRWebgl = class {
     // the boundary, instead of being dropped, so fast drags still reach it.
     const clamp = (value, boundary) =>
       Math.min(Math.max(value, -boundary), boundary);
-    const positionX = clamp(this.positionX_ + yaw, yawBoundary);
-    const positionY = clamp(this.positionY_ + pitch, pitchBoundary);
+    const maxAngle = this.getMaxViewAngle_();
+    const positionY =
+        clamp(this.positionY_ + pitch, Math.min(Math.PI / 2, maxAngle));
+    let positionX = this.positionX_ + yaw;
+    if (maxAngle < Infinity) {
+      // The angle between the center of the view and the center of the
+      // content is acos(cos(yaw) * cos(pitch)).  The pitch is already in
+      // range, so this keeps the yaw where the angle is not larger than the
+      // maximum.
+      const cosine = Math.cos(maxAngle) / Math.cos(positionY);
+      // Looking straight up or down, the cosine is not a number.
+      const yawBoundary = !(cosine < 1) ? 0 :
+          cosine <= -1 ? Math.PI : Math.acos(cosine);
+      positionX = clamp(positionX, yawBoundary);
+    }
     yaw = positionX - this.positionX_;
     pitch = positionY - this.positionY_;
     this.positionX_ = positionX;
@@ -776,8 +794,35 @@ shaka.ui.VRWebgl = class {
       // Rotate local axis
       shaka.ui.Matrix4x4.multiply(matrix, rotation, matrix);
     }
+  }
 
-    this.renderGL_(false);
+  /**
+   * Content that does not cover the whole sphere only has an image around
+   * its center: a half-equirectangular frame covers the front hemisphere,
+   * and a fisheye frame a circle of its field of view.  This returns the
+   * largest angle between the center of the view and the center of the
+   * content at which the whole view stays inside the image, so that the
+   * view never shows the area outside of it.
+   *
+   * @return {number} In radians, or Infinity if the content covers the
+   *   whole sphere.
+   * @private
+   */
+  getMaxViewAngle_() {
+    let radius;
+    if (this.projectionMode_ == 'halfequirectangular') {
+      radius = Math.PI / 2;
+    } else if (this.projectionMode_ == 'fisheye') {
+      radius = this.hfov_ * Math.PI / 360;
+    } else {
+      return Infinity;
+    }
+    // The corners of the view are the farthest points from its center.
+    const tanY = Math.tan(this.fieldOfView_ * Math.PI / 360);
+    const tanX = tanY * this.getAspectRatio_();
+    const corner = Math.atan(Math.sqrt(tanX * tanX + tanY * tanY));
+    // When the view is wider than the image, it stays at the center.
+    return Math.max(0, radius - corner);
   }
 
   /**
