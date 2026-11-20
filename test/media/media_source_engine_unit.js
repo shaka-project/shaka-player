@@ -2315,6 +2315,46 @@ describe('MediaSourceEngine', () => {
       expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(100);
     });
 
+    it('releases the other queue when a reload drops its barrier', async () => {
+      /**
+       * @param {boolean} reloading
+       * @suppress {visibility}
+       */
+      function setReloading(reloading) {
+        mediaSourceEngine.reloadingMediaSource_ = reloading;
+      }
+
+      // An append is in flight on audio, so the barrier queued behind it has
+      // to wait, while the barrier on the idle video queue is already held.
+      const append = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      /** @type {!shaka.test.StatusPromise} */
+      const setDuration =
+          new shaka.test.StatusPromise(mediaSourceEngine.setDuration(100));
+      await Util.shortDelay();
+      expect(setDuration.status).toBe('pending');
+
+      // A MediaSource reload starts and the in-flight append ends.  The reload
+      // path drops everything queued behind that append on the audio buffer,
+      // including the barrier the blocking operation is waiting for.
+      setReloading(true);
+      audioSourceBuffer.updateend();
+      await append;
+      setReloading(false);
+
+      // The blocking operation must give up rather than hang, and the video
+      // queue it was holding must accept new work again.
+      await Util.shortDelay();
+      expect(setDuration.status).toBe('resolved');
+      const videoAppend = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      videoSourceBuffer.updateend();
+      await videoAppend;
+    });
+
     it('waits for all previous operations to complete', async () => {
       /** @type {!shaka.test.StatusPromise} */
       const p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
