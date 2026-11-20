@@ -127,6 +127,12 @@ shaka.extern.UIQualityMarks;
  *   take_screenshot: string,
  *   last_frame: string,
  *   next_frame: string,
+ *   vr_look_left: string,
+ *   vr_look_right: string,
+ *   vr_look_up: string,
+ *   vr_look_down: string,
+ *   vr_zoom_in: string,
+ *   vr_zoom_out: string,
  * }}
  *
  * @property {string} small_rewind
@@ -189,6 +195,34 @@ shaka.extern.UIQualityMarks;
  *   Shortcut for advance to next frame.
  *   <br>
  *   Defaults to '.'.
+ * @property {string} vr_look_left
+ *   Shortcut to look to the left while VR content is displayed.  Holding it
+ *   keeps turning the view.
+ *   <br>
+ *   Defaults to 'a'.
+ * @property {string} vr_look_right
+ *   Shortcut to look to the right while VR content is displayed.  Holding it
+ *   keeps turning the view.
+ *   <br>
+ *   Defaults to 'd'.
+ * @property {string} vr_look_up
+ *   Shortcut to look up while VR content is displayed.  Holding it keeps
+ *   turning the view.
+ *   <br>
+ *   Defaults to 'w'.
+ * @property {string} vr_look_down
+ *   Shortcut to look down while VR content is displayed.  Holding it keeps
+ *   turning the view.
+ *   <br>
+ *   Defaults to 's'.
+ * @property {string} vr_zoom_in
+ *   Shortcut to zoom in the view while VR content is displayed.
+ *   <br>
+ *   Defaults to '+'.
+ * @property {string} vr_zoom_out
+ *   Shortcut to zoom out the view while VR content is displayed.
+ *   <br>
+ *   Defaults to '-'.
  * @exportDoc
  */
 shaka.extern.UIShortcuts;

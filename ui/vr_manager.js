@@ -82,6 +82,26 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
      */
     this.pointers_ = new Map();
 
+    /**
+     * The direction of each key that turns the view while it is held, as
+     * [yaw, pitch].
+     * @private {!Map<string, !Array<number>>}
+     */
+    this.lookDirections_ = new Map();
+
+    /** @private {?number} */
+    this.lookFrameId_ = null;
+
+    /** @private {number} */
+    this.lastLookTime_ = 0;
+
+    /**
+     * Listens to the release of the keys anywhere, so that the view does not
+     * keep turning when the focus moves while a key is held.
+     * @private {shaka.util.EventManager}
+     */
+    this.lookEventManager_ = new shaka.util.EventManager();
+
     /** @private {number} */
     this.prevAlpha_ = 0;
 
@@ -183,6 +203,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.eventManager_.release();
       this.eventManager_ = null;
     }
+    this.stopLooking_();
+    this.lookEventManager_?.release();
+    this.lookEventManager_ = null;
     if (this.vrWebgl_) {
       this.vrWebgl_.release();
       this.vrWebgl_ = null;
@@ -354,6 +377,90 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     }
     this.vrWebgl_.rotateViewGlobal(
         0, 0, angle * shaka.ui.VRManager.TO_RADIANS_);
+  }
+
+  /**
+   * Starts turning the view while a key is held.  Several keys can be held at
+   * the same time, for example to look up and to the right.
+   *
+   * @param {string} key
+   * @param {number} yaw 1 to look to the right, -1 to the left.
+   * @param {number} pitch 1 to look up, -1 down.
+   */
+  startLooking(key, yaw, pitch) {
+    if (!this.vrWebgl_ || !this.lookEventManager_) {
+      return;
+    }
+    const wasLooking = this.lookDirections_.size > 0;
+    this.lookDirections_.set(key.toLowerCase(), [yaw, pitch]);
+    if (wasLooking) {
+      return;
+    }
+    this.lookEventManager_.listen(window, 'keyup', (e) => {
+      const event = /** @type {!KeyboardEvent} */ (e);
+      this.lookDirections_.delete(event.key.toLowerCase());
+      if (!this.lookDirections_.size) {
+        this.stopLooking_();
+      }
+    });
+    // The page does not get the release of the keys without the focus.
+    this.lookEventManager_.listen(window, 'blur', () => this.stopLooking_());
+    this.lastLookTime_ = performance.now();
+    this.lookFrameId_ = requestAnimationFrame((time) => this.look_(time));
+  }
+
+  /**
+   * @param {number} time
+   * @private
+   */
+  look_(time) {
+    if (!this.vrWebgl_) {
+      this.stopLooking_();
+      return;
+    }
+    // A long frame, as when the page was hidden, would make the view jump.
+    const elapsed = Math.min(Math.max(time - this.lastLookTime_, 0), 100);
+    this.lastLookTime_ = time;
+    let yaw = 0;
+    let pitch = 0;
+    for (const direction of this.lookDirections_.values()) {
+      yaw += direction[0];
+      pitch += direction[1];
+    }
+    // The view turns slower when it is zoomed in, so that the image moves at
+    // the same speed on the screen.
+    const angle = this.vrWebgl_.getFieldOfView() *
+        shaka.ui.VRManager.KEYBOARD_LOOK_SPEED_ * elapsed / 1000 *
+        shaka.ui.VRManager.TO_RADIANS_;
+    this.vrWebgl_.rotateViewGlobal(
+        Math.sign(yaw) * angle, Math.sign(pitch) * angle, 0);
+    this.lookFrameId_ = requestAnimationFrame((t) => this.look_(t));
+  }
+
+  /**
+   * @private
+   */
+  stopLooking_() {
+    this.lookDirections_.clear();
+    this.lookEventManager_?.removeAll();
+    if (this.lookFrameId_ != null) {
+      cancelAnimationFrame(this.lookFrameId_);
+      this.lookFrameId_ = null;
+    }
+  }
+
+  /**
+   * Zooms in or out by a step.
+   *
+   * @param {number} direction 1 to zoom in, -1 to zoom out.
+   */
+  zoomStep(direction) {
+    if (!this.vrWebgl_) {
+      return;
+    }
+    // The field of view stays in its range.
+    this.vrWebgl_.setFieldOfView(this.vrWebgl_.getFieldOfView() -
+        direction * shaka.ui.VRManager.KEYBOARD_ZOOM_STEP_);
   }
 
   /**
@@ -702,6 +809,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   stopGestures_() {
+    this.stopLooking_();
     this.eventManager_.removeAll();
     this.container_.classList.remove('shaka-vr-gestures');
     this.pointers_.clear();
@@ -775,3 +883,19 @@ shaka.ui.VRManager.TO_RADIANS_ = Math.PI / 180;
  * @private
  */
 shaka.ui.VRManager.PINCH_ZOOM_FACTOR_ = 5;
+
+/**
+ * How fast the keyboard turns the view, in fields of view per second.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.KEYBOARD_LOOK_SPEED_ = 1;
+
+/**
+ * How much a key press zooms, in degrees of field of view.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.KEYBOARD_ZOOM_STEP_ = 5;
