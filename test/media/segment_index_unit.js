@@ -744,6 +744,21 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(index)).toEqual(inputRefs.slice(1));
     });
 
+    it('works with an empty index', () => {
+      const index = new shaka.media.SegmentIndex([]);
+      const refs = [];
+      for (const ref of index) {
+        refs.push(ref);
+      }
+      expect(refs).toEqual([]);
+    });
+
+    it('works after evicting every reference', () => {
+      const index = new shaka.media.SegmentIndex(inputRefs.slice());
+      index.evict(30);  // Drop all refs.
+      expect(Array.from(index)).toEqual([]);
+    });
+
     it('resumes iteration after new references are added', () => {
       const refs = inputRefs.slice();
       const index = new shaka.media.SegmentIndex(refs);
@@ -1036,6 +1051,13 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       index1 = new shaka.media.SegmentIndex(inputRefs1.slice());
       index2 = new shaka.media.SegmentIndex(inputRefs2.slice());
       metaIndex = new shaka.media.MetaSegmentIndex();
+    });
+
+    it('can be iterated when empty', () => {
+      expect(Array.from(metaIndex)).toEqual([]);
+
+      metaIndex.appendSegmentIndex(new shaka.media.SegmentIndex([]));
+      expect(Array.from(metaIndex)).toEqual([]);
     });
 
     it('combines the contents of several SegmentIndexes', () => {
