@@ -101,8 +101,18 @@ shaka.ui.VRWebgl = class {
     /** @private {boolean} */
     this.stereoscopicMode_ = false;
 
-    /** @private {?shaka.util.Timer} */
-    this.activeTimer_ = null;
+    /**
+     * The animation frame that renders the video while it plays, when the
+     * browser does not support requestVideoFrameCallback.
+     * @private {?number}
+     */
+    this.animationFrameId_ = null;
+
+    /**
+     * The time of the last frame uploaded by the animation frame loop.
+     * @private {number}
+     */
+    this.lastFrameTime_ = -1;
 
     /** @private {?shaka.util.Timer} */
     this.resetTimer_ = null;
@@ -175,8 +185,7 @@ shaka.ui.VRWebgl = class {
     this.eventManager_?.release();
     this.eventManager_ = null;
 
-    this.activeTimer_?.stop();
-    this.activeTimer_ = null;
+    this.stopAnimationFrames_();
 
     this.resetTimer_?.stop();
     this.resetTimer_ = null;
@@ -287,39 +296,22 @@ shaka.ui.VRWebgl = class {
         this.renderGL_();
       });
       if (!usingFrames) {
-        let frameRate;
         this.eventManager_.listen(this.video_, 'canplaythrough', () => {
           this.renderGL_();
         });
         this.eventManager_.listen(this.video_, 'playing', () => {
-          if (this.activeTimer_) {
-            this.activeTimer_.stop();
-          }
-          if (!frameRate) {
-            const variants = this.player_.getVariantTracks();
-            for (const variant of variants) {
-              const variantFrameRate = variant.frameRate;
-              if (variantFrameRate &&
-                  (!frameRate || frameRate < variantFrameRate)) {
-                frameRate = variantFrameRate;
-              }
-            }
-          }
-          if (!frameRate) {
-            frameRate = 60;
-          }
           this.renderGL_();
-          this.activeTimer_ = new shaka.util.Timer(() => {
-            this.renderGL_();
-          }).tickNow().tickEvery(1 / frameRate);
+          this.startAnimationFrames_();
         });
         this.eventManager_.listen(this.video_, 'pause', () => {
-          if (this.activeTimer_) {
-            this.activeTimer_.stop();
-          }
-          this.activeTimer_ = null;
+          this.stopAnimationFrames_();
           this.renderGL_();
         });
+        // The view can be created while the video plays, for example when
+        // the projection changes.
+        if (!this.video_.paused) {
+          this.startAnimationFrames_();
+        }
         this.eventManager_.listen(this.video_, 'seeked', () => {
           this.renderGL_();
         });
@@ -344,6 +336,34 @@ shaka.ui.VRWebgl = class {
     this.initGLShaders_();
     this.initGLBuffers_();
     this.initGLTexture_();
+  }
+
+  /**
+   * Renders the video in sync with the display, uploading only new frames.
+   * @private
+   */
+  startAnimationFrames_() {
+    this.stopAnimationFrames_();
+    const loop = () => {
+      this.animationFrameId_ = requestAnimationFrame(loop);
+      const time = this.video_.currentTime;
+      if (time != this.lastFrameTime_) {
+        this.lastFrameTime_ = time;
+        this.renderGL_();
+      }
+    };
+    this.animationFrameId_ = requestAnimationFrame(loop);
+  }
+
+  /**
+   * @private
+   */
+  stopAnimationFrames_() {
+    if (this.animationFrameId_ != null) {
+      cancelAnimationFrame(this.animationFrameId_);
+      this.animationFrameId_ = null;
+    }
+    this.lastFrameTime_ = -1;
   }
 
   /**
