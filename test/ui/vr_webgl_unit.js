@@ -239,5 +239,37 @@ describe('VR', () => {
       vrWebgl.rotateViewGlobal(0, 40 * toRadians, 0);
       expect(vrWebgl.getNorth()).toBeCloseTo(330, 3);
     });
+
+    it('renders on animation frames without video frame callbacks', () => {
+      // eslint-disable-next-line no-restricted-syntax
+      spyOn(shaka.util.VideoFrameCallbackHandler.prototype, 'start')
+          .and.returnValue(false);
+      /** @type {!Array<function(number)>} */
+      const frames = [];
+      const requestSpy = spyOn(window, 'requestAnimationFrame')
+          .and.callFake((callback) => frames.push(callback));
+      const cancelSpy = spyOn(window, 'cancelAnimationFrame');
+      let currentTime = 0;
+      Object.defineProperty(video, 'currentTime', {get: () => currentTime});
+
+      createVRWebgl('equirectangular');
+      video.dispatchEvent(new Event('playing'));
+      expect(requestSpy).toHaveBeenCalled();
+
+      gl.texImage2D.calls.reset();
+      frames.shift()(0);
+      expect(gl.texImage2D).toHaveBeenCalledTimes(1);
+
+      // Without a new video frame, the texture is not uploaded again.
+      frames.shift()(0);
+      expect(gl.texImage2D).toHaveBeenCalledTimes(1);
+
+      currentTime = 0.04;
+      frames.shift()(0);
+      expect(gl.texImage2D).toHaveBeenCalledTimes(2);
+
+      video.dispatchEvent(new Event('pause'));
+      expect(cancelSpy).toHaveBeenCalled();
+    });
   });
 });
