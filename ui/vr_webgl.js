@@ -102,6 +102,12 @@ shaka.ui.VRWebgl = class {
     this.stereoscopicMode_ = false;
 
     /**
+     * How the views of each eye are stored in the video frames.
+     * @private {shaka.ui.VRWebgl.StereoLayout}
+     */
+    this.stereoLayout_ = shaka.ui.VRWebgl.StereoLayout.MONO;
+
+    /**
      * The animation frame that renders the video while it plays, when the
      * browser does not support requestVideoFrameCallback.
      * @private {?number}
@@ -137,6 +143,12 @@ shaka.ui.VRWebgl = class {
 
     /** @private {?WebGLUniformLocation} */
     this.samplerUniform_ = null;
+
+    /** @private {?WebGLUniformLocation} */
+    this.eyeRectUniform_ = null;
+
+    /** @private {?WebGLUniformLocation} */
+    this.eyeClampUniform_ = null;
 
     /** @private {?WebGLUniformLocation} */
     this.vpMatrixUniform_ = null;
@@ -245,7 +257,6 @@ shaka.ui.VRWebgl = class {
     }
   }
 
-
   /**
    * @return {string}
    */
@@ -278,6 +289,64 @@ shaka.ui.VRWebgl = class {
    */
   isStereoscopicModeEnabled() {
     return this.stereoscopicMode_;
+  }
+
+  /**
+   * Sets how the views of each eye are stored in the video frames.  In the
+   * stereoscopic mode each eye displays its own view.  Otherwise, the left
+   * eye view is displayed.
+   *
+   * @param {shaka.ui.VRWebgl.StereoLayout} stereoLayout
+   */
+  setStereoLayout(stereoLayout) {
+    if (this.stereoLayout_ == stereoLayout) {
+      return;
+    }
+    this.stereoLayout_ = stereoLayout;
+    // The insets of the cube faces depend on the size of the views.
+    this.previousCanvasWidth_ = 0;
+    this.previousCanvasHeight_ = 0;
+    this.renderGL_(false);
+  }
+
+  /**
+   * @return {shaka.ui.VRWebgl.StereoLayout}
+   */
+  getStereoLayout() {
+    return this.stereoLayout_;
+  }
+
+  /**
+   * Returns the part of the video frame that holds the view of an eye, as
+   * [x, y, width, height] in texture coordinates.
+   *
+   * @param {number} eye 0 for the left eye, 1 for the right eye.
+   * @return {!Array<number>}
+   * @private
+   */
+  getEyeRect_(eye) {
+    switch (this.stereoLayout_) {
+      case shaka.ui.VRWebgl.StereoLayout.TOP_BOTTOM:
+        return [0, eye * 0.5, 1, 0.5];
+      case shaka.ui.VRWebgl.StereoLayout.LEFT_RIGHT:
+        return [eye * 0.5, 0, 0.5, 1];
+      default:
+        return [0, 0, 1, 1];
+    }
+  }
+
+  /**
+   * @param {number} eye 0 for the left eye, 1 for the right eye.
+   * @private
+   */
+  setEyeUniforms_(eye) {
+    const rect = this.getEyeRect_(eye);
+    const width = this.video_.videoWidth * rect[2];
+    const height = this.video_.videoHeight * rect[3];
+    this.gl_.uniform4f(this.eyeRectUniform_,
+        rect[0], rect[1], rect[2], rect[3]);
+    this.gl_.uniform2f(this.eyeClampUniform_,
+        width > 0 ? 0.5 / width : 0, height > 0 ? 0.5 / height : 0);
   }
 
   /**
@@ -441,6 +510,10 @@ shaka.ui.VRWebgl = class {
     }
     this.samplerUniform_ = this.gl_.getUniformLocation(
         this.shaderProgram_, 'uSampler');
+    this.eyeRectUniform_ = this.gl_.getUniformLocation(
+        this.shaderProgram_, 'uEyeRect');
+    this.eyeClampUniform_ = this.gl_.getUniformLocation(
+        this.shaderProgram_, 'uEyeClamp');
   }
 
   /**
@@ -612,13 +685,15 @@ shaka.ui.VRWebgl = class {
       this.gl_.viewport(0, 0, this.canvas_.width / 2, this.canvas_.height);
     }
 
-    // Draw
+    // Draw the left eye, which is also the view of the mono mode.
+    this.setEyeUniforms_(0);
     this.gl_.drawElements(this.gl_.TRIANGLES,
         this.geometry_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
 
     if (this.stereoscopicMode_) {
       this.gl_.viewport(this.canvas_.width / 2, 0,
           this.canvas_.width / 2, this.canvas_.height);
+      this.setEyeUniforms_(1);
       this.gl_.drawElements(this.gl_.TRIANGLES,
           this.geometry_.indices.length, this.gl_.UNSIGNED_SHORT, 0);
     }
@@ -713,7 +788,9 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   getCubeInsetU_() {
-    const width = this.video_.videoWidth || this.previousCanvasWidth_;
+    // The inset is relative to the view of an eye.
+    const width = (this.video_.videoWidth || this.previousCanvasWidth_) *
+        this.getEyeRect_(0)[2];
     return width > 0 ? 0.5 / width : 0;
   }
 
@@ -724,7 +801,8 @@ shaka.ui.VRWebgl = class {
    * @private
    */
   getCubeInsetV_() {
-    const height = this.video_.videoHeight || this.previousCanvasHeight_;
+    const height = (this.video_.videoHeight || this.previousCanvasHeight_) *
+        this.getEyeRect_(0)[3];
     return height > 0 ? 0.5 / height : 0;
   }
 
@@ -897,6 +975,20 @@ shaka.ui.VRWebgl = class {
  * @private
  */
 shaka.ui.VRWebgl.ANIMATION_DURATION_ = 0.5;
+
+/**
+ * How the views of each eye are stored in the video frames.
+ *
+ * @enum {string}
+ */
+shaka.ui.VRWebgl.StereoLayout = {
+  // A single view.
+  MONO: 'mono',
+  // Both views in each frame, the left eye on top.
+  TOP_BOTTOM: 'top-bottom',
+  // Both views in each frame, the left eye on the left.
+  LEFT_RIGHT: 'left-right',
+};
 
 /**
  * Never modified.

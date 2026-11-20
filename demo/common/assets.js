@@ -2129,6 +2129,34 @@ shakaAssets.testAssets = [
         defaultVrProjectionMode: 'equirectangular',
       }),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Stereo demo (MP4, VR equirectangular, stereo top-bottom)',
+      /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/stereo.png',
+      /* manifestUri= */ 'https://videos.electroteque.org/360/stereo_demo.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'equirectangular',
+        defaultVrStereoLayout: 'top-bottom',
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Everest (MP4, VR180 half equirectangular, stereo top-bottom)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://oculus-mp4.s3.amazonaws.com/immersive+video+8K+for+Oculus+Browser/everestvr_6.2k_30s_180_TB_h264_crf27_CREDIT_JON_GRIFFITH-injected.mp4',
+      /* source= */ shakaAssets.Source.JWPLAYER)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VR)
+      // The st3d and sv3d boxes of the file are only read from the init
+      // segments of DASH and HLS, not when the MP4 file plays natively.
+      .setExtraUiConfig({
+        displayInVrMode: true,
+        defaultVrProjectionMode: 'halfequirectangular',
+        defaultVrStereoLayout: 'top-bottom',
+      }),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Skydive (MP4, VR fisheye)',
       /* iconUri= */ 'https://electroteque.org/plugins/jwplayer/vrvideo/images/previews/fisheye.png',
       /* manifestUri= */ 'https://videos.electroteque.org/360/fisheye/fisheye.mp4',

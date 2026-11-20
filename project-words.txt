@@ -416,6 +416,7 @@ postroll
 preroll
 prft
 prji
+prhd
 pssh
 psshs
 qpprime
@@ -452,6 +453,7 @@ stco
 stpp
 stsc
 stsd
+svhd
 stsz
 sttg
 stts
@@ -544,8 +546,10 @@ halfequirectangular
 hequ
 hfov
 highp
+multiview
 nospatialvideoinfo
 spatialvideoinfo
+stri
 xyzw
 
 # DASH

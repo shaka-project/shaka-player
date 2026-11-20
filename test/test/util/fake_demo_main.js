@@ -87,6 +87,7 @@ shaka.test.FakeDemoMain = class {
       refreshTickInSeconds: 0.125,
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
+      defaultVrStereoLayout: 'mono',
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,

@@ -226,6 +226,22 @@ shaka.ui.VRUtils = class {
 };
 
 /**
+ * Maps a texture coordinate of an eye view to the video frame.  With stereo
+ * content each eye is stored in part of the frame: uEyeRect is its offset
+ * (xy) and size (zw).  The coordinate is kept half a texel away from the
+ * edges of the view, so the filtering does not sample the other eye.
+ *
+ * @const {string}
+ * @private
+ */
+shaka.ui.VRUtils.EYE_COORD_ =
+`uniform highp vec4 uEyeRect;
+uniform highp vec2 uEyeClamp;
+highp vec2 eyeCoord(highp vec2 coord) {
+ return uEyeRect.xy + clamp(coord, uEyeClamp, 1.0 - uEyeClamp) * uEyeRect.zw;
+}`;
+
+/**
  * Sphere vertex shader.
  *
  * @const {string}
@@ -257,6 +273,7 @@ shaka.ui.VRUtils.FRAGMENT_SPHERE_SHADER =
 varying vec2 v_TexCoordinate;
 varying vec3 pass_position;
 uniform sampler2D uSampler;
+${shaka.ui.VRUtils.EYE_COORD_}
 void main(void) {
  // Compute the longitude per fragment, instead of using the interpolated
  // texture coordinate, to avoid needing texture wrapping at the seam.
@@ -264,7 +281,7 @@ void main(void) {
  highp float xValue =
       (PI + atan(pass_position.z, pass_position.x)) / (2.0 * PI);
  highp vec4 texelColor =
-      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));
+      texture2D(uSampler, eyeCoord(vec2(xValue, v_TexCoordinate.t)));
  gl_FragColor = vec4(texelColor.rgb, texelColor.a);
 }`;
 
@@ -280,13 +297,14 @@ shaka.ui.VRUtils.FRAGMENT_SEMI_SPHERE_SHADER =
 varying vec2 v_TexCoordinate;
 varying vec3 pass_position;
 uniform sampler2D uSampler;
+${shaka.ui.VRUtils.EYE_COORD_}
 void main(void) {
  // The semi-sphere only spans 180 degrees of longitude, so the whole
  // texture width maps to half a turn of atan().
  highp float xValue =
       (HALF_PI + atan(pass_position.z, pass_position.x)) / PI;
  highp vec4 texelColor =
-      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));
+      texture2D(uSampler, eyeCoord(vec2(xValue, v_TexCoordinate.t)));
  gl_FragColor = vec4(texelColor.rgb, texelColor.a);
 }`;
 
@@ -300,12 +318,13 @@ shaka.ui.VRUtils.FRAGMENT_FISHEYE_SHADER =
 varying vec2 v_TexCoordinate;
 varying vec3 pass_position;
 uniform sampler2D uSampler;
+${shaka.ui.VRUtils.EYE_COORD_}
 void main(void) {
  if (distance(v_TexCoordinate, vec2(0.5, 0.5)) > 0.5001) {
   // There is no content outside of the image circle.
   gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
  } else {
-  highp vec4 texelColor = texture2D(uSampler, v_TexCoordinate);
+  highp vec4 texelColor = texture2D(uSampler, eyeCoord(v_TexCoordinate));
   gl_FragColor = vec4(texelColor.rgb, texelColor.a);
  }
 }`;
@@ -335,7 +354,8 @@ void main(void) {
 shaka.ui.VRUtils.FRAGMENT_CUBE_SHADER =
 `varying highp vec2 vTextureCoord;
 uniform sampler2D uSampler;
+${shaka.ui.VRUtils.EYE_COORD_}
 void main(void) {
-  highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
+  highp vec4 texelColor = texture2D(uSampler, eyeCoord(vTextureCoord));
   gl_FragColor = vec4(texelColor.rgb , texelColor.a);
 }`;

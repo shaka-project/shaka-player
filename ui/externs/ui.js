@@ -363,6 +363,7 @@ shaka.extern.UITrackLabelCallback;
  *   refreshTickInSeconds: number,
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
+ *   defaultVrStereoLayout: string,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
@@ -617,6 +618,19 @@ shaka.extern.UITrackLabelCallback;
  *   <code>'cubemap'</code>.
  *   <br>
  *   Defaults to <code>'equirectangular'</code>.
+ * @property {string} defaultVrStereoLayout
+ *   Indicate how the views of each eye are stored in the frames of VR content
+ *   that does not signal it.
+ *   Possible values: <code>'mono'</code>, <code>'top-bottom'</code> (the left
+ *   eye on top) or <code>'left-right'</code> (the left eye on the left).
+ *   In the stereoscopic mode each eye displays its own view.  Otherwise, the
+ *   left eye view is displayed.
+ *   The layout signaled in the content, in a <code>st3d</code> or
+ *   <code>stri</code> box or in the HLS <code>REQ-VIDEO-LAYOUT</code>
+ *   attribute, takes precedence.  MV-HEVC content, such as Apple Immersive
+ *   Video, is displayed as mono, since the browser decodes a single view.
+ *   <br>
+ *   Defaults to <code>'mono'</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D

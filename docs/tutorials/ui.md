@@ -115,8 +115,18 @@ ui.configure(config);
 2. Content is automatically treated as VR if it fits the following criteria:
  - HLS or DASH manifest
  - fMP4 segments
- - Init segment contains `prji` and `hfov` boxes
+ - Init segment contains `prji` and `hfov` boxes (Apple), or an `sv3d` box
+   with an `equi` projection (Spatial Media, 180° or 360°)
 
+
+Stereo content that stores both eyes in each frame is detected from the `st3d`
+box of the init segment (Spatial Media).  For content that does not signal it,
+set `defaultVrStereoLayout` to `'top-bottom'` or `'left-right'`.  The
+stereoscopic mode then displays the view of each eye on its own half of the
+screen, and the mono mode displays the left eye view.  MV-HEVC content, such
+as Apple Immersive Video or spatial video, stores each eye as a separate view
+of the bitstream; the browser decodes a single view, so it is displayed as
+mono.
 
 If you want the VR to be rendered outside of the main container, add the
 `data-shaka-player-vr-canvas` tag to a canvas element on the page.
