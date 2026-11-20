@@ -153,6 +153,14 @@
   pointer-events: none;
 }
 
+/* The frames of VR content hold the whole sphere, or the views of both eyes,
+ * so their aspect ratio is not the one of the view.  Without it, a top-bottom
+ * stereo video would make the container twice as tall as it is wide.  This
+ * only applies when the size of the video is not set by the application. */
+.shaka-vr-video {
+  aspect-ratio: 16 / 9;
+}
+
 /* While VR content is displayed, dragging or pinching the controls container
  * moves or zooms the view instead of panning or zooming the page.  Scrollable
  * menus inside it still scroll. */

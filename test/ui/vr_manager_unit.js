@@ -345,6 +345,22 @@ describe('VRManager', () => {
     expect(vrManager.isPlayingVR()).toBe(false);
     expect(onStatusChanged).not.toHaveBeenCalled();
     expect(canvas.style.display).toBe('none');
+    expect(video.classList.contains('shaka-vr-video')).toBe(false);
+  });
+
+  it('marks the video while VR is displayed', () => {
+    // The aspect ratio of the frames is not the one of the view.
+    createVRManager();
+    expect(video.classList.contains('shaka-vr-video')).toBe(true);
+
+    vrManager.configure(vrConfig('equirectangular', false));
+    expect(video.classList.contains('shaka-vr-video')).toBe(false);
+
+    vrManager.configure(vrConfig('equirectangular'));
+    expect(video.classList.contains('shaka-vr-video')).toBe(true);
+    vrManager.release();
+    vrManager = null;
+    expect(video.classList.contains('shaka-vr-video')).toBe(false);
   });
 
   it('restores the view when the context is restored', () => {
