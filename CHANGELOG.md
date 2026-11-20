@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.16.58](https://github.com/shaka-project/shaka-player/compare/v4.16.57...v4.16.58) (2026-11-20)
+
+
+### Bug Fixes
+
+* **DASH:** Don't request LL-DASH segments before they are available ([#10988](https://github.com/shaka-project/shaka-player/issues/10988)) ([4d5d5f3](https://github.com/shaka-project/shaka-player/commit/4d5d5f316b33b85401116bd74b4e8db6103795fd))
+* **DASH:** Ignore SegmentTimeline segments starting after the Period end ([#10993](https://github.com/shaka-project/shaka-player/issues/10993)) ([58805fe](https://github.com/shaka-project/shaka-player/commit/58805feb48697055d1fbcb9b6315b12379ae08d0))
+* Don't leak an enabled AbrManager when saving a preload ([#10992](https://github.com/shaka-project/shaka-player/issues/10992)) ([0275982](https://github.com/shaka-project/shaka-player/commit/0275982cceb86d853bc61bf7fb5b51afe4b404f6))
+* **DRM:** Recheck key statuses after stream DRM discovery ([#11009](https://github.com/shaka-project/shaka-player/issues/11009)) ([c86a927](https://github.com/shaka-project/shaka-player/commit/c86a92785c3e323e8c7a39479f1092b1884fa935)), closes [#11008](https://github.com/shaka-project/shaka-player/issues/11008)
+* **SRT:** Split cues on blank lines that contain whitespace ([#11018](https://github.com/shaka-project/shaka-player/issues/11018)) ([6593c62](https://github.com/shaka-project/shaka-player/commit/6593c62fa362a1aaa178a7a2fc195fcfefeb905d))
+
+
+### Performance Improvements
+
+* **net:** Read fetch bodies once, with a BYOB reader when possible ([#10983](https://github.com/shaka-project/shaka-player/issues/10983)) ([d7ee401](https://github.com/shaka-project/shaka-player/commit/d7ee40107ed1ed630d145e88a6a306e18e392b89))
+
 ## [4.16.57](https://github.com/shaka-project/shaka-player/compare/v4.16.56...v4.16.57) (2026-11-13)
 
 
