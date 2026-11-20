@@ -285,6 +285,8 @@ override the UI language with the lang= parameter.
 * `p`: Activate picture in picture. If picture in picture mode is enabled, press P again.
 * `>`: Speed up the video playback rate.
 * `<`: Slow down the video playback rate.
+* `w`/`a`/`s`/`d`: Look up, left, down or right while VR content is displayed. Hold the key to keep turning the view; two keys can be held together.
+* `+`/`-`: Zoom in or out while VR content is displayed.
 
 
 #### Stream configuration for Displaying Title in the UI
