@@ -116,6 +116,11 @@ shaka.test.FakeMediaSourceEngine = class {
         .and.callFake((type, time) => this.bufferedBehindOfImpl(type, time));
 
     /** @type {!jasmine.Spy} */
+    this.bufferedBytes = jasmine.createSpy('bufferedBytes')
+        .and.callFake((type, start, end) =>
+          this.bufferedBytesImpl(type, start, end));
+
+    /** @type {!jasmine.Spy} */
     this.setStreamProperties = jasmine.createSpy('setStreamProperties')
         .and.callFake((type, offset, end, sequenceMode) =>
           this.setStreamPropertiesImpl_(type, offset, end, sequenceMode));
@@ -326,6 +331,31 @@ shaka.test.FakeMediaSourceEngine = class {
     }
 
     return end - this.toTime_(type, first);
+  }
+
+  /**
+   * @param {string} type
+   * @param {number} start
+   * @param {number} end
+   * @return {number}
+   */
+  bufferedBytesImpl(type, start, end) {
+    if (!this.segments[type] ||
+        type == shaka.util.ManifestParserUtils.ContentType.TEXT) {
+      return 0;
+    }
+
+    const duration = this.segmentData[type].segmentDuration;
+    let bytes = 0;
+    this.segments[type].forEach((buffered, i) => {
+      const overlap = Math.min(this.toTime_(type, i + 1), end) -
+          Math.max(this.toTime_(type, i), start);
+      if (buffered && overlap > 0) {
+        bytes += this.segmentData[type].segments[i].byteLength *
+            overlap / duration;
+      }
+    });
+    return bytes;
   }
 
   /**
