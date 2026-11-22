@@ -2225,6 +2225,30 @@ describe('UI', () => {
         });
       }
 
+      it('labels the resolutions of VR content as spherical', () => {
+        spyOn(player, 'getVideoTracks').and.returnValue([
+          /** @type {shaka.extern.VideoTrack} */ ({
+            active: true,
+            width: 3840,
+            height: 1920,
+            pixelAspectRatio: null,
+            roles: [],
+          }),
+        ]);
+        const isPlayingVR =
+            spyOn(controls, 'isPlayingVR').and.returnValue(true);
+        controls.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+
+        /** @return {string} */
+        const label = () => resolutionsMenu
+            .querySelector('.explicit-resolution span').textContent;
+        expect(label()).toBe('2160s');
+
+        isPlayingVR.and.returnValue(false);
+        controls.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+        expect(label()).toBe('2160p');
+      });
+
       it('uses customTrackLabel with "video" type to override resolution ' +
           'labels', async () => {
         const manifest = shaka.test.ManifestGenerator.generate(

@@ -82,6 +82,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           this.updateLabels_();
         });
 
+    // The labels of VR content have a different suffix.
+    this.eventManager.listen(this.controls, 'vrstatuschanged', () => {
+      this.updateSelection_();
+      this.updateLabels_();
+    });
+
     this.updateSelection_();
   }
 
@@ -191,7 +197,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
         width, height, pixelAspectRatio);
     const qualityMarks = this.controls.getConfig().qualityMarks;
     if (trackHeight >= 8640) {
-      return trackHeight + 'p';
+      return trackHeight + this.getResolutionSuffix_();
     } else if (trackHeight >= 4320) {
       return qualityMarks['4320'];
     } else if (trackHeight >= 2160) {
@@ -204,6 +210,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return qualityMarks['720'];
     }
     return '';
+  }
+
+  /**
+   * The frames of VR content hold the whole sphere, or a part of it, and only
+   * the part in the field of view is displayed.  As other players do, their
+   * resolutions end with 's' (spherical) instead of 'p', so that they are not
+   * compared with the ones of flat content.
+   *
+   * @return {string}
+   * @private
+   */
+  getResolutionSuffix_() {
+    return this.controls.isPlayingVR() ? 's' : 'p';
   }
 
   /** @private */
@@ -463,7 +482,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   getResolutionLabel_(track, tracks) {
     const height = this.getResolutionHeight_(
         track.width, track.height, track.pixelAspectRatio);
-    let text = height + 'p';
+    let text = height + this.getResolutionSuffix_();
     const frameRates = new Set();
     for (const item of tracks) {
       if (item.frameRate) {
