@@ -312,5 +312,85 @@ describe('VR', () => {
       video.dispatchEvent(new Event('pause'));
       expect(cancelSpy).toHaveBeenCalled();
     });
+
+    describe('content that does not cover the whole sphere', () => {
+      /** @type {!Array<number>} */
+      let center;
+
+      /**
+       * The perspective projection puts -z in w, so the last row of the
+       * view-projection matrix is along the direction the view looks at.
+       *
+       * @return {!Array<number>} A unit vector.
+       */
+      function forward() {
+        const m = lastUniform('u_VPMatrix');
+        const length = Math.hypot(m[3], m[7], m[11]);
+        return [m[3] / length, m[7] / length, m[11] / length];
+      }
+
+      /** @return {number} In degrees. */
+      function angleToCenter() {
+        const f = forward();
+        const dot = f[0] * center[0] + f[1] * center[1] + f[2] * center[2];
+        return Math.acos(Math.min(Math.max(dot, -1), 1)) * 180 / Math.PI;
+      }
+
+      /**
+       * @param {string} projectionMode
+       * @param {number=} hfov
+       */
+      function create(projectionMode, hfov) {
+        vrWebgl = new shaka.ui.VRWebgl(video, /** @type {?} */ (player),
+            canvas, /** @type {!WebGLRenderingContext} */ (gl),
+            projectionMode, hfov);
+        vrWebgl.rotateViewGlobal(0, 0, 0);
+        center = forward();
+      }
+
+      // The corner of a 16:9 view with a vertical field of view of 75
+      // degrees, the default, is 57.42 degrees away from its center.
+
+      it('keeps the view inside half-equirectangular content', () => {
+        create('halfequirectangular');
+        vrWebgl.rotateViewGlobal(Math.PI, 0, 0);
+        expect(angleToCenter()).toBeCloseTo(90 - 57.42, 1);
+
+        // Looking up keeps the view on the boundary.
+        vrWebgl.rotateViewGlobal(0, Math.PI, 0);
+        expect(angleToCenter()).toBeCloseTo(90 - 57.42, 1);
+        expect(forward()[1]).toBeGreaterThan(0);
+      });
+
+      it('keeps the view inside fisheye content', () => {
+        create('fisheye', 200);
+        vrWebgl.rotateViewGlobal(0, -Math.PI, 0);
+        expect(angleToCenter()).toBeCloseTo(100 - 57.42, 1);
+      });
+
+      it('follows the field of view', () => {
+        create('halfequirectangular');
+        // The corner of a view of 40 degrees is 36.59 degrees away.
+        vrWebgl.setFieldOfView(40);
+        vrWebgl.rotateViewGlobal(-Math.PI, 0, 0);
+        expect(angleToCenter()).toBeCloseTo(90 - 36.59, 1);
+
+        // Zooming out moves the view back inside the image.
+        vrWebgl.setFieldOfView(75);
+        expect(angleToCenter()).toBeCloseTo(90 - 57.42, 1);
+      });
+
+      it('stays at the center when the view is wider than the image', () => {
+        create('fisheye', 90);
+        vrWebgl.rotateViewGlobal(0.5, 0.5, 0);
+        expect(angleToCenter()).toBeCloseTo(0, 3);
+      });
+
+      it('does not limit the yaw of content around the viewer', () => {
+        create('equirectangular');
+        vrWebgl.rotateViewGlobal(3, 0, 0);
+        expect(vrWebgl.getNorth()).toBeCloseTo(3 * 180 / Math.PI, 3);
+      });
+    });
   });
 });
