@@ -97,10 +97,25 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     this.pinchDistance_ = null;
 
     /**
-     * The position of the active pointers, by pointer id.
-     * @private {!Map<number, {x: number, y: number}>}
+     * The position of the active pointers, and where they went down, by
+     * pointer id.
+     * @private {!Map<number,
+     *     {x: number, y: number, startX: number, startY: number}>}
      */
     this.pointers_ = new Map();
+
+    /**
+     * True if the last gesture moved the view, so that the click that ends it
+     * does not play or pause the video.
+     * @private {boolean}
+     */
+    this.gestureMovedView_ = false;
+
+    /**
+     * When the last gesture that moved the view ended, in milliseconds.
+     * @private {number}
+     */
+    this.lastMovingGestureTime_ = -Infinity;
 
     /**
      * The direction of each key that turns the view while it is held, as
@@ -857,7 +872,19 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       if (event.button != 0 || !this.canStartGesture_(event.target)) {
         return;
       }
-      this.pointers_.set(event.pointerId, {x: event.clientX, y: event.clientY});
+      if (!this.pointers_.size) {
+        // Stopping a view that is still moving is not a click either.
+        this.gestureMovedView_ = this.inertiaFrameId_ != null;
+      } else {
+        // A pinch.
+        this.gestureMovedView_ = true;
+      }
+      this.pointers_.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+        startX: event.clientX,
+        startY: event.clientY,
+      });
       try {
         this.container_.setPointerCapture(event.pointerId);
       } catch (error) {
@@ -875,6 +902,11 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       }
       pointer.x = event.clientX;
       pointer.y = event.clientY;
+      // A click may move the pointer a little.
+      if (Math.hypot(pointer.x - pointer.startX, pointer.y - pointer.startY) >
+          shaka.ui.VRManager.CLICK_MAX_DISTANCE_) {
+        this.gestureMovedView_ = true;
+      }
       if (this.pinchDistance_ != null) {
         const newPinchDistance = this.getPinchDistance_();
         this.vrWebgl_.zoom(
@@ -892,6 +924,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         ['pointerup', 'pointercancel', 'lostpointercapture'], (e) => {
           const event = /** @type {!PointerEvent} */(e);
           if (this.pointers_.delete(event.pointerId)) {
+            if (!this.pointers_.size && this.gestureMovedView_) {
+              this.lastMovingGestureTime_ = shaka.ui.VRManager.now_();
+            }
             const wasPanning = this.onGesture_ && !this.pointers_.size;
             this.updateGesture_();
             // A cancelled pointer did not release the view.
@@ -933,7 +968,29 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     this.pointers_.clear();
     this.onGesture_ = false;
     this.pinchDistance_ = null;
+    this.gestureMovedView_ = false;
+    this.lastMovingGestureTime_ = -Infinity;
     this.stopInertia_();
+  }
+
+  /**
+   * Tells if the click that ends the last gesture comes from moving the view,
+   * by dragging, pinching or stopping it, instead of a click on the video.
+   *
+   * @return {boolean}
+   */
+  isClickFromGesture() {
+    return this.gestureMovedView_;
+  }
+
+  /**
+   * Tells if any of the clicks of a double click comes from moving the view.
+   *
+   * @return {boolean}
+   */
+  isDoubleClickFromGesture() {
+    return this.gestureMovedView_ || shaka.ui.VRManager.now_() -
+        this.lastMovingGestureTime_ < shaka.ui.VRManager.DOUBLE_CLICK_TIME_;
   }
 
   /**
@@ -1114,6 +1171,24 @@ shaka.ui.VRManager.INERTIA_TIME_CONSTANT_ = 300;
  * @private
  */
 shaka.ui.VRManager.INERTIA_MIN_SPEED_ = Math.PI / 180 / 1000;
+
+/**
+ * How far a pointer can move during a click on the video, in pixels.  Past
+ * that, the gesture moves the view instead.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.CLICK_MAX_DISTANCE_ = 4;
+
+/**
+ * How long after moving the view a double click is still ignored, in ms.  It
+ * covers the time between the two clicks of most double clicks.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.DOUBLE_CLICK_TIME_ = 500;
 
 /**
  * @const {number}

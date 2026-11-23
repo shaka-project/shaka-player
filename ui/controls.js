@@ -1693,6 +1693,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.controlsContainer_, 'focusin', showTooltips);
 
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      // Moving the view of VR content is not a double click on the video.
+      if (this.isPlayingVR() && this.vr_.isDoubleClickFromGesture()) {
+        return;
+      }
       if (this.config_.doubleClickForFullscreen &&
           this.isFullScreenSupported()) {
         this.toggleFullScreen();
@@ -2395,6 +2399,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    if (this.isPlayingVR() && this.vr_.isClickFromGesture()) {
+      // The finger moved the view of VR content, so it did not tap the video,
+      // and the next tap does not make a double tap with it.
+      this.resetLastTouchEventTime();
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      return;
+    }
+
     if (this.contextMenuOpenedByTouch_ && this.anyContextMenusAreOpen()) {
       // This touchend ends the long-press that just opened the context menu.
       // Keep the menu open (matching desktop right-click behavior); a
@@ -2433,7 +2447,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {boolean=} fromTouchEvent
    */
   onContainerClick(fromTouchEvent = false) {
-    if (!this.enabled_ || this.isPlayingVR()) {
+    // The click that ends a drag of the view of VR content is not a click on
+    // the video.
+    if (!this.enabled_ ||
+        (this.isPlayingVR() && this.vr_.isClickFromGesture())) {
       return;
     }
 
