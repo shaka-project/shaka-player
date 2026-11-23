@@ -550,6 +550,76 @@ describe('VRManager', () => {
         expect(cancelSpy).toHaveBeenCalledWith(1);
       });
     });
+
+    describe('clicks', () => {
+      /** @type {number} */
+      let now;
+
+      beforeEach(() => {
+        now = 1000;
+        spyOn(performance, 'now').and.callFake(() => now);
+        // The inertia only runs when a test asks for its frame.
+        spyOn(window, 'requestAnimationFrame').and.returnValue(1);
+        spyOn(window, 'cancelAnimationFrame');
+      });
+
+      /**
+       * @param {number} x The position of the release.
+       */
+      function click(x) {
+        dispatchPointer('pointerdown', 1, 0, 0);
+        dispatchPointer('pointermove', 1, x, 0);
+        dispatchPointer('pointerup', 1, x, 0);
+      }
+
+      it('are clicks on the video if the pointer barely moves', () => {
+        createVRManager();
+        click(3);
+        expect(vrManager.isClickFromGesture()).toBe(false);
+        expect(vrManager.isDoubleClickFromGesture()).toBe(false);
+      });
+
+      it('come from a gesture after a drag', () => {
+        createVRManager();
+        click(20);
+        expect(vrManager.isClickFromGesture()).toBe(true);
+        expect(vrManager.isDoubleClickFromGesture()).toBe(true);
+
+        // The next click is a click on the video, but not a double click with
+        // the drag.
+        now += 300;
+        click(0);
+        expect(vrManager.isClickFromGesture()).toBe(false);
+        expect(vrManager.isDoubleClickFromGesture()).toBe(true);
+
+        now += 300;
+        expect(vrManager.isDoubleClickFromGesture()).toBe(false);
+      });
+
+      it('come from a gesture after a pinch', () => {
+        createVRManager();
+        dispatchPointer('pointerdown', 1, 0, 0);
+        dispatchPointer('pointerdown', 2, 100, 0);
+        dispatchPointer('pointerup', 2, 100, 0);
+        dispatchPointer('pointerup', 1, 0, 0);
+        expect(vrManager.isClickFromGesture()).toBe(true);
+      });
+
+      it('come from a gesture when they stop a moving view', () => {
+        createVRManager();
+        // A fast drag lets the view keep moving.
+        dispatchPointer('pointerdown', 1, 0, 0);
+        for (let x = 10; x <= 30; x += 10) {
+          now += 10;
+          dispatchPointer('pointermove', 1, x, 0);
+        }
+        dispatchPointer('pointerup', 1, 30, 0);
+        expect(window.requestAnimationFrame).toHaveBeenCalled();
+
+        click(0);
+        expect(vrManager.isClickFromGesture()).toBe(true);
+      });
+    });
   });
 
   it('does not change the status without WebGL', () => {

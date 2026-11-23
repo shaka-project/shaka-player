@@ -3885,6 +3885,84 @@ describe('UI', () => {
       expect(container.style.background).toContain('gray');
     });
 
+    describe('clicks on VR content', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {!HTMLElement} */
+      let controlsContainer;
+      /** @type {!jasmine.Spy} */
+      let playPauseSpy;
+      /** @type {!jasmine.Spy} */
+      let fullscreenSpy;
+      /** @type {!jasmine.Spy} */
+      let clickFromGesture;
+      /** @type {!jasmine.Spy} */
+      let doubleClickFromGesture;
+
+      beforeEach(async () => {
+        // Mobile, smart TV and Cast defaults change what a click does.
+        const ui = await UiUtils.createUIThroughAPI(videoContainer, video, {
+          singleClickForPlayAndPause: true,
+          doubleClickForFullscreen: true,
+        });
+        controls = ui.getControls();
+        controlsContainer = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container');
+        spyOn(controls, 'isPlayingVR').and.returnValue(true);
+        const vr = controls.getVR();
+        clickFromGesture =
+            spyOn(vr, 'isClickFromGesture').and.returnValue(false);
+        doubleClickFromGesture =
+            spyOn(vr, 'isDoubleClickFromGesture').and.returnValue(false);
+        playPauseSpy = spyOn(controls, 'playPausePresentation');
+        fullscreenSpy = spyOn(controls, 'toggleFullScreen');
+        spyOn(controls, 'isFullScreenSupported').and.returnValue(true);
+      });
+
+      it('play and pause the video', () => {
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(playPauseSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('do nothing at the end of a drag of the view', () => {
+        clickFromGesture.and.returnValue(true);
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(playPauseSpy).not.toHaveBeenCalled();
+      });
+
+      it('close the menus', () => {
+        spyOn(controls, 'anyContextMenusAreOpen').and.returnValue(true);
+        const hideSpy = spyOn(controls, 'hideContextMenus');
+        UiUtils.simulateEvent(controlsContainer, 'click');
+        expect(hideSpy).toHaveBeenCalled();
+        expect(playPauseSpy).not.toHaveBeenCalled();
+      });
+
+      it('do nothing at the end of a touch drag of the view', () => {
+        Object.defineProperty(video, 'duration', {
+          value: 100,
+          configurable: true,
+        });
+        controlsContainer.setAttribute('shown', 'true');
+        clickFromGesture.and.returnValue(true);
+        const touchEnd = new Event('touchend', {cancelable: true});
+        controls.onContainerTouch(touchEnd);
+        expect(touchEnd.defaultPrevented).toBe(true);
+        expect(playPauseSpy).not.toHaveBeenCalled();
+        expect(fullscreenSpy).not.toHaveBeenCalled();
+      });
+
+      it('toggle fullscreen with a double click', () => {
+        UiUtils.simulateEvent(controlsContainer, 'dblclick');
+        expect(fullscreenSpy).toHaveBeenCalledTimes(1);
+
+        // Not right after a drag of the view.
+        doubleClickFromGesture.and.returnValue(true);
+        UiUtils.simulateEvent(controlsContainer, 'dblclick');
+        expect(fullscreenSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('seek bar thumbnail preview', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
