@@ -444,6 +444,77 @@ describe('UITextDisplayer', () => {
     });
   });
 
+  describe('centers cues on a percentage line', () => {
+    /**
+     * @param {shaka.text.Cue.writingMode} writingMode
+     * @return {!shaka.text.Cue}
+     */
+    function createCue(writingMode) {
+      const Cue = shaka.text.Cue;
+      const cue = new Cue(0, 100, 'Captain\'s log.');
+      cue.writingMode = writingMode;
+      cue.line = 50;
+      cue.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
+      cue.lineAlign = Cue.lineAlign.CENTER;
+      return cue;
+    }
+
+    /** @return {!HTMLElement} */
+    function getCueElement() {
+      const textContainer =
+          videoContainer.querySelector('.shaka-text-container');
+      return /** @type {!HTMLElement} */ (textContainer.querySelector('div'));
+    }
+
+    afterEach(() => {
+      videoContainer.style.position = '';
+    });
+
+    it('puts the middle of a horizontal cue on the line', async () => {
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([
+        createCue(shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM),
+      ]);
+      await updateCaptions();
+
+      // Positions the text container over the video container, as the UI
+      // styles do, which the unit tests don't load.
+      videoContainer.style.position = 'relative';
+      const textContainer = /** @type {!HTMLElement} */ (
+        videoContainer.querySelector('.shaka-text-container'));
+      textContainer.style.position = 'absolute';
+      textContainer.style.top = '0';
+      textContainer.style.left = '0';
+      textContainer.style.width = '100%';
+      textContainer.style.height = '100%';
+      const container = textContainer.getBoundingClientRect();
+
+      const box = getCueElement().getBoundingClientRect();
+      expect(box.height).toBeGreaterThan(0);
+      expect(box.top + box.height / 2 - container.top)
+          .toBeCloseTo(0.5 * container.height, 0);
+    });
+
+    it('puts the middle of a vertical cue on the line', async () => {
+      const Cue = shaka.text.Cue;
+      textDisplayer.setTextVisibility(true);
+      textDisplayer.append([createCue(Cue.writingMode.VERTICAL_LEFT_TO_RIGHT)]);
+      await updateCaptions();
+
+      let style = getCueElement().style;
+      expect(style.left).toBe('50%');
+      expect(style.transform).toBe('translateX(-50%)');
+
+      textDisplayer.remove(0, Infinity);
+      textDisplayer.append([createCue(Cue.writingMode.VERTICAL_RIGHT_TO_LEFT)]);
+      await updateCaptions();
+
+      style = getCueElement().style;
+      expect(style.right).toBe('50%');
+      expect(style.transform).toBe('translateX(50%)');
+    });
+  });
+
   it('converts font sizes relative to the video container', async () => {
     const cue = new shaka.text.Cue(0, 100, 'Text');
     cue.fontSize = '10rh';

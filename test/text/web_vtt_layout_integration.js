@@ -242,6 +242,19 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('line-50');
     });
 
+    // The middle of the cue box should be at the middle of the video.
+    it('line 50% center', async () => {
+      parseAndDisplay([
+        'WEBVTT\n',
+        '\n',
+        '00:00:00.000 --> 00:00:05.000 line:50%,center\n',
+        'This is a test\n',
+        'with two lines\n',
+      ].join(''));
+
+      await helper.checkScreenshot('line-50-center');
+    });
+
     // Regression case for http://b/259121343
     // The top center of the cue box should be 85% from the top and
     // horizontally centered.
