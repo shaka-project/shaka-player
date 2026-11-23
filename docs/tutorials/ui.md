@@ -128,6 +128,11 @@ as Apple Immersive Video or spatial video, stores each eye as a separate view
 of the bitstream; the browser decodes a single view, so it is displayed as
 mono.
 
+While VR content is displayed, a pad below the top controls turns the view
+while one of its arrows is held, and resets it with the button in the
+middle.  It is shown by default on desktop browsers; set `enableVrPad` to
+`false` to hide it, or to `true` to show it on other devices.
+
 If you want the VR to be rendered outside of the main container, add the
 `data-shaka-player-vr-canvas` tag to a canvas element on the page.
 

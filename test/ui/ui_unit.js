@@ -4067,6 +4067,191 @@ describe('UI', () => {
       });
     });
 
+    describe('VR pad', () => {
+      /** @type {shaka.ui.Controls} */
+      let controls;
+      /** @type {shaka.ui.VRManager} */
+      let vr;
+      /** @type {!jasmine.Spy} */
+      let isPlayingVR;
+      /** @type {!jasmine.Spy} */
+      let startSpy;
+      /** @type {!jasmine.Spy} */
+      let stopSpy;
+
+      /**
+       * @param {!Object=} extraConfig
+       * @return {!Promise}
+       */
+      async function createUI(extraConfig = {}) {
+        // Mobile, smart TV and Cast defaults leave the pad out.
+        const config = Object.assign({
+          enableVrPad: true,
+          overflowMenuButtons: ['recenter_vr'],
+        }, extraConfig);
+        const ui = await UiUtils.createUIThroughAPI(
+            videoContainer, video, config);
+        controls = ui.getControls();
+        vr = controls.getVR();
+        startSpy = spyOn(vr, 'startLooking');
+        stopSpy = spyOn(vr, 'stopLooking');
+        isPlayingVR = spyOn(controls, 'isPlayingVR').and.returnValue(true);
+        vr.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+        // The pad ignores the pointer while the controls are hidden.
+        UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container')
+            .setAttribute('shown', 'true');
+      }
+
+      /**
+       * @param {string} name
+       * @return {!HTMLElement}
+       */
+      function getPadButton(name) {
+        return UiUtils.getElementByClassName(
+            videoContainer, 'shaka-vr-pad-' + name);
+      }
+
+      /**
+       * @param {!HTMLElement} element
+       * @param {string} type
+       * @param {number} button
+       */
+      function dispatchPointer(element, type, button) {
+        element.dispatchEvent(new PointerEvent(type, {
+          pointerId: 1,
+          button,
+          bubbles: true,
+          cancelable: true,
+        }));
+      }
+
+      /**
+       * @param {!HTMLElement} element
+       * @param {string} type
+       * @param {string} key
+       * @return {!KeyboardEvent}
+       */
+      function dispatchKey(element, type, key) {
+        const event = new KeyboardEvent(type, {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        if (event.key != key) {
+          // Tizen 3 ignores the key of the init dictionary.
+          Object.defineProperty(event, 'key', {value: key});
+        }
+        element.dispatchEvent(event);
+        return event;
+      }
+
+      it('is shown only while VR content is playing', async () => {
+        await createUI();
+        const pad = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-vr-pad');
+        expect(pad.classList.contains('shaka-hidden')).toBe(false);
+
+        isPlayingVR.and.returnValue(false);
+        vr.dispatchEvent(new shaka.util.FakeEvent('vrstatuschanged'));
+        expect(pad.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('is not built when it is disabled', async () => {
+        await createUI({enableVrPad: false});
+        expect(videoContainer.querySelector('.shaka-vr-pad')).toBe(null);
+      });
+
+      it('labels its buttons', async () => {
+        await createUI();
+        const LocIds = shaka.ui.Locales.Ids;
+        // The browser may prefer another language.
+        const resolve = (id) => controls.getLocalization().resolve(id);
+        expect(getPadButton('left').ariaLabel)
+            .toBe(resolve(LocIds.VR_LOOK_LEFT));
+        expect(getPadButton('right').ariaLabel)
+            .toBe(resolve(LocIds.VR_LOOK_RIGHT));
+        expect(getPadButton('up').ariaLabel).toBe(resolve(LocIds.VR_LOOK_UP));
+        expect(getPadButton('down').ariaLabel)
+            .toBe(resolve(LocIds.VR_LOOK_DOWN));
+        expect(getPadButton('recenter').ariaLabel)
+            .toBe(resolve(LocIds.RECENTER_VR));
+        expect(resolve(LocIds.VR_LOOK_LEFT)).not.toBe('');
+      });
+
+      it('turns the view while an arrow is held', async () => {
+        if (!window.PointerEvent) {
+          pending('Pointer Events are not available');
+        }
+        await createUI();
+        const up = getPadButton('up');
+        dispatchPointer(up, 'pointerdown', 0);
+        expect(startSpy).toHaveBeenCalledOnceWith('vr-pad-up', 0, 1);
+        expect(stopSpy).not.toHaveBeenCalled();
+        dispatchPointer(up, 'pointerup', 0);
+        expect(stopSpy).toHaveBeenCalledWith('vr-pad-up');
+
+        // Other buttons of the mouse do nothing.
+        startSpy.calls.reset();
+        dispatchPointer(getPadButton('left'), 'pointerdown', 2);
+        expect(startSpy).not.toHaveBeenCalled();
+      });
+
+      it('does not turn the view while the controls are hidden', async () => {
+        if (!window.PointerEvent) {
+          pending('Pointer Events are not available');
+        }
+        await createUI();
+        UiUtils.getElementByClassName(
+            videoContainer, 'shaka-controls-container')
+            .removeAttribute('shown');
+        dispatchPointer(getPadButton('right'), 'pointerdown', 0);
+        expect(startSpy).not.toHaveBeenCalled();
+      });
+
+      it('turns the view while Enter or Space is held', async () => {
+        await createUI();
+        const right = getPadButton('right');
+        const keydown = dispatchKey(right, 'keydown', 'Enter');
+        expect(keydown.defaultPrevented).toBe(true);
+        expect(startSpy).toHaveBeenCalledOnceWith('vr-pad-right', 1, 0);
+
+        // The view keeps turning while the key is held.
+        const repeat = new KeyboardEvent('keydown', {key: 'Enter'});
+        Object.defineProperty(repeat, 'key', {value: 'Enter'});
+        Object.defineProperty(repeat, 'repeat', {value: true});
+        right.dispatchEvent(repeat);
+        expect(startSpy).toHaveBeenCalledTimes(1);
+
+        dispatchKey(right, 'keyup', 'Enter');
+        expect(stopSpy).toHaveBeenCalledWith('vr-pad-right');
+
+        dispatchKey(right, 'keydown', ' ');
+        expect(startSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('resets the view', async () => {
+        await createUI();
+        const resetSpy = spyOn(vr, 'reset');
+        getPadButton('recenter').click();
+        expect(resetSpy).toHaveBeenCalled();
+      });
+
+      it('replaces the recenter button of the menus', async () => {
+        await createUI();
+        const menuButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-recenter-vr-button');
+        expect(menuButton.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('leaves the recenter button of the menus when disabled', async () => {
+        await createUI({enableVrPad: false});
+        const menuButton = UiUtils.getElementByClassName(
+            videoContainer, 'shaka-recenter-vr-button');
+        expect(menuButton.classList.contains('shaka-hidden')).toBe(false);
+      });
+    });
+
     describe('seek buttons', () => {
       /** @type {shaka.ui.Controls} */
       let controls;

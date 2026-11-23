@@ -378,6 +378,49 @@ describe('VRManager', () => {
       vrManager.zoomStep(-1);
       expect(vrManager.getFieldOfView()).toBe(80);
     });
+
+    it('stops the directions of buttons one by one', () => {
+      createVRManager();
+      vrManager.startLooking('vr-pad-left', -1, 0);
+      vrManager.startLooking('vr-pad-up', 0, 1);
+      // Releasing a key does not stop a button.
+      releaseKey('a');
+      runFrame(start + 50);
+      expectRotation(-angle, angle);
+
+      vrManager.stopLooking('vr-pad-up');
+      expect(cancelSpy).not.toHaveBeenCalled();
+      runFrame(start + 100);
+      expectRotation(-angle, 0);
+
+      // A direction that is not held changes nothing.
+      vrManager.stopLooking('vr-pad-down');
+      expect(cancelSpy).not.toHaveBeenCalled();
+    });
+
+    it('lets the view slow down after the last button', () => {
+      // One field of view of 75 degrees per second, in radians per ms.
+      const speed = 75 / 1000 * Math.PI / 180;
+      createVRManager();
+      vrManager.startLooking('vr-pad-right', 1, 0);
+      runFrame(start + 50);
+
+      // The frame of the look was canceled, and the inertia asks for another.
+      frames = [];
+      vrManager.stopLooking('vr-pad-right');
+      expect(cancelSpy).toHaveBeenCalled();
+      runFrame(start + 16);
+      expectRotation(speed * 16, 0);
+      runFrame(start + 32);
+      const slower = rotateSpy.calls.argsFor(0)[0];
+      expect(slower).toBeGreaterThan(0);
+      expect(slower).toBeLessThan(speed * 16);
+
+      // Holding a button again stops it.
+      cancelSpy.calls.reset();
+      vrManager.startLooking('vr-pad-up', 0, 1);
+      expect(cancelSpy).toHaveBeenCalled();
+    });
   });
 
   describe('pointer gestures', () => {

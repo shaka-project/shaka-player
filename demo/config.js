@@ -1308,6 +1308,7 @@ shakaDemo.Config = class {
             vrStereoLayoutNames)
         .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
         .addUIBoolInput_('Enable VR Wheel Zoom', 'enableVrWheelZoom')
+        .addUIBoolInput_('Enable VR Pad', 'enableVrPad')
         .addUIBoolInput_('Prefer Video Fullscreen In VisionOS',
             'preferVideoFullScreenInVisionOS')
         .addUIBoolInput_('Cast Android Receiver Compatible',

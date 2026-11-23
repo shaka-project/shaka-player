@@ -76,6 +76,7 @@
 +../../ui/video_type_selection.js
 +../../ui/volume_bar.js
 +../../ui/vr_manager.js
++../../ui/vr_pad.js
 +../../ui/vr_utils.js
 +../../ui/vr_webgl.js
 

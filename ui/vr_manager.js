@@ -411,10 +411,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Starts turning the view while a key is held.  Several keys can be held at
-   * the same time, for example to look up and to the right.
+   * Starts turning the view while a key or a button is held.  Several of them
+   * can be held at the same time, for example to look up and to the right.
+   * The view stops turning when the key is released, or when stopLooking() is
+   * called with the same id.
    *
-   * @param {string} key
+   * @param {string} key The key, or the id of the button.
    * @param {number} yaw 1 to look to the right, -1 to the left.
    * @param {number} pitch 1 to look up, -1 down.
    */
@@ -422,6 +424,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     if (!this.vrWebgl_ || !this.lookEventManager_) {
       return;
     }
+    this.stopInertia_();
     const wasLooking = this.lookDirections_.size > 0;
     this.lookDirections_.set(key.toLowerCase(), [yaw, pitch]);
     if (wasLooking) {
@@ -452,6 +455,18 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     // A long frame, as when the page was hidden, would make the view jump.
     const elapsed = Math.min(Math.max(time - this.lastLookTime_, 0), 100);
     this.lastLookTime_ = time;
+    const speed = this.getLookSpeed_();
+    this.vrWebgl_.rotateViewGlobal(
+        speed[0] * elapsed, speed[1] * elapsed, 0);
+    this.lookFrameId_ = requestAnimationFrame((t) => this.look_(t));
+  }
+
+  /**
+   * @return {!Array<number>} The speed of the view in the directions that are
+   *   held, in radians per millisecond, as [yaw, pitch].
+   * @private
+   */
+  getLookSpeed_() {
     let yaw = 0;
     let pitch = 0;
     for (const direction of this.lookDirections_.values()) {
@@ -460,12 +475,36 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     }
     // The view turns slower when it is zoomed in, so that the image moves at
     // the same speed on the screen.
-    const angle = this.vrWebgl_.getFieldOfView() *
-        shaka.ui.VRManager.KEYBOARD_LOOK_SPEED_ * elapsed / 1000 *
-        shaka.ui.VRManager.TO_RADIANS_;
-    this.vrWebgl_.rotateViewGlobal(
-        Math.sign(yaw) * angle, Math.sign(pitch) * angle, 0);
-    this.lookFrameId_ = requestAnimationFrame((t) => this.look_(t));
+    const speed = this.vrWebgl_ ? this.vrWebgl_.getFieldOfView() *
+        shaka.ui.VRManager.KEYBOARD_LOOK_SPEED_ / 1000 *
+        shaka.ui.VRManager.TO_RADIANS_ : 0;
+    return [Math.sign(yaw) * speed, Math.sign(pitch) * speed];
+  }
+
+  /**
+   * Stops turning the view in the direction started by startLooking() with
+   * the same id.  Once no direction is held, the view keeps moving for a
+   * moment and slows down, as after a drag.
+   *
+   * @param {string} key The key, or the id of the button.
+   */
+  stopLooking(key) {
+    const id = key.toLowerCase();
+    if (!this.lookDirections_.has(id)) {
+      return;
+    }
+    const speed = this.getLookSpeed_();
+    this.lookDirections_.delete(id);
+    if (this.lookDirections_.size) {
+      return;
+    }
+    this.stopLooking_();
+    if (this.vrWebgl_ && (speed[0] || speed[1])) {
+      this.inertia_ = speed;
+      this.lastInertiaTime_ = shaka.ui.VRManager.now_();
+      this.inertiaFrameId_ =
+          requestAnimationFrame((time) => this.inertiaStep_(time));
+    }
   }
 
   /**
