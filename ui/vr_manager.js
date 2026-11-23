@@ -436,7 +436,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     });
     // The page does not get the release of the keys without the focus.
     this.lookEventManager_.listen(window, 'blur', () => this.stopLooking_());
-    this.lastLookTime_ = performance.now();
+    this.lastLookTime_ = shaka.ui.VRManager.now_();
     this.lookFrameId_ = requestAnimationFrame((time) => this.look_(time));
   }
 
@@ -951,7 +951,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     this.prevX_ = x;
     this.prevY_ = y;
 
-    const now = performance.now();
+    const now = shaka.ui.VRManager.now_();
     this.recentMoves_.push({time: now, yaw, pitch});
     while (now - this.recentMoves_[0].time >
         shaka.ui.VRManager.INERTIA_SAMPLE_TIME_) {
@@ -968,7 +968,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
   startInertia_() {
     const moves = this.recentMoves_;
     this.recentMoves_ = [];
-    const now = performance.now();
+    const now = shaka.ui.VRManager.now_();
     // The pointer did not move just before it was released.
     if (moves.length < 2 || now - moves[moves.length - 1].time >
         shaka.ui.VRManager.INERTIA_SAMPLE_TIME_ / 2) {
@@ -1027,6 +1027,16 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.inertiaFrameId_ = null;
     }
     this.inertia_ = [0, 0];
+  }
+
+  /**
+   * @return {number} The current time, in milliseconds.
+   * @private
+   */
+  static now_() {
+    // Some old devices, such as some smart TVs, lack performance.now().
+    return window.performance && window.performance.now ?
+        window.performance.now() : Date.now();
   }
 };
 
