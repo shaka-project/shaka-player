@@ -1783,11 +1783,18 @@ describe('MediaSourceEngine', () => {
     let packedAac;
     /** @type {!BufferSource} */
     let tsAudio;
+    /**
+     * Muxed TS whose audio starts at 1.358667, before its video, at 1.4.  Its
+     * video ends at 2.08.
+     * @type {!BufferSource}
+     */
+    let tsAudioLead;
 
     beforeAll(async () => {
-      [packedAac, tsAudio] = await Promise.all([
+      [packedAac, tsAudio, tsAudioLead] = await Promise.all([
         Util.fetch('/base/test/test/assets/hls-raw-aac/fileSequence0.aac'),
         Util.fetch('/base/test/test/assets/audio.ts'),
+        Util.fetch('/base/test/test/assets/ts-audio-lead.ts'),
       ]);
     });
 
@@ -1815,6 +1822,29 @@ describe('MediaSourceEngine', () => {
           ContentType.AUDIO, tsAudio, dummyReference(0, 10), fakeStream,
           'video/mp2t; codecs="mp4a.40.2"');
       expect(timestamp).toBeCloseTo(56.013333, 3);
+    });
+
+    // Some packagers start the timeline at the earliest frame of any stream,
+    // so the duration of the first segment is counted from its audio.
+    it('starts muxed TS at its audio when the duration counts from it', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO, tsAudioLead, dummyReference(0, 2.08 - 1.358667),
+          fakeStream, 'video/mp2t; codecs="avc1.640014,mp4a.40.2"');
+      expect(timestamp).toBeCloseTo(1.358667, 5);
+    });
+
+    it('starts muxed TS at its video when the duration counts from it', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO, tsAudioLead, dummyReference(0, 2.08 - 1.4),
+          fakeStream, 'video/mp2t; codecs="avc1.640014,mp4a.40.2"');
+      expect(timestamp).toBeCloseTo(1.4, 5);
+    });
+
+    it('starts muxed TS at its video when the duration matches neither', () => {
+      const {timestamp} = mediaSourceEngine.getTimestampAndDispatchMetadata(
+          ContentType.VIDEO, tsAudioLead, dummyReference(0, 0.6),
+          fakeStream, 'video/mp2t; codecs="avc1.640014,mp4a.40.2"');
+      expect(timestamp).toBeCloseTo(1.4, 5);
     });
 
     it('does not treat video labelled as TS as packed audio', () => {
