@@ -2566,6 +2566,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const keyboardSeekDistance = this.config_.keyboardSeekDistance;
     const keyboardLargeSeekDistance = this.config_.keyboardLargeSeekDistance;
 
+    if (this.isPlayingVR() && this.onVrKeyDown_(event)) {
+      return;
+    }
+
     switch (event.key.toLowerCase()) {
       case this.config_.shortcuts.small_rewind.toLowerCase():
         // Move the seek time backward for a few sec, unless another slider is
@@ -2713,6 +2717,41 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         break;
       }
     }
+  }
+
+  /**
+   * Turns and zooms the view of VR content with the keyboard.
+   *
+   * @param {!KeyboardEvent} event
+   * @return {boolean} True if the key was used.
+   * @private
+   */
+  onVrKeyDown_(event) {
+    const shortcuts = this.config_.shortcuts;
+    const key = event.key.toLowerCase();
+    /** @type {!Object<string, !Array<number>>} */
+    const directions = {
+      [shortcuts.vr_look_left.toLowerCase()]: [-1, 0],
+      [shortcuts.vr_look_right.toLowerCase()]: [1, 0],
+      [shortcuts.vr_look_up.toLowerCase()]: [0, 1],
+      [shortcuts.vr_look_down.toLowerCase()]: [0, -1],
+    };
+    const direction = directions[key];
+    if (direction) {
+      // The view keeps turning until the key is released, so the repeated
+      // events of a held key change nothing.
+      if (!event.repeat) {
+        this.vr_.startLooking(key, direction[0], direction[1]);
+      }
+    } else if (key == shortcuts.vr_zoom_in.toLowerCase()) {
+      this.vr_.zoomStep(1);
+    } else if (key == shortcuts.vr_zoom_out.toLowerCase()) {
+      this.vr_.zoomStep(-1);
+    } else {
+      return false;
+    }
+    event.preventDefault();
+    return true;
   }
 
   /**

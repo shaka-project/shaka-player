@@ -3562,6 +3562,41 @@ describe('UI', () => {
         expect(spaceEvent.defaultPrevented).toBe(true);
       });
 
+      it('turns and zooms the VR view with the keyboard', () => {
+        focusForKeyboardTest(container1);
+        const isPlayingVR =
+            spyOn(controls1, 'isPlayingVR').and.returnValue(true);
+        // eslint-disable-next-line no-restricted-syntax
+        const lookSpy = spyOn(shaka.ui.VRManager.prototype, 'startLooking');
+        // eslint-disable-next-line no-restricted-syntax
+        const zoomSpy = spyOn(shaka.ui.VRManager.prototype, 'zoomStep');
+
+        const lookEvent = createKeydownEvent('d');
+        container1.dispatchEvent(lookEvent);
+        expect(lookSpy).toHaveBeenCalledOnceWith('d', 1, 0);
+        expect(lookEvent.defaultPrevented).toBe(true);
+
+        // The view keeps turning while the key is held.
+        const repeatEvent = createKeydownEvent('d');
+        Object.defineProperty(repeatEvent, 'repeat', {value: true});
+        container1.dispatchEvent(repeatEvent);
+        expect(lookSpy).toHaveBeenCalledTimes(1);
+
+        container1.dispatchEvent(createKeydownEvent('+'));
+        expect(zoomSpy).toHaveBeenCalledOnceWith(1);
+
+        // Other shortcuts still work.
+        container1.dispatchEvent(createKeydownEvent('ArrowRight'));
+        expect(video1.currentTime).toBe(55);
+
+        // Outside of VR, the keys are not used.
+        isPlayingVR.and.returnValue(false);
+        const flatEvent = createKeydownEvent('w');
+        container1.dispatchEvent(flatEvent);
+        expect(lookSpy).toHaveBeenCalledTimes(1);
+        expect(flatEvent.defaultPrevented).toBe(false);
+      });
+
       it('handles shortcuts while a button has the focus', () => {
         // Cast, mobile and smart TV defaults leave some controls out.
         ui1.configure({controlPanelElements: ['play_pause']});

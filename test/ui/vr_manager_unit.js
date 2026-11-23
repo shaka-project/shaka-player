@@ -270,6 +270,116 @@ describe('VRManager', () => {
     });
   });
 
+  describe('keyboard look', () => {
+    /** @type {!Array<function(number)>} */
+    let frames;
+    /** @type {!jasmine.Spy} */
+    let cancelSpy;
+    /** @type {number} */
+    const start = 1000;
+
+    beforeEach(() => {
+      frames = [];
+      spyOn(window, 'requestAnimationFrame').and.callFake((callback) => {
+        frames.push(callback);
+        return frames.length;
+      });
+      cancelSpy = spyOn(window, 'cancelAnimationFrame');
+      spyOn(performance, 'now').and.returnValue(start);
+    });
+
+    /**
+     * @param {number} time
+     */
+    function runFrame(time) {
+      expect(frames.length).toBe(1);
+      rotateSpy.calls.reset();
+      frames.shift()(time);
+    }
+
+    /** @param {string} key */
+    function releaseKey(key) {
+      const event = new KeyboardEvent('keyup', {key});
+      if (event.key != key) {
+        // Tizen 3 ignores the key of the init dictionary.
+        Object.defineProperty(event, 'key', {value: key});
+      }
+      window.dispatchEvent(event);
+    }
+
+    /**
+     * @param {number} yaw
+     * @param {number} pitch
+     */
+    function expectRotation(yaw, pitch) {
+      expect(rotateSpy).toHaveBeenCalledTimes(1);
+      const args = rotateSpy.calls.argsFor(0);
+      expect(args[0]).toBeCloseTo(yaw, 10);
+      expect(args[1]).toBeCloseTo(pitch, 10);
+      expect(args[2]).toBe(0);
+    }
+
+    // 50 ms at one field of view of 75 degrees per second.
+    const angle = 75 * 0.05 * Math.PI / 180;
+
+    it('turns the view while a key is held', () => {
+      createVRManager();
+      vrManager.startLooking('d', 1, 0);
+      runFrame(start + 50);
+      expectRotation(angle, 0);
+
+      // Two keys turn the view diagonally.
+      vrManager.startLooking('w', 0, 1);
+      runFrame(start + 100);
+      expectRotation(angle, angle);
+
+      // Shift changes the key of the release.
+      releaseKey('D');
+      runFrame(start + 150);
+      expectRotation(0, angle);
+
+      releaseKey('w');
+      expect(cancelSpy).toHaveBeenCalled();
+    });
+
+    it('turns slower when zoomed in', () => {
+      createVRManager();
+      vrManager.setFieldOfView(30);
+      vrManager.startLooking('a', -1, 0);
+      runFrame(start + 50);
+      expectRotation(-30 * 0.05 * Math.PI / 180, 0);
+    });
+
+    it('stops turning when the window loses the focus', () => {
+      createVRManager();
+      vrManager.startLooking('s', 0, -1);
+      window.dispatchEvent(new Event('blur'));
+      expect(cancelSpy).toHaveBeenCalled();
+
+      // The key that was held does not turn the view any more.
+      frames = [];
+      vrManager.startLooking('a', -1, 0);
+      runFrame(start + 50);
+      expectRotation(-angle, 0);
+    });
+
+    it('stops turning when VR is disabled', () => {
+      createVRManager();
+      vrManager.startLooking('d', 1, 0);
+      vrManager.configure(vrConfig('equirectangular', false));
+      expect(cancelSpy).toHaveBeenCalled();
+    });
+
+    it('zooms by steps', () => {
+      createVRManager();
+      vrManager.zoomStep(1);
+      expect(vrManager.getFieldOfView()).toBe(70);
+      vrManager.zoomStep(-1);
+      vrManager.zoomStep(-1);
+      expect(vrManager.getFieldOfView()).toBe(80);
+    });
+  });
+
   describe('pointer gestures', () => {
     beforeEach(() => {
       if (!window.PointerEvent) {

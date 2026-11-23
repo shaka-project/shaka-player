@@ -1425,7 +1425,13 @@ shakaDemo.Config = class {
         .addUITextInput_('Play', 'shortcuts.play')
         .addUITextInput_('Take Screenshot', 'shortcuts.take_screenshot')
         .addUITextInput_('Last Frame', 'shortcuts.last_frame')
-        .addUITextInput_('Next Frame', 'shortcuts.next_frame');
+        .addUITextInput_('Next Frame', 'shortcuts.next_frame')
+        .addUITextInput_('VR Look Left', 'shortcuts.vr_look_left')
+        .addUITextInput_('VR Look Right', 'shortcuts.vr_look_right')
+        .addUITextInput_('VR Look Up', 'shortcuts.vr_look_up')
+        .addUITextInput_('VR Look Down', 'shortcuts.vr_look_down')
+        .addUITextInput_('VR Zoom In', 'shortcuts.vr_zoom_in')
+        .addUITextInput_('VR Zoom Out', 'shortcuts.vr_zoom_out');
   }
 
   /** @private */
