@@ -296,14 +296,29 @@ function httpPluginTests(usingFetch) {
        * @param {?string} contentLength
        * @param {boolean} byteStream
        * @param {!Object<string, string>=} extraHeaders
+       * @param {boolean=} ignoreByobOffset
        */
-      function respondWithChunks(contentLength, byteStream, extraHeaders) {
+      function respondWithChunks(contentLength, byteStream, extraHeaders,
+          ignoreByobOffset = false) {
         shaka.net.HttpFetchPlugin['fetch_'] = () => {
           let index = 0;
           /** @type {!ReadableStreamSource} */
           const source = {
             pull: (controller) => {
               if (index < chunks.length) {
+                const byobRequest = controller['byobRequest'];
+                if (ignoreByobOffset && byobRequest) {
+                  const chunk = chunks[index++];
+                  // Simulate a Fetch body that writes at byte zero but still
+                  // reports the requested offset in the reader's result.
+                  const BufferUtils = shaka.util.BufferUtils;
+                  const view = /** @type {!ArrayBufferView} */ (
+                    byobRequest.view);
+                  const buffer = BufferUtils.getTransferredBuffer(view);
+                  BufferUtils.toUint8(buffer).set(chunk);
+                  byobRequest.respond(chunk.byteLength);
+                  return;
+                }
                 // A byte stream transfers the chunks it is given.
                 controller.enqueue(chunks[index++].slice());
               } else {
@@ -423,6 +438,17 @@ function httpPluginTests(usingFetch) {
       }
 
       filterDescribe('with a byte stream', byteStreams, () => {
+        it('reads all bytes when BYOB ignores the view offset', async () => {
+          respondWithChunks(String(fullBody.byteLength), /* byteStream= */ true,
+              {}, /* ignoreByobOffset= */ true);
+          const response = await download(null);
+          expect(shaka.util.BufferUtils.toUint8(response.data))
+              .toEqual(fullBody);
+          if (byobRead) {
+            expect(byobRead).toHaveBeenCalledTimes(chunks.length + 1);
+          }
+        });
+
         it('does not use a BYOB reader for a compressed response', async () => {
           respondWithChunks('4', /* byteStream= */ true,
               {'Content-Encoding': 'gzip'});
