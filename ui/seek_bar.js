@@ -41,26 +41,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-show-controls-on-mouse-over',
         ]);
 
-    // Seek through the same path as the keyboard controls.  The generic
-    // range wheel handler only changes the bar and schedules a seek, allowing
-    // playback updates to overwrite the value before that seek runs.
-    this.eventManager.listen(this.container, 'wheel', (e) => {
-      const event = /** @type {!WheelEvent} */ (e);
-      if (event.ctrlKey || event.metaKey || !event.deltaY ||
-          this.bar.disabled || !this.controls.isOpaque() ||
-          !this.video.duration || !this.isShowing()) {
-        return;
-      }
-
-      event.preventDefault();
-      const range = this.player.seekRange();
-      const currentTime = this.controls.isSeeking() ?
-          this.getValue() : this.video.currentTime;
-      const newTime = currentTime + (event.deltaY > 0 ? -1 : 1);
-      this.controls.seekTo(
-          Math.max(range.start, Math.min(range.end, newTime)), false);
-    });
-
     /** @private {!HTMLElement} */
     this.adMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.adMarkerContainer_.classList.add('shaka-ad-markers');
@@ -110,12 +90,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     /** @private {shaka.util.Timer} */
     this.chaptersTimer_ = new shaka.util.Timer(() => {
-      this.markChapters_();
-    });
-
-    shaka.ui.Utils.onForcedColorsChange(this.eventManager, () => {
-      this.update();
-      this.markAdBreaks_();
       this.markChapters_();
     });
 
@@ -269,6 +243,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.controls.hideSettingsMenus();
     });
 
+    shaka.ui.Utils.onForcedColorsChange(this.eventManager, () => {
+      this.update();
+      this.markAdBreaks_();
+      this.markChapters_();
+    });
+
     this.eventManager.listen(
         this.adManager, shaka.ads.Utils.AD_STARTED, () => {
           if (!this.shouldBeDisplayed_()) {
@@ -317,6 +297,28 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickNow();
     });
+
+    if (this.config_.enableSeekBarWheel) {
+      // Seek through the same path as the keyboard controls.  The generic
+      // range wheel handler only changes the bar and schedules a seek, allowing
+      // playback updates to overwrite the value before that seek runs.
+      this.eventManager.listen(this.container, 'wheel', (e) => {
+        const event = /** @type {!WheelEvent} */ (e);
+        if (event.ctrlKey || event.metaKey || !event.deltaY ||
+            this.bar.disabled || !this.controls.isOpaque() ||
+            !this.video.duration || !this.isShowing()) {
+          return;
+        }
+
+        event.preventDefault();
+        const range = this.player.seekRange();
+        const currentTime = this.controls.isSeeking() ?
+            this.getValue() : this.video.currentTime;
+        const newTime = currentTime + (event.deltaY > 0 ? -1 : 1);
+        this.controls.seekTo(
+            Math.max(range.start, Math.min(range.end, newTime)), false);
+      });
+    }
 
     this.eventManager.listen(this.bar, 'keydown', () => {
       this.valueBeforeKeyPress_ = this.getValue();

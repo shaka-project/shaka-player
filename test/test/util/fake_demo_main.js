@@ -40,6 +40,7 @@ shaka.test.FakeDemoMain = class {
       fastForwardRates: [2, 4, 8, 1],
       rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
+      enableSeekBarWheel: false,
       customContextMenu: true,
       castReceiverAppId: '',
       castAndroidReceiverCompatible: false,

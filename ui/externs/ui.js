@@ -334,6 +334,7 @@ shaka.extern.UITrackLabelCallback;
  *   fastForwardRates: !Array<number>,
  *   rewindRates: !Array<number>,
  *   addSeekBar: boolean,
+ *   enableSeekBarWheel: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
  *   castAndroidReceiverCompatible: boolean,
@@ -436,6 +437,10 @@ shaka.extern.UITrackLabelCallback;
  *   Whether or not a seek bar should be part of the UI.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {boolean} enableSeekBarWheel
+ *   Enables seeking with the mouse wheel over the seek bar.
+ *   <br>
+ *   Defaults to <code>false</code>.
  * @property {boolean} customContextMenu
  *   Whether or not a custom context menu replaces the default.
  *   <br>
