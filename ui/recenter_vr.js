@@ -75,8 +75,11 @@ shaka.ui.RecenterVRButton = class extends shaka.ui.Element {
 
   /** @override */
   checkAvailability() {
+    // The pad has a button to recenter the view, so the menus do not need
+    // another one.  The app may still put this one in the control panel.
+    const inPad = this.isSubMenu && this.controls.getConfig().enableVrPad;
     shaka.ui.Utils.setDisplay(this.recenterVRButton_,
-        this.controls.isPlayingVR() && !this.isSubMenuOpened);
+        this.controls.isPlayingVR() && !this.isSubMenuOpened && !inPad);
   }
 
   /** @override */

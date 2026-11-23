@@ -411,6 +411,7 @@ shaka.extern.UITrackLabelCallback;
  *   showRemainingTimeInPresentationTime: boolean,
  *   enableVrDeviceMotion: boolean,
  *   enableVrWheelZoom: boolean,
+ *   enableVrPad: boolean,
  *   showUIAlways: boolean,
  *   showUIAlwaysOnAudioOnly: boolean,
  *   preferIntlDisplayNames: boolean,
@@ -727,6 +728,14 @@ shaka.extern.UITrackLabelCallback;
  *   still be changed with a pinch gesture or through the API.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {boolean} enableVrPad
+ *   Shows a pad with arrows below the top controls while VR content is
+ *   playing.  Holding an arrow turns the view, and the button in the middle
+ *   resets it.  While it is enabled, the <code>recenter_vr</code> button
+ *   is not shown in the overflow and context menus.
+ *   <br>
+ *   Defaults to <code>true</code>, except on mobile devices, smart TVs and
+ *   Chromecast, where it defaults to <code>false</code>.
  * @property {boolean} showUIAlways
  *   If true, always keep the UI visible for all content.
  *   <br>

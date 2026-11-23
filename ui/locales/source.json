@@ -475,6 +475,22 @@
     "description": "Label for a slider used to set the volume level of the video player.",
     "message": "Volume"
   },
+  "VR_LOOK_DOWN": {
+    "description": "Label for a button that turns the view of 360-degree (VR) video down while it is held.",
+    "message": "Look down"
+  },
+  "VR_LOOK_LEFT": {
+    "description": "Label for a button that turns the view of 360-degree (VR) video to the left while it is held.",
+    "message": "Look left"
+  },
+  "VR_LOOK_RIGHT": {
+    "description": "Label for a button that turns the view of 360-degree (VR) video to the right while it is held.",
+    "message": "Look right"
+  },
+  "VR_LOOK_UP": {
+    "description": "Label for a button that turns the view of 360-degree (VR) video up while it is held.",
+    "message": "Look up"
+  },
   "WHITE": {
     "description": "Name of the color white, in a menu used to select the color of the subtitles.",
     "message": "White"

@@ -22,3 +22,107 @@
    * shrinking. */
   margin: 0;
 }
+
+/* The pad to look around VR content, below the top controls.  Its arrows keep
+ * their side of the screen in right-to-left languages, but the pad sits at
+ * the start of the line, as the content title does. */
+.shaka-vr-pad {
+  direction: ltr;
+  display: grid;
+  grid-template:
+    ". up ." 26px
+    "left recenter right" 26px
+    ". down ." 26px / 26px 26px 26px;
+  width: 78px;
+  margin-block-start: 8px;
+  margin-inline-start: 12px;
+  border-radius: 50%;
+  background: var(--shaka-bg);
+
+  /* A light ring keeps the shape of the pad visible over a dark video, as at
+   * the start of many of them.  It does not take any room. */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 35%);
+
+  /* Holding an arrow on a touch screen must not scroll or zoom the page. */
+  touch-action: none;
+  .unselectable();
+  .show-when-controls-shown();
+
+  .shaka-vr-pad-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* The highlight of a button stays clear of the edge of the pad. */
+    margin: 3px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--shaka-font-color);
+    opacity: 0.75;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible,
+    &:active {
+      opacity: 1;
+      background: rgba(255, 255, 255, 20%);
+    }
+
+    .shaka-ui-icon {
+      font-size: 18px;
+    }
+  }
+
+  /* The arrows are the same chevron, which points to the left. */
+  .shaka-vr-pad-up {
+    grid-area: up;
+
+    .shaka-ui-icon {
+      transform: rotate(90deg);
+    }
+  }
+
+  .shaka-vr-pad-left {
+    grid-area: left;
+  }
+
+  .shaka-vr-pad-recenter {
+    grid-area: recenter;
+  }
+
+  .shaka-vr-pad-right {
+    grid-area: right;
+
+    .shaka-ui-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .shaka-vr-pad-down {
+    grid-area: down;
+
+    .shaka-ui-icon {
+      transform: rotate(-90deg);
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .shaka-vr-pad {
+    background: Canvas;
+    border: 1px solid ButtonText;
+
+    .shaka-vr-pad-button {
+      color: ButtonText;
+      opacity: 1;
+
+      &:hover,
+      &:focus-visible,
+      &:active {
+        color: Highlight;
+      }
+    }
+  }
+}

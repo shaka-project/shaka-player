@@ -29,6 +29,7 @@ goog.require('shaka.ui.SkipAdButton');
 goog.require('shaka.ui.TextStylePreview');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.ui.VRManager');
+goog.require('shaka.ui.VRPad');
 goog.require('shaka.util.ArrayUtils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -1903,6 +1904,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         shaka.log.alwaysWarn(
             'Unrecognized top control panel element requested:', name);
       }
+    }
+
+    // It goes below the top controls, which can take their whole width.
+    if (this.config_.enableVrPad) {
+      this.elements_.push(new shaka.ui.VRPad(this.topControls_, this));
     }
 
     /** @private {!HTMLElement} */

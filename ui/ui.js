@@ -463,6 +463,7 @@ shaka.ui.Overlay = class {
       showRemainingTimeInPresentationTime: false,
       enableVrDeviceMotion: true,
       enableVrWheelZoom: false,
+      enableVrPad: true,
       showUIAlways: false,
       showUIAlwaysOnAudioOnly: true,
       preferIntlDisplayNames: true,
@@ -544,6 +545,9 @@ shaka.ui.Overlay = class {
       config.customContextMenu = false;
       config.singleClickForPlayAndPause = false;
       config.seekOnTaps = true;
+      // Dragging the view is easier than pressing small arrows on a touch
+      // screen.
+      config.enableVrPad = false;
       config.enableTooltips = false;
       const device = shaka.device.DeviceFactory.getDevice();
       config.enableFullscreenOnRotation = device.getBrowserEngine() !==
@@ -571,6 +575,7 @@ shaka.ui.Overlay = class {
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
+      config.enableVrPad = false;
       config.controlPanelElements = [
         'play_pause',
         'time_and_duration',
@@ -584,6 +589,8 @@ shaka.ui.Overlay = class {
       config.singleClickForPlayAndPause = false;
       config.enableTooltips = false;
       config.doubleClickForFullscreen = false;
+      // The arrows of the remote move the focus between the controls.
+      config.enableVrPad = false;
       // Smart TVs adjust volume with the remote, so replace the composite
       // mute_volume element (mute button + volume slider) with a standalone
       // mute button: keep the mute control but hide the volume slider.
