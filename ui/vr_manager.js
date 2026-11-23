@@ -73,6 +73,26 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {number} */
     this.prevY_ = 0;
 
+    /**
+     * The last moves of the drag, to measure the speed of the view when the
+     * pointer is released.
+     * @private {!Array<{time: number, yaw: number, pitch: number}>}
+     */
+    this.recentMoves_ = [];
+
+    /**
+     * The speed of the view after a drag, in radians per millisecond, as
+     * [yaw, pitch].
+     * @private {!Array<number>}
+     */
+    this.inertia_ = [0, 0];
+
+    /** @private {?number} */
+    this.inertiaFrameId_ = null;
+
+    /** @private {number} */
+    this.lastInertiaTime_ = 0;
+
     /** @private {?number} */
     this.pinchDistance_ = null;
 
@@ -833,7 +853,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         ['pointerup', 'pointercancel', 'lostpointercapture'], (e) => {
           const event = /** @type {!PointerEvent} */(e);
           if (this.pointers_.delete(event.pointerId)) {
+            const wasPanning = this.onGesture_ && !this.pointers_.size;
             this.updateGesture_();
+            // A cancelled pointer did not release the view.
+            if (wasPanning && event.type == 'pointerup') {
+              this.startInertia_();
+            }
           }
         });
   }
@@ -845,6 +870,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   updateGesture_() {
+    this.stopInertia_();
     this.onGesture_ = false;
     this.pinchDistance_ = null;
     if (this.pointers_.size == 1) {
@@ -868,6 +894,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     this.pointers_.clear();
     this.onGesture_ = false;
     this.pinchDistance_ = null;
+    this.stopInertia_();
   }
 
   /**
@@ -902,6 +929,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    */
   gestureStart_(x, y) {
     this.onGesture_ = true;
+    this.recentMoves_ = [];
     this.prevX_ = x;
     this.prevY_ = y;
   }
@@ -912,14 +940,131 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
    * @private
    */
   gestureMove_(x, y) {
-    const touchScaleFactor = -0.60 * Math.PI / 180;
-    this.vrWebgl_.rotateViewGlobal((x - this.prevX_) * touchScaleFactor,
-        (y - this.prevY_) * -1 * touchScaleFactor, 0);
+    // The view moves slower when it is zoomed in, so that the image follows
+    // the pointer in the same way.
+    const scale = -this.vrWebgl_.getFieldOfView() *
+        shaka.ui.VRManager.DRAG_SPEED_ * shaka.ui.VRManager.TO_RADIANS_;
+    const yaw = (x - this.prevX_) * scale;
+    const pitch = (y - this.prevY_) * -scale;
+    this.vrWebgl_.rotateViewGlobal(yaw, pitch, 0);
 
     this.prevX_ = x;
     this.prevY_ = y;
+
+    const now = performance.now();
+    this.recentMoves_.push({time: now, yaw, pitch});
+    while (now - this.recentMoves_[0].time >
+        shaka.ui.VRManager.INERTIA_SAMPLE_TIME_) {
+      this.recentMoves_.shift();
+    }
+  }
+
+  /**
+   * Keeps the view moving after a drag, at the speed of its last moves, and
+   * slows it down until it stops.
+   *
+   * @private
+   */
+  startInertia_() {
+    const moves = this.recentMoves_;
+    this.recentMoves_ = [];
+    const now = performance.now();
+    // The pointer did not move just before it was released.
+    if (moves.length < 2 || now - moves[moves.length - 1].time >
+        shaka.ui.VRManager.INERTIA_SAMPLE_TIME_ / 2) {
+      return;
+    }
+    // The first move happened before the time of the samples.
+    const duration = moves[moves.length - 1].time - moves[0].time;
+    if (duration <= 0) {
+      return;
+    }
+    let yaw = 0;
+    let pitch = 0;
+    for (const move of moves.slice(1)) {
+      yaw += move.yaw;
+      pitch += move.pitch;
+    }
+    this.inertia_ = [yaw / duration, pitch / duration];
+    this.lastInertiaTime_ = now;
+    this.inertiaFrameId_ =
+        requestAnimationFrame((time) => this.inertiaStep_(time));
+  }
+
+  /**
+   * @param {number} time
+   * @private
+   */
+  inertiaStep_(time) {
+    if (!this.vrWebgl_) {
+      this.stopInertia_();
+      return;
+    }
+    // A long frame, as when the page was hidden, would make the view jump.
+    const elapsed = Math.min(Math.max(time - this.lastInertiaTime_, 0), 100);
+    this.lastInertiaTime_ = time;
+    this.vrWebgl_.rotateViewGlobal(
+        this.inertia_[0] * elapsed, this.inertia_[1] * elapsed, 0);
+    const decay =
+        Math.exp(-elapsed / shaka.ui.VRManager.INERTIA_TIME_CONSTANT_);
+    this.inertia_[0] *= decay;
+    this.inertia_[1] *= decay;
+    const speed = Math.hypot(this.inertia_[0], this.inertia_[1]);
+    if (speed < shaka.ui.VRManager.INERTIA_MIN_SPEED_) {
+      this.stopInertia_();
+    } else {
+      this.inertiaFrameId_ =
+          requestAnimationFrame((t) => this.inertiaStep_(t));
+    }
+  }
+
+  /**
+   * @private
+   */
+  stopInertia_() {
+    if (this.inertiaFrameId_ != null) {
+      cancelAnimationFrame(this.inertiaFrameId_);
+      this.inertiaFrameId_ = null;
+    }
+    this.inertia_ = [0, 0];
   }
 };
+
+/**
+ * How far a drag turns the view, in fields of view per pixel: 0.6 degrees
+ * per pixel at the default field of view of 75 degrees.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.DRAG_SPEED_ = 0.6 / 75;
+
+/**
+ * The time before the release of a drag that gives the speed of the view,
+ * in milliseconds.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.INERTIA_SAMPLE_TIME_ = 100;
+
+/**
+ * How fast the view slows down after a drag: its speed is divided by e every
+ * this many milliseconds.
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.INERTIA_TIME_CONSTANT_ = 300;
+
+/**
+ * The speed at which the view stops after a drag, in radians per
+ * millisecond (about 1 degree per second).
+ *
+ * @const {number}
+ * @private
+ */
+shaka.ui.VRManager.INERTIA_MIN_SPEED_ = Math.PI / 180 / 1000;
 
 /**
  * @const {number}

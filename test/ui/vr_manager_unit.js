@@ -450,6 +450,106 @@ describe('VRManager', () => {
       expect(vrManager.isPlayingVR()).toBe(false);
       expect(container.classList.contains('shaka-vr-gestures')).toBe(false);
     });
+
+    it('pans slower when zoomed in', () => {
+      createVRManager();
+      vrManager.setFieldOfView(30);
+      dispatchPointer('pointerdown', 1, 100, 100);
+      dispatchPointer('pointermove', 1, 101, 100);
+      const yaw = rotateSpy.calls.argsFor(0)[0];
+      expect(yaw).toBeCloseTo(-0.6 * 30 / 75 * Math.PI / 180, 5);
+    });
+
+    describe('inertia', () => {
+      /** @type {number} */
+      let now;
+      /** @type {!Array<function(number)>} */
+      let frames;
+      /** @type {!jasmine.Spy} */
+      let cancelSpy;
+
+      // 0.6 degrees per pixel, 10 pixels every 10 ms.
+      const speed = -0.6 * Math.PI / 180;
+
+      beforeEach(() => {
+        now = 0;
+        frames = [];
+        spyOn(performance, 'now').and.callFake(() => now);
+        spyOn(window, 'requestAnimationFrame').and.callFake((callback) => {
+          frames.push(callback);
+          return frames.length;
+        });
+        cancelSpy = spyOn(window, 'cancelAnimationFrame');
+      });
+
+      /** @param {number} endTime */
+      function drag(endTime) {
+        createVRManager();
+        dispatchPointer('pointerdown', 1, 0, 0);
+        for (let x = 10; x <= 30; x += 10) {
+          now = x;
+          dispatchPointer('pointermove', 1, x, 0);
+        }
+        now = endTime;
+        rotateSpy.calls.reset();
+      }
+
+      /**
+       * @param {number} time
+       * @return {number} The yaw of the frame.
+       */
+      function runFrame(time) {
+        expect(frames.length).toBe(1);
+        rotateSpy.calls.reset();
+        frames.shift()(time);
+        expect(rotateSpy).toHaveBeenCalledTimes(1);
+        return rotateSpy.calls.argsFor(0)[0];
+      }
+
+      it('keeps the view moving after a drag and slows it down', () => {
+        drag(30);
+        dispatchPointer('pointerup', 1, 30, 0);
+
+        // The view keeps the speed of the drag.
+        expect(runFrame(46)).toBeCloseTo(speed * 16, 5);
+        let previous = Infinity;
+        for (let time = 62; frames.length; time += 16) {
+          const yaw = Math.abs(runFrame(time));
+          expect(yaw).toBeLessThan(previous);
+          previous = yaw;
+        }
+        // The view stops.
+        expect(previous).toBeLessThan(0.001);
+      });
+
+      it('does not move after the pointer stopped', () => {
+        drag(200);
+        dispatchPointer('pointerup', 1, 30, 0);
+        expect(frames.length).toBe(0);
+      });
+
+      it('does not move after a cancelled pointer', () => {
+        drag(30);
+        dispatchPointer('pointercancel', 1, 30, 0);
+        expect(frames.length).toBe(0);
+      });
+
+      it('stops when the view is touched again', () => {
+        drag(30);
+        dispatchPointer('pointerup', 1, 30, 0);
+        expect(frames.length).toBe(1);
+
+        dispatchPointer('pointerdown', 2, 50, 50);
+        expect(cancelSpy).toHaveBeenCalledWith(1);
+      });
+
+      it('stops when VR is disabled', () => {
+        drag(30);
+        dispatchPointer('pointerup', 1, 30, 0);
+        vrManager.configure(vrConfig('equirectangular', false));
+        expect(cancelSpy).toHaveBeenCalledWith(1);
+      });
+    });
   });
 
   it('does not change the status without WebGL', () => {
