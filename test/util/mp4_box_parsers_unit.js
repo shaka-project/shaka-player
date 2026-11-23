@@ -636,4 +636,188 @@ describe('Mp4BoxParsers', () => {
       expect(parsed.samples[0].iv).toEqual(expectedIv);
     });
   });
+  describe('parseSpatialVideoInfo', () => {
+    const Mp4BoxParsers = shaka.util.Mp4BoxParsers;
+
+    /**
+     * @param {string} type
+     * @param {...!Uint8Array} children
+     * @return {!Uint8Array}
+     */
+    function box(type, ...children) {
+      const size = 8 + children.reduce((total, c) => total + c.length, 0);
+      const out = shaka.util.BufferUtils.toUint8(new ArrayBuffer(size));
+      shaka.util.BufferUtils.toDataView(out).setUint32(0, size);
+      for (let i = 0; i < 4; i++) {
+        out[4 + i] = type.charCodeAt(i);
+      }
+      let offset = 8;
+      for (const child of children) {
+        out.set(child, offset);
+        offset += child.length;
+      }
+      return out;
+    }
+
+    /**
+     * @param {string} type
+     * @param {!Array<number>} payload Bytes after the version and flags.
+     * @return {!Uint8Array}
+     */
+    function fullBox(type, payload) {
+      return box(type, new Uint8Array([0, 0, 0, 0, ...payload]));
+    }
+
+    /**
+     * @param {string} type The sample entry type, such as 'hvc1'.
+     * @param {...!Uint8Array} children
+     * @return {!Uint8Array} An init segment with that video sample entry.
+     */
+    function initSegment(type, ...children) {
+      // The visual sample entry has 78 bytes before its child boxes.
+      const sampleEntry = box(type, new Uint8Array(78), ...children);
+      // The sample description has an entry count before its entries.
+      const stsd = box('stsd', new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]),
+          sampleEntry);
+      return box('moov', box('trak', box('mdia', box('minf',
+          box('stbl', stsd)))));
+    }
+
+    /**
+     * @param {number} value A fraction of the frame.
+     * @return {!Array<number>} The value as a 0.32 fixed point number.
+     */
+    function fixed32(value) {
+      const n = Math.round(value * 0x100000000);
+      return [n >>> 24, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff];
+    }
+
+    /**
+     * @param {number} left
+     * @param {number} right
+     * @return {!Uint8Array} A Spatial Media 'sv3d' box with an 'equi'
+     *   projection cropped by the given bounds.
+     */
+    function sv3d(left, right) {
+      return box('sv3d',
+          fullBox('svhd', [0]),
+          box('proj',
+              fullBox('prhd', new Array(12).fill(0)),
+              fullBox('equi',
+                  [...fixed32(0), ...fixed32(0),
+                    ...fixed32(left), ...fixed32(right)])));
+    }
+
+    /**
+     * @param {number} eyes The flags of the 'stri' box.
+     * @param {string} projection
+     * @return {!Uint8Array} An Apple 'vexu' box, as in MV-HEVC content.
+     */
+    function vexu(eyes, projection) {
+      return box('vexu',
+          box('eyes',
+              fullBox('stri', [eyes]),
+              fullBox('hero', [1])),
+          box('proj',
+              fullBox('prji',
+                  Array.from(projection).map((c) => c.charCodeAt(0)))));
+    }
+
+    it('reads the Spatial Media boxes of VR180 content', () => {
+      // Each eye on its own half, and the sphere cropped to 180 degrees.
+      const init = initSegment('avc1',
+          fullBox('st3d', [1]), sv3d(0.25, 0.25));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
+        projection: 'hequ',
+        hfov: 180,
+        stereoLayout: 'top-bottom',
+      });
+    });
+
+    it('reads the Spatial Media boxes of 360 content', () => {
+      const init = initSegment('av01', fullBox('st3d', [2]), sv3d(0, 0));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
+        projection: 'equi',
+        hfov: 360,
+        stereoLayout: 'left-right',
+      });
+    });
+
+    it('ignores unsupported Spatial Media bounds and layouts', () => {
+      // A third of the sphere, and the 'stereo-custom' mode.
+      const init = initSegment('vp09',
+          fullBox('st3d', [3]), sv3d(1 / 3, 1 / 3));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
+        projection: null,
+        hfov: null,
+        stereoLayout: null,
+      });
+    });
+
+    it('reads a monoscopic Spatial Media layout', () => {
+      const init = initSegment('hvc1', fullBox('st3d', [0]));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null).stereoLayout)
+          .toBe('mono');
+    });
+
+    it('reads the MV-HEVC stereo views of Apple content', () => {
+      // Apple 180 content: both eyes, as in the "180Lighthouse" example.
+      const init = initSegment('hvc1', vexu(0x03, 'hequ'));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
+        projection: 'hequ',
+        hfov: null,
+        stereoLayout: 'multiview',
+      });
+    });
+
+    it('reads a single MV-HEVC view as mono', () => {
+      const init = initSegment('hvc1', vexu(0x01, 'rect'));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null).stereoLayout)
+          .toBe('mono');
+    });
+
+    it('prefers the video layout of the manifest', () => {
+      const init = initSegment('hvc1',
+          fullBox('st3d', [1]), sv3d(0, 0));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(
+          init, 'CH-STEREO/PROJ-AIV')).toEqual({
+        projection: 'aiv',
+        hfov: null,
+        stereoLayout: 'multiview',
+      });
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(
+          init, 'CH-MONO')).toEqual({
+        projection: 'equi',
+        hfov: 360,
+        stereoLayout: 'mono',
+      });
+    });
+
+    it('reads the field of view when the manifest signals the rest', () => {
+      // Only the init segment signals the field of view of Apple content.
+      const init = initSegment('hvc1', box('vexu',
+          vexu(0x03, 'fish').subarray(8),
+          box('hfov', new Uint8Array([0, 2, 0xbf, 0x20]))));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(
+          init, 'CH-STEREO/PROJ-AIV')).toEqual({
+        projection: 'aiv',
+        hfov: 180,
+        stereoLayout: 'multiview',
+      });
+    });
+
+    it('returns nothing without spatial boxes', () => {
+      const init = initSegment('avc1', box('pasp', new Uint8Array(8)));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
+        projection: null,
+        hfov: null,
+        stereoLayout: null,
+      });
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(init, undefined)).toEqual({
+        projection: null,
+        hfov: null,
+        stereoLayout: null,
+      });
+    });
+  });
 });

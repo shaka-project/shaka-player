@@ -97,6 +97,12 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
     /** @private {?number} */
     this.vrHfov_ = null;
 
+    /**
+     * The stereo layout signaled in the content, if any.
+     * @private {?shaka.ui.VRWebgl.StereoLayout}
+     */
+    this.vrStereoLayout_ = null;
+
     this.listenToContextLoss_();
 
     this.loadEventManager_.listen(player, 'loading', () => {
@@ -111,7 +117,11 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       const spatialInfo = event['detail'];
       let unsupported = false;
       this.vrHfov_ = spatialInfo.hfov;
+      this.vrStereoLayout_ =
+          shaka.ui.VRManager.toStereoLayout_(spatialInfo.stereoLayout);
       switch (spatialInfo.projection) {
+        case null:
+          // Only the stereo layout is signaled.
         case 'rect':
           // Rectilinear content is the flat rectangular media.
           this.vrAsset_ = null;
@@ -160,6 +170,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         player, ['nospatialvideoinfo', 'unloading'], () => {
           this.vrAsset_ = null;
           this.vrHfov_ = null;
+          this.vrStereoLayout_ = null;
           this.checkVrStatus_();
         });
 
@@ -404,6 +415,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           }
         }
       }
+      if (this.vrWebgl_) {
+        this.vrWebgl_.setStereoLayout(this.getStereoLayout_());
+      }
     } else if (this.canvas_ && this.vrWebgl_) {
       this.canvas_.style.display = 'none';
       this.video_.classList.remove('shaka-vr-video');
@@ -438,6 +452,45 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
         this.vrWebgl_.restoreContext();
       }
     });
+  }
+
+  /**
+   * The layout signaled in the content takes precedence over the one in the
+   * configuration.
+   *
+   * @return {shaka.ui.VRWebgl.StereoLayout}
+   * @private
+   */
+  getStereoLayout_() {
+    return this.vrStereoLayout_ ||
+        shaka.ui.VRManager.toStereoLayout_(
+            this.config_.defaultVrStereoLayout) ||
+        shaka.ui.VRWebgl.StereoLayout.MONO;
+  }
+
+  /**
+   * @param {?string} stereoLayout As signaled in the content or the
+   *   configuration.
+   * @return {?shaka.ui.VRWebgl.StereoLayout} How to display it, or null if
+   *   it is unknown.
+   * @private
+   */
+  static toStereoLayout_(stereoLayout) {
+    const StereoLayout = shaka.ui.VRWebgl.StereoLayout;
+    switch (stereoLayout) {
+      case 'mono':
+        return StereoLayout.MONO;
+      case 'multiview':
+        // Each eye is a separate view of the bitstream, as in MV-HEVC.  The
+        // browser decodes a single view, so the frames are mono.
+        return StereoLayout.MONO;
+      case 'top-bottom':
+        return StereoLayout.TOP_BOTTOM;
+      case 'left-right':
+        return StereoLayout.LEFT_RIGHT;
+      default:
+        return null;
+    }
   }
 
   /**

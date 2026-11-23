@@ -51,21 +51,28 @@ describe('VRManager', () => {
   /**
    * @param {string} projectionMode
    * @param {boolean=} displayInVrMode
+   * @param {string=} stereoLayout
    * @return {shaka.extern.UIConfiguration}
    */
-  function vrConfig(projectionMode, displayInVrMode = true) {
+  function vrConfig(projectionMode, displayInVrMode = true,
+      stereoLayout = 'mono') {
     return /** @type {shaka.extern.UIConfiguration} */ ({
       displayInVrMode,
       defaultVrProjectionMode: projectionMode,
+      defaultVrStereoLayout: stereoLayout,
       enableVrDeviceMotion: true,
       enableVrWheelZoom: false,
     });
   }
 
-  /** @return {!shaka.ui.VRManager} */
-  function createVRManager() {
+  /**
+   * @param {string=} stereoLayout
+   * @return {!shaka.ui.VRManager}
+   */
+  function createVRManager(stereoLayout = 'mono') {
     vrManager = new shaka.ui.VRManager(container, canvas, video,
-        /** @type {?} */ (player), vrConfig('equirectangular'),
+        /** @type {?} */ (player),
+        vrConfig('equirectangular', true, stereoLayout),
         /** @type {?} */ (controls));
     return vrManager;
   }
@@ -361,6 +368,42 @@ describe('VRManager', () => {
     vrManager.release();
     vrManager = null;
     expect(video.classList.contains('shaka-vr-video')).toBe(false);
+  });
+
+  it('prefers the stereo layout of the content', () => {
+    const StereoLayout = shaka.ui.VRWebgl.StereoLayout;
+    // eslint-disable-next-line no-restricted-syntax
+    const layoutSpy = spyOn(shaka.ui.VRWebgl.prototype, 'setStereoLayout')
+        .and.callThrough();
+    /** @param {?string} stereoLayout */
+    const dispatchInfo = (stereoLayout) => {
+      player.dispatchEvent(new shaka.util.FakeEvent('spatialvideoinfo',
+          (new Map()).set('detail', {
+            projection: 'equi',
+            hfov: null,
+            stereoLayout,
+          })));
+    };
+    /** @return {shaka.ui.VRWebgl.StereoLayout} */
+    const lastLayout = () => layoutSpy.calls.mostRecent().args[0];
+
+    createVRManager('top-bottom');
+    expect(lastLayout()).toBe(StereoLayout.TOP_BOTTOM);
+
+    // MV-HEVC frames hold a single view.
+    dispatchInfo('multiview');
+    expect(lastLayout()).toBe(StereoLayout.MONO);
+
+    dispatchInfo('left-right');
+    expect(lastLayout()).toBe(StereoLayout.LEFT_RIGHT);
+
+    // Without a signaled layout, the configuration applies.
+    dispatchInfo(null);
+    expect(lastLayout()).toBe(StereoLayout.TOP_BOTTOM);
+
+    player.dispatchEvent(new shaka.util.FakeEvent('nospatialvideoinfo'));
+    vrManager.configure(vrConfig('equirectangular', true, 'left-right'));
+    expect(lastLayout()).toBe(StereoLayout.LEFT_RIGHT);
   });
 
   it('restores the view when the context is restored', () => {
