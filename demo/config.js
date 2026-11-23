@@ -1245,6 +1245,7 @@ shakaDemo.Config = class {
             trackLabelFormatOptions,
             trackLabelFormatNames)
         .addUIBoolInput_('Add Seek Bar', 'addSeekBar')
+        .addUIBoolInput_('Seek With Mouse Wheel', 'enableSeekBarWheel')
         .addUIBoolInput_('Enable custom context Menu', 'customContextMenu')
         .addUIBoolInput_('Clear Buffer On Quality Change',
             'clearBufferOnQualityChange')

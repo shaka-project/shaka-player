@@ -4378,6 +4378,8 @@ describe('UI', () => {
     });
 
     describe('seek bar interactions', () => {
+      /** @type {shaka.ui.Overlay} */
+      let ui;
       /** @type {shaka.ui.Controls} */
       let controls;
       /** @type {shaka.Player} */
@@ -4416,7 +4418,7 @@ describe('UI', () => {
           paused = true;
         });
 
-        const ui = await UiUtils.createUIThroughAPI(videoContainer, video);
+        ui = await UiUtils.createUIThroughAPI(videoContainer, video);
         controls = ui.getControls();
         player = controls.getLocalPlayer();
         spyOn(player, 'getAssetUri').and.returnValue('fake-uri');
@@ -4431,6 +4433,14 @@ describe('UI', () => {
 
         focusForKeyboardTest(seekBar);
       });
+
+      /** @param {boolean} enabled */
+      function configureSeekBarWheel(enabled) {
+        ui.configure({enableSeekBarWheel: enabled});
+        seekBar = /** @type {!HTMLInputElement} */ (
+          UiUtils.getElementByClassName(videoContainer, 'shaka-seek-bar'));
+        focusForKeyboardTest(seekBar);
+      }
 
       /**
        * @param {number} fraction
@@ -4474,10 +4484,26 @@ describe('UI', () => {
         return event;
       }
 
+      it('ignores the wheel by default', () => {
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(50);
+      });
+
+      it('can turn wheel seeking on and off through configuration', () => {
+        configureSeekBarWheel(true);
+        expect(scroll(-100).defaultPrevented).toBe(true);
+        expect(video.currentTime).toBe(51);
+
+        configureSeekBarWheel(false);
+        expect(scroll(-100).defaultPrevented).toBe(false);
+        expect(video.currentTime).toBe(51);
+      });
+
       for (const deltaY of [-100, 100]) {
         for (const playing of [false, true]) {
           it(`seeks with wheel delta ${deltaY} while playing=${playing}`,
               async () => {
+                configureSeekBarWheel(true);
                 if (playing) {
                   video.play();
                 }
@@ -4502,6 +4528,7 @@ describe('UI', () => {
       }
 
       it('accumulates wheel events from the current playback time', () => {
+        configureSeekBarWheel(true);
         video.currentTime = 60;
         scroll(-100);
         scroll(-100);
@@ -4512,6 +4539,7 @@ describe('UI', () => {
       });
 
       it('clamps wheel seeks to the live seek range', () => {
+        configureSeekBarWheel(true);
         Util.funcSpy(player.seekRange).and.returnValue({start: 20, end: 80});
         video.currentTime = 20.5;
         scroll(100);
@@ -4522,6 +4550,7 @@ describe('UI', () => {
       });
 
       it('ignores zoom gestures and horizontal scrolling', () => {
+        configureSeekBarWheel(true);
         expect(scroll(-100, {ctrlKey: true}).defaultPrevented).toBe(false);
         expect(scroll(-100, {metaKey: true}).defaultPrevented).toBe(false);
         expect(scroll(0, {deltaX: 100}).defaultPrevented).toBe(false);
@@ -4529,6 +4558,7 @@ describe('UI', () => {
       });
 
       it('ignores the wheel while disabled or hidden', () => {
+        configureSeekBarWheel(true);
         seekBar.disabled = true;
         expect(scroll(-100).defaultPrevented).toBe(false);
         seekBar.disabled = false;
@@ -4538,6 +4568,7 @@ describe('UI', () => {
       });
 
       it('lets the wheel take over a drag', async () => {
+        configureSeekBarWheel(true);
         mouseEvent('mousedown', positionOfBar(0.25));
         const dragTime = parseFloat(seekBar.value);
         scroll(-100);

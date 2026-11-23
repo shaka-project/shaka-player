@@ -335,6 +335,9 @@ customized with `addSeekBar` boolean and `bigButtons` in the config.
 UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
+Set `enableSeekBarWheel` to `true` to seek with the mouse wheel over the seek bar.
+It defaults to `false` so the wheel can scroll the page.
+
 #### Changing seek bar progress colors
 The seek bar consists of three segments: past (already played part of the presentation),
 future-buffered and future-unbuffered.
