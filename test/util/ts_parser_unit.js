@@ -85,6 +85,15 @@ describe('TsParser', () => {
     expect(headerAudioStartTime).toBe(audioStartTime);
   });
 
+  it('gets the end time of the video from TS PES headers', async () => {
+    const segment = BufferUtils.toUint8(
+        await Util.fetch('/base/test/test/assets/ts-audio-lead.ts'));
+    // Its last frame is presented at 2.04, and frames last 0.04 seconds.
+    const tsParser = new shaka.util.TsParser().parse(segment);
+    const endTime = tsParser.getVideoEndTimeFromPesHeaders();
+    expect(endTime).toBeCloseTo(2.08, 5);
+  });
+
   it('get the codecs from a TS segment', async () => {
     const responses = await Promise.all([
       Util.fetch('/base/test/test/assets/id3-metadata.ts'),
