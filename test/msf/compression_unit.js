@@ -167,6 +167,27 @@ filterDescribe('shaka.msf.Compression', isMSFSupported, () => {
         await expectAsync(Promise.resolve(Compression.decode(obj, codec)))
             .toBeRejected();
       });
+
+      it('rejects a payload that decompresses past the limit', async () => {
+        // Neither is in the externs, so both are reached untyped.
+        /** @type {?} */
+        const CompressionStream = window['CompressionStream'];
+        if (!CompressionStream) {
+          pending('CompressionStream is not supported');
+        }
+        // 17 MiB of zeros, which GZIP shrinks to a few kilobytes.
+        /** @type {?} */
+        const zeros = new Blob([new Uint8Array(17 * 1024 * 1024)]);
+        const gzipped = shaka.util.BufferUtils.toUint8(await new Response(
+            zeros.stream().pipeThrough(new CompressionStream('gzip')))
+            .arrayBuffer());
+        expect(gzipped.byteLength).toBeLessThan(1024 * 1024);
+        const obj = moqObject(gzipped, compression(1));
+        const error = await Promise.resolve(Compression.decode(obj, codec))
+            .then(() => null, (e) => e);
+        expect(error instanceof Error ? error.message : error)
+            .toContain('exceeds');
+      });
     });
   });
 });

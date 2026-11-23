@@ -425,6 +425,66 @@ filterDescribe('LOCParser', isMSFSupported, () => {
       ], slice));
       expect(result.payload).toEqual(slice);
     });
+
+    describe('as a Track Property', () => {
+      /**
+       * @param {number} objectId
+       * @param {!Array<{type: number, value: (number|!Uint8Array)}>} pairs
+       * @return {!shaka.msf.Utils.MOQObject}
+       */
+      function trackObject(objectId, pairs) {
+        const obj = moqObject(pairs, slice);
+        obj.location.object = BigInt(objectId);
+        obj.trackProperties = properties([{type: 0x0d, value: avcc()}]);
+        return obj;
+      }
+
+      it('restores the parameter sets ahead of a Group\'s first Object',
+          () => {
+            const parser = locParser(FRAME, 'avc');
+            const result =
+                parser.parse(trackObject(0, [{type: 0x10, value: 1000000}]));
+            expect(result.payload).toEqual(expectedPayload([SPS, PPS]));
+          });
+
+      it('restores them without any Object Properties', () => {
+        const parser = locParser(FRAME, 'avc');
+        const obj = trackObject(0, []);
+        obj.extensions = null;
+        expect(parser.parse(obj).payload)
+            .toEqual(expectedPayload([SPS, PPS]));
+      });
+
+      it('leaves a later Object of the Group alone', () => {
+        const parser = locParser(FRAME, 'avc');
+        const result =
+            parser.parse(trackObject(3, [{type: 0x10, value: 1000000}]));
+        expect(result.payload).toEqual(slice);
+      });
+
+      it('follows the Frame Marking over the Object ID', () => {
+        const parser = locParser(FRAME, 'avc');
+        const keyFrame = parser.parse(trackObject(3, [
+          {type: 0x09, value: new Uint8Array([0x20])},
+          {type: 0x10, value: 1000000},
+        ]));
+        expect(keyFrame.payload).toEqual(expectedPayload([SPS, PPS]));
+        const delta = parser.parse(trackObject(0, [
+          {type: 0x09, value: new Uint8Array([0x00])},
+          {type: 0x10, value: 1100000},
+        ]));
+        expect(delta.payload).toEqual(slice);
+      });
+
+      it('is not applied twice when the Object carries one too', () => {
+        const parser = locParser(FRAME, 'avc');
+        const result = parser.parse(trackObject(0, [
+          {type: 0x0d, value: avcc()},
+          {type: 0x10, value: 1000000},
+        ]));
+        expect(result.payload).toEqual(expectedPayload([SPS, PPS]));
+      });
+    });
   });
 
   describe('reference timeline', () => {
