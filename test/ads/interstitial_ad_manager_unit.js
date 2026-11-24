@@ -2540,6 +2540,141 @@ describe('Interstitial Ad manager', () => {
 
       expect(onEventSpy).not.toHaveBeenCalled();
     });
+
+    describe('starting playback in an ad break', () => {
+      /** @type {boolean} */
+      let paused;
+      /** @type {{start: number, end: number}} */
+      let seekRange;
+      /** @type {!jasmine.Spy} */
+      let holdSpy;
+      /** @type {!jasmine.Spy} */
+      let preloadSpy;
+      /** @type {?Promise<number>} */
+      let hold;
+
+      beforeEach(() => {
+        paused = true;
+        seekRange = {start: 0, end: 15};
+        Object.defineProperty(video, 'paused', {
+          get: () => paused,
+          configurable: true,
+        });
+        spyOn(player, 'isLive').and.returnValue(true);
+        spyOn(player, 'seekRange').and.callFake(() => seekRange);
+        hold = null;
+        holdSpy = spyOn(player, 'holdStreamingStart').and.callFake((p) => {
+          hold = p;
+          return true;
+        });
+        const adPlayer = interstitialAdManager.getPlayer();
+        preloadSpy = spyOn(adPlayer, 'preload')
+            .and.returnValue(Promise.resolve(null));
+        spyOn(adPlayer, 'load').and.returnValue(Promise.resolve());
+      });
+
+      /**
+       * Adds a 20 s Replace event at the given time.
+       *
+       * @param {number} startTime
+       * @param {number=} maxDuration
+       * @return {!Promise}
+       */
+      async function addBreak(startTime, maxDuration = 20) {
+        const eventNode = TXml.parseXmlString([
+          `<Event duration="20" id="BREAK" presentationTime="${startTime}">`,
+          '<ReplacePresentation uri="https://ads/test.mpd"',
+          ` maxDuration="${maxDuration}"/>`,
+          '</Event>',
+        ].join(''));
+        goog.asserts.assert(eventNode, 'Should have a event node!');
+        await addRegion({
+          startTime,
+          endTime: startTime + 20,
+          id: 'BREAK',
+          schemeIdUri: 'urn:mpeg:dash:event:alternativeMPD:replace:2025',
+          eventNode,
+          value: '',
+          timescale: 1,
+        });
+      }
+
+      function startStreaming() {
+        player.dispatchEvent(new shaka.util.FakeEvent('streaming'));
+      }
+
+      /** @return {boolean} */
+      function adBreakStarted() {
+        return onEventSpy.calls.allArgs().some(
+            (args) => args[0].type == 'ad-break-started');
+      }
+
+      it('plays the ad break before streaming the content', async () => {
+        video.autoplay = true;
+        await addBreak(10);
+        startStreaming();
+        await shaka.test.Util.shortDelay();
+
+        expect(preloadSpy).toHaveBeenCalledTimes(1);
+        expect(holdSpy).toHaveBeenCalledTimes(1);
+        expect(adBreakStarted()).toBe(true);
+        // The content is streamed behind the ad, from where playback started.
+        expect(await hold).toBe(15);
+      });
+
+      it('waits for the start position to be known', async () => {
+        video.autoplay = true;
+        seekRange = {start: 0, end: 0};
+        await addBreak(10);
+
+        expect(preloadSpy).not.toHaveBeenCalled();
+
+        seekRange = {start: 0, end: 15};
+        startStreaming();
+        await shaka.test.Util.shortDelay();
+
+        expect(preloadSpy).toHaveBeenCalledTimes(1);
+        expect(holdSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('waits for playback to be requested', async () => {
+        await addBreak(10);
+        startStreaming();
+        await shaka.test.Util.shortDelay();
+
+        expect(holdSpy).toHaveBeenCalledTimes(1);
+        expect(adBreakStarted()).toBe(false);
+
+        paused = false;
+        video.dispatchEvent(new Event('play'));
+        await shaka.test.Util.shortDelay();
+
+        expect(adBreakStarted()).toBe(true);
+      });
+
+      it('does not hold the content without an ad break', async () => {
+        video.autoplay = true;
+        await addBreak(20);
+        startStreaming();
+        await shaka.test.Util.shortDelay();
+
+        expect(preloadSpy).not.toHaveBeenCalled();
+        expect(holdSpy).not.toHaveBeenCalled();
+        expect(adBreakStarted()).toBe(false);
+      });
+
+      it('releases the content if the ad break is not played', async () => {
+        video.autoplay = true;
+        // Joined 5 s into an ad break clipped to 3 s: nothing is left to play.
+        await addBreak(10, /* maxDuration= */ 3);
+        startStreaming();
+        await shaka.test.Util.shortDelay();
+
+        expect(holdSpy).toHaveBeenCalledTimes(1);
+        expect(adBreakStarted()).toBe(false);
+        expect(await hold).toBe(15);
+      });
+    });
   });
 
   describe('custom', () => {
