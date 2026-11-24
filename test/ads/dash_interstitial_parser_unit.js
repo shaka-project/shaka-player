@@ -45,7 +45,7 @@ describe('DashInterstitialParser', () => {
       expect(DashInterstitialParser.isInterstitialRegion(replace)).toBe(true);
     });
 
-    it('accepts overlay events with an OverlayEvent child', () => {
+    it('rejects overlay events', () => {
       const eventString = [
         '<Event>',
         '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd"/>',
@@ -53,17 +53,13 @@ describe('DashInterstitialParser', () => {
       ].join('');
       const dashEvent =
           makeRegion('urn:mpeg:dash:event:2012', eventString);
-      expect(DashInterstitialParser.isInterstitialRegion(dashEvent)).toBe(true);
+      expect(DashInterstitialParser.isInterstitialRegion(dashEvent))
+          .toBe(false);
 
       const scteEvent =
           makeRegion('urn:scte:dash:scte214-events', eventString);
-      expect(DashInterstitialParser.isInterstitialRegion(scteEvent)).toBe(true);
-    });
-
-    it('rejects overlay schemes without an OverlayEvent child', () => {
-      const region = makeRegion(
-          'urn:mpeg:dash:event:2012', '<Event><Other/></Event>');
-      expect(DashInterstitialParser.isInterstitialRegion(region)).toBe(false);
+      expect(DashInterstitialParser.isInterstitialRegion(scteEvent))
+          .toBe(false);
     });
 
     it('rejects unrelated schemes', () => {
@@ -248,162 +244,6 @@ describe('DashInterstitialParser', () => {
       const region = makeRegion(
           'urn:mpeg:dash:event:alternativeMPD:insert:2025',
           '<Event><InsertPresentation/></Event>');
-      expect(DashInterstitialParser.parseRegion(region)).toBe(null);
-    });
-
-    it('parses a basic overlay event', () => {
-      const eventString = [
-        '<Event>',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd">',
-        '<Viewport x="1920" y="1080"/>',
-        '<Overlay>',
-        '<TopLeft x="0" y="720"/>',
-        '<Size x="480" y="360"/>',
-        '</Overlay>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const region = makeRegion(
-          'urn:mpeg:dash:event:2012', eventString, 0, 1, 1, 'OVERLAY');
-
-      const interstitial = DashInterstitialParser.parseRegion(region);
-      /** @type {!shaka.extern.AdInterstitial} */
-      const expectedInterstitial = {
-        id: 'OVERLAY',
-        groupId: null,
-        startTime: 0,
-        endTime: 1,
-        uri: 'test.mpd',
-        mimeType: 'application/dash+xml',
-        isSkippable: false,
-        skipOffset: null,
-        skipFor: null,
-        canJump: true,
-        resumeOffset: null,
-        playoutLimit: null,
-        once: false,
-        pre: false,
-        post: false,
-        timelineRange: true,
-        loop: false,
-        overlay: {
-          viewport: {
-            x: 1920,
-            y: 1080,
-          },
-          topLeft: {
-            x: 0,
-            y: 720,
-          },
-          size: {
-            x: 480,
-            y: 360,
-          },
-        },
-        displayOnBackground: false,
-        currentVideo: null,
-        background: null,
-        clickThroughUrl: null,
-        tracking: null,
-      };
-      expect(interstitial).toEqual(expectedInterstitial);
-    });
-
-    it('parses an L-Shape overlay event (squeeze, z=-1)', () => {
-      const eventString = [
-        '<Event>',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="-1">',
-        '<Viewport x="1920" y="1080"/>',
-        '<Squeeze>',
-        '<TopLeft x="0" y="0"/>',
-        '<Size x="960" y="540"/>',
-        '</Squeeze>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const region = makeRegion(
-          'urn:scte:dash:scte214-events', eventString, 0, 1, 1, 'OVERLAY');
-
-      const interstitial = DashInterstitialParser.parseRegion(region);
-      goog.asserts.assert(interstitial, 'Should parse an interstitial!');
-      expect(interstitial.displayOnBackground).toBe(true);
-      expect(interstitial.currentVideo).toEqual({
-        viewport: {
-          x: 1920,
-          y: 1080,
-        },
-        topLeft: {
-          x: 0,
-          y: 0,
-        },
-        size: {
-          x: 960,
-          y: 540,
-        },
-      });
-    });
-
-    it('parses a double box overlay event (overlay, squeeze, background)',
-        () => {
-          const eventString = [
-            '<Event>',
-            '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" ' +
-                'z="-1">',
-            '<Background>red</Background>',
-            '<Viewport x="1920" y="1080"/>',
-            '<Overlay>',
-            '<TopLeft x="0" y="720"/>',
-            '<Size x="480" y="360"/>',
-            '</Overlay>',
-            '<Squeeze>',
-            '<TopLeft x="0" y="0"/>',
-            '<Size x="960" y="540"/>',
-            '</Squeeze>',
-            '</OverlayEvent>',
-            '</Event>',
-          ].join('');
-          const region = makeRegion(
-              'urn:scte:dash:scte214-events', eventString, 0, 1, 1, 'OVERLAY');
-
-          const interstitial = DashInterstitialParser.parseRegion(region);
-          goog.asserts.assert(interstitial, 'Should parse an interstitial!');
-          expect(interstitial.background).toBe('red');
-          expect(interstitial.displayOnBackground).toBe(true);
-          expect(interstitial.overlay).toEqual({
-            viewport: {x: 1920, y: 1080},
-            topLeft: {x: 0, y: 720},
-            size: {x: 480, y: 360},
-          });
-          expect(interstitial.currentVideo).toEqual({
-            viewport: {x: 1920, y: 1080},
-            topLeft: {x: 0, y: 0},
-            size: {x: 960, y: 540},
-          });
-        });
-
-    it('returns null for an overlay event with z=0', () => {
-      const eventString = [
-        '<Event>',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd" z="0">',
-        '<Viewport x="1920" y="1080"/>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const region = makeRegion(
-          'urn:mpeg:dash:event:2012', eventString, 0, 1, 1, 'OVERLAY');
-      expect(DashInterstitialParser.parseRegion(region)).toBe(null);
-    });
-
-    it('returns null for an overlay event with an invalid viewport', () => {
-      const eventString = [
-        '<Event>',
-        '<OverlayEvent mimeType="application/dash+xml" uri="test.mpd">',
-        '<Viewport y="1080"/>',
-        '</OverlayEvent>',
-        '</Event>',
-      ].join('');
-      const region = makeRegion(
-          'urn:mpeg:dash:event:2012', eventString, 0, 1, 1, 'OVERLAY');
       expect(DashInterstitialParser.parseRegion(region)).toBe(null);
     });
   });
