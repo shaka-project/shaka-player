@@ -3639,10 +3639,8 @@ describe('Interstitial Ad manager', () => {
     expect(interstitials.length).toBe(1);
   });
 
-  /** @suppress {visibility} */
   describe('click-through URI scheme', () => {
-    const isSafe = (uri) =>
-      shaka.ads.InterstitialAdManager.isSafeClickThroughUri_(uri);
+    const isSafe = (uri) => shaka.ads.Utils.isHttpOrRelativeUri(uri);
 
     it('allows http(s) and relative URIs', () => {
       expect(isSafe('https://example.com/offer')).toBe(true);
