@@ -177,6 +177,72 @@ describe('Ads', () => {
       await shaka.test.Util.shortDelay();
     });
 
+    describe('with a video overlay', () => {
+      const overlayUri =
+          '/base/test/test/assets/hls-interstitial/overlay.m3u8';
+
+      it('presents it over the content, which keeps playing', async () => {
+        if (!player.getConfiguration().ads.supportsMultipleMediaElements) {
+          pending('Platform without support for multiple media elements.');
+        }
+        player.configure('ads.supportsMultipleMediaElements', true);
+        adManager.setContainers(adContainer, adContainer);
+
+        await player.load(overlayUri);
+        video.play();
+
+        await waiter.timeoutAfter(10)
+            .waitForEvent(adManager, shaka.ads.Utils.AD_STARTED);
+
+        // The overlay is drawn in the ad container, on the right half, and
+        // the content is squeezed into the top left quarter, behind it.
+        const overlay = adContainer.querySelector('video');
+        expect(overlay).not.toBeNull();
+        expect(overlay.style.display).toBe('');
+        expect(overlay.style.left).toBe('50%');
+        expect(overlay.style.width).toBe('50%');
+        expect(video.style.transform).toBe('scaleX(0.5) scaleY(0.5)');
+        expect(video.style.zIndex).toBe('1');
+
+        // The content is not paused for the overlay.
+        const contentTime = video.currentTime;
+        await waiter.timeoutAfter(10)
+            .waitUntilPlayheadReaches(video, contentTime + 1);
+        expect(video.paused).toBe(false);
+
+        await waiter.timeoutAfter(20)
+            .waitForEvent(adManager, shaka.ads.Utils.AD_STOPPED);
+
+        expect(video.style.transform).toBe('');
+        expect(video.style.zIndex).toBe('');
+        expect(overlay.style.display).toBe('none');
+        expect(video.paused).toBe(false);
+        expect(adManager.getStats().overlayAds).toBe(1);
+
+        await player.unload();
+      });
+
+      it('is not presented on a single media element', async () => {
+        player.configure('ads.supportsMultipleMediaElements', false);
+        adManager.setContainers(adContainer, adContainer);
+        const onStarted = jasmine.createSpy('onStarted');
+        eventManager.listen(adManager, shaka.ads.Utils.AD_STARTED,
+            Util.spyFunc(onStarted));
+
+        await player.load(overlayUri);
+        video.play();
+
+        // Play past the whole window of the overlay.
+        await waiter.timeoutAfter(20)
+            .waitUntilPlayheadReachesOrFailOnTimeout(video, 9, 20);
+
+        expect(onStarted).not.toHaveBeenCalled();
+        expect(video.style.transform).toBe('');
+
+        await player.unload();
+      });
+    });
+
     describe('with X-ASSET-LIST', () => {
       /**
        * @return {!Promise}
