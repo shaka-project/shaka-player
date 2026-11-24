@@ -185,10 +185,17 @@ describe('LayoutRenderer', () => {
     let video;
     /** @type {!HTMLElement} */
     let container;
+    /** @type {!shaka.ads.LayoutRenderer} */
+    let renderer;
 
     beforeEach(() => {
       video = /** @type {!HTMLElement} */ (document.createElement('video'));
       container = /** @type {!HTMLElement} */ (document.createElement('div'));
+      renderer = new LayoutRenderer(video, container);
+    });
+
+    afterEach(() => {
+      renderer.release();
     });
 
     /**
@@ -200,7 +207,7 @@ describe('LayoutRenderer', () => {
     }
 
     it('scales the primary video with a transition', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         currentVideo: position(0, 0, 960, 540),
       }));
 
@@ -214,7 +221,7 @@ describe('LayoutRenderer', () => {
     });
 
     it('moves the primary video without a transition', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         currentVideo: position(480, 270, 960, 540),
       }));
 
@@ -224,13 +231,13 @@ describe('LayoutRenderer', () => {
     });
 
     it('scales the primary video on each axis independently', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         currentVideo: position(0, 0, 1920, 540),
       }));
 
       expect(video.style.transform).toBe('scaleY(0.5)');
 
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         currentVideo: position(0, 0, 960, 1080),
       }));
 
@@ -238,7 +245,7 @@ describe('LayoutRenderer', () => {
     });
 
     it('draws the primary video on top of the asset', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         overlay: position(0, 0, 1920, 1080),
         displayOnBackground: true,
       }));
@@ -247,7 +254,7 @@ describe('LayoutRenderer', () => {
     });
 
     it('leaves the primary video alone for a plain overlay', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         overlay: position(0, 0, 960, 540),
       }));
 
@@ -256,28 +263,66 @@ describe('LayoutRenderer', () => {
     });
 
     it('sets the background of the container', () => {
-      LayoutRenderer.render(video, container, layoutOf({background: 'red'}));
+      renderer.render(layoutOf({background: 'red'}));
 
       expect(container.style.background).toContain('red');
     });
 
     it('resets only what the layout applied', () => {
-      LayoutRenderer.render(video, container, layoutOf({
+      renderer.render(layoutOf({
         currentVideo: position(0, 0, 960, 540),
         displayOnBackground: true,
         background: 'red',
       }));
-      LayoutRenderer.clear(video, container, layoutOf({}));
+      renderer.clear(layoutOf({}));
 
       expect(video.style.zIndex).toBe('1');
       expect(video.style.transform).not.toBe('');
       expect(container.style.background).toContain('red');
 
-      LayoutRenderer.clear(video, container);
+      renderer.clear();
 
       expect(video.style.zIndex).toBe('');
       expect(video.style.transform).toBe('');
       expect(video.style.transition).toBe('');
+      expect(container.style.background).toBe('');
+    });
+
+    it('places an asset within the container', () => {
+      const element = /** @type {!HTMLElement} */ (
+        document.createElement('img'));
+      renderer.place(element, {
+        viewport: {
+          top: 0,
+          right: 50,
+          bottom: 50,
+          left: 0,
+        },
+        width: 0,
+        height: 0,
+        zDepth: 1,
+      });
+
+      expect(box(element)).toEqual({
+        left: '0%',
+        top: '0%',
+        right: '',
+        bottom: '',
+        width: '50%',
+        height: '50%',
+      });
+    });
+
+    it('clears everything it applied when released', () => {
+      renderer.render(layoutOf({
+        currentVideo: position(0, 0, 960, 540),
+        displayOnBackground: true,
+        background: 'red',
+      }));
+      renderer.release();
+
+      expect(video.style.zIndex).toBe('');
+      expect(video.style.transform).toBe('');
       expect(container.style.background).toBe('');
     });
   });
