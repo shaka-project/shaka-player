@@ -4162,9 +4162,11 @@ describe('UI', () => {
        * @return {!Promise}
        */
       async function createUI(extraConfig = {}) {
-        // Mobile, smart TV and Cast defaults leave the pad out.
+        // Mobile, smart TV and Cast defaults leave the pad out, and Cast
+        // also leaves the overflow menu out.
         const config = Object.assign({
           enableVrPad: true,
+          controlPanelElements: ['overflow_menu'],
           overflowMenuButtons: ['recenter_vr'],
         }, extraConfig);
         const ui = await UiUtils.createUIThroughAPI(
