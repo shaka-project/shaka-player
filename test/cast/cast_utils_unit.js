@@ -36,6 +36,7 @@ describe('CastUtils', () => {
       'addFont',
       // Used by the interstitials of the primary content, not by apps.
       'getUrlParamState',
+      'holdStreamingStart',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
