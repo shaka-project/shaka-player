@@ -157,6 +157,84 @@ describe('SvtaInterstitialParser', () => {
         'trackingEvent'), 'trackingEvent')).toBeNull();
   });
 
+  describe('resolvePod', () => {
+    it('places the slots in their pod', () => {
+      const pod = {
+        start: 0,
+        duration: 20,
+        slots: [slot(), slot(10)],
+      };
+      const parsed = Parser.resolvePod(pod, pod.slots, 100, 'pod');
+      expect(parsed).toEqual({
+        id: 'pod',
+        pod,
+        startTime: 100,
+        slots: [
+          {
+            id: 'pod_slot_0',
+            index: 0,
+            slot: pod.slots[0],
+            podPosition: 1,
+          },
+          {
+            id: 'pod_slot_1',
+            index: 1,
+            slot: pod.slots[1],
+            podPosition: 2,
+          },
+        ],
+      });
+    });
+
+    it('keeps the positions of what carries no slot', () => {
+      const second = slot(10);
+      const parsed = Parser.resolvePod(null, [null, slot(), null, second],
+          0, 'list');
+      expect(parsed.slots.map((item) => item.index)).toEqual([1, 3]);
+      expect(parsed.slots.map((item) => item.podPosition)).toEqual([1, 2]);
+      expect(parsed.slots[1]).toEqual(jasmine.objectContaining({
+        id: 'list_slot_3',
+        slot: second,
+      }));
+    });
+  });
+
+  it('reads the pod and the slot of each asset of an ASSET-LIST', () => {
+    const pod = {
+      start: 0,
+      duration: 20,
+    };
+    const first = slot();
+    const parsed = Parser.parseAssetList({
+      'ASSETS': [
+        {
+          'URI': 'intro',
+          'DURATION': 5,
+        },
+        {
+          'URI': 'ad',
+          'DURATION': 10,
+          'X-AD-CREATIVE-SIGNALING': envelope([first]),
+        },
+        // An asset carries a single slot.
+        {
+          'URI': 'ads',
+          'DURATION': 10,
+          'X-AD-CREATIVE-SIGNALING': envelope([slot(), slot(10)]),
+        },
+      ],
+      'X-AD-CREATIVE-SIGNALING': envelope([pod], 'pod'),
+    }, 100, 'list');
+    expect(parsed.pod).toBe(pod);
+    expect(parsed.startTime).toBe(100);
+    expect(parsed.slots).toEqual([{
+      id: 'list_slot_1',
+      index: 1,
+      slot: first,
+      podPosition: 1,
+    }]);
+  });
+
   it('ignores invalid base64 and JSON null without throwing', () => {
     for (const data of ['!', btoa('null')]) {
       expect(Parser.parseMetadata({type: 'svta', startTime: 0, endTime: 10,
