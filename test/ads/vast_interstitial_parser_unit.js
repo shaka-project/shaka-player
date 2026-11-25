@@ -232,6 +232,47 @@ describe('VastInterstitialParser', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
+    describe('non-linear IFrameResource', () => {
+      /**
+       * @param {string} resources
+       * @return {!Array<shaka.extern.AdInterstitial>}
+       */
+      function parseResources(resources) {
+        const vast = '<VAST><Ad><InLine><Creatives><Creative><NonLinearAds>' +
+            '<NonLinear width="300" height="50">' + resources +
+            '</NonLinear></NonLinearAds></Creative></Creatives></InLine>' +
+            '</Ad></VAST>';
+        return VastInterstitialParser.parseVastToInterstitials(
+            parseVast(vast), /* currentTime= */ 0);
+      }
+
+      it('uses an external iframe URL verbatim', () => {
+        const ads = parseResources('<IFrameResource>' +
+            '<![CDATA[https://ads.example/frame?a=1&b=2]]></IFrameResource>');
+        expect(ads).toEqual([jasmine.objectContaining({
+          uri: 'https://ads.example/frame?a=1&b=2',
+          mimeType: 'text/html',
+        })]);
+      });
+
+      it('prefers inline HTML over an iframe', () => {
+        const ads = parseResources(
+            '<IFrameResource>https://ads.example/frame</IFrameResource>' +
+            '<HTMLResource><![CDATA[<b>Ad</b>]]></HTMLResource>');
+        expect(ads).toEqual([jasmine.objectContaining({
+          uri: 'data:text/html;charset=UTF-8,%3Cb%3EAd%3C%2Fb%3E',
+          mimeType: 'text/html',
+        })]);
+      });
+
+      it('skips an iframe with an unsupported URI scheme', () => {
+        expect(parseResources(
+            '<IFrameResource>javascript:alert(1)</IFrameResource>'))
+            .toEqual([]);
+        expect(parseResources('<IFrameResource/>')).toEqual([]);
+      });
+    });
+
     it('returns an empty array for an empty VAST', () => {
       const vast = [
         '<?xml version="1.0" encoding="UTF-8"?>',
