@@ -5,7 +5,7 @@
  */
 
 // Headless browsers have no WebGL, so these tests use a fake context.  Every
-// method of the fake context is a spy, and every constant is its own name.
+// method of the fake context is a spy.
 describe('VR', () => {
   /** @type {!HTMLVideoElement} */
   let video;
@@ -37,24 +37,10 @@ describe('VR', () => {
       getUniformLocation: (program, name) => name,
       isContextLost: () => contextLost,
     };
-    const spies = new Map();
-    return new Proxy({}, {
-      get: (target, prop) => {
-        if (typeof prop != 'string') {
-          return undefined;
-        }
-        if (prop in values) {
-          return values[prop];
-        }
-        if (/^[A-Z0-9_]+$/.test(prop)) {
-          return prop;
-        }
-        return spies.getOrInsertComputed(prop, () => {
-          return jasmine.createSpy(prop).and.callFake(
-              implementations[prop] || (() => {}));
-        });
-      },
-    });
+    return shaka.test.UiUtils.createFakeWebGl((name) => {
+      return jasmine.createSpy(name).and.callFake(
+          implementations[name] || (() => {}));
+    }, values);
   }
 
   /**
@@ -80,6 +66,10 @@ describe('VR', () => {
   }
 
   beforeEach(() => {
+    // The fake context copies the methods of WebGLRenderingContext.
+    if (!window.WebGLRenderingContext) {
+      pending('WebGL is not available');
+    }
     contextLost = false;
     video = shaka.test.UiUtils.createVideoElement();
     // Pretend that a frame is available, so that the view is rendered.

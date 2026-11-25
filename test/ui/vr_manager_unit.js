@@ -24,8 +24,7 @@ describe('VRManager', () => {
 
   /**
    * Headless browsers have no WebGL, so the view gets a fake context.  Every
-   * method of the fake context does nothing, and every constant is its own
-   * name.
+   * method of the fake context does nothing.
    *
    * @return {?}
    */
@@ -35,17 +34,8 @@ describe('VRManager', () => {
       getProgramParameter: () => true,
       getAttribLocation: () => 0,
     };
-    return new Proxy({}, {
-      get: (target, prop) => {
-        if (typeof prop != 'string') {
-          return undefined;
-        }
-        if (/^[A-Z0-9_]+$/.test(prop)) {
-          return prop;
-        }
-        return implementations[prop] || (() => ({}));
-      },
-    });
+    return shaka.test.UiUtils.createFakeWebGl(
+        (name) => implementations[name] || (() => ({})));
   }
 
   /**
