@@ -2994,6 +2994,52 @@ describe('StreamingEngine', () => {
       expect(onError).toHaveBeenCalled();
     });
 
+    it('resumes streaming after a reset when the stream cannot be disabled',
+        async () => {
+          const expectedError = new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MEDIA,
+              shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+
+          // There is no other stream to switch to.
+          disableStream.and.callFake(() => false);
+          onError.and.stub();
+
+          const originalAppendBuffer =
+              // eslint-disable-next-line no-restricted-syntax
+              shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
+          let rejected = false;
+          mediaSourceEngine.appendBuffer.and.callFake(
+              (type, data, reference) => {
+                // Reject the first audio segment once.
+                if (!rejected &&
+                    data == segmentData[ContentType.AUDIO].segments[0]) {
+                  rejected = true;
+                  return Promise.reject(expectedError);
+                }
+                // eslint-disable-next-line no-restricted-syntax
+                return originalAppendBuffer.call(
+                    mediaSourceEngine, type, data, reference);
+              });
+
+          // Here we go!
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = true;
+          await runTest();
+
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+          expect(onError).toHaveBeenCalledTimes(1);
+          expect(onError.calls.argsFor(0)[0].handled).toBe(true);
+          // Streaming restarted on the new SourceBuffers and reached the end.
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, true, true, true],
+            video: [true, true, true, true],
+            text: [true, true, true, true],
+          });
+        });
+
     it('from failed clear in switchVariant', async () => {
       const expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
