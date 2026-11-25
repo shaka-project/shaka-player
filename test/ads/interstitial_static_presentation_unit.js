@@ -58,7 +58,9 @@ describe('InterstitialStaticPresentation', () => {
       },
     }, fields));
     presentation = new shaka.ads.InterstitialStaticPresentation(
-        interstitial, container, video, shaka.test.Util.spyFunc(onEvent),
+        interstitial, container, video,
+        new shaka.ads.LayoutRenderer(video, container),
+        shaka.test.Util.spyFunc(onEvent),
         shaka.test.Util.spyFunc(onClick), shaka.test.Util.spyFunc(onEnd));
     presentation.start();
     return presentation;

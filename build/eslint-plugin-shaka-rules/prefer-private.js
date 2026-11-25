@@ -17,6 +17,9 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', 'api', 'third_party']);
 // to something outside of this file.
 const SKIP_TAGS = /@(private|protected|package|export\w*|override|define)\b/;
 
+// Tags of documentation that is not part of the interface of a file.
+const SKIP_PRIVATE_TAGS = /@private\b/;
+
 /**
  * The text of every file that could reference a symbol, by absolute path.
  * Built once per process, since the rule needs it for every file it lints.
@@ -131,6 +134,51 @@ export default {
     }
 
     /**
+     * Whether a comment documents a declaration of the file: a top level
+     * statement, a method, or a field set in a constructor.  A type cast or
+     * the type of a local variable is not part of the interface of the file.
+     *
+     * @param {!Object} comment
+     * @return {boolean}
+     */
+    const documentsDeclaration = (comment) => {
+      const token = source.getTokenAfter(comment, {includeComments: true});
+      if (!token || token.type == 'Block' || token.value == '(') {
+        return false;
+      }
+      // The outermost node that starts where the comment ends.
+      let node = source.getNodeByRangeIndex(token.range[0]);
+      while (node && node.parent && node.parent.range[0] == token.range[0]) {
+        node = node.parent;
+      }
+      if (!node) {
+        return false;
+      }
+      if (node.type == 'MethodDefinition' ||
+          node.type == 'PropertyDefinition') {
+        return true;
+      }
+      if (node.type != 'ExpressionStatement') {
+        return false;
+      }
+      if (node.parent.type == 'Program') {
+        return true;
+      }
+      // this.foo = ... in a constructor.
+      const expression = node.expression;
+      if (expression.type != 'AssignmentExpression' ||
+          expression.left.type != 'MemberExpression' ||
+          expression.left.object.type != 'ThisExpression') {
+        return false;
+      }
+      let parent = node.parent;
+      while (parent && parent.type != 'MethodDefinition') {
+        parent = parent.parent;
+      }
+      return !!parent && parent.kind == 'constructor';
+    };
+
+    /**
      * @param {!Object} node The node the JSDoc comment is attached to.
      * @param {string} name The full name of the symbol.
      */
@@ -149,6 +197,19 @@ export default {
       const doc = comment && comment.type == 'Block' ? comment.value : '';
       if (SKIP_TAGS.test(doc)) {
         return;
+      }
+
+      // A type named in the documentation of a declaration that is not
+      // private, such as the parameter of a public method, is part of its
+      // interface, even if only this file uses it.
+      const typeUsage = new RegExp(
+          '[{<|(,!?]\\s*' + escapeRegExp(name) + '(?![\\w$])');
+      for (const other of source.getAllComments()) {
+        if (other != comment && other.type == 'Block' &&
+            !SKIP_PRIVATE_TAGS.test(other.value) &&
+            typeUsage.test(other.value) && documentsDeclaration(other)) {
+          return;
+        }
       }
 
       // Other files reach a symbol by its full name or through an alias of
