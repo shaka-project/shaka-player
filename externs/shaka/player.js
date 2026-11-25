@@ -2118,6 +2118,7 @@ shaka.extern.SpeechToTextConfiguration;
  *   stopFetchingOnPause: boolean,
  *   clampAppendWindowToDuration: boolean,
  *   processSrcEqualMetadata: boolean,
+ *   mixedVariantTypes: shaka.config.MixedVariantTypes,
  * }}
  *
  * @description
@@ -2396,6 +2397,20 @@ shaka.extern.SpeechToTextConfiguration;
  *   This allows metadata frames to be parsed and exposed by the player.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {shaka.config.MixedVariantTypes} mixedVariantTypes
+ *   Which variants to keep when the manifest mixes audio-video variants with
+ *   audio-only or video-only ones (e.g. an HLS master playlist with an
+ *   audio-only variant for very low bandwidths).
+ *   With <code>AV_ONLY</code>, only the audio-video variants are kept.
+ *   With <code>MANUAL_SELECTION</code>, every variant is kept, but adaptation
+ *   only chooses audio-video variants: audio-only and video-only ones are
+ *   only played when selected.  Switching to or from them requires a
+ *   <code>MediaSource</code> reset on platforms that can't remove a
+ *   <code>SourceBuffer</code> while playing (e.g. Firefox, Safari, Tizen and
+ *   WebOS).
+ *   Changes take effect on the next load.
+ *   <br>
+ *   Defaults to <code>MANUAL_SELECTION</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
