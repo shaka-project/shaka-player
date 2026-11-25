@@ -586,15 +586,10 @@ describe('StreamingEngine', () => {
             end += d;
           }
 
-          let cur = i;
-          const getUris = () => {
-            // The times in the media are based on the URL; so to drop a
-            // segment, we change the URL.
-            if (cur >= 1 && dropSegment) {
-              cur++;
-            }
-            return ['0_' + type + '_' + cur];
-          };
+          // The times in the media are based on the URL; so to drop a
+          // segment, we change the URL.
+          const cur = i >= 1 && dropSegment ? i + 1 : i;
+          const getUris = () => ['0_' + type + '_' + cur];
           refs.push(new shaka.media.SegmentReference(
               /* startTime= */ time,
               /* endTime= */ end,
