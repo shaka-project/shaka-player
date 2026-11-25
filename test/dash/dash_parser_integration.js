@@ -340,6 +340,13 @@ describe('DashParser', () => {
           });
     });
 
+    afterEach(() => {
+      // An abort can't interrupt a response filter, so a held segment would
+      // keep the Player from being destroyed if the spec failed before
+      // releasing it.
+      releaseVideo();
+    });
+
     /**
      * @param {function():boolean} condition
      * @param {string} what
@@ -349,7 +356,16 @@ describe('DashParser', () => {
       const start = Date.now();
       while (!condition()) {
         if (Date.now() - start > 20000) {
-          throw new Error('Timeout waiting for ' + what);
+          // Say where the playhead got stuck, compared to what is buffered.
+          const buffered = player.getBufferedInfo();
+          const ranges = (list) => list.map(
+              (r) => r.start.toFixed(3) + '-' + r.end.toFixed(3)).join(',');
+          throw new Error('Timeout waiting for ' + what +
+              ' (currentTime=' + video.currentTime.toFixed(3) +
+              ', readyState=' + video.readyState +
+              ', paused=' + video.paused +
+              ', audio=[' + ranges(buffered.audio) + ']' +
+              ', video=[' + ranges(buffered.video) + '])');
         }
         // eslint-disable-next-line no-await-in-loop
         await shaka.test.Util.delay(0.1);
