@@ -189,6 +189,37 @@ shaka.test.UiUtils = class {
   }
 
   /**
+   * Creates a fake WebGL context for headless browsers, which have no WebGL.
+   * It has every constant and method of WebGLRenderingContext.  It does not
+   * use a Proxy, since some platforms (e.g. Tizen 3) do not support it.
+   *
+   * @param {function(string):!Function} createMethod Creates the method of
+   *   the given name.
+   * @param {!Object<string, *>=} values Values of the attributes of the
+   *   context.
+   * @return {?}
+   */
+  static createFakeWebGl(createMethod, values = {}) {
+    const gl = {};
+    // The fake context copies the members of the native class.
+    // eslint-disable-next-line no-restricted-syntax
+    const prototype = window.WebGLRenderingContext.prototype;
+    for (const name of Object.getOwnPropertyNames(prototype)) {
+      if (name == 'constructor') {
+        continue;
+      }
+      // Reading an attribute of the prototype throws, so read descriptors.
+      const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+      if (typeof descriptor.value == 'function') {
+        gl[name] = createMethod(name);
+      } else if ('value' in descriptor) {
+        gl[name] = descriptor.value;
+      }
+    }
+    return Object.assign(gl, values);
+  }
+
+  /**
    * Creates a canvas element for testing.
    *
    * @return {!HTMLCanvasElement}
