@@ -776,31 +776,42 @@ describe('Mp4BoxParsers', () => {
           .toBe('mono');
     });
 
-    it('prefers the video layout of the manifest', () => {
+    it('prefers the init segment over the manifest', () => {
       const init = initSegment('hvc1',
           fullBox('st3d', [1]), sv3d(0, 0));
       expect(Mp4BoxParsers.parseSpatialVideoInfo(
           init, 'CH-STEREO/PROJ-AIV')).toEqual({
-        projection: 'aiv',
-        hfov: null,
-        stereoLayout: 'multiview',
-      });
-      expect(Mp4BoxParsers.parseSpatialVideoInfo(
-          init, 'CH-MONO')).toEqual({
         projection: 'equi',
         hfov: 360,
+        stereoLayout: 'top-bottom',
+      });
+    });
+
+    it('uses the manifest for what the init segment does not signal', () => {
+      const init = initSegment('hvc1', sv3d(0, 0));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(
+          init, 'CH-STEREO/PROJ-AIV')).toEqual({
+        projection: 'equi',
+        hfov: 360,
+        stereoLayout: 'multiview',
+      });
+
+      const plain = initSegment('hvc1', box('pasp', new Uint8Array(8)));
+      expect(Mp4BoxParsers.parseSpatialVideoInfo(
+          plain, 'CH-MONO/PROJ-AIV')).toEqual({
+        projection: 'aiv',
+        hfov: null,
         stereoLayout: 'mono',
       });
     });
 
-    it('reads the field of view when the manifest signals the rest', () => {
-      // Only the init segment signals the field of view of Apple content.
+    it('reads the field of view of Apple content', () => {
       const init = initSegment('hvc1', box('vexu',
           vexu(0x03, 'fish').subarray(8),
           box('hfov', new Uint8Array([0, 2, 0xbf, 0x20]))));
       expect(Mp4BoxParsers.parseSpatialVideoInfo(
           init, 'CH-STEREO/PROJ-AIV')).toEqual({
-        projection: 'aiv',
+        projection: 'fish',
         hfov: 180,
         stereoLayout: 'multiview',
       });
