@@ -1265,8 +1265,11 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
     let refuseAbsoluteStart;
     /** @type {?shaka.extern.MsfCodec} */
     let codec;
+    /** @type {?Uint8Array} */
+    let describedInitData;
 
     beforeEach(() => {
+      describedInitData = null;
       nextSegments = [];
       subscribes = [];
       refuseAbsoluteStart = false;
@@ -1276,13 +1279,16 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
 
       shaka.msf.PackagingRegistry.registerPackaging(PACKAGING, () => {
         return /** @type {!shaka.extern.MsfPackaging} */ (/** @type {?} */ ({
-          describeTrack: () => ({
-            basicInfo: /** @type {?} */ ({
-              mimeType: 'video/mp4',
-              codecs: 'avc1.4d401f',
-            }),
-            initSegmentReference: null,
-          }),
+          describeTrack: (track, initData) => {
+            describedInitData = initData;
+            return {
+              basicInfo: /** @type {?} */ ({
+                mimeType: 'video/mp4',
+                codecs: 'avc1.4d401f',
+              }),
+              initSegmentReference: null,
+            };
+          },
           createSegmenter: () => ({push: () => nextSegments}),
         }));
       });
@@ -1504,6 +1510,62 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
           expect(timeline.locationForTime(3)).toEqual(
               {group: BigInt(1), object: BigInt(0), subgroup: null});
         });
+
+    describe('initDataList', () => {
+      /**
+       * @param {string} type
+       * @param {string} data
+       * @return {!Promise}
+       * @suppress {visibility}
+       */
+      function processWithInitData(type, data) {
+        return parser.processCatalog_(/** @type {msfCatalog.Catalog} */ ({
+          version: 'draft-02',
+          tracks: [videoTrack({initRef: 'init0'})],
+          initDataList: [{id: 'init0', type, data}],
+        }));
+      }
+
+      it('decodes inline init data', async () => {
+        givenAStartedParser();
+        await processWithInitData('inline', btoa('\x01\x02\x03'));
+        expect(describedInitData).toEqual(new Uint8Array([1, 2, 3]));
+      });
+
+      it('does not decode the type of a property as init data', async () => {
+        // draft-02: the init data is in the Video Config Track Property, and
+        // "0x0D" names it.
+        givenAStartedParser();
+        await processWithInitData('track-property', '0x0D');
+        expect(describedInitData).toEqual(new Uint8Array([]));
+        await processWithInitData('object-property', '0x0D');
+        expect(describedInitData).toEqual(new Uint8Array([]));
+      });
+    });
+
+    it('feeds every track of a renderGroup its depends names', async () => {
+      // draft-02 lets a depends entry be a Number, naming a renderGroup.
+      givenAStartedParser();
+      const timeline = timelineTrack();
+      timeline.depends = [1];
+      await processCatalog([
+        videoTrack({renderGroup: 1}),
+        videoTrack({name: 'video1', renderGroup: 1}),
+        videoTrack({name: 'video2', renderGroup: 2}),
+        timeline,
+      ]);
+
+      lastSubscribeTo('history').callback(timelineObject([
+        [0, [0, 0], 0],
+        [2002, [1, 0], 0],
+      ]));
+
+      expect(timelineOf('video0')).not.toBeNull();
+      expect(timelineOf('video1')).not.toBeNull();
+      expect(timelineOf('video1').getEndTime()).toBe(2.002);
+      expect(timelineOf('video2')).toBeNull();
+      expect(timelineOf('1')).toBeNull();
+    });
 
     it('treats the first object of a group as the whole timeline',
         async () => {
