@@ -5272,6 +5272,34 @@ describe('StreamingEngine', () => {
       // The request should have been aborted.
       expect(isAborted).toBe(true);
     });
+
+    it('ignores seeks while it waits for operations to abort', async () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      /** @type {!Promise.PromiseWithResolvers} */
+      const abortDone = Promise.withResolvers();
+      netEngine.request.and.callFake(() => {
+        // This will never complete, and takes a while to abort.
+        return new shaka.util.AbortableOperation(
+            new Promise(() => {}), () => abortDone.promise);
+      });
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.crossBoundaryStrategy = shaka.config.CrossBoundaryStrategy.RESET;
+      createStreamingEngine(config);
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      await Util.fakeEventLoop(1);
+
+      const destroyed = streamingEngine.destroy();
+      // The Player forwards seeks until the destruction is complete.
+      expect(() => streamingEngine.seeked()).not.toThrow();
+
+      abortDone.resolve();
+      await destroyed;
+    });
   });
 
   describe('beforeAppendSegment', () => {
