@@ -88,6 +88,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
       channelCount: audioTrack.channelsCount || 0,
       codec: '',
       spatialAudio: audioTrack.spatialAudio,
+      accessibilityPurpose: audioTrack.accessibilityPurpose || '',
     };
     this.player.configure({preferredAudio: [pref]});
   }

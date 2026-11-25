@@ -1092,6 +1092,7 @@ shakaDemo.Config = class {
       label: '',
       channelCount: 2,
       codec: '',
+      accessibilityPurpose: '',
     }), (container, entry, index) => {
       this.addPrefTextField_(container, 'Language', entry['language'] || '',
           (v) => makeChange(index, 'language', v));
@@ -1107,6 +1108,9 @@ shakaDemo.Config = class {
       this.addPrefBoolField_(container, 'Spatial Audio',
           entry['spatialAudio'] || false,
           (v) => makeChange(index, 'spatialAudio', v || undefined));
+      this.addPrefTextField_(container, 'Accessibility Purpose',
+          entry['accessibilityPurpose'] || '',
+          (v) => makeChange(index, 'accessibilityPurpose', v));
     });
   }
 
@@ -1128,6 +1132,7 @@ shakaDemo.Config = class {
       language: '',
       role: '',
       format: '',
+      accessibilityPurpose: '',
     }), (container, entry, index) => {
       this.addPrefTextField_(container, 'Language', entry['language'] || '',
           (v) => makeChange(index, 'language', v));
@@ -1137,6 +1142,9 @@ shakaDemo.Config = class {
           (v) => makeChange(index, 'format', v));
       this.addPrefBoolField_(container, 'Forced', entry['forced'] || false,
           (v) => makeChange(index, 'forced', v || undefined));
+      this.addPrefTextField_(container, 'Accessibility Purpose',
+          entry['accessibilityPurpose'] || '',
+          (v) => makeChange(index, 'accessibilityPurpose', v));
     });
   }
 

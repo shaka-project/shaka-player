@@ -3367,7 +3367,8 @@ shaka.extern.TextDisplayerConfiguration;
  *   label: string,
  *   channelCount: number,
  *   codec: string,
- *   spatialAudio: boolean
+ *   spatialAudio: boolean,
+ *   accessibilityPurpose: string
  * }}
  *
  * @property {string} language
@@ -3395,6 +3396,13 @@ shaka.extern.TextDisplayerConfiguration;
  *   Whether spatial audio is preferred.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {string} accessibilityPurpose
+ *   The preferred accessibility purpose for audio tracks, e.g.
+ *   <code>'visually impaired'</code> for audio description.  When empty,
+ *   audio tracks without an accessibility purpose are preferred, and the
+ *   others are only chosen if there is nothing else.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @exportDoc
  */
 shaka.extern.AudioPreference;
@@ -3405,7 +3413,8 @@ shaka.extern.AudioPreference;
  *   language: string,
  *   role: string,
  *   format: string,
- *   forced: boolean
+ *   forced: boolean,
+ *   accessibilityPurpose: string
  * }}
  *
  * @property {string} language
@@ -3426,6 +3435,13 @@ shaka.extern.AudioPreference;
  *   Whether forced subtitles are preferred.
  *   <br>
  *   Defaults to <code>false</code>.
+ * @property {string} accessibilityPurpose
+ *   The preferred accessibility purpose for text tracks, e.g.
+ *   <code>'hard of hearing'</code>.  When empty, text tracks without an
+ *   accessibility purpose are preferred, and the others are only chosen if
+ *   there is nothing else.
+ *   <br>
+ *   Defaults to <code>''</code>.
  * @exportDoc
  */
 shaka.extern.TextPreference;

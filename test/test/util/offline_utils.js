@@ -63,6 +63,7 @@ shaka.test.OfflineUtils = class {
       isAudioMuxedInVideo: false,
       isIframe: false,
       preselection: null,
+      accessibilityPurpose: null,
     };
   }
 

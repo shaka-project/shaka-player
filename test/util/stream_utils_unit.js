@@ -292,6 +292,82 @@ describe('StreamUtils', () => {
       expect(chosen.length).toBe(0);
     });
 
+    // https://github.com/shaka-project/shaka-player/issues/11055
+    describe('accessibility purpose', () => {
+      const HARD_OF_HEARING =
+          shaka.media.ManifestParser.AccessibilityPurpose.HARD_OF_HEARING;
+
+      beforeEach(() => {
+        // The hard of hearing stream comes first, so it is not chosen by
+        // order.
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addTextStream(1, (stream) => {
+            stream.language = 'it';
+            stream.accessibilityPurpose = HARD_OF_HEARING;
+          });
+          manifest.addTextStream(2, (stream) => {
+            stream.language = 'it';
+          });
+        });
+      });
+
+      it('chooses the preferred accessibility purpose', () => {
+        const chosen = StreamUtils.filterStreamsByTextPreferences(
+            manifest.textStreams, [{
+              language: 'it',
+              role: '',
+              format: '',
+              forced: false,
+              accessibilityPurpose: HARD_OF_HEARING,
+            }]);
+        expect(chosen).toEqual([manifest.textStreams[0]]);
+      });
+
+      it('avoids an accessibility purpose when none is preferred', () => {
+        const chosen = StreamUtils.filterStreamsByTextPreferences(
+            manifest.textStreams, [{
+              language: 'it',
+              role: '',
+              format: '',
+              forced: false,
+              accessibilityPurpose: '',
+            }]);
+        expect(chosen).toEqual([manifest.textStreams[1]]);
+      });
+
+      it('falls back to an accessibility purpose if nothing else', () => {
+        manifest.textStreams.pop();
+        const chosen = StreamUtils.filterStreamsByTextPreferences(
+            manifest.textStreams, [{
+              language: 'it',
+              role: '',
+              format: '',
+              forced: false,
+              accessibilityPurpose: '',
+            }]);
+        expect(chosen).toEqual([manifest.textStreams[0]]);
+      });
+
+      it('tries the next preference if the purpose does not match', () => {
+        manifest.textStreams.shift();
+        const chosen = StreamUtils.filterStreamsByTextPreferences(
+            manifest.textStreams, [{
+              language: 'it',
+              role: '',
+              format: '',
+              forced: false,
+              accessibilityPurpose: HARD_OF_HEARING,
+            }, {
+              language: 'it',
+              role: '',
+              format: '',
+              forced: false,
+              accessibilityPurpose: '',
+            }]);
+        expect(chosen).toEqual([manifest.textStreams[0]]);
+      });
+    });
+
     // Regression test for https://github.com/shaka-project/shaka-player/issues/9993
     it('returns nothing when the language matches but the role does not',
         () => {

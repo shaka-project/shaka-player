@@ -1751,6 +1751,66 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('marks SDH text tracks as hard of hearing', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d401f",',
+      'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
+      'video\n',
+
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
+      'NAME="English",DEFAULT=YES,AUTOSELECT=YES,',
+      'URI="text"\n',
+
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
+      'NAME="English SDH",DEFAULT=YES,AUTOSELECT=YES,',
+      'CHARACTERISTICS="public.accessibility.transcribes-spoken-dialog,',
+      'public.accessibility.describes-music-and-sound",',
+      'URI="text2"\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.accessibilityPurpose = null;
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.accessibilityPurpose =
+            shaka.media.ManifestParser.AccessibilityPurpose.HARD_OF_HEARING;
+        // This codec doesn't make sense for text, but we're reusing the same
+        // media playlist for everything.
+        stream.mime('application/mp4', 'avc1.42C01E');
+        stream.roles = [
+          'public.accessibility.transcribes-spoken-dialog',
+          'public.accessibility.describes-music-and-sound',
+        ];
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   // https://github.com/shaka-project/shaka-player/issues/4759
   it('makes roles available without loading tracks', async () => {
     const master = [

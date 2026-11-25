@@ -407,6 +407,10 @@
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
   },
+  "SUBTITLE_HARD_OF_HEARING": {
+    "description": "Label used to identify a subtitle track for the deaf and hard of hearing (SDH), which also describes sounds and identifies speakers.",
+    "message": "SDH"
+  },
   "SUBTITLE_POSITION": {
     "description": "Label for a button used to indicate a subtitle position.",
     "message": "Subtitle position"

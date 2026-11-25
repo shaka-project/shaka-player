@@ -148,6 +148,7 @@ shaka.extern.ManifestDB;
  *   isAudioMuxedInVideo: boolean,
  *   isIframe: boolean,
  *   preselection: ?shaka.extern.Preselection,
+ *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  * }}
  *
  * @property {number} id
@@ -229,6 +230,9 @@ shaka.extern.ManifestDB;
  *   Indicate if the stream only contains I-frames (key frames).
  * @property {?shaka.extern.Preselection} preselection
  *   The Preselection this stream belongs to, if any.
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose
+ *           } accessibilityPurpose
+ *   The accessibility purpose of the stream, if any.
  */
 shaka.extern.StreamDB;
 

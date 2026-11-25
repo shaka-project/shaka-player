@@ -4446,6 +4446,53 @@ describe('Player', () => {
     }
   });  // describe('languages')
 
+  // https://github.com/shaka-project/shaka-player/issues/11055
+  describe('audio accessibility purpose', () => {
+    const VISUALLY_IMPAIRED =
+        shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED;
+
+    beforeEach(async () => {
+      // The audio description comes first, so it is not chosen by order.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.language = 'en';
+          variant.addAudio(0, (stream) => {
+            stream.accessibilityPurpose = VISUALLY_IMPAIRED;
+          });
+        });
+        manifest.addVariant(1, (variant) => {
+          variant.language = 'en';
+          variant.addAudio(1);
+        });
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+
+    it('does not choose audio description by default', () => {
+      expect(getActiveVariantTrack().accessibilityPurpose).toBeFalsy();
+      const variants = abrManager.setVariants.calls.mostRecent().args[0];
+      expect(variants.length).toBe(1);
+    });
+
+    it('selectAudioTrack() respects accessibility purpose', () => {
+      const audioTracks = player.getAudioTracks();
+      expect(audioTracks.length).toBe(2);
+
+      const description =
+          audioTracks.find((t) => t.accessibilityPurpose == VISUALLY_IMPAIRED);
+      goog.asserts.assert(description, 'audio track must be non-null');
+      player.selectAudioTrack(description);
+      expect(getActiveVariantTrack().accessibilityPurpose)
+          .toBe(VISUALLY_IMPAIRED);
+
+      const main = audioTracks.find((t) => !t.accessibilityPurpose);
+      goog.asserts.assert(main, 'audio track must be non-null');
+      player.selectAudioTrack(main);
+      expect(getActiveVariantTrack().accessibilityPurpose).toBeFalsy();
+    });
+  });
+
   describe('getLiveLatency()', () => {
     let timeline;
 
