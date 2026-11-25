@@ -65,9 +65,9 @@ describe('VastInterstitialParser', () => {
   }
 
   describe('parseVastToInterstitials', () => {
-    it('parses a linear ad as a pre-roll when currentTime is null', () => {
-      const interstitials = VastInterstitialParser.parseVastToInterstitials(
-          parseVast(linearVast), /* currentTime= */ null);
+    it('parses a linear ad as a pre-roll for a null time', async () => {
+      const interstitials = await VastInterstitialParser
+          .parseVastToInterstitials(parseVast(linearVast), null);
 
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
@@ -113,9 +113,9 @@ describe('VastInterstitialParser', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
-    it('uses currentTime as the start time for a mid-roll', () => {
-      const interstitials = VastInterstitialParser.parseVastToInterstitials(
-          parseVast(linearVast), /* currentTime= */ 5);
+    it('uses currentTime as the start time for a mid-roll', async () => {
+      const interstitials = await VastInterstitialParser
+          .parseVastToInterstitials(parseVast(linearVast), 5);
 
       expect(interstitials.length).toBe(1);
       expect(interstitials[0].startTime).toBe(5);
@@ -123,16 +123,16 @@ describe('VastInterstitialParser', () => {
       expect(interstitials[0].post).toBe(false);
     });
 
-    it('parses a linear ad as a post-roll when currentTime is Infinity', () => {
-      const interstitials = VastInterstitialParser.parseVastToInterstitials(
-          parseVast(linearVast), /* currentTime= */ Infinity);
+    it('parses a linear ad as a post-roll for an infinite time', async () => {
+      const interstitials = await VastInterstitialParser
+          .parseVastToInterstitials(parseVast(linearVast), Infinity);
 
       expect(interstitials.length).toBe(1);
       expect(interstitials[0].pre).toBe(false);
       expect(interstitials[0].post).toBe(true);
     });
 
-    it('parses a non-linear ad as an overlay', () => {
+    it('parses a non-linear ad as an overlay', async () => {
       const vast = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<VAST version="3.0">',
@@ -172,8 +172,8 @@ describe('VastInterstitialParser', () => {
         '</VAST>',
       ].join('');
 
-      const interstitials = VastInterstitialParser.parseVastToInterstitials(
-          parseVast(vast), /* currentTime= */ null);
+      const interstitials = await VastInterstitialParser
+          .parseVastToInterstitials(parseVast(vast), null);
 
       expect(interstitials.length).toBe(1);
       /** @type {!shaka.extern.AdInterstitial} */
@@ -232,10 +232,10 @@ describe('VastInterstitialParser', () => {
       expect(interstitials[0]).toEqual(expectedInterstitial);
     });
 
-    describe('non-linear IFrameResource', () => {
+    describe('non-linear resource selection', () => {
       /**
        * @param {string} resources
-       * @return {!Array<shaka.extern.AdInterstitial>}
+       * @return {!Promise<!Array<shaka.extern.AdInterstitial>>}
        */
       function parseResources(resources) {
         const vast = '<VAST><Ad><InLine><Creatives><Creative><NonLinearAds>' +
@@ -246,8 +246,8 @@ describe('VastInterstitialParser', () => {
             parseVast(vast), /* currentTime= */ 0);
       }
 
-      it('uses an external iframe URL verbatim', () => {
-        const ads = parseResources('<IFrameResource>' +
+      it('uses an external iframe URL verbatim', async () => {
+        const ads = await parseResources('<IFrameResource>' +
             '<![CDATA[https://ads.example/frame?a=1&b=2]]></IFrameResource>');
         expect(ads).toEqual([jasmine.objectContaining({
           uri: 'https://ads.example/frame?a=1&b=2',
@@ -255,8 +255,8 @@ describe('VastInterstitialParser', () => {
         })]);
       });
 
-      it('prefers inline HTML over an iframe', () => {
-        const ads = parseResources(
+      it('prefers inline HTML over an iframe', async () => {
+        const ads = await parseResources(
             '<IFrameResource>https://ads.example/frame</IFrameResource>' +
             '<HTMLResource><![CDATA[<b>Ad</b>]]></HTMLResource>');
         expect(ads).toEqual([jasmine.objectContaining({
@@ -265,23 +265,53 @@ describe('VastInterstitialParser', () => {
         })]);
       });
 
-      it('skips an iframe with an unsupported URI scheme', () => {
-        expect(parseResources(
+      it('skips an iframe with an unsupported URI scheme', async () => {
+        expect(await parseResources(
             '<IFrameResource>javascript:alert(1)</IFrameResource>'))
             .toEqual([]);
-        expect(parseResources('<IFrameResource/>')).toEqual([]);
+        expect(await parseResources('<IFrameResource/>')).toEqual([]);
+      });
+
+      it('prefers the first supported static resource', async () => {
+        const webp = '<StaticResource creativeType="image/webp">' +
+            'first.webp</StaticResource>';
+        const png = '<StaticResource creativeType="image/png">' +
+            'second.png</StaticResource>';
+        const support = spyOn(shaka.util.StreamUtils, 'isImageTypeSupported');
+        support.and.resolveTo(true);
+        let ads = await parseResources(
+            '<IFrameResource>https://ads.example/frame</IFrameResource>' +
+            '<HTMLResource><![CDATA[<b>Ad</b>]]></HTMLResource>' + webp + png);
+        expect(ads.map((ad) => ad.uri)).toEqual(['first.webp']);
+
+        support.and.callFake((type) => Promise.resolve(type == 'image/png'));
+        ads = await parseResources(webp + png);
+        expect(ads.map((ad) => ad.uri)).toEqual(['second.png']);
+      });
+
+      it('skips empty and unsupported resources', async () => {
+        const ads = await parseResources(
+            '<IFrameResource>https://ads.example/frame</IFrameResource>' +
+            '<HTMLResource/>' +
+            '<HTMLResource><![CDATA[<b>Ad</b>]]></HTMLResource>' +
+            '<StaticResource creativeType="image/unknown">a</StaticResource>' +
+            '<StaticResource/>');
+        expect(ads).toEqual([jasmine.objectContaining({
+          uri: 'data:text/html;charset=UTF-8,%3Cb%3EAd%3C%2Fb%3E',
+          mimeType: 'text/html',
+        })]);
       });
     });
 
-    it('returns an empty array for an empty VAST', () => {
+    it('returns an empty array for an empty VAST', async () => {
       const vast = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<VAST version="3.0">',
         '</VAST>',
       ].join('');
 
-      const interstitials = VastInterstitialParser.parseVastToInterstitials(
-          parseVast(vast), /* currentTime= */ null);
+      const interstitials = await VastInterstitialParser
+          .parseVastToInterstitials(parseVast(vast), null);
       expect(interstitials).toEqual([]);
     });
   });
