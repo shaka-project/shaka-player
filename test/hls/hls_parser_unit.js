@@ -6877,6 +6877,34 @@ describe('HlsParser', () => {
     ]);
   });
 
+  it('ignores a failed lazy-load after the parser is stopped', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,CLOSED-CAPTIONS=NONE\n',
+      'video\n',
+    ].join('');
+
+    const media = Promise.withResolvers();
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponse('test:/video', () => media.promise);
+
+    const disableStreamSpy = jasmine.createSpy('disableStream');
+    playerInterface.disableStream = Util.spyFunc(disableStreamSpy);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    const creation = manifest.variants[0].video.createSegmentIndex();
+    parser.stop();
+    media.reject(new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS));
+
+    await expectAsync(creation).toBeResolved();
+    expect(disableStreamSpy).not.toHaveBeenCalled();
+  });
+
   it('lazy-loads TS content without filtering it out', async () => {
     const master = [
       '#EXTM3U\n',
