@@ -2315,7 +2315,12 @@ describe('MediaSourceEngine', () => {
       expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(100);
     });
 
-    it('releases the other queue when a reload drops its barrier', async () => {
+    describe('interrupted by a MediaSource reload', () => {
+      const aborted = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+
       /**
        * @param {boolean} reloading
        * @suppress {visibility}
@@ -2324,35 +2329,133 @@ describe('MediaSourceEngine', () => {
         mediaSourceEngine.reloadingMediaSource_ = reloading;
       }
 
-      // An append is in flight on audio, so the barrier queued behind it has
-      // to wait, while the barrier on the idle video queue is already held.
-      const append = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, fakeStream,
-          /* hasClosedCaptions= */ false);
-      /** @type {!shaka.test.StatusPromise} */
-      const setDuration =
-          new shaka.test.StatusPromise(mediaSourceEngine.setDuration(100));
-      await Util.shortDelay();
-      expect(setDuration.status).toBe('pending');
+      /**
+       * Ends the append in flight on audio while a MediaSource reload is in
+       * progress, which makes the reload path drop the rest of the audio
+       * queue.
+       */
+      function endAudioAppendDuringReload() {
+        setReloading(true);
+        audioSourceBuffer.updateend();
+        setReloading(false);
+      }
 
-      // A MediaSource reload starts and the in-flight append ends.  The reload
-      // path drops everything queued behind that append on the audio buffer,
-      // including the barrier the blocking operation is waiting for.
-      setReloading(true);
-      audioSourceBuffer.updateend();
-      await append;
-      setReloading(false);
+      /**
+       * @param {function():!Promise} run
+       * @return {!Promise}
+       * @suppress {visibility}
+       */
+      function enqueueBlockingOperation(run) {
+        return mediaSourceEngine.enqueueBlockingOperation_(run);
+      }
 
-      // The blocking operation must give up rather than hang, and the video
-      // queue it was holding must accept new work again.
-      await Util.shortDelay();
-      expect(setDuration.status).toBe('resolved');
-      const videoAppend = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, null, fakeStream,
-          /* hasClosedCaptions= */ false);
-      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
-      videoSourceBuffer.updateend();
-      await videoAppend;
+      it('settles every operation dropped from the queue', async () => {
+        // An append is in flight on audio, so the second append and the
+        // barrier queued behind it have to wait, while the barrier on the idle
+        // video queue is already held.
+        const append1 = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const append2 = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer2, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const setDuration = mediaSourceEngine.setDuration(100);
+        // Create the expectations first so we don't get unhandled rejection
+        // errors.
+        const append2Rejected = expectAsync(append2).toBeRejectedWith(aborted);
+        const setDurationRejected =
+            expectAsync(setDuration).toBeRejectedWith(aborted);
+
+        endAudioAppendDuringReload();
+
+        // The append that was in flight completed.  Nothing else in the queue
+        // will run, and nothing may stay pending or report success.
+        await append1;
+        await append2Rejected;
+        await setDurationRejected;
+        expect(audioSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
+        expect(mockMediaSource.durationSetter).not.toHaveBeenCalled();
+
+        // The video queue the blocking operation was holding must accept new
+        // work again.
+        const videoAppend = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        videoSourceBuffer.updateend();
+        await videoAppend;
+      });
+
+      it('does not report success for endOfStream', async () => {
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const rejected = expectAsync(mediaSourceEngine.endOfStream())
+            .toBeRejectedWith(aborted);
+
+        endAudioAppendDuringReload();
+
+        await append;
+        await rejected;
+        expect(mockMediaSource.endOfStream).not.toHaveBeenCalled();
+      });
+
+      it('does not report success for reset', async () => {
+        const initObject = new Map();
+        initObject.set(ContentType.AUDIO, fakeAudioStream);
+        initObject.set(ContentType.VIDEO, fakeVideoStream);
+        const append = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const rejected = expectAsync(mediaSourceEngine.reset(initObject))
+            .toBeRejectedWith(aborted);
+
+        endAudioAppendDuringReload();
+
+        await append;
+        await rejected;
+        expect(mockMediaSource.removeSourceBuffer).not.toHaveBeenCalled();
+      });
+
+      it('keeps the order of a queue replaced while it runs', async () => {
+        // A blocking operation is running, holding both queues.
+        const gate = Promise.withResolvers();
+        const blocking = enqueueBlockingOperation(() => gate.promise);
+        await Util.shortDelay();
+
+        // A reload replaces the audio queue, and new appends arrive in it.
+        // The first one starts right away.
+        endAudioAppendDuringReload();
+        /** @type {!shaka.test.StatusPromise} */
+        const append1 = new shaka.test.StatusPromise(
+            mediaSourceEngine.appendBuffer(
+                ContentType.AUDIO, buffer, null, fakeStream,
+                /* hasClosedCaptions= */ false));
+        /** @type {!shaka.test.StatusPromise} */
+        const append2 = new shaka.test.StatusPromise(
+            mediaSourceEngine.appendBuffer(
+                ContentType.AUDIO, buffer2, null, fakeStream,
+                /* hasClosedCaptions= */ false));
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+
+        // When the blocking operation finishes, it must only remove its own
+        // barriers.  The append at the head of the new queue is not its to
+        // pop, and the second append must not start early.
+        gate.resolve();
+        await blocking;
+        await Util.shortDelay();
+        expect(audioSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
+        expect(append1.status).toBe('pending');
+
+        audioSourceBuffer.updateend();
+        await append1;
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
+        expect(append2.status).toBe('pending');
+        audioSourceBuffer.updateend();
+        await append2;
+      });
     });
 
     it('waits for all previous operations to complete', async () => {
@@ -2429,6 +2532,72 @@ describe('MediaSourceEngine', () => {
       await Util.shortDelay();
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
+    });
+
+    // A dummy operation waits in each queue for the 'updateend' event of a
+    // duration reduction.  Not every reduction emits one.
+    describe('when a reduction emits no updateend', () => {
+      beforeEach(() => {
+        // Pretend the initial duration was 100.
+        mockMediaSource.durationGetter.and.returnValue(100);
+      });
+
+      async function expectQueuesToWork() {
+        const a1 = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const a2 = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        audioSourceBuffer.updateend();
+        videoSourceBuffer.updateend();
+        await a1;
+        await a2;
+      }
+
+      it('does not block the queues if nothing is truncated', async () => {
+        // No SourceBuffer starts a removal, so no 'updateend' will come.
+        await mediaSourceEngine.setDuration(50);
+        expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(50);
+        await expectQueuesToWork();
+      });
+
+      it('does not block the queues if the platform throws', async () => {
+        // "Duration reductions that would truncate currently buffered media
+        // are disallowed."
+        mockMediaSource.durationSetter.and.throwError(
+            new Error('InvalidStateError'));
+        await expectAsync(mediaSourceEngine.setDuration(50)).toBeRejected();
+        await expectQueuesToWork();
+      });
+
+      it('only waits for the SourceBuffers that are updating', async () => {
+        // Only the audio buffer has something to truncate.
+        mockMediaSource.durationSetter.and.callFake(() => {
+          audioSourceBuffer.updating = true;
+        });
+        await mediaSourceEngine.setDuration(50);
+
+        const a1 = mediaSourceEngine.appendBuffer(
+            ContentType.AUDIO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        const a2 = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, fakeStream,
+            /* hasClosedCaptions= */ false);
+        expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+
+        // The removal ends, then the audio append.
+        audioSourceBuffer.updating = false;
+        audioSourceBuffer.updateend();
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        audioSourceBuffer.updateend();
+        videoSourceBuffer.updateend();
+        await a1;
+        await a2;
+      });
     });
 
     it('allows duration to be shrunk', async () => {
