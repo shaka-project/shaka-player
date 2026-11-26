@@ -158,6 +158,25 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
      */
     this.vrStereoLayout_ = null;
 
+    /**
+     * The video container whose text is displayed for each eye, while the
+     * stereoscopic mode is enabled.
+     * @private {?HTMLElement}
+     */
+    this.stereoTextContainer_ = null;
+
+    /**
+     * Copies the text of the left eye to the right eye.
+     * @private {?MutationObserver}
+     */
+    this.stereoTextObserver_ = null;
+
+    /**
+     * The copy of the text container for the right eye.
+     * @private {?HTMLElement}
+     */
+    this.stereoTextMirror_ = null;
+
     this.listenToContextLoss_();
 
     this.loadEventManager_.listen(player, 'loading', () => {
@@ -257,6 +276,7 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       this.vrWebgl_ = null;
     }
     this.video_.classList.remove('shaka-vr-video');
+    this.stopStereoText_();
 
     // FakeEventTarget implements IReleasable
     super.release();
@@ -360,7 +380,115 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
       return;
     }
     this.vrWebgl_.toggleStereoscopicMode();
+    this.updateStereoText_();
     this.dispatchStereoscopicModeChanged_();
+  }
+
+  /**
+   * In the stereoscopic mode each eye displays its view in one half of the
+   * video container, but the text displayer draws over the whole of it.  So
+   * the text container takes the half of the left eye, and a copy of it the
+   * half of the right eye.  Both are shifted towards each other, so that the
+   * text appears in front of the video.
+   *
+   * @private
+   */
+  updateStereoText_() {
+    const parent = this.video_.parentElement;
+    const videoContainer =
+        parent ? shaka.util.Dom.asHTMLElement(parent) : null;
+    if (!videoContainer || !this.vrWebgl_ ||
+        !this.vrWebgl_.isStereoscopicModeEnabled()) {
+      this.stopStereoText_();
+      return;
+    }
+    if (this.stereoTextContainer_ != videoContainer) {
+      this.stopStereoText_();
+      this.stereoTextContainer_ = videoContainer;
+      videoContainer.classList.add('shaka-vr-stereo-text');
+      this.stereoTextObserver_ = new MutationObserver(() => {
+        this.mirrorStereoText_();
+      });
+      this.mirrorStereoText_();
+    }
+    // Half of the disparity goes to each eye, relative to the width of its
+    // view, which is the width of the text container.
+    const shift = this.config_.vrStereoTextDisparity * 100 / 2;
+    videoContainer.style.setProperty('--shaka-vr-text-shift', shift + '%');
+  }
+
+  /**
+   * Copies the text container of the left eye to the right eye, and watches
+   * it for the next changes.
+   *
+   * @private
+   */
+  mirrorStereoText_() {
+    const videoContainer = this.stereoTextContainer_;
+    const observer = this.stereoTextObserver_;
+    if (!videoContainer || !observer) {
+      return;
+    }
+    // The text displayer adds and removes its container as the text is shown
+    // and hidden, so look for it again on each change.
+    observer.disconnect();
+    observer.observe(videoContainer, {childList: true});
+    /** @type {?HTMLElement} */
+    let source = null;
+    for (const child of videoContainer.childNodes) {
+      if (child instanceof HTMLElement &&
+          child.classList.contains('shaka-text-container')) {
+        source = child;
+        break;
+      }
+    }
+    if (!source) {
+      this.stereoTextMirror_?.remove();
+      return;
+    }
+    if (!this.stereoTextMirror_) {
+      this.stereoTextMirror_ = shaka.util.Dom.createHTMLElement('div');
+      this.stereoTextMirror_.classList.add('shaka-vr-text-mirror');
+      // Screen readers read the text of the left eye only.
+      this.stereoTextMirror_.setAttribute('aria-hidden', 'true');
+    }
+    const mirror = this.stereoTextMirror_;
+    // The inline styles hold the layout of the text displayer and the
+    // position above the controls.
+    mirror.style.cssText = source.style.cssText;
+    while (mirror.firstChild) {
+      mirror.removeChild(mirror.firstChild);
+    }
+    for (const node of Array.from(source.childNodes)) {
+      mirror.appendChild(node.cloneNode(/* deep= */ true));
+    }
+    for (const element of Array.from(mirror.querySelectorAll('[id]'))) {
+      element.removeAttribute('id');
+    }
+    if (source.nextSibling != mirror) {
+      videoContainer.insertBefore(mirror, source.nextSibling);
+    }
+    observer.observe(source, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * @private
+   */
+  stopStereoText_() {
+    this.stereoTextObserver_?.disconnect();
+    this.stereoTextObserver_ = null;
+    this.stereoTextMirror_?.remove();
+    this.stereoTextMirror_ = null;
+    if (this.stereoTextContainer_) {
+      this.stereoTextContainer_.classList.remove('shaka-vr-stereo-text');
+      this.stereoTextContainer_.style.removeProperty('--shaka-vr-text-shift');
+      this.stereoTextContainer_ = null;
+    }
   }
 
   /**
@@ -609,6 +737,9 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
           'vrstatuschanged',
           (new Map()).set('newStatus', this.isPlayingVR())));
     }
+    // A new view starts without the stereoscopic mode, and the disparity of
+    // the text may have changed.
+    this.updateStereoText_();
   }
 
   /**

@@ -428,6 +428,7 @@ shaka.ui.Overlay = class {
       displayInVrMode: false,
       defaultVrProjectionMode: 'equirectangular',
       defaultVrStereoLayout: 'mono',
+      vrStereoTextDisparity: 0.01,
       preferVideoFullScreenInVisionOS: true,
       showAudioCodec: true,
       showVideoCodec: true,

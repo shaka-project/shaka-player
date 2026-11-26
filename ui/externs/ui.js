@@ -399,6 +399,7 @@ shaka.extern.UITrackLabelCallback;
  *   displayInVrMode: boolean,
  *   defaultVrProjectionMode: string,
  *   defaultVrStereoLayout: string,
+ *   vrStereoTextDisparity: number,
  *   preferVideoFullScreenInVisionOS: boolean,
  *   showAudioCodec: boolean,
  *   showVideoCodec: boolean,
@@ -671,6 +672,15 @@ shaka.extern.UITrackLabelCallback;
  *   Video, is displayed as mono, since the browser decodes a single view.
  *   <br>
  *   Defaults to <code>'mono'</code>.
+ * @property {number} vrStereoTextDisparity
+ *   How far in front of the video the text appears in the stereoscopic mode
+ *   of VR content, where the text is displayed for each eye.  It is the
+ *   horizontal disparity between the text of both eyes, relative to the width
+ *   of the view of one eye, from 0 to 1.  Half of it shifts the text of each
+ *   eye towards the other eye.  With <code>0</code>, the text is at the same
+ *   depth as the screen plane.
+ *   <br>
+ *   Defaults to <code>0.01</code>.
  * @property {boolean} preferVideoFullScreenInVisionOS
  *   If true, we will use the fullscreen API of the video element itself if it
  *   is available in Vision OS. This is useful to be able to access 3D

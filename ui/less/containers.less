@@ -74,7 +74,8 @@
   background-color: var(--shaka-bg-solid);
 
   .shaka-text-container,
-  .shaka-speech-to-text-container {
+  .shaka-speech-to-text-container,
+  .shaka-vr-text-mirror {
     /* In fullscreen mode, the text displayer's font size should be relative to
      * the either window height or width (whichever is smaller), instead of a
      * fixed size. */
@@ -159,6 +160,27 @@
  * only applies when the size of the video is not set by the application. */
 .shaka-vr-video {
   aspect-ratio: 16 / 9;
+}
+
+/* In the stereoscopic mode of VR content, each eye displays its view in one
+ * half of the video container.  The text container takes the half of the left
+ * eye, and its copy the half of the right eye.  Both are shifted towards each
+ * other, so that the text appears in front of the video. */
+.shaka-vr-stereo-text {
+  > .shaka-text-container {
+    /* Also with right-to-left text, where "right" would win over "left". */
+    right: auto;
+    left: 0;
+    width: 50%;
+    transform: translateX(var(--shaka-vr-text-shift, 0));
+  }
+
+  > .shaka-vr-text-mirror {
+    right: auto;
+    left: 50%;
+    width: 50%;
+    transform: translateX(calc(-1 * var(--shaka-vr-text-shift, 0)));
+  }
 }
 
 /* While VR content is displayed, dragging or pinching the controls container
@@ -623,7 +645,8 @@
 }
 
 .shaka-text-container,
-.shaka-speech-to-text-container {
+.shaka-speech-to-text-container,
+.shaka-vr-text-mirror {
   .absolute-position();
 
   /* Make sure the text container doesn't steal pointer events from another
@@ -657,7 +680,8 @@
 }
 
 .shaka-controls-container[shown="true"] ~ .shaka-text-container,
-.shaka-controls-container[shown="true"] ~ .shaka-speech-to-text-container {
+.shaka-controls-container[shown="true"] ~ .shaka-speech-to-text-container,
+.shaka-controls-container[shown="true"] ~ .shaka-vr-text-mirror {
   /* Disable the transition delay when moving the captions up, so that the
    * controls don't appear over the captions. */
   transition-delay: 0ms;
