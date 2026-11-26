@@ -418,7 +418,14 @@ describe('SegmentPrefetch', () => {
      * @return {!Array<string>} the URIs downloaded more than once
      */
     function twice(downloads) {
-      return downloads.filter((u, i) => downloads.indexOf(u) != i);
+      const seen = new Set();
+      return downloads.filter((u) => {
+        if (seen.has(u)) {
+          return true;
+        }
+        seen.add(u);
+        return false;
+      });
     }
 
     it('uses every prefetched segment when segments are aligned', () => {
