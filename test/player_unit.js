@@ -3565,6 +3565,58 @@ describe('Player', () => {
       expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
+    it('keeps the speech track when switching text displayers', () => {
+      const supported = spyOn(
+          shaka.text.SpeechToText.isMediaStreamTrackSupported, 'value')
+          .and.returnValue(true);
+      player.setVideoContainer(shaka.util.Dom.createHTMLElement('div'));
+      player.configure('accessibility.speechToText.enabled', true);
+      expect(supported).toHaveBeenCalled();
+
+      const useUi = () => player.configure('textDisplayFactory',
+          (p) => new shaka.text.UITextDisplayer(p));
+      const getSpeechTrack = () => player.getTextTracks().find(
+          (t) => t.originalLanguage == 'speech-to-text');
+      expect(getSpeechTrack().active).toBe(false);
+      video.paused = true;
+      player.selectTextTrack(getSpeechTrack());
+      expect(getSpeechTrack().active).toBe(true);
+      expect(player.getTextDisplayer().isTextVisible()).toBe(true);
+      expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.setTextDisplayer)
+          .toHaveBeenCalledWith(jasmine.any(shaka.text.StubTextDisplayer));
+
+      player.selectTextTrack(textTracks[0]);
+      expect(getSpeechTrack().active).toBe(false);
+      expect(mediaSourceEngine.setTextDisplayer)
+          .toHaveBeenCalledWith(player.getTextDisplayer());
+      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
+
+      player.selectTextTrack(getSpeechTrack());
+      player.configure('textDisplayFactory',
+          () => new shaka.text.StubTextDisplayer());
+      expect(getSpeechTrack().active).toBe(true);
+      useUi();
+      expect(getSpeechTrack().active).toBe(true);
+      expect(player.getTextDisplayer().isTextVisible()).toBe(true);
+      player.configure('textDisplayFactory',
+          (p) => new shaka.text.NativeTextDisplayer(p));
+      expect(getSpeechTrack().active).toBe(true);
+      expect(video.textTracks.filter((t) => t.mode == 'showing').length)
+          .toBe(1);
+      player.selectTextTrack(textTracks[0]);
+      expect(getSpeechTrack().active).toBe(false);
+      player.selectTextTrack(getSpeechTrack());
+      useUi();
+      expect(getSpeechTrack().active).toBe(true);
+      player.configure('accessibility.speechToText.enabled', false);
+      expect(getSpeechTrack()).toBeUndefined();
+      expect(player.getTextDisplayer().isTextVisible()).toBe(false);
+      supported.and.returnValue(false);
+      player.configure('accessibility.speechToText.enabled', true);
+      expect(getSpeechTrack()).toBeUndefined();
+    });
+
     it('returns empty arrays before tracks can be determined', async () => {
       const parser = new shaka.test.FakeManifestParser(manifest);
 
@@ -4286,6 +4338,53 @@ describe('Player', () => {
       expect(getActiveVariantTrack().label).toBe('es-label');
     });
   });  // describe('tracks')
+
+  it('switches between speech and native tracks in src= mode', async () => {
+    spyOn(shaka.text.SpeechToText.isMediaStreamTrackSupported, 'value')
+        .and.returnValue(true);
+    player.setVideoContainer(shaka.util.Dom.createHTMLElement('div'));
+    player.configure({
+      textDisplayFactory: (p) => new shaka.text.UITextDisplayer(p),
+      accessibility: {speechToText: {enabled: true}},
+    });
+    video.paused = true;
+    video.canPlayType.and.returnValue('maybe');
+    spyOn(shaka.util.Dom, 'anyMediaElement').and.returnValue(video);
+    spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+        (mediaElement, readyState, eventManager, callback) => callback());
+    await player.load(fakeManifestUri, 0, 'video/mp4');
+
+    const trackNode = shaka.util.Dom.createHTMLElement('track');
+    const nativeTrack = /** @type {HTMLTrackElement} */(trackNode).track;
+    nativeTrack.mode = 'disabled';
+    video.textTracks.push(nativeTrack);
+    const tracks = player.getTextTracks();
+    const ordinary = tracks.find((t) => t.originalLanguage != 'speech-to-text');
+    const speech = tracks.find((t) => t.originalLanguage == 'speech-to-text');
+    player.selectTextTrack(ordinary);
+    expect(nativeTrack.mode).toBe('hidden');
+    player.selectTextTrack(speech);
+    expect(nativeTrack.mode).toBe('disabled');
+    expect(player.getTextTracks().filter((t) => t.active)).toEqual([speech]);
+    player.selectTextTrack(ordinary);
+    expect(nativeTrack.mode).toBe('hidden');
+    expect(player.getTextDisplayer().isTextVisible()).toBe(true);
+
+    player.selectTextTrack(speech);
+    player.configure('textDisplayFactory',
+        (p) => new shaka.text.NativeTextDisplayer(p));
+    expect(player.getTextTracks().map((t) => t.id))
+        .toEqual([ordinary.id, speech.id]);
+    expect(player.getTextTracks().filter((t) => t.active)).toEqual([speech]);
+    expect(video.textTracks.length).toBe(2);
+    expect(video.textTracks[1].mode).toBe('showing');
+    player.selectTextTrack(ordinary);
+    expect(nativeTrack.mode).toBe('showing');
+    expect(video.textTracks[1].mode).toBe('disabled');
+    player.configure('accessibility.speechToText.enabled', false);
+    expect(video.textTracks).toContain(nativeTrack);
+    expect(video.textTracks.length).toBe(1);
+  });
 
   describe('HTML5 audio tracks in src= mode', () => {
     let trackEn1;
@@ -6071,6 +6170,20 @@ describe('Player', () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       player.getManifest().variants.unshift(filteredVariant);
       expect(player.isVideoOnly()).toBe(false);
+    });
+
+    it('is not video-only in src= without audio or video tracks', () => {
+      // Safari reports neither track type for some audio-only files.
+      const media = /** @type {?} */(video);
+      media.src = 'test.mp3';
+      media.audioTracks = [];
+      media.videoTracks = [];
+      expect(player.isAudioOnly()).toBe(true);
+      expect(player.isVideoOnly()).toBe(false);
+
+      media.videoTracks = [{}];
+      expect(player.isAudioOnly()).toBe(false);
+      expect(player.isVideoOnly()).toBe(true);
     });
   });
 

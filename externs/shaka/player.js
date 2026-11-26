@@ -2039,8 +2039,7 @@ shaka.extern.LiveSyncConfiguration;
  *   <br>
  *   This can be useful if your stream doesn't have subtitles and you want them.
  *   <br>
- *   This feature creates a text track that works like any other, but only
- *   renders when a <code>videoContainer</code> is provided to the player.
+ *   The player displays the generated text like any other subtitle track.
  *   You can recognize this track by its originalLanguage which is
  *   'speech-to-text'.
  *   <br>

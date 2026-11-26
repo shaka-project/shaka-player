@@ -31,7 +31,6 @@ The **Speech-to-Text module** enables real-time transcription of audio streams w
 
 ### Requirements
 
- - Use `setVideoContainer` method in the player.
  - [Speech Recognition API][] with support for `start(MediaStreamTrack audioTrack)` method.
 
 **Note:** The required APIs must be available and functional.
@@ -50,7 +49,7 @@ There are two possible behaviors, depending on the configuration:
 
 By default, when this module is activated, only **Speech-to-Text** is used. To enable translation, you must specify the target languages in the configuration.
 
-The text is rendered inside a container with the class `shaka-speech-to-text-container`, created within `videoContainer`.
+Transcriptions and translations appear as selectable subtitle tracks.
 
 Text is truncated by default, and the maximum number of characters can be configured using `accessibility.speechToText.maxTextLength`.
 

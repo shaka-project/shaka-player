@@ -11,181 +11,207 @@ describe('SpeechToText', () => {
   let player;
   /** @type {shaka.extern.SpeechToTextConfiguration} */
   let config;
-  /** @type {shaka.text.SpeechToText} */
+  /** @type {!shaka.text.SpeechToText} */
   let speechToText;
 
+  /** @type {!shaka.text.UITextDisplayer} */
+  let displayer;
+  /** @type {!HTMLElement} */
+  let container;
   const originalSpeechRecognition = window.SpeechRecognition;
   const originalTranslator = window.Translator;
 
-  // eslint-disable-next-line no-restricted-syntax
-  const originalAppendChild = Node.prototype.appendChild;
-
-  beforeAll(() => {
-    video = shaka.test.UiUtils.createVideoElement();
-    document.body.appendChild(video);
-  });
-
   beforeEach(async () => {
-    shaka.text.SpeechToText.isMediaStreamTrackSupported.reset();
-
+    container = shaka.util.Dom.createHTMLElement('div');
+    video = shaka.test.UiUtils.createVideoElement();
+    container.appendChild(video);
+    document.body.appendChild(container);
     player = new shaka.Player();
-    await player.attach(video);
-
-    const defaultConfig = shaka.util.PlayerConfiguration.createDefault();
-
-    config = defaultConfig.accessibility.speechToText;
+    await player.attach(video, /* initializeMediaSource= */ false);
+    player.setVideoContainer(container);
+    displayer = new shaka.text.UITextDisplayer(player);
+    const defaults = shaka.util.PlayerConfiguration.createDefault();
+    defaults.textDisplayer.suspendRenderingWhenHidden = false;
+    displayer.configure(defaults.textDisplayer);
+    displayer.setTextVisibility(true);
+    config = defaults.accessibility.speechToText;
+    speechToText = new shaka.text.SpeechToText(player);
+    speechToText.setTextDisplayer(displayer);
+    speechToText.configure(config);
+    window.SpeechRecognition = /** @type {?} */ (MockSpeechRecognition);
   });
 
   afterEach(async () => {
+    speechToText.release();
+    await displayer.destroy();
+    await player.destroy();
+    container.remove();
     window.SpeechRecognition = originalSpeechRecognition;
     window.Translator = originalTranslator;
-    // eslint-disable-next-line no-restricted-syntax
-    Node.prototype.appendChild = originalAppendChild;
-    if (speechToText) {
-      speechToText.release();
-    }
-    await player.unload();
-    await player.destroy();
   });
 
-  afterAll(() => {
-    document.body.removeChild(video);
+  it('offers translation tracks when the Translator API is available', () => {
+    window.Translator = /** @type {?} */ (MockTranslator);
+    config.languagesToTranslate = ['en', 'es'];
+    speechToText.configure(config);
+    expect(speechToText.getTextTracks().map((t) => t.language))
+        .toEqual(['', 'en', 'es']);
   });
 
-  describe('when no SpeechRecognition support', () => {
-    beforeEach(() => {
-      delete window.SpeechRecognition;
-    });
-
-    it('isSupported returns false', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.isSupported()).toBe(false);
-    });
-
-    it('isEnabled returns false', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.isEnabled()).toBe(false);
-    });
-
-    it('getTextTracks returns empty', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.getTextTracks()).toEqual([]);
-    });
-
-    it('disable do nothing', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      speechToText.disable();
-    });
-
-    it('configure works', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      speechToText.configure(config);
-    });
+  it('offers only the transcription without the Translator API', () => {
+    delete window.Translator;
+    config.languagesToTranslate = ['en', 'es'];
+    speechToText.configure(config);
+    expect(speechToText.getTextTracks().map((t) => t.language)).toEqual(['']);
   });
 
-  describe('when SpeechRecognition support', () => {
-    /** @type {!HTMLElement} */
-    let container;
+  /** @return {!MockSpeechRecognition} */
+  function mockRecognition() {
+    spyOn(player, 'getAudioTracks').and.returnValue([]);
+    spyOn(Object.getPrototypeOf(speechToText), 'getAudioTrackFromMediaElement_')
+        .and.returnValue(/** @type {?} */ ({}));
+    const recognition = new MockSpeechRecognition();
+    spyOn(window, 'SpeechRecognition').and.returnValue(recognition);
+    return recognition;
+  }
 
-    beforeEach(() => {
-      container = /** @type {!HTMLElement} */(document.createElement('div'));
-      player.setVideoContainer(container);
-
-      /** @type {(typeof SpeechRecognition)} */
-      const mock = /** @type {?} */ (MockSpeechRecognition);
-
-      window.SpeechRecognition = mock;
-
-      // eslint-disable-next-line no-restricted-syntax
-      Node.prototype.appendChild = function(child) {
-        // eslint-disable-next-line no-restricted-syntax
-        const result = originalAppendChild.call(this, child);
-        if (child instanceof HTMLIFrameElement) {
-          const iframe = /** @type {!HTMLIFrameElement} */ (child);
-          const contentWindow = iframe.contentWindow;
-          if (contentWindow) {
-            contentWindow.SpeechRecognition = mock;
-          }
+  it('keeps live cues on their own native track across displayer changes',
+      async () => {
+        spyOn(shaka.text.SpeechToText.isMediaStreamTrackSupported, 'value')
+            .and.returnValue(true);
+        player.configure({
+          accessibility: {speechToText: {enabled: true}},
+          textDisplayFactory: (p) => new shaka.text.NativeTextDisplayer(p),
+        });
+        await player.load('/base/test/test/assets/hls-raw-mp3/' +
+            'media_w905519204_0.mp3', 0, 'audio/mpeg');
+        // load() resolves with metadata, but Safari only adds the audio track
+        // with the first data. Its 'audiotrackschanged' would then restart
+        // recognition and, since the element never plays, stop it.
+        if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+          await new Promise((resolve) => {
+            const eventManager = new shaka.util.EventManager();
+            eventManager.listenOnce(video, 'loadeddata', () => {
+              eventManager.release();
+              resolve();
+            });
+          });
+          // Let the delayed 'audiotrackschanged' be dispatched first.
+          await shaka.test.Util.shortDelay();
         }
-        return result;
-      };
-    });
+        const ordinary = video.addTextTrack('subtitles', 'English', 'en');
+        ordinary.mode = 'showing';
+        const original = new VTTCue(0, 10, 'Original');
+        ordinary.addCue(original);
+        const tracks = player.getTextTracks();
+        const speech = tracks.find(
+            (t) => t.originalLanguage == 'speech-to-text');
+        const authored = tracks.find((t) => t.label == 'English');
+        const recognition = mockRecognition();
 
-    it('isSupported returns true', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.isSupported()).toBe(true);
-    });
+        player.selectTextTrack(authored);
+        player.selectTextTrack(speech);
+        video.dispatchEvent(new Event('play'));
+        await shaka.test.Util.shortDelay();
+        recognition.simulateResult('Good');
+        await shaka.test.Util.shortDelay();
+        const selected = () => Array.from(video.textTracks).find(
+            (t) => t.mode == 'showing');
+        const cueText = () => Array.from(selected()?.cues || [], (c) => c.text);
+        expect(cueText()).withContext('first result').toEqual(['Good']);
+        recognition.simulateResult('Good morning');
+        await shaka.test.Util.shortDelay();
+        expect(cueText()).withContext('interim result')
+            .toEqual(['Good morning']);
 
-    it('isSupported returns false if no videoContainer', () => {
-      player.setVideoContainer(null);
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.isSupported()).toBe(false);
-    });
+        const custom = new shaka.test.FakeTextDisplayer();
+        player.configure('textDisplayFactory', () => custom);
+        expect(custom.appendSpy).toHaveBeenCalledWith([
+          jasmine.objectContaining({payload: 'Good morning'}),
+        ]);
+        recognition.simulateResult('Good morning everyone');
+        await shaka.test.Util.shortDelay();
+        expect(custom.removeSpy).toHaveBeenCalled();
+        expect(custom.appendSpy.calls.mostRecent().args[0][0].payload)
+            .toBe('Good morning everyone');
 
-    it('getTextTracks returns the correct result', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      const tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(1);
-    });
+        player.configure('textDisplayFactory',
+            (p) => new shaka.text.UITextDisplayer(p));
+        expect(container.textContent).toBe('Good morning everyone');
+        player.configure('textDisplayFactory',
+            (p) => new shaka.text.NativeTextDisplayer(p));
+        expect(cueText()).withContext('restored cue')
+            .toEqual(['Good morning everyone']);
+        expect(player.getTextTracks().length).toBe(2);
 
-    it('getTextTracks returns the correct result with Translator API', () => {
-      /** @type {(typeof Translator)} */
-      window.Translator = /** @type {?} */ (MockTranslator);
+        // Simulate switching back through the browser's subtitle menu.
+        // The displayer reacts to the async 'change' event and then debounces
+        // with a zero-delay timer, so a fixed delay is too short on slow
+        // devices. Wait for the event, then let the debounce timer run first.
+        // 'trackschanged' is not usable here: the configure() above already
+        // queued one, which would resolve before the browser fires 'change'.
+        const changed = new Promise((resolve) => {
+          const eventManager = new shaka.util.EventManager();
+          eventManager.listenOnce(video.textTracks, 'change', () => {
+            eventManager.release();
+            resolve();
+          });
+        });
+        selected().mode = 'disabled';
+        ordinary.mode = 'showing';
+        await changed;
+        await shaka.test.Util.shortDelay();
+        expect(player.getTextTracks().filter((t) => t.active).map((t) => t.id))
+            .toEqual([authored.id]);
+        expect(Array.from(ordinary.cues || [])).toEqual([original]);
+        await player.unload();
+        expect(Array.from(video.textTracks).some(
+            (t) => t.label == 'Auto-generated')).toBe(false);
+      });
 
-      speechToText = new shaka.text.SpeechToText(player);
-      config.languagesToTranslate = ['en', 'es'];
-      speechToText.configure(config);
-      const tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(3);
-    });
+  it('stops pending recognition when the track is released', async () => {
+    const recognition = mockRecognition();
+    const start = spyOn(recognition, 'start');
+    speechToText.enable(speechToText.getTextTracks()[0]);
+    video.dispatchEvent(new Event('play'));
+    speechToText.release();
+    await shaka.test.Util.shortDelay();
+    expect(start).not.toHaveBeenCalled();
+  });
 
-    // eslint-disable-next-line @stylistic/max-len
-    it('getTextTracks returns the correct result without Translator API', () => {
-      delete window.Translator;
+  it('replaces interim cues and clears the last one on disable', async () => {
+    const recognition = mockRecognition();
+    const append = spyOn(displayer, 'append').and.callThrough();
+    const track = speechToText.getTextTracks()[0];
+    speechToText.enable(track);
+    video.dispatchEvent(new Event('play'));
+    await shaka.test.Util.shortDelay();
 
-      speechToText = new shaka.text.SpeechToText(player);
-      config.languagesToTranslate = ['en', 'es'];
-      speechToText.configure(config);
-      const tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(1);
-    });
+    recognition.simulateResult('Good');
+    await shaka.test.Util.shortDelay();
+    const firstCue = append.calls.mostRecent().args[0][0];
+    expect(firstCue).toEqual(jasmine.any(shaka.text.Cue));
+    expect(firstCue.region).toEqual(jasmine.objectContaining({
+      id: 'shaka-speech-to-text',
+      width: 90,
+      height: 3,
+      heightUnits: shaka.text.CueRegion.units.LINES,
+      viewportAnchorX: 5,
+      viewportAnchorY: 95,
+      regionAnchorY: 100,
+    }));
+    expect(container.textContent).toBe('Good');
 
-    it('create shaka-speech-to-text-container on demand only', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      const elements =
-          container.getElementsByClassName('shaka-speech-to-text-container');
-      expect(elements.length).toBe(0);
-    });
+    recognition.simulateResult('Good morning');
+    await shaka.test.Util.shortDelay();
+    expect(append.calls.mostRecent().args[0][0].region).toBe(firstCue.region);
+    expect(container.textContent).toBe('Good morning');
+    video.dispatchEvent(new Event('pause'));
+    expect(container.textContent).toBe('Good morning');
 
-    it('release remove shaka-speech-to-text-container', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      expect(speechToText.isSupported()).toBe(true);
-      const tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(1);
-      expect(tracks[0].active).toBe(false);
-      speechToText.enable(tracks[0]);
-      let elements =
-          container.getElementsByClassName('shaka-speech-to-text-container');
-      expect(elements.length).toBe(1);
-      speechToText.release();
-      elements =
-          container.getElementsByClassName('shaka-speech-to-text-container');
-      expect(elements.length).toBe(0);
-    });
-
-    it('enable and disable works', () => {
-      speechToText = new shaka.text.SpeechToText(player);
-      let tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(1);
-      expect(tracks[0].active).toBe(false);
-      speechToText.enable(tracks[0]);
-      expect(speechToText.isEnabled()).toBe(true);
-      tracks = speechToText.getTextTracks();
-      expect(tracks.length).toBe(1);
-      expect(tracks[0].active).toBe(true);
-      speechToText.disable();
-      expect(speechToText.isEnabled()).toBe(false);
-    });
+    speechToText.disable();
+    expect(container.textContent).toBe('');
+    expect(speechToText.getTextTracks()[0].active).toBe(false);
   });
 });
 
@@ -239,35 +265,14 @@ class MockSpeechRecognition {
 
   /**
    * @param {string} transcript
-   * @param {boolean=} isFinal
    */
-  simulateResult(transcript, isFinal = true) {
-    const event = /** @type {!SpeechRecognitionEvent} */ ({
+  simulateResult(transcript) {
+    const event = new Event('result');
+    Object.assign(event, {
       resultIndex: 0,
-      results: [
-        {transcript, confidence: 0.95},
-      ],
-      isFinal,
+      results: [[{transcript, confidence: 0.95}]],
     });
-
-    if (this.onresult) {
-      this.onresult(event);
-    }
-    this.eventTarget_.dispatchEvent(new CustomEvent('result', {detail: event}));
-  }
-
-  /**
-   * @param {string} errorType
-   */
-  simulateError(errorType) {
-    const event = /** @type {!SpeechRecognitionError} */ ({
-      error: errorType,
-    });
-
-    if (this.onerror) {
-      this.onerror(event);
-    }
-    this.eventTarget_.dispatchEvent(new CustomEvent('error', {detail: event}));
+    this.dispatchEvent(event);
   }
 
   /**
