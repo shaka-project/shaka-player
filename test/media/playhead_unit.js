@@ -1166,6 +1166,77 @@ describe('Playhead', () => {
           expect(video.currentTime).toBe(data.expectedEndTime);
         });
       }
+      describe('with safeSeekEndOffset', () => {
+        beforeEach(() => {
+          // Fixed values, so the expectations don't depend on the device's
+          // default gapPadding (2 on Tizen, Edge and Xbox, 0 elsewhere).
+          // The seek range is 0-60 (beforeEach of 'gap jumping'), so the limit
+          // is 60 - 5 = 55.
+          config.gapPadding = 2;
+          config.safeSeekEndOffset = 5;
+        });
+
+        playingTest('jumps forward as usual far from the end', {
+          // target 11 + 2 = 13, before the limit 55
+          buffered: [{start: 0, end: 10}, {start: 11, end: 20}],
+          start: 5,
+          waitingAt: 10,
+          expectEvent: true,
+          expectedEndTime: 13,
+        });
+
+        playingTest('steps back when the jump gets too close to the end', {
+          // target 54 + 2 = 56, past the limit 55: step back to 50 - 5 = 45,
+          // which is buffered
+          buffered: [{start: 40, end: 50}, {start: 54, end: 60}],
+          start: 45,
+          waitingAt: 50,
+          expectEvent: true,
+          expectedEndTime: 45,
+        });
+
+        playingTest('steps back when the jump would pass the end', {
+          // target 59 + 2 = 61, past the seek range end 60
+          buffered: [{start: 40, end: 50}, {start: 59, end: 60}],
+          start: 45,
+          waitingAt: 50,
+          expectEvent: true,
+          expectedEndTime: 45,
+        });
+
+        playingTest('doesn\'t seek when the point behind isn\'t buffered', {
+          // target 56 past the limit, but 50 - 5 = 45 isn't buffered
+          buffered: [{start: 47, end: 50}, {start: 54, end: 60}],
+          start: 47,
+          waitingAt: 50,
+          expectEvent: false,
+          expectedEndTime: 50,
+        });
+
+        describe('set to 0 (Shaka\'s default)', () => {
+          beforeEach(() => {
+            config.safeSeekEndOffset = 0;
+          });
+
+          playingTest('jumps close to the end as before', {
+            // target 56, before the seek range end 60: jumps
+            buffered: [{start: 40, end: 50}, {start: 54, end: 60}],
+            start: 45,
+            waitingAt: 50,
+            expectEvent: true,
+            expectedEndTime: 56,
+          });
+
+          playingTest('doesn\'t jump past the end, as before', {
+            // target 61, past the seek range end 60: no jump
+            buffered: [{start: 40, end: 50}, {start: 59, end: 60}],
+            start: 45,
+            waitingAt: 50,
+            expectEvent: false,
+            expectedEndTime: 50,
+          });
+        });
+      });
     });  // when playing
 
     describe('with buffered seeks', () => {
