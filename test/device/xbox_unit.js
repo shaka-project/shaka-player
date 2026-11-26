@@ -56,4 +56,38 @@ describe('Xbox', () => {
     expect(new shaka.device.Xbox().shouldOverrideDolbyVisionCodecs())
         .toBe(true);
   });
+
+  // See: https://github.com/shaka-project/shaka-player/issues/3380
+  describe('isStreamSupported', () => {
+    it('rejects H.264 above FHD', () => {
+      Util.setUserAgent(xboxOne);
+      const device = new shaka.device.Xbox();
+      expect(device.isStreamSupported(videoStream('avc1.640033', 3840, 2160)))
+          .toBe(false);
+    });
+
+    it('accepts H.264 up to FHD and other codecs above it', () => {
+      Util.setUserAgent(xboxOne);
+      const device = new shaka.device.Xbox();
+      expect(device.isStreamSupported(videoStream('avc1.640028', 1920, 1080)))
+          .toBe(true);
+      const hevc = videoStream('hvc1.2.4.L153.B0', 3840, 2160);
+      expect(device.isStreamSupported(hevc)).toBe(true);
+    });
+  });
+
+  /**
+   * @param {string} codecs
+   * @param {number} width
+   * @param {number} height
+   * @return {shaka.extern.Stream}
+   */
+  function videoStream(codecs, width, height) {
+    return /** @type {shaka.extern.Stream} */ ({
+      type: 'video',
+      codecs,
+      width,
+      height,
+    });
+  }
 });

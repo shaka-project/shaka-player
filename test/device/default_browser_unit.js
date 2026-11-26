@@ -11,6 +11,8 @@ describe('DefaultBrowser', () => {
   const chromiumEdge = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0';
   const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36';
   const firefox = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:155.0) Gecko/20100101 Firefox/155.0';
+  const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:132.0) Gecko/132.0 Firefox/132.0';
+  const chromeAndroid = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36';
   const safari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.2 Safari/605.1.15';
   /* eslint-enable @stylistic/max-len */
 
@@ -91,6 +93,56 @@ describe('DefaultBrowser', () => {
       Util.setVendor('Apple Computer, Inc.');
       expect(new shaka.device.DefaultBrowser().requiresTimestampOffsetFudge())
           .toBe(false);
+    });
+  });
+
+  // See: https://github.com/shaka-project/shaka-player/issues/6111
+  describe('isStreamSupported', () => {
+    /**
+     * @param {string} codecs
+     * @param {boolean} encrypted
+     * @return {shaka.extern.Stream}
+     */
+    function audioStream(codecs, encrypted) {
+      return /** @type {shaka.extern.Stream} */ ({
+        type: 'audio',
+        codecs,
+        encrypted,
+      });
+    }
+
+    it('rejects encrypted Opus on Firefox Android', () => {
+      Util.setUserAgent(firefoxAndroid);
+      Util.setVendor('');
+      const device = new shaka.device.DefaultBrowser();
+      expect(device.isStreamSupported(audioStream('opus', true))).toBe(false);
+      expect(device.isStreamSupported(audioStream('opus', false))).toBe(true);
+      expect(device.isStreamSupported(audioStream('mp4a.40.2', true)))
+          .toBe(true);
+    });
+
+    it('accepts encrypted Opus elsewhere', () => {
+      Util.setUserAgent(firefox);
+      Util.setVendor('');
+      expect(new shaka.device.DefaultBrowser().isStreamSupported(
+          audioStream('opus', true))).toBe(true);
+      Util.setUserAgent(chromeAndroid);
+      Util.setVendor('Google Inc.');
+      expect(new shaka.device.DefaultBrowser().isStreamSupported(
+          audioStream('opus', true))).toBe(true);
+    });
+
+    it('accepts H.264 above FHD', () => {
+      Util.setUserAgent(chrome);
+      Util.setVendor('Google Inc.');
+      const stream = /** @type {shaka.extern.Stream} */ ({
+        type: 'video',
+        codecs: 'avc1.640033',
+        width: 3840,
+        height: 2160,
+      });
+      expect(new shaka.device.DefaultBrowser().isStreamSupported(stream))
+          .toBe(true);
     });
   });
 });
