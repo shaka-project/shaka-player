@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('InterstitialStaticPresentation', () => {
+describe('InterstitialConcurrentPresentation', () => {
   const Utils = shaka.ads.Utils;
 
   /** @type {!HTMLElement} */
@@ -19,7 +19,7 @@ describe('InterstitialStaticPresentation', () => {
   let onClick;
   /** @type {!jasmine.Spy} */
   let onEnd;
-  /** @type {?shaka.ads.InterstitialStaticPresentation} */
+  /** @type {?shaka.ads.InterstitialConcurrentPresentation} */
   let presentation;
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe('InterstitialStaticPresentation', () => {
 
   /**
    * @param {!Object} fields
-   * @return {!shaka.ads.InterstitialStaticPresentation}
+   * @return {!shaka.ads.InterstitialConcurrentPresentation}
    */
   function start(fields) {
     const interstitial = Utils.createInterstitial(Object.assign({
@@ -57,12 +57,12 @@ describe('InterstitialStaticPresentation', () => {
         size: {x: 960, y: 540},
       },
     }, fields));
-    presentation = new shaka.ads.InterstitialStaticPresentation(
-        interstitial, container, video,
+    presentation = new shaka.ads.InterstitialConcurrentPresentation(
+        interstitial, video);
+    presentation.presentAsset(container,
         new shaka.ads.LayoutRenderer(video, container),
         shaka.test.Util.spyFunc(onEvent),
         shaka.test.Util.spyFunc(onClick), shaka.test.Util.spyFunc(onEnd));
-    presentation.start();
     return presentation;
   }
 
@@ -159,5 +159,90 @@ describe('InterstitialStaticPresentation', () => {
     jasmine.clock().tick(100);
     expect(onEvent).not.toHaveBeenCalled();
     expect(onEnd).not.toHaveBeenCalled();
+  });
+
+  describe('with media', () => {
+    /** @type {!HTMLVideoElement} */
+    let element;
+    /** @type {!jasmine.Spy} */
+    let skip;
+
+    beforeEach(() => {
+      element = shaka.test.UiUtils.createVideoElement();
+      skip = jasmine.createSpy('skip');
+    });
+
+    const inWindow = {
+      startTime: 10,
+      endTime: 20,
+    };
+    const preRoll = {
+      startTime: 0,
+      pre: true,
+    };
+
+    /**
+     * @param {!Object} fields
+     * @param {boolean=} live
+     */
+    function present(fields, live = false) {
+      const interstitial = Utils.createInterstitial(Object.assign({
+        uri: 'test:overlay',
+        overlay: {
+          viewport: {
+            x: 1920,
+            y: 1080,
+          },
+          topLeft: {
+            x: 960,
+            y: 0,
+          },
+          size: {
+            x: 960,
+            y: 1080,
+          },
+        },
+      }, fields));
+      presentation = new shaka.ads.InterstitialConcurrentPresentation(
+          interstitial, video);
+      presentation.presentMedia(element, live, shaka.test.Util.spyFunc(skip));
+    }
+
+    it('follows the position of the primary content', () => {
+      present(inWindow);
+      currentTime = 14;
+      element.dispatchEvent(new Event('playing'));
+      expect(element.currentTime).toBe(4);
+
+      currentTime = 17;
+      video.dispatchEvent(new Event('seeking'));
+      expect(element.currentTime).toBe(7);
+      expect(skip).not.toHaveBeenCalled();
+    });
+
+    it('does not follow the primary content in a pre-roll', () => {
+      present(preRoll);
+      currentTime = 3;
+      element.dispatchEvent(new Event('playing'));
+      video.dispatchEvent(new Event('seeking'));
+      expect(element.currentTime).toBe(0);
+    });
+
+    it('is skipped when seeking out of the window', () => {
+      present(inWindow);
+      currentTime = 25;
+      video.dispatchEvent(new Event('seeked'));
+      expect(skip).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops following the primary content when released', () => {
+      present(inWindow);
+      presentation.release();
+      currentTime = 25;
+      video.dispatchEvent(new Event('seeking'));
+      video.dispatchEvent(new Event('seeked'));
+      expect(element.currentTime).toBe(0);
+      expect(skip).not.toHaveBeenCalled();
+    });
   });
 });
