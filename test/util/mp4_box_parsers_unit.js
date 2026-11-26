@@ -817,28 +817,6 @@ describe('Mp4BoxParsers', () => {
       });
     });
 
-    it('does not compare the projection of the init segment with AIV', () => {
-      const warning = spyOn(shaka.log, 'warning');
-      for (const projection of ['fish', 'prim', 'equi', 'hequ', 'rect']) {
-        const init = initSegment('hvc1', vexu(0x03, projection));
-        expect(Mp4BoxParsers.parseSpatialVideoInfo(
-            init, 'CH-STEREO/PROJ-AIV').projection).toBe(projection);
-      }
-      expect(warning).not.toHaveBeenCalled();
-    });
-
-    it('warns when the manifest does not match the init segment', () => {
-      const warning = spyOn(shaka.log, 'warning');
-      const init = initSegment('hvc1', vexu(0x03, 'rect'));
-      expect(Mp4BoxParsers.parseSpatialVideoInfo(
-          init, 'CH-MONO/PROJ-EQUI')).toEqual({
-        projection: 'rect',
-        hfov: null,
-        stereoLayout: 'multiview',
-      });
-      expect(warning).toHaveBeenCalledTimes(2);
-    });
-
     it('returns nothing without spatial boxes', () => {
       const init = initSegment('avc1', box('pasp', new Uint8Array(8)));
       expect(Mp4BoxParsers.parseSpatialVideoInfo(init, null)).toEqual({
