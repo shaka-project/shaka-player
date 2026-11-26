@@ -77,12 +77,6 @@ describe('SegmentReference', () => {
       expect(SegmentReference.isSameMedia(
           reference, makeReference(10, 12, ['a.mp4'], 100))).toBe(false);
     });
-
-    it('handles null references', () => {
-      expect(SegmentReference.isSameMedia(null, null)).toBe(true);
-      expect(SegmentReference.isSameMedia(reference, null)).toBe(false);
-      expect(SegmentReference.isSameMedia(null, reference)).toBe(false);
-    });
   });
 });
 

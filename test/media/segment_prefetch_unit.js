@@ -198,7 +198,7 @@ describe('SegmentPrefetch', () => {
     });
 
     // https://github.com/shaka-project/shaka-player/issues/11067
-    it('does not prefetch again a segment with a new reference', () => {
+    it('does not prefetch a segment again with a new reference', () => {
       stream.segmentIndex =
           new shaka.media.SegmentIndex([references[0], references[1]]);
       segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
