@@ -196,6 +196,68 @@ describe('SegmentPrefetch', () => {
       expect(segmentPrefetch.getPrefetchedSegment(reference)).toBeNull();
       expect(segmentPrefetch.getPrefetchedSegment(initReference)).toBeNull();
     });
+
+    // https://github.com/shaka-project/shaka-player/issues/11067
+    it('does not prefetch a segment again with a new reference', () => {
+      stream.segmentIndex =
+          new shaka.media.SegmentIndex([references[0], references[1]]);
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      expect(fetchDispatcher).toHaveBeenCalledTimes(2);
+
+      // A manifest update creates new references for the same segments.
+      const updated = [
+        makeReference(uri('0.10'), 0, 10),
+        makeReference(uri('10.20'), 10, 20),
+        references[2],
+      ];
+      stream.segmentIndex = new shaka.media.SegmentIndex(updated);
+      segmentPrefetch.resetPosition();
+      segmentPrefetch.prefetchSegmentsByTime(updated[0].startTime);
+
+      // Only the new segment is fetched.
+      expect(fetchDispatcher).toHaveBeenCalledTimes(3);
+      expect(fetchDispatcher.calls.mostRecent().args[0]).toBe(references[2]);
+      for (const reference of updated) {
+        expect(segmentPrefetch.getPrefetchedSegment(reference)).not.toBeNull();
+      }
+      expect(fetchDispatcher).toHaveBeenCalledTimes(3);
+    });
+
+    it('reuses a prefetch for a new reference of the segment', async () => {
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      const op = segmentPrefetch.getPrefetchedSegment(references[1]);
+      expect(op).not.toBeNull();
+
+      const newReference = makeReference(uri('10.20'), 10, 20);
+      expect(segmentPrefetch.getPrefetchedSegment(newReference)).toBe(op);
+      // The prefetch now belongs to the new reference.
+      expect(segmentPrefetch.getPrefetchedSegment(references[1])).toBe(op);
+      expect(fetchDispatcher).toHaveBeenCalledTimes(3);
+      await expectSegmentsPrefetched(0);
+    });
+
+    it('does not reuse a prefetch of another byte range', () => {
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+
+      const otherRange = new shaka.media.SegmentReference(
+          10, 20, () => [uri('10.20')],
+          /* startByte= */ 100, /* endByte= */ 199,
+          /* initSegmentReference= */ null,
+          /* timestampOffset= */ 0,
+          /* appendWindowStart= */ 0,
+          /* appendWindowEnd= */ Infinity);
+      expect(segmentPrefetch.getPrefetchedSegment(otherRange)).toBeNull();
+    });
+
+    it('does not reuse a prefetch of the same URI at another time', () => {
+      segmentPrefetch.prefetchSegmentsByTime(references[0].startTime);
+      const op = segmentPrefetch.getPrefetchedSegment(references[1]);
+
+      const sameUriLater = makeReference(uri('10.20'), 50, 60);
+      expect(segmentPrefetch.getPrefetchedSegment(sameUriLater)).toBeNull();
+      // The original reference keeps its prefetch.
+      expect(segmentPrefetch.getPrefetchedSegment(references[1])).toBe(op);
+    });
   });
 
   describe('clearAll', () => {
@@ -437,7 +499,7 @@ describe('SegmentPrefetch', () => {
    * @param {string} uri
    * @param {number} startTime
    * @param {number} endTime
-   * @return {shaka.media.SegmentReference}
+   * @return {!shaka.media.SegmentReference}
    */
   function makeReference(uri, startTime, endTime) {
     return new shaka.media.SegmentReference(
