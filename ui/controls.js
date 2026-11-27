@@ -21,6 +21,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Icon');
 goog.require('shaka.ui.HiddenFastForwardButton');
 goog.require('shaka.ui.HiddenRewindButton');
+goog.require('shaka.ui.HoldToSpeedUp');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.MediaSession');
@@ -377,6 +378,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     /**
+     * True while the space key that this player took is held down.
+     * @private {boolean}
+     */
+    this.spaceKeyHeld_ = false;
+
+    /**
+     * True if releasing the space key should pause the presentation, because
+     * it was playing when the key was pressed.
+     * @private {boolean}
+     */
+    this.pauseOnSpaceKeyUp_ = false;
+
+    /**
      * This timer is used to regularly update the time and seek range elements
      * so that we are communicating the current state as accurately as possibly.
      *
@@ -579,6 +593,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.lostFocusTimer_?.stop();
     this.lostFocusTimer_ = null;
+
+    this.holdToSpeedUp_?.release();
+    this.holdToSpeedUp_ = null;
 
     this.timeAndSeekRangeTimer_?.stop();
     this.timeAndSeekRangeTimer_ = null;
@@ -799,6 +816,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.localVideo_.controls = false;
     } else {
       this.videoContainer_.removeAttribute('shaka-controls');
+      this.holdToSpeedUp_?.end();
     }
 
     // The effects of play state changes are inhibited while showing native
@@ -2060,6 +2078,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onPlayStateChange_();
     });
 
+    /** @private {shaka.ui.HoldToSpeedUp} */
+    this.holdToSpeedUp_ = new shaka.ui.HoldToSpeedUp(this);
+
     this.eventManager_.listen(this.videoContainer_, 'mousemove', (e) => {
       this.onMouseMove_(e);
     });
@@ -2702,7 +2723,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         const isSpace = key == ' ' || key == 'spacebar';
         if (!isSpace || isSeekBar || !isControlsFocused) {
           event.preventDefault();
-          this.playPausePresentation();
+          if (!isSpace) {
+            this.playPausePresentation();
+          } else if (!event.repeat) {
+            // A held key repeats; the first press is the one that counts.
+            this.onSpaceKeyDown_();
+          }
         }
         break;
       }
@@ -2785,6 +2811,45 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   onControlsKeyUp_(event) {
     // When the key is released, remove it from the pressed keys set.
     this.pressedKeys_.delete(event.key);
+
+    const key = event.key.toLowerCase();
+    if (this.spaceKeyHeld_ && (key == ' ' || key == 'spacebar')) {
+      event.preventDefault();
+      this.spaceKeyHeld_ = false;
+      // A pause, or anything else that ended the hold meanwhile, means the
+      // release must not toggle the playback.
+      const holding = this.holdToSpeedUp_.isHolding();
+      const spedUp = this.holdToSpeedUp_.end();
+      if (holding && !spedUp && this.pauseOnSpaceKeyUp_ &&
+          !this.presentationIsPaused()) {
+        this.playPausePresentation();
+      }
+    }
+  }
+
+  /**
+   * Plays or pauses the presentation for the space key, which can also be held
+   * down to speed up the playback.  See shaka.ui.HoldToSpeedUp.
+   * @private
+   */
+  onSpaceKeyDown_() {
+    this.spaceKeyHeld_ = false;
+    if (!this.enabled_ || !this.holdToSpeedUp_.isEnabled()) {
+      this.playPausePresentation();
+      return;
+    }
+
+    // If the presentation is playing, a short press pauses it when the key is
+    // released, so that holding the key does not pause it first.  Otherwise,
+    // play right away; if the key is held, the playback speeds up once it has
+    // started, and is paused again when the key is released.
+    const wasPaused = this.presentationIsPaused();
+    this.pauseOnSpaceKeyUp_ = this.holdToSpeedUp_.canSpeedUp();
+    if (!this.pauseOnSpaceKeyUp_) {
+      this.playPausePresentation();
+    }
+    this.spaceKeyHeld_ = true;
+    this.holdToSpeedUp_.begin(wasPaused);
   }
 
   /**

@@ -80,6 +80,7 @@ shaka.test.FakeDemoMain = class {
       enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
+      holdToSpeedUpRate: 2,
       fullScreenElement: null,
       showAudioChannelCountVariants: true,
       seekOnTaps: false,
