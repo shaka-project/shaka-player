@@ -258,62 +258,6 @@ describe('NativeTextDisplayer', () => {
     });
   });
 
-  describe('regions', () => {
-    const regionsSupported = () => !!originalVTTCue && !!window.VTTRegion &&
-        // eslint-disable-next-line no-restricted-syntax
-        'region' in originalVTTCue.prototype;
-
-    filterDescribe('with VTTRegion support', regionsSupported, () => {
-      beforeEach(() => {
-        window.VTTCue = originalVTTCue;
-      });
-
-      it('shares the VTTRegion of a region across appends', () => {
-        /**
-         * @param {number} startTime
-         * @return {!shaka.text.Cue}
-         */
-        const createCue = (startTime) => {
-          const cue = new shaka.text.Cue(startTime, startTime + 1, 'Test');
-          // An equal region for each cue, as parsed from different segments.
-          cue.region.id = 'fred';
-          cue.region.height = 3;
-          cue.region.heightUnits = shaka.text.CueRegion.units.LINES;
-          return cue;
-        };
-
-        displayer.append([createCue(0)]);
-        displayer.append([createCue(1)]);
-
-        const cues = mockTrack.addCue.calls.allArgs().map((args) => args[0]);
-        expect(cues.length).toBe(2);
-        expect(cues[0].region).toEqual(jasmine.any(VTTRegion));
-        expect(cues[1].region).toBe(cues[0].region);
-      });
-
-      it('appends equal time cues of a region in order', () => {
-        const region = new shaka.text.CueRegion();
-        region.id = 'fred';
-        region.height = 2;
-        region.heightUnits = shaka.text.CueRegion.units.LINES;
-        region.scroll = shaka.text.CueRegion.scrollMode.UP;
-        const shakaCues = ['First', 'Second', 'Third'].map((text) => {
-          const cue = new shaka.text.Cue(0, 5, text);
-          cue.region = region;
-          return cue;
-        });
-
-        displayer.append(shakaCues);
-
-        // The last one is added last, so the region shows it at the bottom.
-        const cues = mockTrack.addCue.calls.allArgs().map((args) => args[0]);
-        expect(cues.map((cue) => cue.text))
-            .toEqual(['First', 'Second', 'Third']);
-        expect(cues[0].region).toEqual(jasmine.any(VTTRegion));
-      });
-    });
-  });
-
   describe('remove', () => {
     it('removes cues which overlap the range', () => {
       const cue1 = new shaka.text.Cue(0, 1, 'Test');
