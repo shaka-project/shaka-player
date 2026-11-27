@@ -1032,7 +1032,8 @@ shaka.extern.IUIRangeElement = class {
 
   /**
    * Ends an in-progress mouse interaction, if there is one, so that other
-   * controls can take over from a drag that is still in progress.
+   * controls can take over from a drag that is still in progress.  A
+   * keyboard-based change started by changeTo() is ended too.
    */
   endMouseInteraction() {}
 };
