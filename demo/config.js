@@ -1306,6 +1306,9 @@ shakaDemo.Config = class {
             'defaultVrStereoLayout',
             vrStereoLayoutOptions,
             vrStereoLayoutNames)
+        .addUINumberInput_('VR Stereo Text Disparity',
+            'vrStereoTextDisparity',
+            /* canBeDecimal= */ true)
         .addUIBoolInput_('Enable VR Device Motion', 'enableVrDeviceMotion')
         .addUIBoolInput_('Enable VR Wheel Zoom', 'enableVrWheelZoom')
         .addUIBoolInput_('Enable VR Pad', 'enableVrPad')

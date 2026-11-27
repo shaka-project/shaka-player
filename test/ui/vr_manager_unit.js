@@ -42,14 +42,16 @@ describe('VRManager', () => {
    * @param {string} projectionMode
    * @param {boolean=} displayInVrMode
    * @param {string=} stereoLayout
+   * @param {number=} textDisparity
    * @return {shaka.extern.UIConfiguration}
    */
   function vrConfig(projectionMode, displayInVrMode = true,
-      stereoLayout = 'mono') {
+      stereoLayout = 'mono', textDisparity = 0.01) {
     return /** @type {shaka.extern.UIConfiguration} */ ({
       displayInVrMode,
       defaultVrProjectionMode: projectionMode,
       defaultVrStereoLayout: stereoLayout,
+      vrStereoTextDisparity: textDisparity,
       enableVrDeviceMotion: true,
       enableVrWheelZoom: false,
     });
@@ -717,6 +719,188 @@ describe('VRManager', () => {
     player.dispatchEvent(new shaka.util.FakeEvent('nospatialvideoinfo'));
     vrManager.configure(vrConfig('equirectangular', true, 'left-right'));
     expect(lastLayout()).toBe(StereoLayout.LEFT_RIGHT);
+  });
+
+  describe('stereoscopic text', () => {
+    /**
+     * Adds a text container like the one of the text displayer.
+     *
+     * @return {!HTMLElement}
+     */
+    function addTextContainer() {
+      const textContainer = shaka.util.Dom.createHTMLElement('div');
+      textContainer.classList.add('shaka-text-container');
+      const cue = shaka.util.Dom.createHTMLElement('div');
+      cue.id = 'shaka-text-region---0';
+      cue.textContent = 'Hello';
+      textContainer.appendChild(cue);
+      container.appendChild(textContainer);
+      return textContainer;
+    }
+
+    /** @return {?HTMLElement} */
+    function getMirror() {
+      return /** @type {?HTMLElement} */ (
+        container.querySelector('.shaka-vr-text-mirror'));
+    }
+
+    /** @return {!Promise} The copies follow the mutations asynchronously. */
+    function waitForMutations() {
+      return shaka.test.Util.shortDelay();
+    }
+
+    it('copies the text to the view of the right eye', async () => {
+      const textContainer = addTextContainer();
+      textContainer.style.bottom = '48px';
+      createVRManager();
+      expect(getMirror()).toBe(null);
+
+      vrManager.toggleStereoscopicMode();
+      expect(container.classList.contains('shaka-vr-stereo-text'))
+          .toBe(true);
+      const mirror = getMirror();
+      expect(mirror).not.toBe(null);
+      expect(textContainer.nextSibling).toBe(mirror);
+      expect(mirror.getAttribute('aria-hidden')).toBe('true');
+      expect(mirror.textContent).toBe('Hello');
+      // The position above the controls.
+      expect(mirror.style.bottom).toBe('48px');
+      // Ids stay unique.
+      expect(mirror.querySelector('[id]')).toBe(null);
+      // The copy is not a text container, so the controls keep placing the
+      // one of the text displayer.
+      expect(mirror.classList.contains('shaka-text-container')).toBe(false);
+
+      textContainer.firstChild.textContent = 'World';
+      textContainer.style.bottom = '0px';
+      await waitForMutations();
+      expect(getMirror()).toBe(mirror);
+      expect(mirror.textContent).toBe('World');
+      expect(mirror.style.bottom).toBe('0px');
+    });
+
+    it('follows the text container as it comes and goes', async () => {
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+      expect(getMirror()).toBe(null);
+
+      const textContainer = addTextContainer();
+      await waitForMutations();
+      const mirror = getMirror();
+      expect(mirror).not.toBe(null);
+      expect(textContainer.nextSibling).toBe(mirror);
+
+      // The text displayer removes its container when the text is hidden.
+      textContainer.remove();
+      await waitForMutations();
+      expect(getMirror()).toBe(null);
+
+      // And adds it again when it is shown.
+      container.appendChild(textContainer);
+      await waitForMutations();
+      expect(textContainer.nextSibling).toBe(mirror);
+      expect(mirror.textContent).toBe('Hello');
+    });
+
+    it('shifts the text of each eye by half of the disparity', () => {
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+      expect(container.style.getPropertyValue('--shaka-vr-text-shift'))
+          .toBe('0.5%');
+
+      vrManager.configure(vrConfig('equirectangular', true, 'mono', 0.04));
+      expect(container.style.getPropertyValue('--shaka-vr-text-shift'))
+          .toBe('2%');
+    });
+
+    it('stops copying the text when the stereoscopic mode ends', async () => {
+      const textContainer = addTextContainer();
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+      expect(getMirror()).not.toBe(null);
+
+      vrManager.toggleStereoscopicMode();
+      expect(getMirror()).toBe(null);
+      expect(container.classList.contains('shaka-vr-stereo-text'))
+          .toBe(false);
+      expect(container.style.getPropertyValue('--shaka-vr-text-shift'))
+          .toBe('');
+
+      // Changes of the text are no longer copied.
+      textContainer.firstChild.textContent = 'World';
+      await waitForMutations();
+      expect(getMirror()).toBe(null);
+    });
+
+    it('stops copying the text when the view is replaced', () => {
+      addTextContainer();
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+      expect(getMirror()).not.toBe(null);
+
+      // The new view starts without the stereoscopic mode.
+      vrManager.configure(vrConfig('cubemap'));
+      expect(vrManager.isStereoscopicModeEnabled()).toBe(false);
+      expect(getMirror()).toBe(null);
+    });
+
+    it('stops copying the text when VR is disabled', () => {
+      addTextContainer();
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+
+      vrManager.configure(vrConfig('equirectangular', false));
+      expect(getMirror()).toBe(null);
+      expect(container.classList.contains('shaka-vr-stereo-text'))
+          .toBe(false);
+    });
+
+    it('stops copying the text on release', () => {
+      addTextContainer();
+      createVRManager();
+      vrManager.toggleStereoscopicMode();
+
+      vrManager.release();
+      vrManager = null;
+      expect(getMirror()).toBe(null);
+      expect(container.classList.contains('shaka-vr-stereo-text'))
+          .toBe(false);
+    });
+
+    describe('layout', () => {
+      /** @type {!HTMLLinkElement} */
+      const cssLink = /** @type {!HTMLLinkElement} */(
+        document.createElement('link'));
+
+      beforeAll(async () => {
+        await shaka.test.UiUtils.setupCSS(cssLink);
+      });
+
+      afterAll(() => {
+        cssLink.remove();
+      });
+
+      it('places the text in the view of each eye', () => {
+        container.style.position = 'relative';
+        container.style.width = '400px';
+        container.style.height = '200px';
+        const textContainer = addTextContainer();
+        createVRManager();
+        vrManager.configure(vrConfig('equirectangular', true, 'mono', 0.1));
+        vrManager.toggleStereoscopicMode();
+
+        const containerRect = container.getBoundingClientRect();
+        const leftRect = textContainer.getBoundingClientRect();
+        const rightRect = getMirror().getBoundingClientRect();
+        // Each view is 200px wide, and the text of each eye moves 5% of it
+        // towards the other eye.
+        expect(leftRect.width).toBeCloseTo(200, 0);
+        expect(rightRect.width).toBeCloseTo(200, 0);
+        expect(leftRect.left - containerRect.left).toBeCloseTo(10, 0);
+        expect(rightRect.left - containerRect.left).toBeCloseTo(190, 0);
+        expect(rightRect.top).toBeCloseTo(leftRect.top, 0);
+      });
+    });
   });
 
   it('restores the view when the context is restored', () => {
