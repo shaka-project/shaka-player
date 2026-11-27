@@ -22,6 +22,7 @@
 +../../ui/hidden_fast_forward_button.js
 +../../ui/hidden_rewind_button.js
 +../../ui/hidden_seek_button.js
++../../ui/hold_to_speed_up.js
 +../../ui/icon.js
 +../../ui/icon_registry.js
 +../../ui/language_utils.js

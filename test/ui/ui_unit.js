@@ -3715,6 +3715,184 @@ describe('UI', () => {
 
         document.body.removeChild(input);
       });
+
+      describe('holding the space key', () => {
+        let paused = false;
+        let rate = 1;
+        /** @type {!jasmine.Spy} */
+        let playSpy;
+        /** @type {!jasmine.Spy} */
+        let pauseSpy;
+        /** @type {!jasmine.Spy} */
+        let trickPlaySpy;
+        /** @type {!jasmine.Spy} */
+        let cancelTrickPlaySpy;
+
+        beforeEach(() => {
+          jasmine.clock().install();
+          paused = false;
+          rate = 1;
+          Object.defineProperty(video1, 'paused', {
+            get: () => paused,
+            configurable: true,
+          });
+          playSpy = spyOn(video1, 'play').and.callFake(() => {
+            paused = false;
+            return Promise.resolve();
+          });
+          pauseSpy = spyOn(video1, 'pause').and.callFake(() => {
+            paused = true;
+          });
+          spyOn(player1, 'isEnded').and.returnValue(false);
+          spyOn(player1, 'getPlaybackRate').and.callFake(() => rate);
+          trickPlaySpy = spyOn(player1, 'trickPlay').and.callFake((r) => {
+            rate = r;
+          });
+          cancelTrickPlaySpy =
+              spyOn(player1, 'cancelTrickPlay').and.callFake(() => {
+                rate = 1;
+              });
+          focusForKeyboardTest(container1);
+        });
+
+        afterEach(() => {
+          jasmine.clock().uninstall();
+        });
+
+        /**
+         * @param {boolean=} repeat
+         * @return {!KeyboardEvent}
+         */
+        function pressSpace(repeat = false) {
+          const event = createKeydownEvent(' ');
+          if (repeat) {
+            Object.defineProperty(event, 'repeat', {value: true});
+          }
+          container1.dispatchEvent(event);
+          return event;
+        }
+
+        /** @return {!KeyboardEvent} */
+        function releaseSpace() {
+          const event = new KeyboardEvent('keyup', {
+            key: ' ',
+            bubbles: true,
+            cancelable: true,
+          });
+          if (event.key != ' ') {
+            // Tizen 3 ignores the key of the init dictionary.
+            Object.defineProperty(event, 'key', {value: ' '});
+          }
+          container1.dispatchEvent(event);
+          return event;
+        }
+
+        /** @return {Element} */
+        function getIndicator() {
+          return container1.querySelector('.shaka-speed-up-indicator');
+        }
+
+        it('pauses on release after a short press', () => {
+          expect(pressSpace().defaultPrevented).toBe(true);
+          expect(pauseSpy).not.toHaveBeenCalled();
+
+          jasmine.clock().tick(100);
+          expect(releaseSpace().defaultPrevented).toBe(true);
+          expect(pauseSpy).toHaveBeenCalledTimes(1);
+          expect(trickPlaySpy).not.toHaveBeenCalled();
+          expect(getIndicator()).toBe(null);
+        });
+
+        it('speeds up while held and restores the rate on release', () => {
+          pressSpace();
+          // A held key repeats, which must not toggle the playback.
+          pressSpace(/* repeat= */ true);
+          jasmine.clock().tick(600);
+          pressSpace(/* repeat= */ true);
+
+          expect(trickPlaySpy).toHaveBeenCalledOnceWith(
+              2, /* useTrickPlayTrack= */ false);
+          expect(getIndicator()).not.toBe(null);
+          expect(getIndicator().textContent).toContain('2x');
+
+          releaseSpace();
+          expect(cancelTrickPlaySpy).toHaveBeenCalledTimes(1);
+          expect(rate).toBe(1);
+          expect(getIndicator()).toBe(null);
+          expect(pauseSpy).not.toHaveBeenCalled();
+          expect(playSpy).not.toHaveBeenCalled();
+        });
+
+        it('restores a rate that the user had chosen', () => {
+          rate = 1.5;
+          pressSpace();
+          jasmine.clock().tick(600);
+          expect(rate).toBe(2);
+
+          releaseSpace();
+          expect(trickPlaySpy).toHaveBeenCalledWith(
+              1.5, /* useTrickPlayTrack= */ false);
+          expect(cancelTrickPlaySpy).not.toHaveBeenCalled();
+          expect(rate).toBe(1.5);
+        });
+
+        it('uses the configured rate', () => {
+          ui1.configure({holdToSpeedUpRate: 3});
+          focusForKeyboardTest(container1);
+          pressSpace();
+          jasmine.clock().tick(600);
+          expect(rate).toBe(3);
+          releaseSpace();
+        });
+
+        it('plays right away when paused, then speeds up', () => {
+          paused = true;
+          pressSpace();
+          expect(playSpy).toHaveBeenCalledTimes(1);
+
+          jasmine.clock().tick(600);
+          expect(rate).toBe(2);
+
+          releaseSpace();
+          expect(rate).toBe(1);
+          expect(pauseSpy).not.toHaveBeenCalled();
+        });
+
+        it('does not pause on release when paused meanwhile', () => {
+          pressSpace();
+          paused = true;
+          video1.dispatchEvent(new Event('pause'));
+          releaseSpace();
+          expect(pauseSpy).not.toHaveBeenCalled();
+          expect(playSpy).not.toHaveBeenCalled();
+        });
+
+        it('restores the rate when the window loses the focus', () => {
+          pressSpace();
+          jasmine.clock().tick(600);
+          expect(rate).toBe(2);
+
+          window.dispatchEvent(new Event('blur'));
+          expect(rate).toBe(1);
+          expect(getIndicator()).toBe(null);
+
+          // The release that the window missed does nothing.
+          releaseSpace();
+          expect(pauseSpy).not.toHaveBeenCalled();
+        });
+
+        it('toggles on press when disabled', () => {
+          ui1.configure({holdToSpeedUpRate: 0});
+          focusForKeyboardTest(container1);
+          pressSpace();
+          expect(pauseSpy).toHaveBeenCalledTimes(1);
+
+          jasmine.clock().tick(600);
+          releaseSpace();
+          expect(trickPlaySpy).not.toHaveBeenCalled();
+          expect(pauseSpy).toHaveBeenCalledTimes(1);
+        });
+      });
     });
 
     describe('tooltips', () => {

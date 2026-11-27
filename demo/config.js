@@ -1273,6 +1273,8 @@ shakaDemo.Config = class {
         .addUINumberInput_('Keyboard Large Seek Distance (sec)',
             'keyboardLargeSeekDistance',
             /* canBeDecimal= */ false)
+        .addUINumberInput_('Hold To Speed Up Rate', 'holdToSpeedUpRate',
+            /* canBeDecimal= */ true)
         .addUIBoolInput_('Show Audio Channel Count Variants',
             'showAudioChannelCountVariants')
         .addUIBoolInput_('Seek On Taps', 'seekOnTaps')

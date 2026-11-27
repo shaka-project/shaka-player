@@ -390,6 +390,7 @@ shaka.extern.UITrackLabelCallback;
  *   enableTooltips: boolean,
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
+ *   holdToSpeedUpRate: number,
  *   fullScreenElement: HTMLElement,
  *   showAudioChannelCountVariants: boolean,
  *   seekOnTaps: boolean,
@@ -613,6 +614,15 @@ shaka.extern.UITrackLabelCallback;
  *   to 0, no seeking will occur.
  *   <br>
  *   Defaults to <code>60</code>.
+ * @property {number} holdToSpeedUpRate
+ *   The playback rate to use while the user holds down the space key.  A short
+ *   press still plays or pauses the presentation; when the presentation is
+ *   playing, the pause happens when the key is released.  The previous rate is
+ *   restored when the key is released.  If less than or equal to 0, holding
+ *   the key does nothing special and the space key plays or pauses as soon as
+ *   it is pressed.
+ *   <br>
+ *   Defaults to <code>2</code>.
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
  *   <br>

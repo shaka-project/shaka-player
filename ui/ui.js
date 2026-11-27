@@ -419,6 +419,7 @@ shaka.ui.Overlay = class {
       enableTooltips: true,
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
+      holdToSpeedUpRate: 2,
       fullScreenElement: this.videoContainer_,
       showAudioChannelCountVariants: true,
       seekOnTaps: false,

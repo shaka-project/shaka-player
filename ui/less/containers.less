@@ -737,3 +737,34 @@
     outline: 1px solid CanvasText;
   }
 }
+
+/* Shown at the top of the video while holding the space key speeds up the
+ * playback.  See holdToSpeedUpRate. */
+.shaka-speed-up-indicator {
+  .absolute-position();
+  .hide-when-shaka-controls-disabled();
+
+  top: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.shaka-speed-up-label {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 60%);
+  color: white;
+  font-size: 14px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
+    fill: currentcolor;
+  }
+}
