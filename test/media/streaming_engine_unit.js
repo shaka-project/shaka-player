@@ -4051,11 +4051,11 @@ describe('StreamingEngine', () => {
             expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
           });
 
-      it('lowers the goal again for a heavier segment', async () => {
+      it('waits for room for a heavier segment that was rejected', async () => {
         // The video quota is in bytes, and the third video segment weighs
-        // three times as much as the others (VBR).  The goal derived from
-        // the light segments is then too high for it, so it is rejected again
-        // once the buffer is down to that goal, and the goal is lowered again.
+        // three times as much as the others (VBR).  It is rejected, and the
+        // light segments that fit tell nothing about its size.  Its own size
+        // does, though, so it is not tried again before there is room for it.
         const quotaBytes = 32000;
         setUpQuota((type, reference) => {
           if (type != ContentType.VIDEO) {
@@ -4079,7 +4079,55 @@ describe('StreamingEngine', () => {
 
         await play();
 
-        expect(quotaErrors.video).toBeGreaterThan(1);
+        expect(quotaErrors.video).toBe(1);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      });
+
+      /**
+       * A quota in bytes for video: a segment fits if, together with the
+       * bytes that are buffered ahead of the playhead, it weighs no more than
+       * quotaBytes.
+       *
+       * @param {number} quotaBytes
+       * @return {function(string, !shaka.media.SegmentReference):boolean}
+       */
+      function fitsInVideoBytes(quotaBytes) {
+        return (type, reference) => {
+          if (type != ContentType.VIDEO) {
+            return true;
+          }
+          const segments = segmentData[ContentType.VIDEO].segments;
+          const duration = segmentData[ContentType.VIDEO].segmentDuration;
+          const bytesAhead = mediaSourceEngine.bufferedBytesImpl(
+              type, presentationTimeInSeconds, Infinity);
+          const segment = segments[reference.startTime / duration];
+          return bytesAhead + segment.byteLength <= quotaBytes;
+        };
+      }
+
+      it('buffers more seconds of lighter segments', async () => {
+        // Two heavy video segments fit into the quota, and the third segment
+        // is rejected, although it is light.  That limits the buffer to the
+        // 20 seconds that fit.  The same number of bytes holds more seconds
+        // of the light segments, though.
+        setUpQuota(fitsInVideoBytes(22000));
+        const segments = segmentData[ContentType.VIDEO].segments;
+        segments[0] = new ArrayBuffer(10000);
+        segments[1] = new ArrayBuffer(10000);
+        segments[2] = new ArrayBuffer(5000);
+        segments[3] = new ArrayBuffer(5000);
+
+        let maxBufferedAhead = 0;
+        await play(() => {
+          maxBufferedAhead = Math.max(
+              maxBufferedAhead,
+              mediaSourceEngine.bufferedAheadOfImpl(
+                  ContentType.VIDEO, presentationTimeInSeconds));
+        });
+
+        expect(quotaErrors).toEqual({audio: 0, video: 1});
+        expect(maxBufferedAhead).toBeGreaterThan(20);
         expect(onError).not.toHaveBeenCalled();
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
       });
