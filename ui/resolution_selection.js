@@ -119,6 +119,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       }
       return;
     }
+    if (this.player.isPlayingAudioOnly()) {
+      // An audio-only variant was selected, so there is no resolution.
+      this.qualityMark.textContent = '';
+      this.qualityMark.style.display = 'none';
+      if (this.overflowQualityMark) {
+        this.overflowQualityMark.textContent = '';
+        this.overflowQualityMark.style.display = 'none';
+      }
+      this.autoQuality.style.display = 'none';
+      return;
+    }
     const tracks = this.player.getVideoTracks() || [];
     const track = tracks.find((track) => track.active);
     if (!track) {
@@ -470,7 +481,73 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.menu.appendChild(button);
     }
 
-    return tracks.length;
+    const audioOnlyTrack = this.getAudioOnlyTrack_();
+    if (audioOnlyTrack) {
+      this.addAudioOnlyButton_(audioOnlyTrack, abrEnabled);
+    }
+
+    return tracks.length + (audioOnlyTrack ? 1 : 0);
+  }
+
+  /**
+   * @param {!shaka.extern.Track} track
+   * @param {boolean} abrEnabled
+   * @private
+   */
+  addAudioOnlyButton_(track, abrEnabled) {
+    const button = shaka.util.Dom.createButton();
+    // ARIA: single-select menu item
+    button.setAttribute('role', 'menuitemradio');
+    button.setAttribute('aria-checked', 'false');
+    button.classList.add('explicit-resolution');
+    button.classList.add('shaka-audio-only-button');
+    this.eventManager.listen(button, 'click',
+        () => this.onTrackSelected_(track));
+
+    const span = shaka.util.Dom.createHTMLElement('span');
+    span.textContent =
+        this.localization.resolve(shaka.ui.Locales.Ids.AUDIO_ONLY);
+    button.appendChild(span);
+
+    if (!abrEnabled && track.active) {
+      button.appendChild(shaka.ui.Utils.checkmarkIcon());
+      shaka.ui.Utils.setChosenItem(button, span);
+      this.currentSelection.textContent = span.textContent;
+    }
+    this.menu.appendChild(button);
+  }
+
+  /**
+   * Gets the audio-only variant to offer along with the resolutions, i.e. the
+   * one playing, or the best one with the current audio language and label.
+   *
+   * @return {?shaka.extern.Track}
+   * @private
+   */
+  getAudioOnlyTrack_() {
+    if (this.player.getLoadMode() == shaka.Player.LoadMode.SRC_EQUALS ||
+        this.player.isRemotePlayback()) {
+      return null;
+    }
+    const tracks = this.player.getVariantTracks() || [];
+    const active = tracks.find((t) => t.active);
+    if (!active) {
+      return null;
+    }
+    if (active.videoId == null) {
+      return active;
+    }
+    let best = null;
+    for (const track of tracks) {
+      if (track.videoId != null || track.language != active.language ||
+          track.label != active.label) {
+        continue;
+      }
+      if (!best || track.bandwidth > best.bandwidth) {
+        best = track;
+      }
+    }
+    return best;
   }
 
   /**

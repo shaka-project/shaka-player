@@ -2456,6 +2456,8 @@ describe('UI', () => {
       /** @type {shaka.ui.Controls} */
       let controls;
       /** @type {!jasmine.Spy} */
+      let getVariantTracks;
+      /** @type {!jasmine.Spy} */
       let isPlayingAudioOnly;
       /** @type {!jasmine.Spy} */
       let isPlayingVideoOnly;
@@ -2466,6 +2468,11 @@ describe('UI', () => {
             'mute',
             'volume',
             'picture_in_picture',
+            'overflow_menu',
+          ],
+          overflowMenuButtons: [
+            'quality',
+            'language',
           ],
           // Document Picture-in-Picture shows the controls, so it is also
           // useful without video.
@@ -2480,10 +2487,24 @@ describe('UI', () => {
 
         const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
+            variant.language = 'en';
+            variant.bandwidth = 1e6;
             variant.addVideo(1, (stream) => {
               stream.size(640, 480);
             });
             variant.addAudio(2);
+          });
+          manifest.addVariant(3, (variant) => {
+            variant.language = 'en';
+            variant.bandwidth = 1e5;
+            variant.addAudio(4);
+          });
+          manifest.addVariant(5, (variant) => {
+            variant.language = 'en';
+            variant.bandwidth = 9e5;
+            variant.addVideo(6, (stream) => {
+              stream.size(640, 480);
+            });
           });
         });
         shaka.media.ManifestParser.registerParserByMime(
@@ -2491,6 +2512,7 @@ describe('UI', () => {
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
+        getVariantTracks = spyOn(player, 'getVariantTracks').and.callThrough();
         isPlayingAudioOnly =
             spyOn(player, 'isPlayingAudioOnly').and.returnValue(false);
         isPlayingVideoOnly =
@@ -2498,16 +2520,19 @@ describe('UI', () => {
       });
 
       /**
-       * Pretends that only the audio, only the video, or both are played,
-       * e.g. after switching to an audio-only or a video-only variant mixed
-       * with audio-video ones.
+       * Pretends that the variant with |id| is playing, without waiting for
+       * the fake content to be streamed.
        *
-       * @param {string} what 'audio', 'video' or 'both'.
+       * @param {number} id
        * @return {!Promise}
        */
-      async function play(what) {
-        isPlayingAudioOnly.and.returnValue(what == 'audio');
-        isPlayingVideoOnly.and.returnValue(what == 'video');
+      async function playVariant(id) {
+        const tracks = player.getVariantTracks();
+        getVariantTracks.and.returnValue(tracks.map((t) => {
+          return Object.assign({}, t, {active: t.id == id});
+        }));
+        isPlayingAudioOnly.and.returnValue(id == 3);
+        isPlayingVideoOnly.and.returnValue(id == 5);
         player.dispatchEvent(new shaka.util.FakeEvent('variantchanged'));
         // The UI gets the events of the player through the cast proxy.
         await Util.shortDelay();
@@ -2520,6 +2545,15 @@ describe('UI', () => {
         return /** @type {!HTMLElement} */ (poster);
       }
 
+      /** @return {string} The label of Auto, or '' if hidden. */
+      function getAutoQuality() {
+        const autoQuality = /** @type {HTMLElement} */ (
+          videoContainer.querySelector('.shaka-current-auto-quality'));
+        goog.asserts.assert(autoQuality, 'Missing auto quality');
+        return autoQuality.style.display == 'none' ?
+            '' : autoQuality.textContent;
+      }
+
       /**
        * @param {string} className
        * @return {boolean}
@@ -2530,21 +2564,111 @@ describe('UI', () => {
         return element.classList.contains('shaka-hidden');
       }
 
-      it('shows when only the audio is played', async () => {
-        await play('both');
-        expect(getPoster().classList).toContain('shaka-hidden');
+      it('offers the audio-only variant after the resolutions', async () => {
+        await playVariant(0);
+        const resolutions = Array.from(videoContainer.querySelectorAll(
+            'button.explicit-resolution > span')).map((s) => s.textContent);
+        expect(resolutions).toEqual(['480p', 'Audio only']);
 
-        await play('audio');
+        const selectVariantTrack = spyOn(player, 'selectVariantTrack');
+        const button = /** @type {!HTMLElement} */ (
+          videoContainer.querySelector('button.shaka-audio-only-button'));
+        button.click();
+        expect(player.getConfiguration().abr.enabled).toBe(false);
+        expect(selectVariantTrack).toHaveBeenCalledWith(
+            jasmine.objectContaining({id: 3}), jasmine.any(Boolean));
+      });
+
+      it('offers turning the audio off', async () => {
+        await playVariant(0);
+        const selector = '.shaka-audio-languages ' +
+            'button:not(.shaka-back-to-overflow-button)';
+        const languages = Array.from(videoContainer.querySelectorAll(selector))
+            .map((b) => b.querySelector('span').textContent);
+        expect(languages.length).toBe(2);
+        expect(languages[1]).toBe(getOffLabel());
+
+        player.configure('abr.enabled', true);
+        const selectVariantTrack = spyOn(player, 'selectVariantTrack');
+        getOffButton().click();
+        expect(player.getConfiguration().abr.enabled).toBe(false);
+        expect(selectVariantTrack).toHaveBeenCalledWith(
+            jasmine.objectContaining({id: 5}), true);
+      });
+
+      it('turns the audio and adaptation back on', async () => {
+        await playVariant(0);
+        player.configure('abr.enabled', true);
+        spyOn(player, 'selectVariantTrack');
+        getOffButton().click();
+        await playVariant(5);
+        expect(getOffButton().getAttribute('aria-checked')).toBe('true');
+        const currentSelection = videoContainer.querySelector(
+            '.shaka-language-button .shaka-current-selection-span');
+        goog.asserts.assert(currentSelection, 'Missing current selection');
+        expect(currentSelection.textContent).toBe(getOffLabel());
+
+        const selectAudioTrack = spyOn(player, 'selectAudioTrack');
+        getLanguageButton().click();
+        expect(selectAudioTrack).toHaveBeenCalledWith(
+            jasmine.objectContaining({language: 'en'}));
+        expect(player.getConfiguration().abr.enabled).toBe(true);
+      });
+
+      it('keeps adaptation disabled if it was before turning the audio off',
+          async () => {
+            await playVariant(0);
+            player.configure('abr.enabled', false);
+            spyOn(player, 'selectVariantTrack');
+            getOffButton().click();
+            await playVariant(5);
+
+            spyOn(player, 'selectAudioTrack');
+            getLanguageButton().click();
+            expect(player.getConfiguration().abr.enabled).toBe(false);
+          });
+
+      /** @return {string} */
+      function getOffLabel() {
+        return controls.getLocalization().resolve(shaka.ui.Locales.Ids.OFF);
+      }
+
+      /** @return {!HTMLElement} */
+      function getOffButton() {
+        const button =
+            videoContainer.querySelector('button.shaka-audio-off-button');
+        goog.asserts.assert(button, 'Missing Off button');
+        return /** @type {!HTMLElement} */ (button);
+      }
+
+      /** @return {!HTMLElement} */
+      function getLanguageButton() {
+        const button = videoContainer.querySelector(
+            '.shaka-audio-languages button:not(.shaka-audio-off-button)' +
+            ':not(.shaka-back-to-overflow-button)');
+        goog.asserts.assert(button, 'Missing language button');
+        return /** @type {!HTMLElement} */ (button);
+      }
+
+      it('shows when only the audio is played', async () => {
+        await playVariant(0);
+        expect(getPoster().classList).toContain('shaka-hidden');
+        expect(getAutoQuality()).toBe('480p');
+
+        await playVariant(3);
         expect(getPoster().classList).not.toContain('shaka-hidden');
+        // There is no resolution to show.
+        expect(getAutoQuality()).toBe('');
         expect(isHidden('shaka-mute-button')).toBe(false);
 
-        await play('both');
+        await playVariant(0);
         expect(getPoster().classList).toContain('shaka-hidden');
+        expect(getAutoQuality()).toBe('480p');
       });
 
       it('covers the video with its poster when only the audio is played',
           async () => {
-            await play('audio');
+            await playVariant(3);
             const poster = getPoster();
             expect(poster.style.backgroundImage).toBe('');
 
@@ -2564,16 +2688,16 @@ describe('UI', () => {
 
       it('hides the volume controls when only the video is played',
           async () => {
-            await play('both');
+            await playVariant(0);
             expect(isHidden('shaka-mute-button')).toBe(false);
             expect(isHidden('shaka-volume-bar-container')).toBe(false);
 
-            await play('video');
+            await playVariant(5);
             expect(isHidden('shaka-mute-button')).toBe(true);
             expect(isHidden('shaka-volume-bar-container')).toBe(true);
             expect(getPoster().classList).toContain('shaka-hidden');
 
-            await play('both');
+            await playVariant(0);
             expect(isHidden('shaka-mute-button')).toBe(false);
             expect(isHidden('shaka-volume-bar-container')).toBe(false);
           });
@@ -2583,23 +2707,23 @@ describe('UI', () => {
             if (!controls.isPiPAllowed()) {
               pending('Picture-in-Picture is not available.');
             }
-            await play('both');
+            await playVariant(0);
             expect(isHidden('shaka-pip-button')).toBe(false);
 
-            await play('audio');
+            await playVariant(3);
             expect(isHidden('shaka-pip-button')).toBe(true);
 
-            await play('both');
+            await playVariant(0);
             expect(isHidden('shaka-pip-button')).toBe(false);
           });
 
       it('takes no screenshot when only the audio is played', async () => {
         // Clear content is needed to take a screenshot.
         spyOn(player, 'drmInfo').and.returnValue(null);
-        await play('both');
+        await playVariant(0);
         expect(controls.canTakeScreenshot()).toBe(true);
 
-        await play('audio');
+        await playVariant(3);
         expect(controls.canTakeScreenshot()).toBe(false);
       });
 
@@ -2614,11 +2738,11 @@ describe('UI', () => {
         ]);
         spyOn(player, 'seekRange').and.returnValue({start: 0, end: 60});
 
-        await play('audio');
+        await playVariant(3);
         controls.frameByFrame_(1);
         expect(seek).not.toHaveBeenCalled();
 
-        await play('both');
+        await playVariant(0);
         controls.frameByFrame_(1);
         expect(seek).toHaveBeenCalled();
       });

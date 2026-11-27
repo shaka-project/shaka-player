@@ -467,6 +467,9 @@ describe('StreamingEngine', () => {
       // Device-specific config may change the tolerance (Apple sets it to
       // 0), but these tests expect the default.
       config.inaccurateManifestTolerance = 2;
+      // Device-specific config may set a gap padding (Tizen sets it to 2),
+      // which detaches SourceBuffers earlier while the element can't play.
+      config.gapPadding = 0;
     }
 
     if (defaultConfig.segmentPrefetchLimit == config.segmentPrefetchLimit) {
@@ -518,6 +521,250 @@ describe('StreamingEngine', () => {
 
   afterAll(() => {
     jasmine.clock().uninstall();
+  });
+
+  describe('variants without video', () => {
+    /** @type {!jasmine.Spy} */
+    let supportsSourceBufferRemovalSpy;
+    /** @type {shaka.extern.Variant} */
+    let audioOnlyVariant;
+
+    beforeEach(() => {
+      // Do not depend on the browser running the tests.
+      supportsSourceBufferRemovalSpy = spyOn(
+          shaka.device.DeviceFactory.getDevice(),
+          'supportsSourceBufferRemoval').and.returnValue(true);
+      setupVod();
+      audioOnlyVariant = {
+        audio: audioStream,
+        video: null,
+        id: 100,
+        language: 'und',
+        disabledUntilTime: 0,
+        primary: false,
+        bandwidth: 0,
+        allowedByApplication: true,
+        allowedByKeySystem: true,
+        decodingInfos: [],
+      };
+      manifest.variants.push(audioOnlyVariant);
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+    });
+
+    /**
+     * @param {shaka.extern.Variant} initialVariant
+     * @return {!Promise}
+     */
+    async function start(initialVariant) {
+      streamingEngine.switchVariant(initialVariant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+    }
+
+    it('plays out the video, then detaches it', async () => {
+      await start(variant);
+
+      /** @type {?number} */
+      let videoBufferEnd = null;
+      /** @type {?number} */
+      let detachedAt = null;
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        detachedAt = presentationTimeInSeconds;
+        return Promise.resolve();
+      });
+      await runTest(() => {
+        if (presentationTimeInSeconds == 6 && videoBufferEnd == null) {
+          videoBufferEnd = Util.spyFunc(mediaSourceEngine.bufferEnd)(
+              ContentType.VIDEO);
+          streamingEngine.switchVariant(audioOnlyVariant);
+        }
+      });
+
+      goog.asserts.assert(videoBufferEnd != null, 'Must have switched');
+      expect(videoBufferEnd).toBeGreaterThan(6);
+      expect(detachedAt).toBe(videoBufferEnd);
+      expect(mediaSourceEngine.removeSourceBuffer)
+          .toHaveBeenCalledOnceWith(ContentType.VIDEO);
+      expect(mediaSourceEngine.segments[ContentType.AUDIO])
+          .toEqual([true, true, true, true]);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toContain(false);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+    });
+
+    it('detaches the video within the gap padding if playback stops',
+        /** @suppress {accessControls} */ async () => {
+          // Like Tizen, which stalls before the end of a buffered range.  The
+          // video element of the tests never has enough data to play.
+          streamingEngine.config_.gapPadding = 2;
+          await start(variant);
+
+          /** @type {?number} */
+          let videoBufferEnd = null;
+          /** @type {?number} */
+          let detachedAt = null;
+          mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+            detachedAt = presentationTimeInSeconds;
+            return Promise.resolve();
+          });
+          await runTest(() => {
+            if (presentationTimeInSeconds == 6 && videoBufferEnd == null) {
+              videoBufferEnd = Util.spyFunc(mediaSourceEngine.bufferEnd)(
+                  ContentType.VIDEO);
+              streamingEngine.switchVariant(audioOnlyVariant);
+            }
+          });
+
+          goog.asserts.assert(videoBufferEnd != null, 'Must have switched');
+          expect(detachedAt).toBe(/** @type {number} */ (videoBufferEnd) - 2);
+          expect(mediaSourceEngine.removeSourceBuffer)
+              .toHaveBeenCalledOnceWith(ContentType.VIDEO);
+        });
+
+    it('detaches the video right away when clearing the buffer', async () => {
+      await start(variant);
+
+      /** @type {?number} */
+      let detachedAt = null;
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        detachedAt = presentationTimeInSeconds;
+        return Promise.resolve();
+      });
+      let switched = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 6 && !switched) {
+          switched = true;
+          streamingEngine.switchVariant(
+              audioOnlyVariant, /* clearBuffer= */ true);
+        }
+      });
+
+      expect(detachedAt).toBe(6);
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+    });
+
+    it('recreates the MediaSource without the video if it cannot remove it',
+        async () => {
+          supportsSourceBufferRemovalSpy.and.returnValue(false);
+          await start(variant);
+
+          let switched = false;
+          await runTest(() => {
+            if (presentationTimeInSeconds == 6 && !switched) {
+              switched = true;
+              streamingEngine.switchVariant(audioOnlyVariant);
+            }
+          });
+
+          expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+          const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+          expect(streamsByType.has(ContentType.AUDIO)).toBe(true);
+          expect(streamsByType.has(ContentType.VIDEO)).toBe(false);
+          expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        });
+
+    it('keeps the video if it comes back before being detached',
+        async () => {
+          await start(variant);
+
+          let switched = false;
+          await runTest(() => {
+            if (presentationTimeInSeconds == 6 && !switched) {
+              switched = true;
+              streamingEngine.switchVariant(audioOnlyVariant);
+            } else if (presentationTimeInSeconds == 7) {
+              streamingEngine.switchVariant(variant);
+            }
+          });
+
+          expect(mediaSourceEngine.removeSourceBuffer).not.toHaveBeenCalled();
+          expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+          expect(mediaSourceEngine.segments[ContentType.VIDEO])
+              .toEqual([true, true, true, true]);
+          expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        });
+
+    it('resets the MediaSource to bring the video back', async () => {
+      await start(variant);
+
+      /** @type {?number} */
+      let detachedAt = null;
+      mediaSourceEngine.removeSourceBuffer.and.callFake(() => {
+        detachedAt = presentationTimeInSeconds;
+        return Promise.resolve();
+      });
+      let switched = false;
+      let switchedBack = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 6 && !switched) {
+          switched = true;
+          streamingEngine.switchVariant(audioOnlyVariant);
+        } else if (detachedAt != null && !switchedBack &&
+            presentationTimeInSeconds == detachedAt + 2) {
+          switchedBack = true;
+          mediaSourceEngine.segments[ContentType.VIDEO] =
+              [false, false, false, false];
+          streamingEngine.switchVariant(variant);
+          expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        }
+      });
+
+      expect(switchedBack).toBe(true);
+      const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+      expect(streamsByType.get(ContentType.AUDIO)).toBe(audioStream);
+      expect(streamsByType.get(ContentType.VIDEO)).toBe(videoStream);
+      // The video is buffered again from the playhead.
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([false, false, true, true]);
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds the video when starting audio-only', async () => {
+      await start(audioOnlyVariant);
+      expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
+      const initStreams = mediaSourceEngine.init.calls.argsFor(0)[0];
+      expect(initStreams.has(ContentType.VIDEO)).toBe(false);
+
+      let switched = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 6 && !switched) {
+          switched = true;
+          streamingEngine.switchVariant(variant);
+        }
+      });
+
+      expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+      const streamsByType = mediaSourceEngine.reset.calls.argsFor(0)[0];
+      expect(streamsByType.get(ContentType.VIDEO)).toBe(videoStream);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO])
+          .toEqual([true, true, true, true]);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
+
+    it('does not bring the video back on a seek', async () => {
+      await start(variant);
+
+      let switched = false;
+      let seeked = false;
+      await runTest(() => {
+        if (presentationTimeInSeconds == 6 && !switched) {
+          switched = true;
+          streamingEngine.switchVariant(audioOnlyVariant);
+        } else if (presentationTimeInSeconds == 30 && !seeked) {
+          seeked = true;
+          presentationTimeInSeconds = 5;
+          streamingEngine.seeked();
+        }
+      });
+
+      expect(seeked).toBe(true);
+      expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.removeSourceBuffer).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('stream ending before the other one', () => {
