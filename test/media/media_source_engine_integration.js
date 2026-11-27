@@ -455,6 +455,24 @@ describe('MediaSourceEngine', () => {
     expect(mediaSource.duration).toBeCloseTo(60);
   });
 
+  it('appends after reducing the duration', async () => {
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.setDuration(60);
+    await appendInit(ContentType.VIDEO);
+    await append(ContentType.VIDEO, 0);
+    // Nothing is buffered past 10, so this truncates nothing.
+    await mediaSourceEngine.setDuration(30);
+    expect(mediaSource.duration).toBeCloseTo(30);
+    await append(ContentType.VIDEO, 1);
+    expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
+    // This would truncate the buffer.  Some platforms run a removal, and
+    // others reject the new duration.
+    await mediaSourceEngine.setDuration(15).catch(() => {});
+    await append(ContentType.VIDEO, 2);
+  });
+
   it('ends the stream, truncating the duration', async () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
