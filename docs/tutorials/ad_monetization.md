@@ -428,22 +428,30 @@ adManager.addCustomInterstitial({
 
 ##### VAST/VMAP
 
-Example:
+With Shaka UI, get the player from the video element's controls. The UI
+already configures the ad containers.
 
 ```js
 const video = document.getElementById('video');
-const ui = video['ui'];
-const controls = video.ui.getControls();
-const player = controls.getPlayer();
+const player = video.ui.getControls().getPlayer();
+```
+
+With the player-only build, use the player your application has attached to
+the video. To provide ad containers, create the corresponding elements in your
+layout and pass them to the ad manager:
+
+```js
+const csContainer = document.getElementById('client-side-ad-container');
+const ssContainer = document.getElementById('server-side-ad-container');
+player.getAdManager().setContainers(csContainer, ssContainer);
+```
+
+With either setup, request the ad using that player:
+
+```js
 const adManager = player.getAdManager();
-// If you're using a non-UI build, this is the div you'll need to create
-// for your layout.
-const csContainer = controls.getClientSideAdContainer();
-const ssContainer = controls.getServerSideAdContainer();
-// Note: If you are using Shaka UI this call is not necessary.
-adManager.setContainers(csContainer, ssContainer);
 const url = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=';
-adManager.addAdUrlInterstitial(url);
+await adManager.addAdUrlInterstitial(url);
 ```
 
 
