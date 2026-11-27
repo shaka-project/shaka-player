@@ -124,6 +124,9 @@ shaka.test.FakeStreamingEngine = class {
             () => activeText);
 
     /** @type {!jasmine.Spy} */
+    this.reloadTextStream = jasmine.createSpy('reloadTextStream');
+
+    /** @type {!jasmine.Spy} */
     this.unloadTextStream =
         jasmine.createSpy('unloadTextStream').and.callFake(() => {
           activeText = null;

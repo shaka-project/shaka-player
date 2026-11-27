@@ -403,8 +403,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.textContainerObserver_ = new MutationObserver((mutations) => {
       const isTextContainer = (node) => node instanceof HTMLElement &&
-          (node.classList.contains('shaka-text-container') ||
-           node.classList.contains('shaka-speech-to-text-container'));
+          node.classList.contains('shaka-text-container');
       const added = mutations.some(
           (mutation) => Array.from(mutation.addedNodes).some(isTextContainer));
       if (added) {
@@ -2312,34 +2311,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   computeShakaTextContainerSize_(animate = true) {
-    const elements = [];
-    const shakaTextContainer = this.videoContainer_.getElementsByClassName(
+    const element = this.videoContainer_.getElementsByClassName(
         'shaka-text-container')[0];
-    const shakaSpeechToTextContainer =
-        this.videoContainer_.getElementsByClassName(
-            'shaka-speech-to-text-container')[0];
-    if (shakaTextContainer) {
-      elements.push(shakaTextContainer);
+    if (!element) {
+      return;
     }
-    if (shakaSpeechToTextContainer) {
-      elements.push(shakaSpeechToTextContainer);
-    }
-    if (elements.length) {
-      let bottom = '0px';
-      if (this.isOpaque()) {
-        bottom = this.bottomControls_.clientHeight + 'px';
-      }
-      for (const element of elements) {
-        if (animate) {
-          element.style.bottom = bottom;
-        } else {
-          element.style.transition = 'none';
-          element.style.bottom = bottom;
-          // Apply the position before the transition comes back.
-          element.getBoundingClientRect();
-          element.style.transition = '';
-        }
-      }
+    const bottom = this.isOpaque() ? this.bottomControls_.clientHeight : 0;
+    if (animate) {
+      element.style.bottom = bottom + 'px';
+    } else {
+      element.style.transition = 'none';
+      element.style.bottom = bottom + 'px';
+      // Apply the position before the transition comes back.
+      element.getBoundingClientRect();
+      element.style.transition = '';
     }
   }
 
