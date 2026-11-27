@@ -3612,6 +3612,7 @@ shaka.extern.PlayerConfiguration;
  *   preloadPrevItem: boolean,
  *   repeatMode: shaka.config.RepeatMode,
  *   autoPlayNext: boolean,
+ *   autoPlayNextDelay: number,
  * }}
  *
  * @description
@@ -3637,6 +3638,16 @@ shaka.extern.PlayerConfiguration;
  *   independent of <code>repeatMode</code>, which only controls repetition.
  *   <br>
  *   Defaults to <code>true</code>.
+ * @property {number} autoPlayNextDelay
+ *   The time to wait, in seconds, between the end of the current item and the
+ *   start of the next one when <code>autoPlayNext</code> is <code>true</code>.
+ *   During that time the queue fires <code>autoplaynextscheduled</code>, so
+ *   the app can show a countdown, and the advance can be cancelled with
+ *   <code>cancelAutoPlayNext()</code>.  Seeking or unloading the current item
+ *   also cancels it.  It does not apply when the current item is repeated.
+ *   If the value is 0, the queue advances immediately.
+ *   <br>
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.QueueConfiguration;

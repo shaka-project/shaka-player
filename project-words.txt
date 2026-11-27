@@ -12,6 +12,8 @@ audiolang
 audiotrackchange
 audiotrackchanged
 audiotrackschanged
+autoplaynextcancelled
+autoplaynextscheduled
 autoplaying
 boundarycrossed
 bufferappending

@@ -624,7 +624,11 @@ shakaDemo.Config = class {
             repeatModeOptions,
             repeatModeOptionNames)
         .addBoolInput_('Auto play next item',
-            'queue.autoPlayNext');
+            'queue.autoPlayNext')
+        .addNumberInput_('Delay before auto playing next item',
+            'queue.autoPlayNextDelay',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true);
   }
 
   /** @private */

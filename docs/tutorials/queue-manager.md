@@ -109,6 +109,35 @@ preloads the next item, so no manifest, segment or licence request is wasted.
 It defaults to `true`.  The UI exposes it as the `'autoplay'` element, a switch
 in the control panel.
 
+To give the user a few seconds to stay on the current item, like an "Up next"
+countdown, set `autoPlayNextDelay`:
+
+```js
+player.configure('queue.autoPlayNextDelay', 10);
+
+let nextIndex = -1;
+
+queueManager.addEventListener('autoplaynextscheduled', (event) => {
+  nextIndex = event.itemIndex;
+  const next = queueManager.getItems()[nextIndex];
+  showUpNext(next.metadata, event.delay);  // Your own countdown UI
+});
+
+queueManager.addEventListener('autoplaynextcancelled', hideUpNext);
+queueManager.addEventListener('currentitemchanged', hideUpNext);
+
+cancelButton.onclick = () => queueManager.cancelAutoPlayNext();
+playNowButton.onclick = () => queueManager.playItem(nextIndex);
+```
+
+When the current item ends, the queue fires `autoplaynextscheduled` and waits
+`autoPlayNextDelay` seconds before playing the next item.  The advance is
+cancelled by `cancelAutoPlayNext()`, by seeking or unloading the current item,
+by turning off `autoPlayNext`, by `removeAllItems()`, and by playing any item
+other than the next one.  Repeating the current item (`RepeatMode.SINGLE`, or
+`RepeatMode.ALL` with a single item) is never delayed.  It defaults to `0`,
+which advances immediately.
+
 
 #### Preloading Adjacent Items
 
@@ -162,6 +191,8 @@ queueManager.addEventListener('itemsremoved', () => {
 | `currentitemchanged` | `playItem()` is called with a different index than the current one. |
 | `itemsinserted` | `insertItems()` is called. |
 | `itemsremoved` | `removeAllItems()` is called. |
+| `autoplaynextscheduled` | The current item ends and the queue will advance after `autoPlayNextDelay`.  The event has `itemIndex` and `delay`. |
+| `autoplaynextcancelled` | A pending advance is cancelled before it happens. |
 
 
 #### Adding Extra Tracks per Item
