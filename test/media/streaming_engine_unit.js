@@ -3806,6 +3806,45 @@ describe('StreamingEngine', () => {
       // It should not have removed any segments.
       expect(mediaSourceEngine.remove).not.toHaveBeenCalled();
     });
+
+    it('marks the first append after a seek during eviction', async () => {
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine(config);
+
+      const isVideoMediaAppend =
+          (args) => args[0] == ContentType.VIDEO && args[2] != null;
+      /** @type {?number} */
+      let appendsBeforeSeek = null;
+      const originalRemove =
+          // eslint-disable-next-line no-restricted-syntax
+          shaka.test.FakeMediaSourceEngine.prototype.removeImpl
+              .bind(mediaSourceEngine);
+      mediaSourceEngine.remove.and.callFake(
+          (type, start, end, continuityTimelines) => {
+            const removed =
+                originalRemove(type, start, end, continuityTimelines);
+            if (appendsBeforeSeek == null && type == ContentType.VIDEO) {
+              appendsBeforeSeek = mediaSourceEngine.appendBuffer.calls
+                  .allArgs().filter(isVideoMediaAppend).length;
+              presentationTimeInSeconds = 0;
+              streamingEngine.seeked();
+            }
+            return removed;
+          });
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      goog.asserts.assert(appendsBeforeSeek != null, 'Must have seeked back');
+      const appendsAfterSeek = mediaSourceEngine.appendBuffer.calls.allArgs()
+          .filter(isVideoMediaAppend).slice(appendsBeforeSeek);
+      // The first segment appended is at the new position, marked as seeked.
+      expect(appendsAfterSeek[0][2].startTime).toBe(0);
+      expect(appendsAfterSeek[0][5]).toBe(true);
+    });
   });
 
   describe('QuotaExceededError', () => {
