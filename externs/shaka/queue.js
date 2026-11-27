@@ -133,6 +133,13 @@ shaka.extern.IQueueManager = class extends EventTarget {
   playItem(itemIndex) {}
 
   /**
+   * Cancels the pending advance to the next item, scheduled when the current
+   * item ends and <code>queue.autoPlayNextDelay</code> is greater than 0.
+   * The current item stays loaded.  Does nothing if no advance is pending.
+   */
+  cancelAutoPlayNext() {}
+
+  /**
    * Fetches an M3U/M3U8 playlist from the given URL using the player's
    * networking engine, parses it, and inserts the resulting items into the
    * queue. Supports the extended EXTINF format with tvg-* attributes

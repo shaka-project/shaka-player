@@ -285,6 +285,144 @@ describe('QueueManager', () => {
     expect(playSpy).not.toHaveBeenCalled();
   });
 
+  describe('autoPlayNextDelay', () => {
+    /** @type {!jasmine.Spy} */
+    let scheduledSpy;
+    /** @type {!jasmine.Spy} */
+    let cancelledSpy;
+
+    beforeEach(async () => {
+      scheduledSpy = jasmine.createSpy('autoPlayNextScheduled');
+      cancelledSpy = jasmine.createSpy('autoPlayNextCancelled');
+      queueManager.addEventListener(
+          shaka.util.FakeEvent.EventName.AutoPlayNextScheduled,
+          shaka.test.Util.spyFunc(scheduledSpy));
+      queueManager.addEventListener(
+          shaka.util.FakeEvent.EventName.AutoPlayNextCancelled,
+          shaka.test.Util.spyFunc(cancelledSpy));
+
+      queueManager.insertItems([queueItem, queueItem2]);
+      const config = queueManager.getConfiguration();
+      config.autoPlayNextDelay = 0.2;
+      queueManager.configure(config);
+      await queueManager.playItem(0);
+    });
+
+    it('waits before moving to the next item', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+
+      expect(scheduledSpy).toHaveBeenCalledTimes(1);
+      const event = scheduledSpy.calls.argsFor(0)[0];
+      expect(event['itemIndex']).toBe(1);
+      expect(event['delay']).toBe(0.2);
+
+      await shaka.test.Util.shortDelay();
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(1);
+      expect(cancelledSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not move when cancelled', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      queueManager.cancelAutoPlayNext();
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      // Nothing is pending anymore.
+      queueManager.cancelAutoPlayNext();
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+    });
+
+    it('can be cancelled from the scheduled event', async () => {
+      scheduledSpy.and.callFake(() => queueManager.cancelAutoPlayNext());
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+    });
+
+    it('is cancelled by seeking', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      video.dispatchEvent(new Event('seeking'));
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+    });
+
+    it('is cancelled by turning off autoPlayNext', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      const config = queueManager.getConfiguration();
+      config.autoPlayNext = false;
+      queueManager.configure(config);
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+    });
+
+    it('is cancelled by removeAllItems', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      await queueManager.removeAllItems();
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(-1);
+    });
+
+    it('is cancelled by playing another item', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      await queueManager.playItem(0);
+      expect(cancelledSpy).toHaveBeenCalledTimes(1);
+
+      await shaka.test.Util.delay(0.4);
+      expect(queueManager.getCurrentItemIndex()).toBe(0);
+    });
+
+    it('is completed early by playing the next item', async () => {
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      const playItemSpy = spyOn(queueManager, 'playItem').and.callThrough();
+      await queueManager.playItem(1);
+      expect(queueManager.getCurrentItemIndex()).toBe(1);
+
+      await shaka.test.Util.delay(0.4);
+      // The timer does not play the item again.
+      expect(playItemSpy).toHaveBeenCalledTimes(1);
+      expect(cancelledSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not delay repeating the current item', () => {
+      const config = queueManager.getConfiguration();
+      config.repeatMode = shaka.config.RepeatMode.SINGLE;
+      queueManager.configure(config);
+      video.currentTime = 10;
+      const playSpy = spyOn(video, 'play').and.callThrough();
+
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+
+      expect(scheduledSpy).not.toHaveBeenCalled();
+      expect(video.currentTime).toBe(0);
+      expect(playSpy).toHaveBeenCalled();
+    });
+
+    it('advances immediately when it is 0', async () => {
+      const config = queueManager.getConfiguration();
+      config.autoPlayNextDelay = 0;
+      queueManager.configure(config);
+
+      player.dispatchEvent(new shaka.util.FakeEvent('complete'));
+      await shaka.test.Util.shortDelay();
+
+      expect(scheduledSpy).not.toHaveBeenCalled();
+      expect(queueManager.getCurrentItemIndex()).toBe(1);
+    });
+  });
+
   it('adds text, thumbnail, and chapter tracks', async () => {
     queueManager.insertItems([queueItem, queueItem2]);
     await queueManager.playItem(0);
