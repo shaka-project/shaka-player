@@ -375,6 +375,7 @@ describe('ManifestConverter', () => {
       isAudioMuxedInVideo: false,
       isIframe: false,
       preselection: null,
+      accessibilityPurpose: null,
     };
 
     return streamDB;
@@ -527,7 +528,8 @@ describe('ManifestConverter', () => {
       spatialAudio: false,
       closedCaptions: null,
       tilesLayout: undefined,
-      accessibilityPurpose: null,
+      accessibilityPurpose:
+          shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED,
       external: false,
       fastSwitching: false,
       isAudioMuxedInVideo: false,
@@ -649,7 +651,7 @@ describe('ManifestConverter', () => {
       spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
       tilesLayout: streamDb.tilesLayout,
-      accessibilityPurpose: null,
+      accessibilityPurpose: streamDb.accessibilityPurpose || null,
       external: streamDb.external,
       fastSwitching: streamDb.fastSwitching,
       fullMimeTypes: new Set([shaka.util.MimeUtils.getFullType(

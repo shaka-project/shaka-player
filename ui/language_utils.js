@@ -287,6 +287,8 @@ shaka.ui.LanguageUtils = class {
    */
   static updateTextTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, config) {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
     const LocIds = shaka.ui.Locales.Ids;
     const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
@@ -307,10 +309,12 @@ shaka.ui.LanguageUtils = class {
       return track.roles.join(', ');
     };
 
-    const getCombination = (language, rolesString, label, forced) => {
+    const getCombination = (language, rolesString, accessibilityPurpose,
+        label, forced) => {
       const keys = [
         language,
         rolesString,
+        accessibilityPurpose,
         forced,
       ];
       if (label && trackLabelFormat == TrackLabelFormat.LABEL) {
@@ -324,12 +328,23 @@ shaka.ui.LanguageUtils = class {
     const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack),
+        selectedTrack.accessibilityPurpose,
         selectedTrack.label, selectedTrack.forced) : '';
 
     for (const track of tracks) {
       const language = track.language;
       const forced = track.forced;
       const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
+      const accessibilityPurpose = track.accessibilityPurpose;
+      // Both suffixes go in parentheses, e.g. "English (SDH)".
+      let suffix = '';
+      if (accessibilityPurpose == AccessibilityPurpose.HARD_OF_HEARING) {
+        suffix += ' (' +
+            localization.resolve(LocIds.SUBTITLE_HARD_OF_HEARING) + ')';
+      }
+      if (forced) {
+        suffix += ' (' + forcedString + ')';
+      }
       const rolesString = getRolesString(track);
       const displayRolesString =
           shaka.ui.LanguageUtils.getDisplayRolesString_(track);
@@ -337,8 +352,8 @@ shaka.ui.LanguageUtils = class {
           shaka.ui.LanguageUtils.getMachineGeneratedSuffix_(
               track, localization);
       const label = track.label;
-      const combinationName =
-          getCombination(language, rolesString, label, forced);
+      const combinationName = getCombination(
+          language, rolesString, accessibilityPurpose, label, forced);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -400,9 +415,7 @@ shaka.ui.LanguageUtils = class {
       switch (labelFormat) {
         case TrackLabelFormat.LANGUAGE:
           span.textContent += machineGeneratedSuffix;
-          if (forced) {
-            span.textContent += ' (' + forcedString + ')';
-          }
+          span.textContent += suffix;
           break;
         case TrackLabelFormat.ROLE:
           if (!displayRolesString) {
@@ -419,18 +432,14 @@ shaka.ui.LanguageUtils = class {
           } else {
             span.textContent = displayRolesString + machineGeneratedSuffix;
           }
-          if (forced) {
-            span.textContent += ' (' + forcedString + ')';
-          }
+          span.textContent += suffix;
           break;
         case TrackLabelFormat.LANGUAGE_ROLE:
           span.textContent += machineGeneratedSuffix;
           if (displayRolesString) {
             span.textContent += ': ' + displayRolesString;
           }
-          if (forced) {
-            span.textContent += ' (' + forcedString + ')';
-          }
+          span.textContent += suffix;
           break;
         case TrackLabelFormat.LABEL:
           if (label) {

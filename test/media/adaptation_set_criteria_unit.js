@@ -1525,6 +1525,79 @@ describe('AdaptationSetCriteria', () => {
       expect(set).toBe(builder.getLastAdaptationSet());
     });
 
+    describe('audio accessibility purpose', () => {
+      const VISUALLY_IMPAIRED =
+          shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED;
+
+      /** @type {shaka.extern.Manifest} */
+      let manifest;
+
+      beforeEach(() => {
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(1, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(10, (stream) => {
+              stream.accessibilityPurpose = VISUALLY_IMPAIRED;
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(20);
+          });
+        });
+      });
+
+      /**
+       * @param {string} accessibilityPurpose
+       * @return {!shaka.media.AdaptationSet}
+       */
+      const create = (accessibilityPurpose) => {
+        const builder = new shaka.media.PreferenceBasedCriteria();
+        builder.configure({
+          preferredAudio: [{
+            language: 'en',
+            role: '',
+            label: '',
+            channelCount: 0,
+            codec: '',
+            spatialAudio: false,
+            accessibilityPurpose,
+          }],
+          preferredVideo: [],
+          language: '',
+          role: '',
+          videoRole: '',
+          channelCount: 0,
+          hdrLevel: '',
+          spatialAudio: false,
+          videoLayout: '',
+          audioLabel: '',
+          videoLabel: '',
+          preferredAudioCodecs: [],
+          preferredAudioChannelCount: 0,
+          codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy.RELOAD,
+          audioCodec: '',
+          activeAudioCodec: '',
+          activeAudioChannelCount: 0,
+          keySystem: '',
+        });
+        return builder.create(manifest.variants);
+      };
+
+      it('chooses variants with preferred accessibility purpose', () => {
+        checkSet(create(VISUALLY_IMPAIRED), [manifest.variants[0]]);
+      });
+
+      it('avoids an accessibility purpose when none is preferred', () => {
+        checkSet(create(''), [manifest.variants[1]]);
+      });
+
+      it('falls back to an accessibility purpose if nothing else', () => {
+        manifest.variants.pop();
+        checkSet(create(''), [manifest.variants[0]]);
+      });
+    });
+
     it('chooses variants with prefer spatial audio', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {

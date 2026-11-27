@@ -833,6 +833,126 @@ describe('PeriodCombiner', () => {
     ]));
   });
 
+  // https://github.com/shaka-project/shaka-player/issues/11055
+  it('Keeps streams that differ only in accessibility purpose', async () => {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
+
+    const audioMain = makeAudioStream('en', /* channels= */ 2);
+    audioMain.originalId = 'audio-main';
+    const audioDescription = makeAudioStream('en', /* channels= */ 2);
+    audioDescription.originalId = 'audio-ad';
+    audioDescription.accessibilityPurpose =
+        AccessibilityPurpose.VISUALLY_IMPAIRED;
+
+    const textMain = makeTextStream('it');
+    textMain.originalId = 'sub-ita';
+    const textHoh = makeTextStream('it');
+    textHoh.originalId = 'sub-ita-hoh';
+    textHoh.accessibilityPurpose = AccessibilityPurpose.HARD_OF_HEARING;
+
+    /** @type {!Array<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [makeVideoStream(1080)],
+        audioStreams: [audioMain, audioDescription],
+        textStreams: [textMain, textHoh],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+
+    const audioIds = combiner.getVariants().map((v) => v.audio.originalId);
+    expect(audioIds).toEqual(jasmine.arrayWithExactContents([
+      'audio-main',
+      'audio-ad',
+    ]));
+    const textIds = combiner.getTextStreams().map((s) => s.originalId);
+    expect(textIds).toEqual(jasmine.arrayWithExactContents([
+      'sub-ita',
+      'sub-ita-hoh',
+    ]));
+  });
+
+  it('Matches streams with the same accessibility purpose', async () => {
+    const AccessibilityPurpose =
+        shaka.media.ManifestParser.AccessibilityPurpose;
+
+    /**
+     * @param {string} originalId
+     * @param {number} bandwidth
+     * @param {?shaka.media.ManifestParser.AccessibilityPurpose} purpose
+     * @return {shaka.extern.Stream}
+     */
+    const makeAudio = (originalId, bandwidth, purpose) => {
+      const stream = makeAudioStream('en', /* channels= */ 2);
+      stream.originalId = originalId;
+      stream.bandwidth = bandwidth;
+      stream.accessibilityPurpose = purpose;
+      return stream;
+    };
+
+    /**
+     * @param {string} originalId
+     * @param {?shaka.media.ManifestParser.AccessibilityPurpose} purpose
+     * @return {shaka.extern.Stream}
+     */
+    const makeText = (originalId, purpose) => {
+      const stream = makeTextStream('it');
+      stream.originalId = originalId;
+      stream.accessibilityPurpose = purpose;
+      return stream;
+    };
+
+    // The bandwidths do not match across periods, so the streams are matched
+    // by the linear search.  The closest bandwidth would pair the main audio
+    // with the audio description, so the purpose has to win.
+    /** @type {!Array<shaka.extern.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [makeVideoStream(1080)],
+        audioStreams: [
+          makeAudio('p1-main', 100, null),
+          makeAudio('p1-ad', 200, AccessibilityPurpose.VISUALLY_IMPAIRED),
+        ],
+        textStreams: [
+          makeText('p1-sub', null),
+          makeText('p1-hoh', AccessibilityPurpose.HARD_OF_HEARING),
+        ],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [makeVideoStream(1080)],
+        audioStreams: [
+          makeAudio('p2-ad', 101, AccessibilityPurpose.VISUALLY_IMPAIRED),
+          makeAudio('p2-main', 199, null),
+        ],
+        textStreams: [
+          makeText('p2-hoh', AccessibilityPurpose.HARD_OF_HEARING),
+          makeText('p2-sub', null),
+        ],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+
+    const audioIds = combiner.getVariants().map((v) => v.audio.originalId);
+    expect(audioIds).toEqual(jasmine.arrayWithExactContents([
+      'p1-main,p2-main',
+      'p1-ad,p2-ad',
+    ]));
+    const textIds = combiner.getTextStreams().map((s) => s.originalId);
+    expect(textIds).toEqual(jasmine.arrayWithExactContents([
+      'p1-sub,p2-sub',
+      'p1-hoh,p2-hoh',
+    ]));
+  });
+
   // Regression test for #3383, where we failed on multi-period content with
   // multiple image streams per period.
   it('Can handle multiple image streams', async () => {
