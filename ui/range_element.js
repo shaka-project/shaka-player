@@ -53,12 +53,20 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {boolean} */
     this.isMouseChanging_ = false;
 
+    /**
+     * True while a keyboard-based change started by changeTo() is waiting for
+     * its timer to end it.
+     * @private {boolean}
+     */
+    this.isKeyboardChanging_ = false;
+
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
 
     /** @private {shaka.util.Timer} */
     this.endFakeChangeTimer_ = new shaka.util.Timer(() => {
+      this.isKeyboardChanging_ = false;
       this.onChangeEnd();
       this.isChanging_ = false;
     });
@@ -106,6 +114,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         // A keyboard interaction may still be waiting to end.  This one takes
         // over from it, so that its timer does not end this interaction.
         this.endFakeChangeTimer_.stop();
+        this.isKeyboardChanging_ = false;
         this.isChanging_ = true;
         this.isMouseChanging_ = true;
         this.setBarValueForMouse_(e);
@@ -134,7 +143,16 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
-      this.onChange();
+      if (this.isChanging_ && !this.isKeyboardChanging_) {
+        this.onChange();
+      } else {
+        // No pointer is driving the bar, so the browser changed the value
+        // itself, from a key that no shortcut used (e.g. the up and down
+        // arrows).  Without an interaction in progress, an external value
+        // pushed in through setValue() would undo the change before it takes
+        // effect, and the thumb would flicker.
+        this.changeTo(this.getValue());
+      }
     });
 
     if (navigator.maxTouchPoints > 0) {
@@ -142,6 +160,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         if (!this.bar.disabled && this.controls.isOpaque()) {
           // See the comment in the mousedown handler above.
           this.endFakeChangeTimer_.stop();
+          this.isKeyboardChanging_ = false;
           this.isChanging_ = true;
           this.setBarValueForTouch_(e);
           this.onChangeStart(/* fromTouchEvent= */ true);
@@ -185,6 +204,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isChanging_) {
+        // Otherwise the timer would end a keyboard interaction a second time.
+        this.endFakeChangeTimer_.stop();
+        this.isKeyboardChanging_ = false;
         this.isChanging_ = false;
         this.isMouseChanging_ = false;
         this.onChangeEnd();
@@ -295,6 +317,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   changeTo(value) {
     if (!this.isChanging_) {
       this.isChanging_ = true;
+      this.isKeyboardChanging_ = true;
       this.onChangeStart();
     }
 
@@ -315,7 +338,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
   /**
    * Ends an in-progress mouse interaction, if there is one, as if the user had
-   * released the button with the bar where it currently is.
+   * released the button with the bar where it currently is.  A keyboard-based
+   * change started by changeTo() that is still waiting to end is ended too.
    *
    * This lets other controls, such as the keyboard ones, take over from a drag
    * that is still in progress.  The pointer stops driving the bar until the
@@ -325,6 +349,14 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
    * @export
    */
   endMouseInteraction() {
+    if (this.isKeyboardChanging_) {
+      this.endFakeChangeTimer_.stop();
+      this.isKeyboardChanging_ = false;
+      this.isChanging_ = false;
+      this.onChangeEnd();
+      return;
+    }
+
     if (!this.isMouseChanging_) {
       return;
     }

@@ -4832,6 +4832,49 @@ describe('UI', () => {
         expect(video.currentTime).toBe(50);
       });
 
+      /**
+       * Changes the bar the way the browser does for a key that no shortcut
+       * uses, such as the up and down arrows.
+       * @param {number} value
+       */
+      function changeNatively(value) {
+        seekBar.value = String(value);
+        seekBar.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+
+      it('seeks when the browser changes the value from the keyboard',
+          async () => {
+            video.play();
+            changeNatively(60);
+            // Like a drag, the video waits for the keys to stop.
+            expect(controls.isSeeking()).toBe(true);
+            expect(video.paused).toBe(true);
+
+            // The periodic time update does not undo the change.
+            await Util.delay(0.3);
+            expect(parseFloat(seekBar.value)).toBe(60);
+            expect(video.currentTime).toBe(60);
+
+            await Util.delay(0.4);
+            expect(controls.isSeeking()).toBe(false);
+            expect(video.paused).toBe(false);
+            expect(video.currentTime).toBe(60);
+          });
+
+      it('seeks from where the browser left the bar', async () => {
+        changeNatively(60);
+        pressKey('ArrowRight');
+
+        const keyboardSeekDistance =
+            controls.getConfig().keyboardSeekDistance;
+        expect(video.currentTime).toBe(60 + keyboardSeekDistance);
+        expect(controls.isSeeking()).toBe(false);
+
+        // The end of the native change does not undo the shortcut.
+        await Util.delay(0.7);
+        expect(video.currentTime).toBe(60 + keyboardSeekDistance);
+      });
+
       it('lets the wheel take over a drag', async () => {
         configureSeekBarWheel(true);
         mouseEvent('mousedown', positionOfBar(0.25));
