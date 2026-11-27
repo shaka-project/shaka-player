@@ -19,10 +19,20 @@ describe('DefaultBrowser', () => {
   const Util = shaka.test.Util;
   const originalUserAgent = navigator.userAgent;
   const originalVendor = navigator.vendor;
+  const originalUserAgentData = navigator.userAgentData;
+
+  beforeEach(() => {
+    // The device type falls back to the real navigator.userAgentData when the
+    // fake user agent has no mobile token, so a desktop user agent would be
+    // classified as MOBILE on a real Android device.  None of the faked
+    // browsers below expose it consistently, so take it out of the picture.
+    Util.setUserAgentData(null);
+  });
 
   afterEach(() => {
     Util.setUserAgent(originalUserAgent);
     Util.setVendor(originalVendor);
+    Util.setUserAgentData(originalUserAgentData);
   });
 
   // The 0.001 nudge that MediaSourceEngine applies to negative timestamp
