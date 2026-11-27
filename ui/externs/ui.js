@@ -618,9 +618,10 @@ shaka.extern.UITrackLabelCallback;
  *   The playback rate to use while the user holds down the space key.  A short
  *   press still plays or pauses the presentation; when the presentation is
  *   playing, the pause happens when the key is released.  The previous rate is
- *   restored when the key is released.  If less than or equal to 0, holding
- *   the key does nothing special and the space key plays or pauses as soon as
- *   it is pressed.
+ *   restored when the key is released and, if the presentation was paused
+ *   when the key was pressed, it is paused again.  If less than or equal to 0,
+ *   holding the key does nothing special and the space key plays or pauses as
+ *   soon as it is pressed.
  *   <br>
  *   Defaults to <code>2</code>.
  * @property {HTMLElement} fullScreenElement

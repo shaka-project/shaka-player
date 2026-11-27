@@ -3845,7 +3845,7 @@ describe('UI', () => {
           releaseSpace();
         });
 
-        it('plays right away when paused, then speeds up', () => {
+        it('plays when paused, and pauses again after a hold', () => {
           paused = true;
           pressSpace();
           expect(playSpy).toHaveBeenCalledTimes(1);
@@ -3855,6 +3855,33 @@ describe('UI', () => {
 
           releaseSpace();
           expect(rate).toBe(1);
+          expect(pauseSpy).toHaveBeenCalledTimes(1);
+          expect(getIndicator()).toBe(null);
+        });
+
+        it('keeps playing after a short press while paused', () => {
+          paused = true;
+          pressSpace();
+          expect(playSpy).toHaveBeenCalledTimes(1);
+
+          jasmine.clock().tick(100);
+          releaseSpace();
+          expect(trickPlaySpy).not.toHaveBeenCalled();
+          expect(pauseSpy).not.toHaveBeenCalled();
+          expect(paused).toBe(false);
+        });
+
+        it('does not pause again when unloading during a hold', () => {
+          paused = true;
+          pressSpace();
+          jasmine.clock().tick(600);
+          expect(rate).toBe(2);
+
+          player1.dispatchEvent(new shaka.util.FakeEvent('unloading'));
+          expect(rate).toBe(1);
+          expect(pauseSpy).not.toHaveBeenCalled();
+
+          releaseSpace();
           expect(pauseSpy).not.toHaveBeenCalled();
         });
 

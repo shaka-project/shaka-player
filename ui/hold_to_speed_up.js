@@ -19,9 +19,10 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * Speeds up the playback while the user holds down a key, a mouse button or
- * a finger, and restores the previous playback rate when it is released.  It
- * does not listen to the input itself: whoever handles the input calls
- * begin() when the hold starts and end() when it is released.
+ * a finger, and restores the previous playback rate when it is released.  If
+ * the presentation was paused when the hold started, it is paused again on
+ * release.  It does not listen to the input itself: whoever handles the input
+ * calls begin() when the hold starts and end() when it is released.
  *
  * See holdToSpeedUpRate.
  *
@@ -55,17 +56,27 @@ shaka.ui.HoldToSpeedUp = class {
      */
     this.previousRate_ = null;
 
+    /**
+     * True if the presentation was paused when the hold started, so it is
+     * paused again when a hold that sped it up ends.
+     * @private {boolean}
+     */
+    this.pauseOnEnd_ = false;
+
     /** @private {HTMLElement} */
     this.indicator_ = null;
 
     // The hold may be released where we can't see it, so these end it as
     // well.  A pause ends it too, so that releasing does not toggle the
     // playback again.
+    // Unloading or an ad does not leave the presentation in the state the hold
+    // started from, so these don't pause it again.
     const end = () => this.end();
+    const cancel = () => this.cancel_();
     this.eventManager_.listen(controls.getVideo(), 'pause', end);
-    this.eventManager_.listen(controls.getPlayer(), 'unloading', end);
+    this.eventManager_.listen(controls.getPlayer(), 'unloading', cancel);
     this.eventManager_.listen(
-        controls.getAdManager(), shaka.ads.Utils.AD_STARTED, end);
+        controls.getAdManager(), shaka.ads.Utils.AD_STARTED, cancel);
     this.eventManager_.listen(window, 'blur', end);
     this.eventManager_.listen(document, 'visibilitychange', () => {
       if (document.hidden) {
@@ -76,7 +87,7 @@ shaka.ui.HoldToSpeedUp = class {
 
   /** @override */
   release() {
-    this.end();
+    this.cancel_();
     this.eventManager_.release();
     this.eventManager_ = null;
     this.timer_.stop();
@@ -116,25 +127,49 @@ shaka.ui.HoldToSpeedUp = class {
   /**
    * Starts a hold.  The playback is sped up if the hold lasts long enough and
    * the playback can be sped up by then.
+   *
+   * @param {boolean} wasPaused True if the presentation was paused when the
+   *   hold started, before the input that started it played it.
    */
-  begin() {
+  begin(wasPaused) {
     this.end();
     if (!this.isEnabled()) {
       return;
     }
     this.holding_ = true;
+    this.pauseOnEnd_ = wasPaused;
     this.timer_.tickAfter(shaka.ui.HoldToSpeedUp.DELAY_);
   }
 
   /**
-   * Ends the hold, restoring the playback rate if it was sped up.  Does
+   * Ends the hold, restoring the playback rate if it was sped up, and pausing
+   * the presentation again if it was paused when the hold started.  Does
    * nothing if there is no hold.
    *
    * @return {boolean} True if the playback had been sped up, so the release
    *   should not be handled as a short press.
    */
   end() {
+    const pause = this.pauseOnEnd_;
+    if (!this.cancel_()) {
+      return false;
+    }
+    if (pause && !this.controls_.presentationIsPaused()) {
+      this.controls_.getVideo().pause();
+    }
+    return true;
+  }
+
+  /**
+   * Ends the hold, restoring the playback rate if it was sped up, without
+   * pausing the presentation again.
+   *
+   * @return {boolean} True if the playback had been sped up.
+   * @private
+   */
+  cancel_() {
     this.holding_ = false;
+    this.pauseOnEnd_ = false;
     this.timer_?.stop();
 
     const previousRate = this.previousRate_;

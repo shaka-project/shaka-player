@@ -2842,13 +2842,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If the presentation is playing, a short press pauses it when the key is
     // released, so that holding the key does not pause it first.  Otherwise,
     // play right away; if the key is held, the playback speeds up once it has
-    // started.
+    // started, and is paused again when the key is released.
+    const wasPaused = this.presentationIsPaused();
     this.pauseOnSpaceKeyUp_ = this.holdToSpeedUp_.canSpeedUp();
     if (!this.pauseOnSpaceKeyUp_) {
       this.playPausePresentation();
     }
     this.spaceKeyHeld_ = true;
-    this.holdToSpeedUp_.begin();
+    this.holdToSpeedUp_.begin(wasPaused);
   }
 
   /**
