@@ -121,6 +121,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.onChangeStart();
         this.onChange();
         e.stopPropagation();
+      } else if (!this.bar.disabled) {
+        // The bar is only left enabled while the controls are hidden so that
+        // it keeps the focus (see the 'hidingui' handler above).  Don't let
+        // the browser move it either: the 'input' event that follows would be
+        // taken for a keyboard change and seek.
+        e.preventDefault();
       }
     });
 
