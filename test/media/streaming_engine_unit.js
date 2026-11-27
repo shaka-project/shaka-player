@@ -2994,6 +2994,152 @@ describe('StreamingEngine', () => {
       expect(onError).toHaveBeenCalled();
     });
 
+    describe('when an append fails', () => {
+      /** @type {!shaka.util.Error} */
+      let appendError;
+
+      /**
+       * Rejects one append of each given audio segment, once per occurrence.
+       * @param {!Array<number>} positions
+       */
+      function failAudioAppends(positions) {
+        const pending = positions.map(
+            (i) => segmentData[ContentType.AUDIO].segments[i]);
+        const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
+        mediaSourceEngine.appendBuffer.and.callFake(
+            (type, data, reference) => {
+              const index = pending.indexOf(data);
+              if (index != -1) {
+                pending.splice(index, 1);
+                return Promise.reject(appendError);
+              }
+              // eslint-disable-next-line no-restricted-syntax
+              return originalAppendBuffer.call(
+                  mediaSourceEngine, type, data, reference);
+            });
+      }
+
+      async function play() {
+        streamingEngine.switchVariant(variant);
+        streamingEngine.switchTextStream(textStream);
+        await streamingEngine.start();
+        playing = true;
+        await runTest();
+      }
+
+      /** @return {number} */
+      function countRecoveredEvents() {
+        return onEvent.calls.allArgs().filter(([event]) => {
+          return event.type ==
+              shaka.util.FakeEvent.EventName.MediaSourceRecovered;
+        }).length;
+      }
+
+      beforeEach(() => {
+        appendError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MEDIA,
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+      });
+
+      // https://github.com/shaka-project/shaka-player/issues/11047
+      it('recovers when the stream cannot be disabled', async () => {
+        // Past minTimeBetweenRecoveries since the start.
+        failAudioAppends([2]);
+
+        await play();
+
+        expect(disableStream).toHaveBeenCalledTimes(1);
+        expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        expect(countRecoveredEvents()).toBe(1);
+        expect(onError).not.toHaveBeenCalled();
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [true, true, true, true],
+          video: [true, true, true, true],
+          text: [true, true, true, true],
+        });
+      });
+
+      it('stops streaming when it fails again too soon', async () => {
+        failAudioAppends([2, 2]);
+        onError.and.callFake((error) => {
+          expect(error).toBe(appendError);
+          expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
+          expect(error.handled).toBe(false);
+        });
+
+        await play();
+
+        // Only the first failure resets the media source.
+        expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        expect(countRecoveredEvents()).toBe(1);
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(mediaSourceEngine.segments[ContentType.AUDIO]).toEqual(
+            [true, true, false, false]);
+      });
+
+      it('stops streaming when recoveries are not allowed', async () => {
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().streaming;
+        config.allowMediaSourceRecoveries = false;
+        const failureCallback = jasmine.createSpy('failureCallback');
+        config.failureCallback = Util.spyFunc(failureCallback);
+        createStreamingEngine(config);
+        failAudioAppends([2]);
+        onError.and.callFake((error) => {
+          expect(error).toBe(appendError);
+          expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
+          expect(error.handled).toBe(false);
+        });
+
+        await play();
+
+        expect(mediaSourceEngine.reset).not.toHaveBeenCalled();
+        expect(countRecoveredEvents()).toBe(0);
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(failureCallback).toHaveBeenCalledTimes(1);
+        expect(mediaSourceEngine.segments[ContentType.AUDIO]).toEqual(
+            [true, true, false, false]);
+
+        // The application can resume it.  The playhead has reached the end
+        // by now, so only the last segment is needed.
+        expect(streamingEngine.retry(0)).toBe(true);
+        await runTest();
+
+        expect(mediaSourceEngine.segments[ContentType.AUDIO][3]).toBe(true);
+      });
+
+      it('keeps streaming text when the stream is disabled', async () => {
+        // Within minTimeBetweenRecoveries since the start, so it is not a
+        // media source recovery, but the media source is reset anyway.
+        failAudioAppends([0]);
+        onError.and.callFake((error) => {
+          expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
+          expect(error.handled).toBe(true);
+        });
+        disableStream.and.callFake(() => {
+          // Switch to the same streams, as if they were the alternatives.
+          streamingEngine.switchVariant(
+              variant, /* clearBuffer= */ false, /* safeMargin= */ 0,
+              /* force= */ true);
+          return true;
+        });
+
+        await play();
+
+        expect(mediaSourceEngine.reset).toHaveBeenCalledTimes(1);
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(countRecoveredEvents()).toBe(0);
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [true, true, true, true],
+          video: [true, true, true, true],
+          text: [true, true, true, true],
+        });
+      });
+    });
+
     it('from failed clear in switchVariant', async () => {
       const expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
