@@ -159,9 +159,13 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
               playerInterface)).toBeRejectedWith(expected);
         });
 
-    it('subscribes to the catalog joining its current group', async () => {
-      // MSF requires it: a subscription alone starts after the latest catalog
-      // Object and may never see a complete catalog.
+    /**
+     * Replaces the transport with one that records its subscribeTrack() calls
+     * and never answers them.
+     *
+     * @return {!Array<!Array<*>>}
+     */
+    function recordSubscriptions() {
       const calls = [];
       shaka.msf['MSFTransport'] = class {
         /** @return {!Promise} */
@@ -189,6 +193,13 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
         /** */
         release() {}
       };
+      return calls;
+    }
+
+    it('subscribes to the catalog joining its current group', async () => {
+      // MSF requires it: a subscription alone starts after the latest catalog
+      // Object and may never see a complete catalog.
+      const calls = recordSubscriptions();
 
       await expectAsync(parser.start('moqt://relay.example/live',
           playerInterface)).toBeRejected();
@@ -197,6 +208,19 @@ filterDescribe('shaka.msf.MSFParser', isMSFSupported, () => {
       expect(calls[0][0]).toEqual(['msf', 'clear']);
       expect(calls[0][1]).toBe('catalog');
       expect(calls[0][4]).toBe(true);
+    });
+
+    it('subscribes to the configured catalog track name', async () => {
+      config.msf.catalogTrackName = 'catalog_svta';
+      parser.configure(config);
+      const calls = recordSubscriptions();
+
+      await expectAsync(parser.start('moqt://relay.example/live',
+          playerInterface)).toBeRejected();
+
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual(['msf', 'clear']);
+      expect(calls[0][1]).toBe('catalog_svta');
     });
   });
 

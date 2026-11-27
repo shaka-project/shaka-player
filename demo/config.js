@@ -334,6 +334,8 @@ shakaDemo.Config = class {
             'manifest.msf.fingerprintUri')
         .addArrayStringInput_('Namespaces',
             'manifest.msf.namespaces')
+        .addTextInput_('Catalog track name',
+            'manifest.msf.catalogTrackName')
         .addTextInput_('Authorization token',
             'manifest.msf.authorizationToken')
         .addSelectInput_('MoQ version used in the connection',

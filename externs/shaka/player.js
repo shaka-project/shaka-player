@@ -1729,6 +1729,7 @@ shaka.extern.HlsManifestConfiguration;
  * @typedef {{
  *   fingerprintUri: string,
  *   namespaces: !Array<string>,
+ *   catalogTrackName: string,
  *   authorizationToken: string,
  *   version: shaka.config.MsfVersion,
  *   catalogPreprocessor: function(!msfCatalog.Catalog),
@@ -1744,6 +1745,14 @@ shaka.extern.HlsManifestConfiguration;
  *   via PublishNamespace messages.
  *   <br>
  *   Defaults to <code>[]</code>.
+ * @property {string} catalogTrackName
+ *   Track Name of the catalog the player subscribes to in each namespace.
+ *   <br>
+ *   MSF requires the top-level catalog track to be named
+ *   <code>catalog</code>. Change it only for publishers that put their
+ *   catalog under another name, e.g. <code>catalog_svta</code>.
+ *   <br>
+ *   Defaults to <code>'catalog'</code>.
  * @property {string} authorizationToken
  *   Authorization token used to authenticate the MOQT session or subsequent
  *   requests. When provided, this value is sent using the MOQT
