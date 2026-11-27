@@ -428,6 +428,90 @@ describe('SegmentPrefetch', () => {
     });
   });
 
+  describe('with a limit of 1 and overlapping segments', () => {
+    // A period boundary where the last segment of a period ends a few ms after
+    // the next one starts (seen with AAC audio at ad boundaries): 10-20.004
+    // overlaps 20-30 by 4 ms.
+    const overlapping = [
+      makeReference(uri('0.10'), 0, 10),
+      makeReference(uri('10.20'), 10, 20.004),
+      makeReference(uri('20.30'), 20, 30),
+      makeReference(uri('30.40'), 30, 40),
+      makeReference(uri('40.50'), 40, 50),
+      makeReference(uri('50.60'), 50, 60),
+    ];
+    const aligned = [
+      makeReference(uri('0.10'), 0, 10),
+      makeReference(uri('10.20'), 10, 20),
+      makeReference(uri('20.30'), 20, 30),
+      makeReference(uri('30.40'), 30, 40),
+      makeReference(uri('40.50'), 40, 50),
+      makeReference(uri('50.60'), 50, 60),
+    ];
+
+    /**
+     * Plays the references one by one as StreamingEngine.fetchAndAppend_ does:
+     * evict(start + 0.001), prefetchSegmentsByTime(start), then take the
+     * segment from the prefetch map, or fetch it directly on a miss.
+     *
+     * @param {!Array<!shaka.media.SegmentReference>} refs
+     * @return {{downloads: !Array<string>, misses: !Array<string>}}
+     */
+    function playLikeStreamingEngine(refs) {
+      stream.segmentIndex = new shaka.media.SegmentIndex(refs);
+      segmentPrefetch = new shaka.media.SegmentPrefetch(
+          1, stream, Util.spyFunc(fetchDispatcher), /* reverse= */ false);
+      const misses = [];
+      for (const ref of refs) {
+        const fudgeTime = 0.001;
+        segmentPrefetch.evict(ref.startTime + fudgeTime);
+        segmentPrefetch.prefetchSegmentsByTime(ref.startTime);
+        if (!segmentPrefetch.getPrefetchedSegment(ref)) {
+          misses.push(ref.getUris()[0]);  // StreamingEngine fetches it itself
+        }
+      }
+      const prefetched = fetchDispatcher.calls.allArgs()
+          .map((args) => args[0].getUris()[0]);
+      return {downloads: prefetched.concat(misses), misses};
+    }
+
+    /**
+     * @param {!Array<string>} downloads
+     * @return {!Array<string>} the URIs downloaded more than once
+     */
+    function twice(downloads) {
+      const seen = new Set();
+      return downloads.filter((u) => {
+        if (seen.has(u)) {
+          return true;
+        }
+        seen.add(u);
+        return false;
+      });
+    }
+
+    it('uses every prefetched segment when segments are aligned', () => {
+      const {downloads, misses} = playLikeStreamingEngine(aligned);
+      expect(misses).toEqual([]);
+      expect(twice(downloads)).toEqual([]);
+      expect(downloads.length).toBe(aligned.length);
+    });
+
+    it('downloads each segment once across an overlapping boundary', () => {
+      const {downloads} = playLikeStreamingEngine(overlapping);
+      expect(twice(downloads)).toEqual([]);
+      expect(downloads.length).toBe(overlapping.length);
+    });
+
+    it('re-syncs with StreamingEngine after an overlapping boundary', () => {
+      const {misses} = playLikeStreamingEngine(overlapping);
+      expect(misses).not.toContain(uri('30.40'));
+      expect(misses).not.toContain(uri('40.50'));
+      expect(misses).not.toContain(uri('50.60'));
+      expect(misses.length).toBeLessThanOrEqual(1);
+    });
+  });  // with a limit of 1 and overlapping segments
+
   describe('stream data', () => {
     /** @type {?function(BufferSource):!Promise} */
     let dispatchedCallback;
